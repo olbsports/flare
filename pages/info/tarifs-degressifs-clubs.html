@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarifs Dégressifs Clubs & Équipes Sportives | Prix Fabricant Direct - FLARE CUSTOM</title>
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    
+    <meta name="description" content="Tarifs dégressifs pour clubs sportifs : économisez jusqu'à 60% sur vos équipements personnalisés. Plus vous commandez, plus vous économisez. Devis gratuit 24h.">
+    
+    <link rel="canonical" href="https://flare-custom.com/tarifs-degressifs-clubs">
+    
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+
+    <style>
+        /* 🔥 HERO 2/3 + 1/3 avec IMAGE FULL */
+        .hero-budget {
+            min-height: 70vh;
+            background: linear-gradient(135deg, #000000 0%, #121212 50%, #000000 100%);
+            margin-top: 80px;
+            position: relative;
+            display: flex;
+            align-items: stretch;
+            overflow: hidden;
+        }
+
+        .hero-budget-content {
+            flex: 2;
+            padding: 4rem 5%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-budget-image {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-budget-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            position: absolute;
+            inset: 0;
+        }
+
+        .hero-budget-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(255, 75, 38, 0.15), transparent 60%);
+            z-index: 1;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 24px;
+        }
+
+        .breadcrumb a {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .breadcrumb a:hover {
+            color: #FF4B26;
+        }
+
+        .hero-budget-eyebrow {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #FF4B26;
+            margin-bottom: 16px;
+        }
+
+        .hero-budget-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(48px, 8vw, 80px);
+            line-height: 0.95;
+            letter-spacing: 1px;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        .hero-budget-subtitle {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(40px, 7vw, 72px);
+            line-height: 0.95;
+            letter-spacing: 1px;
+            color: #FF4B26;
+            margin-bottom: 32px;
+        }
+
+        .hero-budget-desc {
+            font-size: clamp(16px, 2vw, 18px);
+            line-height: 1.6;
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 40px;
+            max-width: 600px;
+        }
+
+        .hero-budget-cta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 48px;
+        }
+
+        .btn-hero-primary, .btn-hero-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 40px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-hero-primary {
+            background: #FF4B26;
+            color: #fff;
+        }
+
+        .btn-hero-primary:hover {
+            background: #E63910;
+            transform: translateY(-2px);
+        }
+
+        .btn-hero-secondary {
+            background: transparent;
+            color: #fff;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-hero-secondary:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: #fff;
+        }
+
+        /* 🔥 BADGES HERO */
+        .hero-budget-features {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .feature-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: rgba(255,255,255,0.9);
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .feature-badge:hover {
+            background: rgba(255, 75, 38, 0.1);
+            border-color: rgba(255, 75, 38, 0.3);
+        }
+
+        .feature-badge svg {
+            color: #FF4B26;
+            width: 20px;
+            height: 20px;
+        }
+
+        /* 🔥 TRUST BAR */
+        .trust-bar {
+            background: #fff;
+            padding: 48px 5%;
+            border-top: 1px solid #E5E7EB;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .trust-items {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            text-align: center;
+        }
+
+        .trust-item strong {
+            display: block;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 48px;
+            color: #FF4B26;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .trust-item span {
+            font-size: 14px;
+            color: #6B7280;
+            font-weight: 600;
+        }
+
+        /* 🔥 SECTIONS STYLES */
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .section-eyebrow {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #FF4B26;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(40px, 6vw, 64px);
+            line-height: 1.1;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        .section-description {
+            font-size: 18px;
+            line-height: 1.7;
+            color: #6B7280;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* 🔥 TARIFS - 4 CARTES */
+        .pricing-cards {
+            padding: 100px 5%;
+            background: #f9fafb;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto 60px;
+        }
+
+        .price-card {
+            background: #fff;
+            padding: 48px 32px;
+            text-align: center;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .price-card:hover {
+            border-color: #FF4B26;
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(255, 75, 38, 0.12);
+        }
+
+        .price-card.featured {
+            border-color: #FF4B26;
+            transform: scale(1.05);
+            box-shadow: 0 12px 40px rgba(255, 75, 38, 0.15);
+        }
+
+        .price-card.premium {
+            background: #000;
+            border-color: #000;
+            color: #fff;
+        }
+
+        .price-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #FF4B26;
+            color: #fff;
+            padding: 6px 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .price-volume {
+            font-size: 13px;
+            font-weight: 700;
+            color: #6B7280;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+        }
+
+        .price-card.premium .price-volume {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .price-amount {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 56px;
+            line-height: 1;
+            color: #000;
+            margin-bottom: 8px;
+        }
+
+        .price-card.premium .price-amount {
+            color: #fff;
+        }
+
+        .price-unit {
+            font-size: 20px;
+            color: #6B7280;
+        }
+
+        .price-card.premium .price-unit {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .price-saving {
+            font-size: 14px;
+            color: #FF4B26;
+            font-weight: 700;
+            margin-bottom: 32px;
+        }
+
+        .price-cta {
+            display: block;
+            padding: 16px;
+            background: #000;
+            color: #fff;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            border-radius: 6px;
+        }
+
+        .price-card.featured .price-cta,
+        .price-card.premium .price-cta {
+            background: #FF4B26;
+        }
+
+        .price-cta:hover {
+            background: #FF4B26;
+            transform: translateY(-2px);
+        }
+
+        /* 🔥 POURQUOI DEGRESSIF - 3 COLONNES */
+        .advantages-section {
+            padding: 100px 5%;
+            background: #fff;
+        }
+
+        .advantages-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .advantage-card {
+            background: #f9fafb;
+            padding: 40px 32px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+        }
+
+        .advantage-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(255, 75, 38, 0.12);
+        }
+
+        .advantage-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #FF4B26, #E63910);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            font-size: 32px;
+        }
+
+        .advantage-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #000;
+            margin-bottom: 12px;
+        }
+
+        .advantage-desc {
+            font-size: 16px;
+            line-height: 1.7;
+            color: #6B7280;
+        }
+
+        /* 🔥 SPORTS GRID - STYLE INDEX */
+        .sports-section {
+            padding: 100px 5%;
+            background: #f9fafb;
+        }
+
+        .sports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sport-card {
+            position: relative;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.06);
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            text-decoration: none;
+            display: block;
+        }
+
+        .sport-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.12);
+        }
+
+        .sport-card-content {
+            padding: 32px;
+        }
+
+        .sport-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .sport-card h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 32px;
+            line-height: 1;
+            letter-spacing: -0.01em;
+            color: #000;
+            margin-bottom: 8px;
+        }
+
+        .sport-card p {
+            font-size: 15px;
+            color: #6B7280;
+            margin-bottom: 16px;
+        }
+
+        .sport-link {
+            font-size: 24px;
+            color: #FF4B26;
+            transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+            display: inline-block;
+        }
+
+        .sport-card:hover .sport-link {
+            transform: translateX(8px);
+        }
+
+        /* 🔥 COMPARAISON TABLE */
+        .comparison-section {
+            padding: 100px 5%;
+            background: #121212;
+            color: #fff;
+        }
+
+        .comparison-table {
+            background: #fff;
+            color: #000;
+            overflow-x: auto;
+            border-radius: 0;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .comparison-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .comparison-table thead tr {
+            background: #f9fafb;
+        }
+
+        .comparison-table th {
+            padding: 24px;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #E5E7EB;
+        }
+
+        .comparison-table th:first-child {
+            text-align: left;
+        }
+
+        .comparison-table th:nth-child(2) {
+            background: #FFF5F3;
+        }
+
+        .comparison-table td {
+            padding: 20px;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .comparison-table td:first-child {
+            font-weight: 600;
+        }
+
+        .comparison-table td:nth-child(2) {
+            text-align: center;
+            background: #FFF5F3;
+        }
+
+        .comparison-table td:nth-child(3) {
+            text-align: center;
+            color: #9CA3AF;
+        }
+
+        .highlight-price {
+            color: #FF4B26;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        /* 🔥 FAQ */
+        .faq-section {
+            padding: 100px 5%;
+            background: #fff;
+        }
+
+        .faq-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .faq-accordion {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        details {
+            background: #f9fafb;
+            padding: 24px 32px;
+            border-left: 4px solid #E5E7EB;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        details:hover {
+            border-left-color: #FF4B26;
+        }
+
+        details[open] {
+            border-left-color: #FF4B26;
+            background: #fff;
+        }
+
+        summary {
+            font-size: 18px;
+            font-weight: 700;
+            color: #000;
+            list-style: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-icon {
+            font-size: 24px;
+            color: #FF4B26;
+            transition: transform 0.3s;
+        }
+
+        details[open] .faq-icon {
+            transform: rotate(45deg);
+        }
+
+        details p {
+            margin-top: 16px;
+            color: #6B7280;
+            line-height: 1.7;
+        }
+
+        /* 🔥 CTA FINAL */
+        .cta-final-section {
+            background: linear-gradient(135deg, #000000 0%, #121212 100%);
+            padding: 100px 5%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-final-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 75, 38, 0.1), transparent 70%);
+        }
+
+        .cta-final-container {
+            position: relative;
+            z-index: 2;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .cta-final-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(48px, 8vw, 80px);
+            line-height: 1.1;
+            color: #fff;
+            margin-bottom: 24px;
+        }
+
+        .cta-final-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 64px;
+        }
+
+        .btn-cta-primary,
+        .btn-cta-secondary {
+            display: inline-block;
+            padding: 20px 48px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-cta-primary {
+            background: #FF4B26;
+            color: #fff;
+        }
+
+        .btn-cta-primary:hover {
+            background: #E63910;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255, 75, 38, 0.4);
+        }
+
+        .btn-cta-secondary {
+            background: transparent;
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-cta-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #fff;
+        }
+
+        .cta-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .stat-item {
+            padding: 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-number {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 48px;
+            color: #FF4B26;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+        }
+
+        @media (max-width: 968px) {
+            .hero-budget {
+                flex-direction: column;
+                min-height: auto;
+            }
+
+            .hero-budget-content {
+                padding: 60px 5%;
+            }
+
+            .hero-budget-image {
+                min-height: 300px;
+            }
+
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .advantages-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 1200px) and (min-width: 969px) {
+            .advantages-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": "Équipements Sportifs Personnalisés - Tarifs Dégressifs",
+        "description": "Tarifs dégressifs pour clubs et équipes sportives. Jusqu'à 60% d'économies sur vos équipements personnalisés.",
+        "brand": {
+            "@type": "Brand",
+            "name": "FLARE CUSTOM"
+        },
+        "offers": {
+            "@type": "AggregateOffer",
+            "priceCurrency": "EUR",
+            "lowPrice": "12.96",
+            "highPrice": "34.9",
+            "offerCount": "375"
+        }
+    }
+    </script>
+</head>
+<body>
+    <div id="dynamic-header"></div>
+
+    <section class="hero-budget">
+        <div class="hero-budget-overlay"></div>
+        
+        <div class="hero-budget-content">
+            <div class="breadcrumb">
+                <a href="/">Accueil</a>
+                <span>→</span>
+                <span>Tarifs Dégressifs</span>
+            </div>
+
+            <span class="hero-budget-eyebrow">Prix Fabricant Direct</span>
+            
+            <h1 class="hero-budget-title">
+                Tarifs Dégressifs
+            </h1>
+            
+            <div class="hero-budget-subtitle">
+                Jusqu'à -60%
+            </div>
+            
+            <p class="hero-budget-desc">
+                Plus vous commandez, plus vous économisez ! Tarifs dégressifs automatiques pour tous les clubs et équipes sportives. Fabrication européenne, qualité premium, prix imbattables.
+            </p>
+            
+            <div class="hero-budget-cta">
+                <a href="/contact.html" class="btn-hero-primary">
+                    Calculer Mes Économies
+                    <span>→</span>
+                </a>
+                <a href="https://wa.me/359885813134" class="btn-hero-secondary">
+                    WhatsApp Direct
+                </a>
+            </div>
+
+            <div class="hero-budget-features">
+                <div class="feature-badge">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Aucun Minimum</span>
+                </div>
+                <div class="feature-badge">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                    </svg>
+                    <span>-60% Maximum</span>
+                </div>
+                <div class="feature-badge">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Fabrication Europe</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-budget-image">
+            <img src="https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=800" alt="Équipements sportifs personnalisés tarifs dégressifs">
+        </div>
+    </section>
+
+    <section class="trust-bar">
+        <div class="trust-items">
+            <div class="trust-item">
+                <strong>-60%</strong>
+                <span>Économie Maximum</span>
+            </div>
+            <div class="trust-item">
+                <strong>24h</strong>
+                <span>Réponse Garantie</span>
+            </div>
+            <div class="trust-item">
+                <strong>0€</strong>
+                <span>Quantité Minimum</span>
+            </div>
+            <div class="trust-item">
+                <strong>100%</strong>
+                <span>Made in Europe</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🔥 TARIFS - 4 CARTES SEULEMENT -->
+    <section class="pricing-cards">
+        <div class="section-header">
+            <div class="section-eyebrow">Transparence Totale</div>
+            <h2 class="section-title" style="color: #000;">
+                Nos Tarifs<br>
+                <span style="color: #FF4B26;">Dégressifs</span>
+            </h2>
+            <p class="section-description">
+                Plus vous commandez, plus vous économisez. Tarifs automatiques pour tous les clubs et équipes sportives, sans négociation ni minimum de commande.
+            </p>
+        </div>
+
+        <div class="pricing-grid">
+            <div class="price-card">
+                <div class="price-volume">1-19 Pièces</div>
+                <div class="price-amount">34.90€ <span class="price-unit">/pièce</span></div>
+                <div class="price-saving">Prix Standard</div>
+                <a href="/contact.html" class="price-cta">Demander Devis</a>
+            </div>
+
+            <div class="price-card featured">
+                <div class="price-badge">Plus Populaire</div>
+                <div class="price-volume">20-49 Pièces</div>
+                <div class="price-amount">29.66€ <span class="price-unit">/pièce</span></div>
+                <div class="price-saving">-15% économie</div>
+                <a href="/contact.html" class="price-cta">Demander Devis</a>
+            </div>
+
+            <div class="price-card">
+                <div class="price-volume">50-99 Pièces</div>
+                <div class="price-amount">26.17€ <span class="price-unit">/pièce</span></div>
+                <div class="price-saving">-25% économie</div>
+                <a href="/contact.html" class="price-cta">Demander Devis</a>
+            </div>
+
+            <div class="price-card premium">
+                <div class="price-volume">100+ Pièces</div>
+                <div class="price-amount">24.43€ <span class="price-unit">/pièce</span></div>
+                <div class="price-saving">-30% économie</div>
+                <a href="/contact.html" class="price-cta">Demander Devis</a>
+            </div>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="/contact.html" style="display: inline-block; padding: 20px 48px; background: #FF4B26; color: #fff; text-decoration: none; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; transition: all 0.3s;">Demander Mon Devis Personnalisé</a>
+        </div>
+    </section>
+
+    <!-- 🔥 POURQUOI DEGRESSIF - 3 COLONNES -->
+    <section class="advantages-section">
+        <div class="section-header">
+            <div class="section-eyebrow">Pourquoi Commander Plus ?</div>
+            <h2 class="section-title" style="color: #000;">
+                Les Avantages<br>
+                <span style="color: #FF4B26;">Du Volume</span>
+            </h2>
+        </div>
+
+        <div class="advantages-grid">
+            <div class="advantage-card">
+                <div class="advantage-icon">💰</div>
+                <h3 class="advantage-title">Économies Massives</h3>
+                <p class="advantage-desc">
+                    Jusqu'à 60% d'économie sur vos équipements. Plus votre équipe grandit, plus vous économisez. Tarifs dégressifs automatiques sans négociation.
+                </p>
+            </div>
+
+            <div class="advantage-card">
+                <div class="advantage-icon">📦</div>
+                <h3 class="advantage-title">Stock Disponible</h3>
+                <p class="advantage-desc">
+                    Commandez pour toute la saison en une fois. Équipements supplémentaires disponibles instantanément pour nouveaux joueurs ou remplacements.
+                </p>
+            </div>
+
+            <div class="advantage-card">
+                <div class="advantage-icon">🎨</div>
+                <h3 class="advantage-title">Uniformité Parfaite</h3>
+                <p class="advantage-desc">
+                    Tous vos équipements produits en même temps garantissent des couleurs et qualité identiques. Cohérence visuelle optimale pour votre club.
+                </p>
+            </div>
+
+            <div class="advantage-card">
+                <div class="advantage-icon">⚡</div>
+                <h3 class="advantage-title">Process Simplifié</h3>
+                <p class="advantage-desc">
+                    Une seule commande, un seul design, un seul paiement. Gain de temps énorme sur la gestion administrative de votre club.
+                </p>
+            </div>
+
+            <div class="advantage-card">
+                <div class="advantage-icon">🔄</div>
+                <h3 class="advantage-title">Réassort Facile</h3>
+                <p class="advantage-desc">
+                    Vos designs conservés gratuitement. Commandes supplémentaires simplifiées sans refaire tout le process de création.
+                </p>
+            </div>
+
+            <div class="advantage-card">
+                <div class="advantage-icon">🤝</div>
+                <h3 class="advantage-title">Support Prioritaire</h3>
+                <p class="advantage-desc">
+                    Gestionnaire de compte dédié pour les volumes importants. Assistance personnalisée et suivi VIP de votre projet.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🔥 TOUS LES SPORTS -->
+    <section class="sports-section">
+        <div class="section-header">
+            <div class="section-eyebrow">Tarifs Dégressifs</div>
+            <h2 class="section-title" style="color: #000;">
+                Pour Tous<br>
+                <span style="color: #FF4B26;">Les Sports</span>
+            </h2>
+            <p class="section-description">
+                Nos tarifs dégressifs s'appliquent à l'ensemble de notre catalogue de 375+ produits personnalisés.
+            </p>
+        </div>
+
+        <div class="sports-grid">
+            <a href="/equipements-football-maillots-shorts-personnalises-sublimation.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">⚽</span>
+                    <h3>Football</h3>
+                    <p>Maillots, shorts, survêtements</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/equipements-rugby-maillots-shorts-personnalises-sublimation.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">🏉</span>
+                    <h3>Rugby</h3>
+                    <p>Maillots renforcés, polos</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/equipements-basketball-debardeurs-shorts-personnalises.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">🏀</span>
+                    <h3>Basketball</h3>
+                    <p>Débardeurs, shorts réversibles</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/equipements-handball-maillots-shorts-personnalises.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">🤾</span>
+                    <h3>Handball</h3>
+                    <p>Maillots respirants, shorts</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/equipements-volleyball-maillots-shorts-personnalises.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">🏐</span>
+                    <h3>Volleyball</h3>
+                    <p>Maillots, shorts compression</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/equipements-running-trail-maillots-shorts-personnalises.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">🏃</span>
+                    <h3>Running</h3>
+                    <p>Maillots légers, cuissards</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/equipements-cyclisme-maillots-cuissards-personnalises.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">🚴</span>
+                    <h3>Cyclisme</h3>
+                    <p>Maillots, cuissards aéro</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/equipements-triathlon-personnalises-combinaisons-sublimation.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">🏊</span>
+                    <h3>Triathlon</h3>
+                    <p>Combinaisons multi-sports</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/sportswear-vetements-sport-personnalises.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">👕</span>
+                    <h3>Sportswear</h3>
+                    <p>Survêtements, hoodies, t-shirts</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- 🔥 COMPARAISON -->
+    <section class="comparison-section">
+        <div class="section-header">
+            <div class="section-eyebrow">Transparence Totale</div>
+            <h2 class="section-title" style="color: #fff;">
+                FLARE CUSTOM vs<br>
+                <span style="color: #FF4B26;">Concurrence</span>
+            </h2>
+        </div>
+
+        <div class="comparison-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Critère</th>
+                        <th>FLARE CUSTOM</th>
+                        <th>Concurrence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Tarifs dégressifs</td>
+                        <td><strong class="highlight-price">Jusqu'à -60%</strong></td>
+                        <td>-20 à -30% max</td>
+                    </tr>
+                    <tr>
+                        <td>Quantité minimum</td>
+                        <td><strong class="highlight-price">Aucune (dès 1 pièce)</strong></td>
+                        <td>10-20 pièces minimum</td>
+                    </tr>
+                    <tr>
+                        <td>Prix unitaire 50 pièces</td>
+                        <td><strong class="highlight-price">26.17€</strong></td>
+                        <td>30-40€</td>
+                    </tr>
+                    <tr>
+                        <td>Prix unitaire 100+ pièces</td>
+                        <td><strong class="highlight-price">24.43€</strong></td>
+                        <td>25-35€</td>
+                    </tr>
+                    <tr>
+                        <td>Frais de création</td>
+                        <td><strong class="highlight-price">50€ forfait unique</strong></td>
+                        <td>80-150€</td>
+                    </tr>
+                    <tr>
+                        <td>Délai fabrication</td>
+                        <td><strong class="highlight-price">3-4 semaines</strong></td>
+                        <td>4-8 semaines</td>
+                    </tr>
+                    <tr>
+                        <td>Garantie</td>
+                        <td><strong class="highlight-price">1 an pièces + MO</strong></td>
+                        <td>3-6 mois</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="text-align: center; margin-top: 48px;">
+            <a href="/contact.html" style="display: inline-block; padding: 20px 48px; background: #FF4B26; color: #fff; text-decoration: none; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; transition: all 0.3s;">Profiter Des Tarifs Dégressifs</a>
+        </div>
+    </section>
+
+    <!-- 🔥 FAQ -->
+    <section class="faq-section">
+        <div class="faq-container">
+            <div class="section-header">
+                <div class="section-eyebrow">Questions Fréquentes</div>
+                <h2 class="section-title" style="color: #000;">Vos Questions Sur Les Tarifs Dégressifs</h2>
+            </div>
+
+            <div class="faq-accordion">
+                <details>
+                    <summary>
+                        Comment fonctionnent vos tarifs dégressifs ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        Plus vous commandez, plus le prix unitaire diminue automatiquement. Pas de négociation nécessaire ! Les remises s'appliquent directement selon votre quantité : -10% dès 11 pièces, -15% dès 20 pièces, jusqu'à -60% pour 1000+ pièces. Tarifs identiques pour tous les clubs, sans minimum de commande.
+                    </p>
+                </details>
+
+                <details>
+                    <summary>
+                        Y a-t-il un minimum de commande ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        Non, aucun minimum ! Vous pouvez commander dès 1 pièce au prix de 34.90€. Nos tarifs dégressifs s'appliquent automatiquement selon la quantité. Plus vous commandez, plus vous économisez (jusqu'à -60%). Idéal pour les clubs de toutes tailles.
+                    </p>
+                </details>
+
+                <details>
+                    <summary>
+                        Puis-je combiner plusieurs produits pour bénéficier des tarifs dégressifs ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        <strong>OUI, et c'est LA stratégie gagnante !</strong> Les tarifs dégressifs s'appliquent sur la quantité TOTALE de produits de votre commande.
+                    </p>
+                    <p style="margin-top: 12px;">
+                        <strong>Important :</strong> Un kit (maillot + short) = 1 produit. Un survêtement = 1 produit. Un polo = 1 produit.
+                    </p>
+                    <p style="margin-top: 12px;">
+                        <strong>Exemples concrets :</strong><br>
+                        • 15 kits match + 10 survêtements = 25 produits = <strong>-15% sur TOUT</strong><br>
+                        • 20 kits match + 20 kits entraînement + 15 survêtements = 55 produits = <strong>-25% sur TOUT</strong><br>
+                        • 30 kits + 15 survêtements + 10 polos staff = 55 produits = <strong>-25% sur TOUT</strong>
+                    </p>
+                    <p style="margin-top: 12px;">
+                        <strong>Profitez-en pour équiper COMPLÈTEMENT votre club :</strong> tenues de match, entraînement, échauffement, et déplacement. Tous les produits comptent pour atteindre les paliers de remise !
+                    </p>
+                </details>
+
+                <details>
+                    <summary>
+                        Les tarifs incluent-ils la personnalisation complète ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        Oui, tout est inclus : logos illimités, couleurs personnalisées, numéros 1-99, sublimation haute qualité. Seuls suppléments : noms individuels (+2€/pièce), numéros spéciaux (+2€/pièce), service design (50€ forfait unique). Livraison Europe incluse dans tous nos tarifs.
+                    </p>
+                </details>
+
+                <details>
+                    <summary>
+                        Puis-je commander en plusieurs fois pour bénéficier du tarif dégressif ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        Oui ! Une fois votre première commande passée, nous conservons vos designs gratuitement. Les commandes suivantes bénéficient du même tarif dégressif selon la quantité. Idéal pour étaler vos achats sur la saison tout en profitant des meilleurs prix.
+                    </p>
+                </details>
+
+                <details>
+                    <summary>
+                        Les tarifs dégressifs sont-ils valables pour tous les sports ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        Oui, nos tarifs dégressifs s'appliquent sur l'ensemble de notre catalogue de 375+ produits : football, rugby, basketball, handball, volleyball, running, cyclisme, triathlon, et sportswear. Les mêmes économies pour tous les sports !
+                    </p>
+                </details>
+
+                <details>
+                    <summary>
+                        Comment calculer mon palier exact avec plusieurs produits ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        <strong>C'est simple : additionnez TOUS les produits !</strong> Un kit (maillot+short) = 1 produit.
+                    </p>
+                    <p style="margin-top: 12px;">
+                        <strong>Cas pratique pour une équipe de 15 joueurs :</strong><br>
+                        • 15 kits domicile (maillot+short) = 15 produits<br>
+                        • 15 kits extérieur (maillot+short) = 15 produits<br>
+                        • 15 kits entraînement = 15 produits<br>
+                        • 10 survêtements = 10 produits<br>
+                        <strong>TOTAL = 55 produits = palier 50-99 = -25% sur TOUT !</strong>
+                    </p>
+                    <p style="margin-top: 12px;">
+                        Au lieu de payer 34.90€/produit, vous payez <strong>26.17€/produit</strong>. Sur 55 produits, économie totale : <strong>480€ sur votre commande complète !</strong>
+                    </p>
+                </details>
+            </div>
+
+            <div style="text-align: center; margin-top: 48px;">
+                <a href="/faq-questions-frequentes-equipements-personnalises.html" style="display: inline-block; padding: 16px 40px; background: #fff; color: #000; text-decoration: none; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; border: 2px solid #E5E7EB; transition: all 0.3s; border-radius: 8px;">Toutes Les FAQ</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🔥 CTA FINAL -->
+    <section class="cta-final-section">
+        <div class="cta-final-overlay"></div>
+        
+        <div class="cta-final-container">
+            <div class="section-eyebrow">Prêt À Économiser ?</div>
+            
+            <h2 class="cta-final-title">
+                Calculez Vos Économies<br>
+                <span style="color: #FF4B26;">Devis Gratuit 24h</span>
+            </h2>
+            
+            <p style="font-size: clamp(16px, 2.5vw, 20px); line-height: 1.6; color: rgba(255,255,255,0.85); margin-bottom: 48px; max-width: 700px; margin-left: auto; margin-right: auto;">
+                Tarifs dégressifs automatiques. Fabrication européenne. Qualité premium garantie. Sans engagement.
+            </p>
+            
+            <div class="cta-final-buttons">
+                <a href="/contact.html" class="btn-cta-primary">Demander Mon Devis</a>
+                <a href="https://wa.me/359885813134" class="btn-cta-secondary">WhatsApp Direct</a>
+            </div>
+
+            <div class="cta-stats">
+                <div class="stat-item">
+                    <div class="stat-number">-60%</div>
+                    <div class="stat-label">Économie maximum</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">0€</div>
+                    <div class="stat-label">Quantité minimum</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">24h</div>
+                    <div class="stat-label">Réponse garantie</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Made in Europe</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div id="dynamic-footer"></div>
+
+    <script src="../../assets/js/components-loader.js"></script>
+    <script src="../../assets/js/script.js"></script>
+</body>
+</html>

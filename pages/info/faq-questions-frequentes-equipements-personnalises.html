@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ Questions Fréquentes | Équipements Sportifs Personnalisés - FLARE CUSTOM</title>
+    
+    <meta name="description" content="FAQ FLARE CUSTOM : toutes les réponses sur les équipements sportifs personnalisés. Délais, tarifs, personnalisation, livraison, qualité.">
+    
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <link rel="stylesheet" href="faq.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="dynamic-header"></div>
+
+    <section class="hero-faq">
+        <div class="hero-faq-content">
+            <span class="hero-faq-eyebrow">Questions Fréquentes</span>
+            <h1 class="hero-faq-title">Comment pouvons-nous vous aider ?</h1>
+            <p class="hero-faq-subtitle">Trouvez rapidement les réponses à vos questions</p>
+            
+            <div class="faq-search-wrapper">
+                <input type="text" class="faq-search-input" placeholder="Rechercher..." id="faqSearch">
+                <svg class="faq-search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8"/><path d="M21 21L16.65 16.65"/>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <section class="faq-categories-section">
+        <div class="faq-categories-container">
+            <div class="faq-categories-tabs">
+                <button class="faq-tab active" data-category="all">Toutes</button>
+                <button class="faq-tab" data-category="commande">Commande</button>
+                <button class="faq-tab" data-category="personnalisation">Personnalisation</button>
+                <button class="faq-tab" data-category="tarifs">Tarifs</button>
+                <button class="faq-tab" data-category="livraison">Livraison</button>
+                <button class="faq-tab" data-category="qualite">Qualité</button>
+                <button class="faq-tab" data-category="validation">BAT & Validation</button>
+                <button class="faq-tab" data-category="technique">Technique & Sublimation</button>
+            </div>
+            <div class="faq-accordion" id="faqAccordion"></div>
+        </div>
+    </section>
+
+    <section class="faq-cta-section">
+        <div class="faq-cta-content">
+            <h2>Vous avez encore des questions ?</h2>
+            <p>Notre équipe est là pour vous accompagner. Devis gratuit sous 24h.</p>
+            <div class="faq-cta-buttons">
+                <a href="/contact.html" class="btn-cta-white"><span>Nous contacter</span></a>
+                <a href="https://wa.me/359885813134" class="btn-cta-outline"><span>WhatsApp</span></a>
+            </div>
+        </div>
+    </section>
+
+    <div id="dynamic-footer"></div>
+    
+    <script src="../../assets/js/components-loader.js"></script>
+    <script src="faq-data.js"></script>
+    <script src="faq-script.js"></script>
+</body>
+</html>

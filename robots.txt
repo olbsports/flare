@@ -10,15 +10,22 @@ Disallow: /cgi-bin/
 Disallow: /.git/
 Disallow: /tmp/
 Disallow: /cache/
+Disallow: /config/
+Disallow: /api/
 
 # Bloquer les fichiers sensibles
 Disallow: /*.php$
 Disallow: /*.inc$
 Disallow: /*.sql$
+Disallow: /*.csv$
+Disallow: /*.json$
+Disallow: /*.log$
+Disallow: /*.bak$
 
 # Autoriser explicitement les ressources importantes (pour Google)
-Allow: /css/
-Allow: /js/
+Allow: /assets/css/
+Allow: /assets/js/
+Allow: /pages/
 Allow: /images/
 Allow: /photos/
 Allow: /*.css$
@@ -29,6 +36,7 @@ Allow: /*.png$
 Allow: /*.webp$
 Allow: /*.svg$
 Allow: /*.woff2$
+Allow: /*.html$
 
 # ========================================
 # OPTIMISATIONS SPÉCIFIQUES PAR BOT
@@ -112,8 +120,6 @@ Disallow: /
 # ========================================
 
 Sitemap: https://flare-custom.com/sitemap.xml
-Sitemap: https://flare-custom.com/sitemap-images.xml
-Sitemap: https://flare-custom.com/sitemap-products.xml
 
 # ========================================
 # NOTES
