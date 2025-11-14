@@ -1,0 +1,123 @@
+# 🔥 FLARE CUSTOM - Robots.txt optimisé SEO
+
+# User-agent général (tous les robots)
+User-agent: *
+Allow: /
+
+# Bloquer les dossiers système/admin
+Disallow: /admin/
+Disallow: /cgi-bin/
+Disallow: /.git/
+Disallow: /tmp/
+Disallow: /cache/
+
+# Bloquer les fichiers sensibles
+Disallow: /*.php$
+Disallow: /*.inc$
+Disallow: /*.sql$
+
+# Autoriser explicitement les ressources importantes (pour Google)
+Allow: /css/
+Allow: /js/
+Allow: /images/
+Allow: /photos/
+Allow: /*.css$
+Allow: /*.js$
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.png$
+Allow: /*.webp$
+Allow: /*.svg$
+Allow: /*.woff2$
+
+# ========================================
+# OPTIMISATIONS SPÉCIFIQUES PAR BOT
+# ========================================
+
+# GoogleBot (prioritaire)
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# GoogleBot Images
+User-agent: Googlebot-Image
+Allow: /images/
+Allow: /photos/
+Crawl-delay: 0
+
+# Bing
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Perplexity AI (important pour les IA !)
+User-agent: PerplexityBot
+Allow: /
+Crawl-delay: 1
+
+# ChatGPT (OpenAI)
+User-agent: GPTBot
+Allow: /
+Crawl-delay: 1
+
+# Claude (Anthropic)
+User-agent: ClaudeBot
+Allow: /
+Crawl-delay: 1
+
+# Google Gemini
+User-agent: Google-Extended
+Allow: /
+Crawl-delay: 1
+
+# Autres bots IA importants
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
+
+# ========================================
+# BLOQUER LES MAUVAIS BOTS
+# ========================================
+
+# Scrapers agressifs
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Crawl-delay: 10
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: dotbot
+Disallow: /
+
+# Bots spam
+User-agent: BLEXBot
+Disallow: /
+
+User-agent: DataForSeoBot
+Disallow: /
+
+# ========================================
+# SITEMAP (IMPORTANT !)
+# ========================================
+
+Sitemap: https://flare-custom.com/sitemap.xml
+Sitemap: https://flare-custom.com/sitemap-images.xml
+Sitemap: https://flare-custom.com/sitemap-products.xml
+
+# ========================================
+# NOTES
+# ========================================
+# Crawl-delay: 0 = Pas de délai (Google recommandé)
+# Crawl-delay: 1 = 1 seconde entre requêtes (autres bots)
+# Allow: / = Autorise tout (pour les bots IA)

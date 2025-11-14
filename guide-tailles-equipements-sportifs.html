@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide des Tailles - Équipements Sportifs | FLARE CUSTOM</title>
+    <meta name="description" content="Guide complet des tailles pour rugby, basketball, football, handball, volleyball, cyclisme, running et sportswear. Tableaux détaillés enfant et adulte.">
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="components.css">
+    <link rel="stylesheet" href="guide-tailles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="dynamic-header"></div>
+
+    <!-- HERO (même structure que FAQ) -->
+    <section class="hero-faq">
+        <div class="hero-faq-content">
+            <span class="hero-faq-eyebrow">Guide Complet</span>
+            <h1 class="hero-faq-title">GUIDE DES TAILLES</h1>
+            <p class="hero-faq-subtitle">
+                Trouvez la taille parfaite pour tous vos équipements sportifs personnalisés.<br>
+                48 produits disponibles - Tableaux homme, femme et enfant.
+            </p>
+            
+            <div class="faq-search-wrapper">
+                <input type="text" class="faq-search-input" placeholder="Rechercher un sport ou produit..." id="guideSearch">
+                <svg class="faq-search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8"/><path d="M21 21L16.65 16.65"/>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- TABS SPORTS (comme FAQ) -->
+    <section class="faq-categories-section">
+        <div class="faq-categories-container">
+            <div class="faq-categories-tabs">
+                <button class="faq-tab active" data-sport="all">Tous</button>
+                <button class="faq-tab" data-sport="rugby">🏉 Rugby</button>
+                <button class="faq-tab" data-sport="basketball">🏀 Basketball</button>
+                <button class="faq-tab" data-sport="football">⚽ Football</button>
+                <button class="faq-tab" data-sport="handball">🤾 Handball</button>
+                <button class="faq-tab" data-sport="volleyball">🏐 Volleyball</button>
+                <button class="faq-tab" data-sport="cyclisme">🚴 Cyclisme</button>
+                <button class="faq-tab" data-sport="running">🏃 Running</button>
+                <button class="faq-tab" data-sport="sportswear">👕 Sportswear</button>
+            </div>
+
+            <!-- CONSEILS RAPIDES -->
+            <div class="conseils-quick">
+                <div class="conseil-quick-item">
+                    <div class="conseil-icon">📏</div>
+                    <h3>Mesure A (Largeur)</h3>
+                    <p>Tour de poitrine ÷ 2</p>
+                </div>
+                <div class="conseil-quick-item">
+                    <div class="conseil-icon">📐</div>
+                    <h3>Mesure B (Longueur)</h3>
+                    <p>Épaule jusqu'au bas</p>
+                </div>
+                <div class="conseil-quick-item">
+                    <div class="conseil-icon">✋</div>
+                    <h3>Mesure C (Manche)</h3>
+                    <p>Épaule jusqu'au poignet</p>
+                </div>
+            </div>
+
+            <!-- CONTAINER TABLEAUX -->
+            <div id="tableaux-container" class="faq-accordion">
+                <div class="loading-text">Chargement des tableaux...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA (même structure que FAQ) -->
+    <section class="faq-cta-section">
+        <div class="faq-cta-content">
+            <h2>Besoin d'Aide pour Choisir ?</h2>
+            <p>Notre équipe vous conseille sur les tailles adaptées. Devis gratuit sous 24h.</p>
+            <div class="faq-cta-buttons">
+                <a href="/contact.html" class="btn-cta-white"><span>Nous contacter</span></a>
+                <a href="https://wa.me/359885813134" class="btn-cta-outline"><span>WhatsApp</span></a>
+            </div>
+        </div>
+    </section>
+
+    <div id="dynamic-footer"></div>
+    
+    <script src="components-loader.js"></script>
+    <script src="guide-tailles-generator.js"></script>
+</body>
+</html>

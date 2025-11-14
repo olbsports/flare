@@ -1,0 +1,858 @@
+/* ========================================
+   INNOVATION PAGE - CSS COMPLET ISOLÉ
+   ======================================== */
+
+/* RESET LOCAL pour cette page seulement */
+.innovation-page-wrapper * {
+    box-sizing: border-box;
+}
+
+/* HERO SECTION */
+.innovation-hero {
+    position: relative;
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, #1A1D2E 0%, #000 100%);
+    padding: 160px 5% 100px;
+    overflow: hidden;
+}
+
+.innovation-hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 70% 30%, rgba(255, 75, 38, 0.15) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.innovation-hero-content {
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+    z-index: 2;
+}
+
+.innovation-eyebrow {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #FF4B26;
+    padding: 10px 28px;
+    border: 1px solid #FF4B26;
+    margin-bottom: 32px;
+}
+
+.innovation-hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(56px, 8vw, 96px);
+    line-height: 1;
+    letter-spacing: 4px;
+    color: #fff;
+    margin-bottom: 32px;
+}
+
+.innovation-hero-subtitle {
+    font-size: clamp(16px, 2vw, 20px);
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.9);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.innovation-hero-subtitle strong {
+    color: #FF4B26;
+}
+
+/* STICKY NAV */
+.innovation-sticky-nav {
+    position: sticky;
+    top: 80px;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    border-bottom: 2px solid #e0e0e0;
+    z-index: 999;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease;
+}
+
+.innovation-sticky-nav.visible {
+    transform: translateY(0);
+}
+
+.innovation-nav-links {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    padding: 16px 24px;
+    flex-wrap: wrap;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.innovation-nav-links a {
+    font-size: 13px;
+    font-weight: 700;
+    color: #666;
+    text-decoration: none;
+    transition: color 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.innovation-nav-links a:hover {
+    color: #FF4B26;
+}
+
+/* SECTIONS */
+.innovation-section {
+    padding: 100px 5%;
+}
+
+.innovation-section.gray-bg {
+    background: #f9f9f9;
+}
+
+.innovation-section.dark-bg {
+    background: linear-gradient(135deg, #1A1D2E 0%, #000 100%);
+}
+
+.innovation-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* SECTION HEADERS */
+.innovation-section-header {
+    text-align: center;
+    max-width: 900px;
+    margin: 0 auto 80px;
+}
+
+.innovation-section-eyebrow {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #FF4B26;
+    margin-bottom: 16px;
+}
+
+.innovation-section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 6vw, 64px);
+    letter-spacing: 2px;
+    color: #000;
+    margin-bottom: 24px;
+    line-height: 1.1;
+}
+
+.innovation-section-title.white {
+    color: #fff;
+}
+
+.innovation-section-intro {
+    font-size: 18px;
+    line-height: 1.8;
+    color: #666;
+    margin: 0;
+}
+
+.innovation-section-intro.white {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* CONTENT GRID 2 COLS */
+.innovation-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 60px;
+    margin-top: 60px;
+}
+
+/* FEATURE BOX */
+.innovation-feature-box {
+    background: #fff;
+    padding: 48px;
+    border: 2px solid #e0e0e0;
+    border-left: 6px solid #FF4B26;
+}
+
+.innovation-feature-icon {
+    font-size: 56px;
+    margin-bottom: 24px;
+}
+
+.innovation-feature-box h3 {
+    font-size: 28px;
+    font-weight: 800;
+    color: #000;
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+.innovation-feature-box p {
+    font-size: 16px;
+    line-height: 1.8;
+    color: #666;
+    margin-bottom: 24px;
+}
+
+.innovation-feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.innovation-feature-list li {
+    font-size: 15px;
+    line-height: 1.8;
+    color: #333;
+    padding-left: 28px;
+    position: relative;
+    margin-bottom: 12px;
+}
+
+.innovation-feature-list li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #FF4B26;
+    font-weight: 900;
+    font-size: 18px;
+}
+
+/* PROCESS STEPS */
+.innovation-process-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.innovation-process-step {
+    background: #fff;
+    padding: 32px;
+    border-left: 4px solid #FF4B26;
+}
+
+.innovation-step-number {
+    width: 56px;
+    height: 56px;
+    background: #FF4B26;
+    color: #fff;
+    font-size: 24px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin-bottom: 16px;
+}
+
+.innovation-process-step h4 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 12px;
+}
+
+.innovation-process-step p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #666;
+    margin: 0;
+}
+
+/* ADVANTAGES GRID */
+.innovation-advantages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 32px;
+    margin-top: 60px;
+}
+
+.innovation-advantage-card {
+    background: #fff;
+    padding: 40px;
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.innovation-advantage-card:hover {
+    border-color: #FF4B26;
+    box-shadow: 0 8px 32px rgba(255, 75, 38, 0.12);
+    transform: translateY(-4px);
+}
+
+.innovation-advantage-icon {
+    font-size: 48px;
+    margin-bottom: 24px;
+}
+
+.innovation-advantage-card h3 {
+    font-size: 22px;
+    font-weight: 800;
+    color: #000;
+    margin-bottom: 16px;
+    line-height: 1.3;
+}
+
+.innovation-advantage-main {
+    font-size: 16px;
+    font-weight: 600;
+    color: #FF4B26;
+    margin-bottom: 20px;
+}
+
+.innovation-advantage-specs {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.innovation-advantage-specs li {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #666;
+    padding-left: 24px;
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.innovation-advantage-specs li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: #FF4B26;
+    font-weight: 700;
+}
+
+.innovation-advantage-specs strong {
+    color: #000;
+    font-weight: 700;
+}
+
+/* TISSUS SHOWCASE */
+.innovation-tissus-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 40px;
+    margin-top: 60px;
+}
+
+.innovation-tissu-card {
+    background: #fff;
+    padding: 48px;
+    border: 2px solid #e0e0e0;
+    position: relative;
+}
+
+.innovation-tissu-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 8px 20px;
+    background: #FF4B26;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.innovation-tissu-badge.pro {
+    background: #1A1D2E;
+}
+
+.innovation-tissu-badge.elite {
+    background: linear-gradient(135deg, #E63910 0%, #C42025 100%);
+}
+
+.innovation-tissu-badge.tech {
+    background: #000;
+}
+
+.innovation-tissu-name {
+    font-size: 26px;
+    font-weight: 800;
+    color: #000;
+    margin-bottom: 8px;
+}
+
+.innovation-tissu-weight {
+    font-size: 14px;
+    font-weight: 600;
+    color: #FF4B26;
+    margin-bottom: 24px;
+}
+
+.innovation-tissu-desc {
+    font-size: 15px;
+    line-height: 1.8;
+    color: #666;
+    margin-bottom: 28px;
+}
+
+.innovation-tissu-specs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+    padding: 24px;
+    background: #f9f9f9;
+}
+
+.innovation-spec-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.innovation-spec-item strong {
+    font-size: 12px;
+    font-weight: 700;
+    color: #000;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.innovation-spec-item span {
+    font-size: 18px;
+    color: #FF4B26;
+}
+
+.innovation-tissu-tech {
+    margin-bottom: 24px;
+}
+
+.innovation-tissu-tech h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 16px;
+}
+
+.innovation-tissu-tech ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.innovation-tissu-tech li {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #666;
+    margin-bottom: 8px;
+    padding-left: 20px;
+    position: relative;
+}
+
+.innovation-tissu-tech li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #FF4B26;
+    font-weight: 900;
+}
+
+.innovation-tissu-tech strong {
+    color: #000;
+}
+
+.innovation-tissu-sports {
+    padding-top: 24px;
+    border-top: 2px solid #e0e0e0;
+    font-size: 14px;
+    color: #666;
+}
+
+.innovation-tissu-sports strong {
+    color: #000;
+    font-weight: 700;
+}
+
+/* COMPARISON TABLE */
+.innovation-comparison-wrapper {
+    overflow-x: auto;
+    margin-top: 60px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.innovation-comparison-table {
+    width: 100%;
+    min-width: 1200px;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+.innovation-comparison-table thead tr {
+    background: #000;
+}
+
+.innovation-comparison-table th {
+    padding: 20px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #fff;
+    text-align: left;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.innovation-comparison-table th:last-child {
+    border-right: none;
+}
+
+.innovation-comparison-table .highlight {
+    background: #FF4B26;
+}
+
+.innovation-comparison-table tbody tr {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.innovation-comparison-table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.innovation-comparison-table td {
+    padding: 20px 16px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #666;
+    vertical-align: top;
+}
+
+.innovation-comparison-table .criteria {
+    font-weight: 700;
+    color: #000;
+    background: #f5f5f5;
+}
+
+.innovation-comparison-table .highlight {
+    background: rgba(255, 75, 38, 0.05);
+    border-left: 4px solid #FF4B26;
+}
+
+.innovation-comparison-table td strong {
+    color: #000;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.innovation-comparison-conclusion {
+    margin-top: 60px;
+    padding: 48px;
+    background: #fff;
+    border: 2px solid #FF4B26;
+    border-left: 8px solid #FF4B26;
+}
+
+.innovation-comparison-conclusion h3 {
+    font-size: 28px;
+    font-weight: 800;
+    color: #000;
+    margin-bottom: 24px;
+}
+
+.innovation-comparison-conclusion p {
+    font-size: 16px;
+    line-height: 1.8;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.innovation-comparison-conclusion strong {
+    color: #000;
+    font-weight: 700;
+}
+
+/* CERTIFICATIONS GRID */
+.innovation-cert-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 32px;
+    margin-top: 60px;
+}
+
+.innovation-cert-card {
+    background: #fff;
+    padding: 40px;
+    border: 2px solid #e0e0e0;
+}
+
+.innovation-cert-logo {
+    font-size: 56px;
+    margin-bottom: 24px;
+}
+
+.innovation-cert-card h3 {
+    font-size: 22px;
+    font-weight: 800;
+    color: #000;
+    margin-bottom: 16px;
+}
+
+.innovation-cert-desc {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #666;
+    margin-bottom: 24px;
+}
+
+.innovation-cert-points {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.innovation-cert-points li {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #666;
+    padding-left: 24px;
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.innovation-cert-points li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #FF4B26;
+    font-weight: 900;
+}
+
+/* FABRICATION BENEFITS */
+.innovation-fab-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 32px;
+    margin-top: 60px;
+}
+
+.innovation-fab-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 40px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.innovation-fab-icon {
+    font-size: 48px;
+    margin-bottom: 24px;
+}
+
+.innovation-fab-card h3 {
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 16px;
+}
+
+.innovation-fab-card p {
+    font-size: 15px;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+}
+
+.innovation-europe-guarantee {
+    margin-top: 80px;
+    padding: 60px;
+    background: rgba(255, 75, 38, 0.1);
+    border: 3px solid #FF4B26;
+    text-align: center;
+}
+
+.innovation-europe-guarantee h3 {
+    font-size: 32px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 24px;
+}
+
+.innovation-europe-guarantee p {
+    font-size: 17px;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.9);
+    max-width: 900px;
+    margin: 0 auto 40px;
+}
+
+.innovation-guarantee-stamp {
+    display: inline-block;
+    padding: 20px 48px;
+    background: #FF4B26;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 2px;
+}
+
+/* CTA FINAL */
+.innovation-cta-final {
+    padding: 120px 5%;
+    background: #000;
+    text-align: center;
+}
+
+.innovation-cta-content h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 56px;
+    letter-spacing: 2px;
+    color: #fff;
+    margin-bottom: 24px;
+}
+
+.innovation-cta-content p {
+    font-size: 18px;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 48px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.innovation-cta-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+}
+
+.innovation-btn-primary {
+    padding: 20px 48px;
+    background: #FF4B26;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.innovation-btn-primary:hover {
+    background: #fff;
+    color: #000;
+}
+
+.innovation-btn-secondary {
+    padding: 20px 48px;
+    background: transparent;
+    color: #fff;
+    border: 2px solid #fff;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.innovation-btn-secondary:hover {
+    background: #fff;
+    color: #000;
+}
+
+.innovation-cta-reassurance {
+    display: flex;
+    gap: 32px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.innovation-cta-reassurance span {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+    .innovation-grid-2 {
+        grid-template-columns: 1fr;
+    }
+    
+    .innovation-advantages-grid,
+    .innovation-tissus-grid,
+    .innovation-cert-grid,
+    .innovation-fab-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .innovation-nav-links {
+        gap: 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .innovation-hero {
+        padding: 120px 5% 80px;
+    }
+    
+    .innovation-section {
+        padding: 60px 5%;
+    }
+    
+    .innovation-feature-box,
+    .innovation-advantage-card,
+    .innovation-tissu-card,
+    .innovation-cert-card,
+    .innovation-fab-card {
+        padding: 32px 24px;
+    }
+    
+    .innovation-comparison-wrapper {
+        margin-left: -5%;
+        margin-right: -5%;
+    }
+    
+    .innovation-europe-guarantee {
+        padding: 40px 24px;
+    }
+    
+    .innovation-cta-buttons {
+        flex-direction: column;
+    }
+    
+    .innovation-btn-primary,
+    .innovation-btn-secondary {
+        width: 100%;
+    }
+    
+    .innovation-nav-links {
+        flex-direction: column;
+        gap: 8px;
+        padding: 12px 24px;
+    }
+    
+    .innovation-nav-links a {
+        padding: 8px 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .innovation-hero-title {
+        font-size: 42px;
+    }
+    
+    .innovation-section-title {
+        font-size: 36px;
+    }
+    
+    .innovation-tissu-specs {
+        grid-template-columns: 1fr;
+    }
+}

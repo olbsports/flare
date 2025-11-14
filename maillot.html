@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maillots de Sport Personnalisés | FLARE CUSTOM</title>
+    <meta name="description" content="Découvrez notre collection de maillots de sport personnalisés pour tous les sports. Qualité professionnelle, fabrication européenne, livraison 3-4 semaines.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <section class="sport-hero">
+        <div class="container">
+            <h1 class="sport-title">MAILLOTS DE SPORT</h1>
+            <p class="sport-subtitle">Collection complète de maillots personnalisés pour tous les sports</p>
+        </div>
+    </section>
+
+    <section class="products-section">
+        <div class="container">
+            <div class="filters-container">
+                <div class="filter-group">
+                    <label>Sport</label>
+                    <select id="filter-sport" class="filter-select">
+                        <option value="">Tous les sports</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Genre</label>
+                    <select id="filter-genre" class="filter-select">
+                        <option value="">Tous</option>
+                        <option value="Homme">Homme</option>
+                        <option value="Femme">Femme</option>
+                        <option value="Mixte">Mixte</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Tissu</label>
+                    <select id="filter-tissu" class="filter-select">
+                        <option value="">Tous les tissus</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Grammage</label>
+                    <select id="filter-grammage" class="filter-select">
+                        <option value="">Tous</option>
+                    </select>
+                </div>
+                <button id="reset-filters" class="reset-filters-btn">Réinitialiser les filtres</button>
+            </div>
+
+            <div id="products-grid" class="products-grid">
+                <!-- Products will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <div id="footer-container"></div>
+
+    <script src="products-loader.js"></script>
+    <script>
+        // Load header and footer
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-container').innerHTML = data;
+            });
+
+        fetch('footer.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('footer-container').innerHTML = data;
+            });
+
+        // Load products
+        let allProducts = [];
+        let filteredProducts = [];
+
+        fetch('maillot-products.json')
+            .then(response => response.json())
+            .then(products => {
+                allProducts = products;
+                filteredProducts = products;
+                
+                // Populate filter options
+                populateFilters();
+                
+                // Display products
+                displayProducts(products);
+                
+                // Setup filters
+                setupFilters();
+            });
+
+        function populateFilters() {
+            // Sports
+            const sports = [...new Set(allProducts.map(p => p.sport))].filter(s => s).sort();
+            const sportSelect = document.getElementById('filter-sport');
+            sports.forEach(sport => {
+                const option = document.createElement('option');
+                option.value = sport;
+                option.textContent = sport;
+                sportSelect.appendChild(option);
+            });
+
+            // Tissus
+            const tissus = [...new Set(allProducts.map(p => p.tissu))].filter(t => t).sort();
+            const tissuSelect = document.getElementById('filter-tissu');
+            tissus.forEach(tissu => {
+                const option = document.createElement('option');
+                option.value = tissu;
+                option.textContent = tissu;
+                tissuSelect.appendChild(option);
+            });
+
+            // Grammages
+            const grammages = [...new Set(allProducts.map(p => p.grammage))].filter(g => g).sort();
+            const grammageSelect = document.getElementById('filter-grammage');
+            grammages.forEach(grammage => {
+                const option = document.createElement('option');
+                option.value = grammage;
+                option.textContent = grammage;
+                grammageSelect.appendChild(option);
+            });
+        }
+
+        function setupFilters() {
+            const filterSelects = document.querySelectorAll('.filter-select');
+            filterSelects.forEach(select => {
+                select.addEventListener('change', applyFilters);
+            });
+
+            document.getElementById('reset-filters').addEventListener('click', () => {
+                filterSelects.forEach(select => select.value = '');
+                applyFilters();
+            });
+        }
+
+        function applyFilters() {
+            const sport = document.getElementById('filter-sport').value;
+            const genre = document.getElementById('filter-genre').value;
+            const tissu = document.getElementById('filter-tissu').value;
+            const grammage = document.getElementById('filter-grammage').value;
+
+            filteredProducts = allProducts.filter(product => {
+                if (sport && product.sport !== sport) return false;
+                if (genre && product.genre !== genre) return false;
+                if (tissu && product.tissu !== tissu) return false;
+                if (grammage && product.grammage !== grammage) return false;
+                return true;
+            });
+
+            displayProducts(filteredProducts);
+        }
+
+        function displayProducts(products) {
+            const grid = document.getElementById('products-grid');
+            
+            if (products.length === 0) {
+                grid.innerHTML = '<p class="no-results">Aucun produit ne correspond à vos critères de recherche.</p>';
+                return;
+            }
+
+            grid.innerHTML = products.map(product => createProductCard(product)).join('');
+            
+            // Setup sliders for each product
+            products.forEach(product => {
+                setupProductSlider(product.id);
+            });
+        }
+
+        function createProductCard(product) {
+            const hasEco = product.etiquettes.some(tag => tag.includes('ÉCO') || tag.includes('ECO'));
+            const hasPerformance = product.etiquettes.some(tag => tag.includes('Performance') || tag.includes('PERFORMANCE'));
+            
+            const adultPrice = product.pricing.adult['10'] || product.pricing.adult['1'];
+            const childPrice = product.pricing.child['10'] || product.pricing.child['1'];
+
+            return `
+                <div class="product-card">
+                    <div class="product-image-wrapper">
+                        <div class="product-slides" id="slides-${product.id}">
+                            ${product.images.map((img, index) => `
+                                <div class="product-slide ${index === 0 ? 'active' : ''}" style="background-image: url('${img}')"></div>
+                            `).join('')}
+                        </div>
+                        <button class="slider-nav prev" onclick="changeSlide('${product.id}', -1)">‹</button>
+                        <button class="slider-nav next" onclick="changeSlide('${product.id}', 1)">›</button>
+                        <div class="product-slider-dots" id="dots-${product.id}">
+                            ${product.images.map((_, index) => `
+                                <span class="dot ${index === 0 ? 'active' : ''}" onclick="goToSlide('${product.id}', ${index})"></span>
+                            `).join('')}
+                        </div>
+                        ${hasEco || hasPerformance ? `
+                            <div class="product-badges">
+                                ${hasEco ? '<span class="badge eco">ÉCO</span>' : ''}
+                                ${hasPerformance ? '<span class="badge performance">PERFORMANCE</span>' : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="product-info">
+                        <div class="product-family">${product.family}</div>
+                        <h3 class="product-name">${product.name}</h3>
+                        <div class="product-specs">
+                            ${product.sport ? `<span class="spec-item">${product.sport}</span>` : ''}
+                            ${product.genre ? `<span class="spec-item">${product.genre}</span>` : ''}
+                            ${product.tissu ? `<span class="spec-item">${product.tissu}</span>` : ''}
+                            ${product.grammage ? `<span class="spec-item">${product.grammage}</span>` : ''}
+                        </div>
+                        ${product.finitions ? `
+                            <div class="product-finitions">${product.finitions}</div>
+                        ` : ''}
+                        <div class="product-pricing">
+                            <div class="price-row">
+                                <span class="price-label">Adulte</span>
+                                <span class="price-value">${parseFloat(adultPrice).toFixed(2)}€</span>
+                            </div>
+                            ${childPrice ? `
+                                <div class="price-row">
+                                    <span class="price-label">Enfant</span>
+                                    <span class="price-value">${parseFloat(childPrice).toFixed(2)}€</span>
+                                </div>
+                            ` : ''}
+                            <div class="price-note">Prix à partir de 10 pièces</div>
+                        </div>
+                        <a href="mailto:contact@flare-custom.com?subject=Demande de devis - ${encodeURIComponent(product.name)}" class="cta-button">Demander un devis</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        function setupProductSlider(productId) {
+            const slides = document.querySelectorAll(`#slides-${productId} .product-slide`);
+            if (slides.length <= 1) {
+                // Hide navigation if only one image
+                const navButtons = document.querySelectorAll(`#slides-${productId}`).parentElement?.querySelectorAll('.slider-nav');
+                navButtons?.forEach(btn => btn.style.display = 'none');
+            }
+        }
+
+        function changeSlide(productId, direction) {
+            const slidesContainer = document.getElementById(`slides-${productId}`);
+            const slides = slidesContainer.querySelectorAll('.product-slide');
+            const dots = document.querySelectorAll(`#dots-${productId} .dot`);
+            
+            let currentIndex = Array.from(slides).findIndex(slide => slide.classList.contains('active'));
+            let newIndex = currentIndex + direction;
+            
+            if (newIndex < 0) newIndex = slides.length - 1;
+            if (newIndex >= slides.length) newIndex = 0;
+            
+            slides[currentIndex].classList.remove('active');
+            slides[newIndex].classList.add('active');
+            dots[currentIndex].classList.remove('active');
+            dots[newIndex].classList.add('active');
+        }
+
+        function goToSlide(productId, index) {
+            const slidesContainer = document.getElementById(`slides-${productId}`);
+            const slides = slidesContainer.querySelectorAll('.product-slide');
+            const dots = document.querySelectorAll(`#dots-${productId} .dot`);
+            
+            const currentIndex = Array.from(slides).findIndex(slide => slide.classList.contains('active'));
+            
+            slides[currentIndex].classList.remove('active');
+            slides[index].classList.add('active');
+            dots[currentIndex].classList.remove('active');
+            dots[index].classList.add('active');
+        }
+    </script>
+</body>
+</html>
