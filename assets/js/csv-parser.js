@@ -128,16 +128,20 @@ class CSVParser {
      * @returns {Array<Array<string>>} - Tableau de lignes (chaque ligne est un tableau de valeurs)
      */
     parseCSVRows(csvText) {
+        console.log('🔍 Début de parseCSVRows, longueur:', csvText.length);
+
         const rows = [];
         let currentRow = [];
         let currentField = '';
         let insideQuotes = false;
         let i = 0;
+        let lineCount = 0;
 
         while (i < csvText.length) {
             const char = csvText[i];
             const nextChar = csvText[i + 1];
 
+            // Gestion des guillemets
             if (char === '"') {
                 if (insideQuotes && nextChar === '"') {
                     // Double quote = échappement
@@ -152,21 +156,36 @@ class CSVParser {
                 }
             }
 
+            // Si on n'est PAS dans des guillemets
             if (!insideQuotes) {
+                // Séparateur de champ
                 if (char === ';') {
-                    // Fin de champ
                     currentRow.push(currentField);
                     currentField = '';
                     i++;
                     continue;
                 }
 
-                if (char === '\n' || (char === '\r' && nextChar === '\n')) {
-                    // Fin de ligne
+                // Fin de ligne (CRLF ou LF)
+                if (char === '\r' || char === '\n') {
+                    // Ajouter le dernier champ de la ligne
                     currentRow.push(currentField);
-                    if (currentRow.length > 0 && currentRow.some(f => f.trim() !== '')) {
-                        rows.push(currentRow);
+
+                    // Sauvegarder la ligne si elle a des champs non vides
+                    if (currentRow.length > 0) {
+                        const hasContent = currentRow.some(f => f.trim() !== '');
+                        if (hasContent) {
+                            rows.push(currentRow);
+                            lineCount++;
+
+                            // Log les premières lignes pour debug
+                            if (lineCount <= 3) {
+                                console.log(`📝 Ligne ${lineCount}:`, currentRow.length, 'champs');
+                                console.log(`   Premier champ:`, currentRow[0]);
+                            }
+                        }
                     }
+
                     currentRow = [];
                     currentField = '';
 
@@ -180,19 +199,21 @@ class CSVParser {
                 }
             }
 
-            // Ajouter le caractère au champ actuel
+            // Caractère normal - ajouter au champ actuel
             currentField += char;
             i++;
         }
 
-        // Ajouter le dernier champ/ligne si nécessaire
+        // Ne pas oublier la dernière ligne si le fichier ne se termine pas par un saut de ligne
         if (currentField || currentRow.length > 0) {
             currentRow.push(currentField);
             if (currentRow.some(f => f.trim() !== '')) {
                 rows.push(currentRow);
+                lineCount++;
             }
         }
 
+        console.log(`✅ parseCSVRows terminé: ${lineCount} lignes parsées`);
         return rows;
     }
 
