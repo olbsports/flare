@@ -1,0 +1,585 @@
+/**
+ * Widget de configurateur flottant - FLARE CUSTOM
+ * Style bulle de chat en bas à droite
+ */
+
+/* Variables */
+:root {
+    --widget-primary: #FF6B00;
+    --widget-primary-dark: #E56000;
+    --widget-white: #ffffff;
+    --widget-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+    --widget-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* Container principal du widget */
+#flare-configurateur-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 999999;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+}
+
+/* Bulle de chat */
+.flare-chat-bubble {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--widget-primary) 0%, var(--widget-primary-dark) 100%);
+    border-radius: 50%;
+    box-shadow: var(--widget-shadow-lg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.flare-chat-bubble:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 40px rgba(255, 107, 0, 0.4);
+}
+
+.flare-chat-bubble.active {
+    transform: scale(0.9);
+}
+
+/* Animation de pulsation */
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15), 0 0 0 0 rgba(255, 107, 0, 0.4);
+    }
+    50% {
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15), 0 0 0 15px rgba(255, 107, 0, 0);
+    }
+}
+
+/* Icône dans la bulle */
+.flare-chat-bubble-icon {
+    font-size: 28px;
+    color: var(--widget-white);
+    transition: transform 0.3s;
+}
+
+.flare-chat-bubble.active .flare-chat-bubble-icon {
+    transform: rotate(180deg);
+}
+
+/* Badge de notification */
+.flare-chat-bubble-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #FF0000;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    border: 3px solid white;
+    animation: bounce 0.5s ease-in-out;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+/* Fenêtre du chat */
+.flare-chat-window {
+    position: absolute;
+    bottom: 80px;
+    right: 0;
+    width: 400px;
+    max-width: calc(100vw - 40px);
+    height: 600px;
+    max-height: calc(100vh - 120px);
+    background: var(--widget-white);
+    border-radius: 20px;
+    box-shadow: var(--widget-shadow-lg);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.flare-chat-window.open {
+    display: flex;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* En-tête de la fenêtre */
+.flare-chat-header {
+    background: linear-gradient(135deg, var(--widget-primary) 0%, var(--widget-primary-dark) 100%);
+    color: var(--widget-white);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.flare-chat-header-content {
+    flex: 1;
+}
+
+.flare-chat-header h3 {
+    margin: 0 0 4px 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.flare-chat-header p {
+    margin: 0;
+    font-size: 13px;
+    opacity: 0.95;
+}
+
+.flare-chat-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    transition: background 0.2s;
+}
+
+.flare-chat-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Zone des messages */
+.flare-chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    background: #f8f9fa;
+    scroll-behavior: smooth;
+}
+
+.flare-chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.flare-chat-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.flare-chat-messages::-webkit-scrollbar-thumb {
+    background: #d0d0d0;
+    border-radius: 10px;
+}
+
+/* Message individuel */
+.flare-message {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    animation: messageSlide 0.3s ease-out;
+}
+
+@keyframes messageSlide {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.flare-message-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.flare-message.bot .flare-message-avatar {
+    background: linear-gradient(135deg, var(--widget-primary) 0%, var(--widget-primary-dark) 100%);
+}
+
+.flare-message.user .flare-message-avatar {
+    background: #1a1a1a;
+}
+
+.flare-message-bubble {
+    background: white;
+    padding: 12px 16px;
+    border-radius: 16px;
+    max-width: 75%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    font-size: 14px;
+    line-height: 1.5;
+    color: #333;
+}
+
+.flare-message.user .flare-message-bubble {
+    background: var(--widget-primary);
+    color: white;
+    margin-left: auto;
+}
+
+/* Options de sélection */
+.flare-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.flare-option-btn {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    color: #333;
+}
+
+.flare-option-btn:hover {
+    border-color: var(--widget-primary);
+    background: rgba(255, 107, 0, 0.05);
+    transform: translateX(4px);
+}
+
+.flare-option-btn.selected {
+    border-color: var(--widget-primary);
+    background: linear-gradient(135deg, rgba(255, 107, 0, 0.1) 0%, rgba(255, 107, 0, 0.15) 100%);
+}
+
+.flare-option-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.flare-option-desc {
+    font-size: 12px;
+    color: #666;
+}
+
+/* Carte produit compacte */
+.flare-product-card {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+}
+
+.flare-product-card:hover {
+    border-color: var(--widget-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 0, 0.15);
+}
+
+.flare-product-card.selected {
+    border-color: var(--widget-primary);
+    background: linear-gradient(135deg, rgba(255, 107, 0, 0.05) 0%, rgba(255, 107, 0, 0.1) 100%);
+}
+
+.flare-product-img {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.flare-product-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.flare-product-name {
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 4px;
+    color: #333;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.flare-product-details {
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.flare-product-price {
+    font-weight: 700;
+    color: var(--widget-primary);
+    font-size: 14px;
+}
+
+/* Input de quantité */
+.flare-input-group {
+    margin-top: 12px;
+}
+
+.flare-input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.flare-input:focus {
+    outline: none;
+    border-color: var(--widget-primary);
+}
+
+.flare-textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+}
+
+.flare-textarea:focus {
+    outline: none;
+    border-color: var(--widget-primary);
+}
+
+/* Bouton de validation */
+.flare-btn {
+    background: linear-gradient(135deg, var(--widget-primary) 0%, var(--widget-primary-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 12px;
+    width: 100%;
+}
+
+.flare-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+}
+
+.flare-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Indicateur de frappe */
+.flare-typing {
+    display: flex;
+    gap: 4px;
+    padding: 12px;
+}
+
+.flare-typing-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--widget-primary);
+    border-radius: 50%;
+    animation: typing 1.4s infinite;
+}
+
+.flare-typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.flare-typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.7;
+    }
+    30% {
+        transform: translateY(-8px);
+        opacity: 1;
+    }
+}
+
+/* Formulaire compact */
+.flare-form-group {
+    margin-bottom: 12px;
+}
+
+.flare-form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #333;
+}
+
+.flare-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    margin-top: 12px;
+}
+
+.flare-checkbox input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* Récapitulatif */
+.flare-summary {
+    background: linear-gradient(135deg, rgba(255, 107, 0, 0.05) 0%, rgba(255, 107, 0, 0.1) 100%);
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 12px;
+    font-size: 13px;
+}
+
+.flare-summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.flare-summary-row:last-child {
+    border-bottom: none;
+    padding-top: 12px;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--widget-primary);
+}
+
+.flare-summary-label {
+    color: #666;
+    font-weight: 500;
+}
+
+.flare-summary-value {
+    color: #333;
+    font-weight: 600;
+}
+
+/* Message de succès */
+.flare-success {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    padding: 16px;
+    border-radius: 12px;
+    text-align: center;
+    margin-top: 12px;
+}
+
+.flare-success-icon {
+    font-size: 48px;
+    margin-bottom: 8px;
+}
+
+.flare-success h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+}
+
+.flare-success p {
+    margin: 0;
+    font-size: 13px;
+    opacity: 0.95;
+}
+
+/* Pied de page */
+.flare-chat-footer {
+    padding: 12px 20px;
+    background: white;
+    border-top: 1px solid #e0e0e0;
+    text-align: center;
+    font-size: 11px;
+    color: #999;
+    flex-shrink: 0;
+}
+
+.flare-chat-footer a {
+    color: var(--widget-primary);
+    text-decoration: none;
+}
+
+/* Responsive mobile */
+@media (max-width: 480px) {
+    #flare-configurateur-widget {
+        bottom: 10px;
+        right: 10px;
+    }
+
+    .flare-chat-window {
+        width: calc(100vw - 20px);
+        height: calc(100vh - 100px);
+        bottom: 70px;
+        right: -10px;
+    }
+
+    .flare-chat-bubble {
+        width: 56px;
+        height: 56px;
+    }
+
+    .flare-chat-bubble-icon {
+        font-size: 24px;
+    }
+}
+
+/* Animation d'apparition initiale */
+@keyframes widgetAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+#flare-configurateur-widget {
+    animation: widgetAppear 0.5s ease-out 0.5s both;
+}
