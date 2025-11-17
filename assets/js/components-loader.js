@@ -103,17 +103,23 @@ window.toggleMobileSection = function(button) {
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🔥 Chargement composants...');
 
-    // Détecter le chemin relatif vers la racine
-    const path = window.location.pathname;
-    let basePath = '';
+    // Calculer le chemin relatif basé sur la profondeur de l'URL
+    const pathSegments = window.location.pathname.split('/').filter(s => s);
+    const depth = pathSegments.length;
 
-    if (path.includes('/pages/products/') || path.includes('/pages/info/')) {
-        basePath = '../../';
-    } else if (path.includes('/pages/components/')) {
-        basePath = '../../';
-    } else {
+    let basePath;
+    if (depth <= 1) {
+        // À la racine (index.html ou /index.html)
         basePath = '';
+    } else if (depth === 2) {
+        // Un niveau de profondeur (/pages/something.html n'existe pas normalement)
+        basePath = '../';
+    } else {
+        // Deux niveaux ou plus (/pages/products/file.html ou /pages/info/file.html)
+        basePath = '../../';
     }
+
+    console.log('📍 Chemin détecté:', basePath);
 
     // Charger header et footer
     await Promise.all([
