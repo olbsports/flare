@@ -767,7 +767,7 @@ section {
 
 .sports-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr));
     gap: 24px;
 }
 
@@ -999,7 +999,7 @@ section {
 
 .guarantees-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr));
     gap: 32px;
 }
 
@@ -1051,7 +1051,7 @@ section {
 
 .design-options-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
     gap: 32px;
 }
 
@@ -1174,7 +1174,7 @@ section {
 
 .testimonials-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr));
     gap: 32px;
 }
 
@@ -1244,7 +1244,7 @@ section {
 
 .faq-columns {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 500px), 1fr));
     gap: 60px;
 }
 
@@ -1409,7 +1409,7 @@ section {
 
 .values-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
     gap: 32px;
 }
 
@@ -1588,7 +1588,7 @@ section {
 
 .delivery-options {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
     gap: 24px;
     max-width: 1000px;
     margin: 0 auto;
@@ -1624,7 +1624,7 @@ section {
 
 .certifications-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
     gap: 32px;
 }
 
@@ -1661,7 +1661,7 @@ section {
 
 .testimonials-expanded-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr));
     gap: 32px;
 }
 
@@ -1704,7 +1704,7 @@ section {
 
 .faq-homepage-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 450px), 1fr));
     gap: 32px;
 }
 
@@ -2000,7 +2000,7 @@ section {
     letter-spacing: 0px;
 }
     .hero-adidas {
-        padding: 80px 30px 50px;
+        padding: 80px 5% 50px;
     }
 
     .hero-adidas-title {
@@ -2038,6 +2038,63 @@ section {
     }
 }
 
+
+/* === MEDIA QUERIES SUPPLÉMENTAIRES POUR MOBILE === */
+@media (max-width: 480px) {
+    .hero-adidas {
+        padding: 60px 5% 40px;
+    }
+
+    .hero-adidas-title {
+        font-size: clamp(36px, 12vw, 48px);
+    }
+
+    .hero-adidas-subtitle {
+        font-size: 16px;
+    }
+
+    .guarantee-card,
+    .testimonial-card {
+        padding: 32px 24px;
+    }
+
+    .design-option-card {
+        padding: 32px 24px;
+    }
+
+    .faq-columns {
+        gap: 40px;
+    }
+
+    .container {
+        padding: 0 20px;
+    }
+
+    section {
+        padding: 80px 0;
+    }
+
+    .section-header {
+        margin-bottom: 60px;
+    }
+}
+
+@media (max-width: 375px) {
+    .hero-adidas {
+        padding: 50px 5% 30px;
+    }
+
+    .sport-card-content,
+    .guarantee-card,
+    .testimonial-card,
+    .design-option-card {
+        padding: 24px 20px;
+    }
+
+    .hero-adidas-image {
+        height: 280px;
+    }
+}
 
 /* === ANIMATION FLOTTEMENT MAILLOT === */
 @keyframes floatJersey {
