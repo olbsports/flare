@@ -33,21 +33,44 @@ class CSVParser {
      * @returns {Object} - Données structurées
      */
     parseCSV(csvText) {
+        console.log('📋 Parsing CSV, taille:', csvText.length, 'caractères');
+
         const lines = csvText.split('\n');
+        console.log('📋 Nombre de lignes:', lines.length);
+
         const headers = lines[0].split(';');
+        console.log('📋 Headers:', headers);
+        console.log('📋 Nombre de headers:', headers.length);
+
+        let skippedLines = 0;
+        let productsWithoutPrice = 0;
 
         // Parse chaque ligne de produit
         for (let i = 1; i < lines.length; i++) {
             const line = lines[i].trim();
-            if (!line) continue;
+            if (!line) {
+                skippedLines++;
+                continue;
+            }
 
             const values = this.parseCSVLine(line);
-            if (values.length < headers.length) continue;
+            if (values.length < headers.length) {
+                console.warn(`⚠️ Ligne ${i}: ${values.length} valeurs au lieu de ${headers.length}`);
+                skippedLines++;
+                continue;
+            }
 
             const product = {};
             headers.forEach((header, index) => {
                 product[header.trim()] = values[index] ? values[index].trim() : '';
             });
+
+            // Debug: log le premier produit
+            if (i === 1) {
+                console.log('📦 Exemple de produit (ligne 1):', product);
+                console.log('📦 QTY_1:', product.QTY_1, 'Type:', typeof product.QTY_1);
+                console.log('📦 parseFloat(QTY_1):', parseFloat(product.QTY_1));
+            }
 
             // Ne garder que les produits avec prix
             if (product.QTY_1 && parseFloat(product.QTY_1) > 0) {
@@ -70,8 +93,20 @@ class CSVParser {
                 if (product.GENRE) {
                     this.genres.add(product.GENRE);
                 }
+            } else {
+                productsWithoutPrice++;
+                if (productsWithoutPrice <= 3) {
+                    console.warn(`⚠️ Produit sans prix ligne ${i}:`, product.QTY_1);
+                }
             }
         }
+
+        console.log('📊 Statistiques parsing:');
+        console.log('  - Lignes traitées:', lines.length - 1);
+        console.log('  - Lignes vides:', skippedLines);
+        console.log('  - Produits sans prix:', productsWithoutPrice);
+        console.log('  - Produits validés:', this.products.length);
+        console.log('  - Sports:', Array.from(this.sports));
 
         return {
             products: this.products,
