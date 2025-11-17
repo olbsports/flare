@@ -239,7 +239,15 @@ class FlareConfigurateurWidget {
      * Affiche les options de famille
      */
     showFamilyOptions() {
-        const families = this.csvParser.getFamiliesBySport(this.config.sport);
+        let families = this.csvParser.getFamiliesBySport(this.config.sport);
+
+        // Ajouter les familles SPORTSWEAR dans tous les sports (sauf si c'est déjà SPORTSWEAR)
+        if (this.config.sport !== 'SPORTSWEAR') {
+            const sportsWearFamilies = this.csvParser.getFamiliesBySport('SPORTSWEAR');
+            // Fusionner en évitant les doublons
+            const allFamilies = new Set([...families, ...sportsWearFamilies]);
+            families = Array.from(allFamilies).sort();
+        }
 
         this.addBotMessage('Super ! Quel type de produit ?');
 
@@ -260,7 +268,19 @@ class FlareConfigurateurWidget {
      * Affiche les options de genre
      */
     showGenreOptions() {
-        const genres = this.csvParser.getGenresBySportAndFamily(this.config.sport, this.config.famille);
+        // Déterminer le sport réel à utiliser (SPORTSWEAR si la famille n'existe pas dans le sport actuel)
+        let sportToUse = this.config.sport;
+        const familiesInCurrentSport = this.csvParser.getFamiliesBySport(this.config.sport);
+
+        if (!familiesInCurrentSport.includes(this.config.famille)) {
+            // Cette famille vient du sport SPORTSWEAR
+            sportToUse = 'SPORTSWEAR';
+            this.config.sportForProducts = sportToUse;
+        } else {
+            this.config.sportForProducts = this.config.sport;
+        }
+
+        const genres = this.csvParser.getGenresBySportAndFamily(sportToUse, this.config.famille);
 
         this.addBotMessage('Homme ou Femme ?');
 
@@ -281,8 +301,11 @@ class FlareConfigurateurWidget {
      * Affiche les produits
      */
     showProducts() {
+        // Utiliser le sport déterminé pour les produits (peut être SPORTSWEAR)
+        const sportToUse = this.config.sportForProducts || this.config.sport;
+
         const products = this.csvParser.getProductsBySportFamilyGenre(
-            this.config.sport,
+            sportToUse,
             this.config.famille,
             this.config.genre
         );
@@ -332,7 +355,7 @@ class FlareConfigurateurWidget {
                     input.disabled = true;
 
                     this.addUserMessage(`${qty} pièces`);
-                    this.showContactForm();
+                    this.showComplementsOrContactForm();
                 }
             };
 
@@ -344,14 +367,94 @@ class FlareConfigurateurWidget {
     }
 
     /**
+     * Propose des compléments de produits ou passe directement au formulaire
+     */
+    showComplementsOrContactForm() {
+        // Définir les compléments logiques par famille de produit
+        const complements = this.getProductComplements(this.config.famille);
+
+        if (complements.length === 0 || this.config.hasShownComplements) {
+            // Pas de compléments ou déjà proposés, passer au formulaire
+            this.showContactForm();
+            return;
+        }
+
+        // Marquer qu'on a déjà proposé les compléments (éviter la boucle)
+        this.config.hasShownComplements = true;
+
+        this.addBotMessage('Excellent ! 🎯\n\nSouhaitez-vous ajouter un produit complémentaire à votre devis ?');
+
+        // Ajouter l'option "Non merci, continuer"
+        const options = [
+            {
+                id: '__skip__',
+                title: 'Non merci, continuer',
+                desc: '✅'
+            }
+        ];
+
+        // Ajouter les compléments disponibles
+        complements.forEach(comp => {
+            options.push({
+                id: comp,
+                title: comp,
+                desc: this.getFamilyEmoji(comp)
+            });
+        });
+
+        this.showOptions(options, (selected) => {
+            if (selected.id === '__skip__') {
+                this.addUserMessage('Non merci');
+                this.showContactForm();
+            } else {
+                this.addUserMessage(`Oui, ajouter ${selected.title}`);
+                // Revenir à la sélection de genre pour cette nouvelle famille
+                this.config.famille = selected.id;
+                this.showGenreOptions();
+            }
+        });
+    }
+
+    /**
+     * Retourne les familles de produits complémentaires
+     */
+    getProductComplements(famille) {
+        const complementsMap = {
+            'Maillot': ['Short', 'Chaussettes', 'Sweat'],
+            'Short': ['Maillot', 'Chaussettes', 'Polo'],
+            'Polo': ['Pantalon', 'Short', 'Sweat'],
+            'Sweat': ['Pantalon', 'Polo', 'Sweat à Capuche'],
+            'Sweat à Capuche': ['Pantalon', 'Sweat', 'Polo'],
+            'Pantalon': ['Polo', 'Sweat', 'Veste'],
+            'Veste': ['Pantalon', 'Polo', 'Sweat'],
+            'Coupe-Vent': ['Pantalon', 'Sweat', 'Polo'],
+            'Débardeur': ['Short', 'Cuissard', 'Brassière'],
+            'Cuissard': ['Maillot', 'Débardeur', 'Gilet'],
+            'Chaussettes': ['Maillot', 'Short'],
+            'Corsaire': ['Maillot', 'Débardeur', 'Brassière'],
+            'Legging': ['Sweat', 'Débardeur', 'Brassière'],
+            'Brassière': ['Legging', 'Short', 'Corsaire']
+        };
+
+        const sportToUse = this.config.sportForProducts || this.config.sport;
+        const availableInSport = this.csvParser.getFamiliesBySport(sportToUse);
+        const suggested = complementsMap[famille] || [];
+
+        // Retourner uniquement les compléments disponibles dans le sport actuel
+        return suggested.filter(comp => availableInSport.includes(comp));
+    }
+
+    /**
      * Affiche le formulaire de contact
      */
     showContactForm() {
         // Calculer l'estimation (on arrondit pour donner une fourchette)
+        const prixUnitaireMin = Math.floor(this.config.prix.unitPrice * 0.9 * 100) / 100;
+        const prixUnitaireMax = Math.ceil(this.config.prix.unitPrice * 1.1 * 100) / 100;
         const estimationMin = Math.floor(this.config.prix.totalPrice * 0.9 / 50) * 50;
         const estimationMax = Math.ceil(this.config.prix.totalPrice * 1.1 / 50) * 50;
 
-        this.addBotMessage(`Parfait ! Voici un récapitulatif de votre demande :\n\n📦 ${this.config.produit.TITRE_VENDEUR}\n🏷️ ${this.config.quantite} pièces\n\n💰 Estimation : ${estimationMin}€ - ${estimationMax}€ HT\n\n✨ Nous vous enverrons un devis détaillé et personnalisé sous 24h !`);
+        this.addBotMessage(`Parfait ! Voici un récapitulatif de votre demande :\n\n📦 ${this.config.produit.TITRE_VENDEUR}\n🏷️ ${this.config.quantite} pièces\n\n💰 Prix unitaire : ${prixUnitaireMin}€ - ${prixUnitaireMax}€ HT/pièce\n💰 Estimation totale : ${estimationMin}€ - ${estimationMax}€ HT\n\n✨ Nous vous enverrons un devis détaillé et personnalisé sous 24h !`);
 
         const formHtml = `
             <div style="background: linear-gradient(135deg, rgba(255, 107, 0, 0.05) 0%, rgba(255, 107, 0, 0.1) 100%); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
@@ -724,17 +827,11 @@ class FlareConfigurateurWidget {
     // ========== MÉTHODES UTILITAIRES ==========
 
     formatSportName(sport) {
-        const names = {
-            'SPORTSWEAR': 'Sportswear',
-            'FOOTBALL': 'Football',
-            'RUGBY': 'Rugby',
-            'BASKETBALL': 'Basketball',
-            'VOLLEYBALL': 'Volleyball',
-            'HANDBALL': 'Handball',
-            'CYCLISME': 'Cyclisme',
-            'RUNNING': 'Running'
-        };
-        return names[sport] || sport;
+        // Remplacer les "_" par des espaces et capitaliser la première lettre uniquement
+        return sport
+            .toLowerCase()
+            .replace(/_/g, ' ')
+            .replace(/^\w/, c => c.toUpperCase());
     }
 
     getSportEmoji(sport) {
