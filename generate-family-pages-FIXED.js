@@ -260,6 +260,90 @@ const familySEOContent = {
 <p>Politique tarifaire accessible <strong>coupe-vent personnalisés pas cher</strong> qualité professionnelle : prix dégressifs automatiques commandes volumes, fabrication européenne certifiée, matières recyclées éco-responsables, délais rapides 3-4 semaines, service design création visuelle professionnel inclus gratuitement.</p>
 
 <p style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #FF4B26; text-align: center;">11 modèles coupe-vent sport • Ultra-légers compactables • Protection vent pluie • Haute visibilité réfléchissante • Design professionnel inclus • Devis gratuit 24h • Prix dégressifs dès 5 pièces • Fabrication européenne certifiée</p>`
+    },
+    'Short': {
+        title: 'Short Sport Personnalisé',
+        slug: 'shorts-sport-personnalises',
+        eyebrow: `${productsByFamily['Short']?.length || 0} modèles personnalisables tous sports`,
+        subtitle: `${productsByFamily['Short']?.length || 0} modèles tous sports. Léger et confortable, Ceinture élastique, Personnalisation illimitée, fabrication européenne, prix dégressifs dès 5 pièces.`,
+        seoTitle: 'Short Sport Personnalisé Sublimation | Tous Sports - FLARE CUSTOM',
+        seoDescription: 'Short sport personnalisé en sublimation intégrale. 64 modèles pour tous sports : football, rugby, basketball, running, volleyball. Léger et confortable. Fabrication européenne, prix dégressifs. Devis gratuit 24h.',
+        seoContent: `<p>Les <strong>shorts sport personnalisés en sublimation intégrale</strong> offrent légèreté, confort et liberté mouvement maximale pour tous sports collectifs et individuels. Notre vaste gamme de <strong>64 modèles de shorts techniques</strong> équipe clubs football, rugby, basketball, volleyball, running et sports salle avec performance et designs spectaculaires.</p>
+
+<p>Nos <strong>shorts techniques performance</strong> utilisent tissus <strong>ultra-légers respirants</strong> évacuant transpiration rapidement maintenant jambes sèches fraîches durant efforts intensifs. La <strong>ceinture élastique ajustable</strong> avec cordon serrage assure maintien parfait confortable sans glissement pendant courses sprints sauts.</p>
+
+<p>La <strong>personnalisation short sublimation</strong> transforme chaque pièce en support visuel club : grands logos couleurs vives cuisses, sponsors réglementaires, numéros joueurs géants lisibilité arbitres, bandes latérales contrastées modernes, dégradés coordonnés maillots. La sublimation garantit <strong>durabilité couleurs</strong> lavages répétés clubs intensifs.</p>
+
+<p>Les <strong>shorts club personnalisés</strong> conviennent football matchs entraînements, rugby shorts légers respirants, basketball débardeurs assortis, volleyball shorts femme ajustés, running trails courses route, handball sports salle et compétitions outdoor toutes disciplines. Idéals <strong>tenues complètes coordonnées</strong> maillots clubs.</p>
+
+<p>Gamme complète : <strong>shorts classiques</strong> longueur standard mi-cuisse, <strong>shorts courts</strong> liberté mouvement maximale, <strong>shorts longs</strong> protection cuisses basketball, <strong>shorts réversibles</strong> double face économiques entraînements. Versions <strong>femme ajustées</strong> coupe anatomique spécifique confort optimal.</p>
+
+<p>Tarification accessible <strong>shorts personnalisés pas cher</strong> qualité professionnelle : prix dégressifs automatiques volumes clubs équipes, fabrication européenne certifiée, matières recyclées éco-responsables, délais rapides 3-4 semaines, service création design graphique professionnel inclus gratuitement.</p>
+
+<p style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #FF4B26; text-align: center;">64 modèles shorts sport • Ultra-légers respirants • Ceinture élastique ajustable • Coupes homme femme • Design professionnel inclus • Devis gratuit 24h • Prix dégressifs dès 5 pièces • Fabrication européenne certifiée</p>`
+    },
+    'Cuissard': {
+        title: 'Cuissard Cyclisme Personnalisé',
+        slug: 'cuissards-cyclisme-personnalises',
+        eyebrow: `${productsByFamily['Cuissard']?.length || 0} modèles personnalisables cyclisme`,
+        subtitle: `${productsByFamily['Cuissard']?.length || 0} modèles cyclisme. Peau chamois confort, Maintien musculaire, Personnalisation illimitée, fabrication européenne, prix dégressifs dès 5 pièces.`,
+        seoTitle: 'Cuissard Cyclisme Personnalisé Sublimation | Vélo Route VTT - FLARE CUSTOM',
+        seoDescription: 'Cuissard cyclisme personnalisé en sublimation intégrale. 9 modèles pour vélo route et VTT. Peau chamois haute densité, maintien musculaire. Fabrication européenne, prix dégressifs. Devis gratuit 24h.',
+        seoContent: `<p>Les <strong>cuissards cyclisme personnalisés en sublimation intégrale</strong> combinent confort selle exceptionnel et maintien musculaire optimal pour sorties longues distances. Notre sélection de <strong>9 modèles de cuissards techniques</strong> équipe clubs cyclistes route VTT avec peau chamois haute qualité et compression ciblée.</p>
+
+<p>Nos <strong>cuissards techniques performance</strong> intègrent <strong>peau chamois haute densité</strong> multi-couches absorbant chocs vibrations selle protégeant zone périnéale durant heures parcours. Les bretelles larges ergonomiques répartissent poids uniformément épaules sans compression thoracique respirant librement.</p>
+
+<p>La <strong>personnalisation cuissard sublimation</strong> permet designs clubs spectaculaires : grands logos cuisses dos, sponsors partenaires réglementaires cyclisme, numéros dossards compétitions, bandes latérales contrastées, dégradés coordonnés maillots équipes. La sublimation assure <strong>résistance frottements</strong> selle lavages fréquents sans usure prématurée.</p>
+
+<p>Les <strong>cuissards club personnalisés</strong> conviennent parfaitement cyclisme route sorties entraînements longues distances, VTT randonnées trails techniques, cyclosportives compétitions amateurs, cyclotourisme séjours itinérants et entraînements home-trainer indoor. Essentiels <strong>confort sorties longues</strong> clubs cyclistes.</p>
+
+<p>Versions disponibles : <strong>cuissards classiques</strong> bretelles traditionnelles, <strong>cuissards sans bretelles</strong> ceinture haute maintien lombaires, <strong>cuissards longs</strong> protection cuisses températures fraîches, <strong>cuissards femme</strong> peau chamois anatomique spécifique. Bandes silicones cuisses anti-remontée maintien parfait.</p>
+
+<p>Politique tarifaire accessible <strong>cuissards personnalisés pas cher</strong> qualité professionnelle : prix dégressifs volumes clubs cyclistes, fabrication européenne certifiée, peaux chamois italiennes premium, délais rapides 3-4 semaines, service design création visuelle professionnel inclus gratuitement.</p>
+
+<p style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #FF4B26; text-align: center;">9 modèles cuissards cyclisme • Peau chamois haute densité • Bretelles ergonomiques • Maintien musculaire compression • Design professionnel inclus • Devis gratuit 24h • Prix dégressifs dès 5 pièces • Fabrication européenne certifiée</p>`
+    },
+    'Corsaire': {
+        title: 'Corsaire Sport Personnalisé',
+        slug: 'corsaires-sport-personnalises',
+        eyebrow: `${productsByFamily['Corsaire']?.length || 0} modèles personnalisables tous sports`,
+        subtitle: `${productsByFamily['Corsaire']?.length || 0} modèles tous sports. Longueur 3/4, Maintien musculaire, Personnalisation illimitée, fabrication européenne, prix dégressifs dès 5 pièces.`,
+        seoTitle: 'Corsaire Sport Personnalisé Sublimation | Running Cyclisme - FLARE CUSTOM',
+        seoDescription: 'Corsaire sport personnalisé en sublimation intégrale. 8 modèles pour running, cyclisme, fitness. Longueur 3/4, maintien musculaire. Fabrication européenne, prix dégressifs. Devis gratuit 24h.',
+        seoContent: `<p>Les <strong>corsaires sport personnalisés en sublimation intégrale</strong> offrent protection cuisses mollets avec légèreté respirabilité optimales disciplines endurance. Notre gamme de <strong>8 modèles de corsaires techniques</strong> longueur 3/4 équipe clubs running, cyclisme, fitness avec compression ciblée et confort exceptionnel.</p>
+
+<p>Nos <strong>corsaires techniques performance</strong> combinent <strong>maintien musculaire compression</strong> réduisant vibrations fatigue jambes efforts prolongés tout en restant respirants évacuant transpiration efficacement. La longueur 3/4 protège cuisses mollets soleil frottements tout en offrant liberté mouvement genoux chevilles.</p>
+
+<p>La <strong>personnalisation corsaire sublimation</strong> transforme chaque pièce en support communication club : grands logos cuisses mollets, sponsors partenaires multiples, numéros dossards compétitions, bandes latérales réfléchissantes sécurité, dégradés modernes coordonnés hauts. La sublimation garantit <strong>résistance frottements</strong> lavages répétés sans décoloration.</p>
+
+<p>Les <strong>corsaires club personnalisés</strong> conviennent parfaitement running trails semi-marathons marathons températures modérées, cyclisme sorties printemps automne protection soleil, fitness training fonctionnel, yoga sports doux et entraînements home-trainer indoor. Polyvalents <strong>mi-saison</strong> clubs multi-disciplines.</p>
+
+<p>Options disponibles : <strong>corsaires compression</strong> maintien musculaire renforcé récupération, <strong>corsaires légers</strong> respirants courses rapides, <strong>corsaires femme</strong> coupe anatomique taille haute gainante, <strong>corsaires réfléchissants</strong> bandes haute visibilité sécurité nocturne. Ceintures élastiques plates sans coutures irritantes.</p>
+
+<p>Tarification accessible <strong>corsaires personnalisés pas cher</strong> qualité professionnelle : prix dégressifs automatiques commandes groupées, fabrication européenne certifiée, tissus compression techniques, délais rapides 3-4 semaines, service création graphique design professionnel inclus gratuitement.</p>
+
+<p style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #FF4B26; text-align: center;">8 modèles corsaires sport • Longueur 3/4 cuisses mollets • Maintien compression musculaire • Respirants évacuation transpiration • Design professionnel inclus • Devis gratuit 24h • Prix dégressifs dès 5 pièces • Fabrication européenne certifiée</p>`
+    },
+    'Combinaison Triathlon': {
+        title: 'Combinaison Triathlon Personnalisée',
+        slug: 'combinaisons-triathlon-personnalisees',
+        eyebrow: `${productsByFamily['Combinaison Triathlon']?.length || 0} modèles personnalisables triathlon`,
+        subtitle: `${productsByFamily['Combinaison Triathlon']?.length || 0} modèles triathlon. Séchage rapide, Peau chamois, Personnalisation illimitée, fabrication européenne, prix dégressifs dès 5 pièces.`,
+        seoTitle: 'Combinaison Triathlon Personnalisée Sublimation | Tri Ironman - FLARE CUSTOM',
+        seoDescription: 'Combinaison triathlon personnalisée en sublimation intégrale. 8 modèles pour tri, ironman. Séchage rapide, peau chamois. Fabrication européenne, prix dégressifs. Devis gratuit 24h.',
+        seoContent: `<p>Les <strong>combinaisons triathlon personnalisées en sublimation intégrale</strong> optimisent transitions natation vélo course avec séchage ultra-rapide et polyvalence trois disciplines. Notre sélection de <strong>8 modèles de combinaisons tri techniques</strong> équipe triathlètes clubs ironman avec confort exceptionnel performances chronométrées.</p>
+
+<p>Nos <strong>combinaisons tri techniques performance</strong> utilisent tissus <strong>séchage ultra-rapide</strong> évacuant eau natation instantanément transition T1 permettant enfiler directement sans perte temps précieuses secondes. La <strong>peau chamois fine</strong> intégrée protège selle vélo sans gêner course pied enchaînée.</p>
+
+<p>La <strong>personnalisation combinaison triathlon sublimation</strong> affiche couleurs club sponsors partenaires visibles trois disciplines : grands logos dos devant cuisses, sponsors multiples règlementaires fédérations, numéros dossards géants lisibilité arbitres, designs aérodynamiques techniques. La sublimation assure <strong>résistance chlore</strong> eau salée transpiration lavages.</p>
+
+<p>Les <strong>combinaisons club personnalisées</strong> conviennent parfaitement triathlon sprint olympique distances courtes, half ironman 70.3 distances intermédiaires, ironman distances longues extrêmes, duathlon bike-run enchaînements et aquathlon natation-course. Essentielles <strong>compétitions chronométrées</strong> clubs triathlon.</p>
+
+<p>Versions proposées : <strong>combinaisons courtes</strong> manches courtes jambes courtes températures chaudes, <strong>combinaisons longues</strong> manches longues protection complète, <strong>combinaisons femme</strong> coupe anatomique bustier intégré, <strong>combinaisons sans manches</strong> liberté bras natation. Zips dorsaux longs enfilage facile transitions rapides.</p>
+
+<p>Politique tarifaire accessible <strong>combinaisons triathlon personnalisées pas cher</strong> qualité professionnelle : prix dégressifs volumes clubs, fabrication européenne certifiée, tissus techniques italiens, peaux chamois fines spécifiques, délais rapides 3-4 semaines, service création design professionnel inclus gratuitement.</p>
+
+<p style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #FF4B26; text-align: center;">8 modèles combinaisons triathlon • Séchage ultra-rapide • Peau chamois fine confort • Zip dorsal transitions • Design professionnel inclus • Devis gratuit 24h • Prix dégressifs dès 5 pièces • Fabrication européenne certifiée</p>`
     }
 };
 
