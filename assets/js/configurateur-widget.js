@@ -644,9 +644,7 @@ class FlareConfigurateurWidget {
         const estimationMin = Math.floor(this.config.prix.totalPrice * 0.9 / 50) * 50;
         const estimationMax = Math.ceil(this.config.prix.totalPrice * 1.1 / 50) * 50;
 
-        const remiseEnfantText = this.config.isEnfant ? '\n🎁 Remise enfant -10% déjà appliquée !' : '';
-
-        this.addBotMessage(`Parfait ! Voici un récapitulatif de votre demande :\n\n📦 ${this.config.produit.TITRE_VENDEUR}\n👤 ${this.config.genreSelected}\n🏷️ ${this.config.quantite} pièces\n\n💰 Prix unitaire : ${prixUnitaireMin}€ - ${prixUnitaireMax}€ HT/pièce\n💰 Estimation totale : ${estimationMin}€ - ${estimationMax}€ HT${remiseEnfantText}\n\n✨ Nous vous enverrons un devis détaillé et personnalisé sous 24h !`);
+        this.addBotMessage(`Parfait ! Voici un récapitulatif de votre demande :\n\n📦 ${this.config.produit.TITRE_VENDEUR}\n👤 ${this.config.genreSelected}\n🏷️ ${this.config.quantite} pièces\n\n💰 Prix unitaire : ${prixUnitaireMin}€ - ${prixUnitaireMax}€ HT/pièce\n💰 Estimation totale : ${estimationMin}€ - ${estimationMax}€ HT\n\n✨ Nous vous enverrons un devis détaillé et personnalisé sous 24h !`);
 
         const formHtml = `
             <div style="background: linear-gradient(135deg, rgba(255, 107, 0, 0.05) 0%, rgba(255, 107, 0, 0.1) 100%); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
