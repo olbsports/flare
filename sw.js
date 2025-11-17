@@ -8,13 +8,13 @@ const RUNTIME_CACHE = 'flare-runtime';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
-    '/football.html',
-    '/rugby.html',
-    '/basketball.html',
-    '/style.css',
-    '/style-sport.css',
-    '/script.js',
-    '/products-loader.js'
+    '/assets/css/style.css',
+    '/assets/css/style-sport.css',
+    '/assets/css/components.css',
+    '/assets/js/script.js',
+    '/assets/js/components-loader.js',
+    '/pages/components/header.html',
+    '/pages/components/footer.html'
 ];
 
 // Installation: cache static assets

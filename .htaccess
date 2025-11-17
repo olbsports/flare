@@ -88,9 +88,13 @@
     
     # Permissions-Policy
     Header set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=()"
-    
-    # HSTS - À décommenter quand HTTPS 100% stable
-    # Header always set Strict-Transport-Security "max-age=15552000; includeSubDomains; preload"
+
+    # HSTS - Force HTTPS pour tous les sous-domaines
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+    # Content Security Policy (CSP)
+    # Protège contre XSS tout en autorisant Google Fonts et images externes
+    Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
 </IfModule>
 
 # ============================================
@@ -148,7 +152,52 @@ AddDefaultCharset UTF-8
 # ============================================
 # 8. BLOCK SENSITIVE FILES
 # ============================================
+
+# Bloquer les fichiers cachés (commençant par .)
 <FilesMatch "^\.">
     Order allow,deny
     Deny from all
 </FilesMatch>
+
+# Bloquer les fichiers de configuration et backups
+<FilesMatch "(\.htaccess|\.htpasswd|\.txt|\.log|\.bak|\.sql|\.zip|\.tar|\.gz)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Autoriser robots.txt et README.txt explicitement
+<FilesMatch "^(robots\.txt|README\.txt)$">
+    Order allow,deny
+    Allow from all
+</FilesMatch>
+
+# Bloquer l'accès au répertoire config
+<DirectoryMatch "^.*/config">
+    Order allow,deny
+    Deny from all
+</DirectoryMatch>
+
+# Empêcher le listing des répertoires
+Options -Indexes
+
+# Protéger contre l'injection de code dans les uploads
+<FilesMatch "\.(php|phtml|php3|php4|php5|pl|py|jsp|asp|sh|cgi)$">
+    <IfModule mod_php5.c>
+        php_flag engine off
+    </IfModule>
+    <IfModule mod_php7.c>
+        php_flag engine off
+    </IfModule>
+</FilesMatch>
+
+# Autoriser PHP uniquement dans le dossier /api/
+<Directory "/api">
+    <FilesMatch "\.php$">
+        <IfModule mod_php5.c>
+            php_flag engine on
+        </IfModule>
+        <IfModule mod_php7.c>
+            php_flag engine on
+        </IfModule>
+    </FilesMatch>
+</Directory>

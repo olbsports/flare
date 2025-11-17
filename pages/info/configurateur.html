@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurateur SVG - FLARE CUSTOM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+            color: #1a1a1a;
+        }
+
+        /* Header */
+        .header {
+            background: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 20px 40px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: 1px;
+        }
+
+        .logo span {
+            color: #FF4B26;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid #e0e0e0;
+            background: #ffffff;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: #f5f5f5;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: #FF4B26;
+            color: #ffffff;
+            border-color: #FF4B26;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #e63d1a;
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            min-height: calc(100vh - 81px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: #ffffff;
+            border-right: 1px solid #e0e0e0;
+            overflow-y: auto;
+            height: calc(100vh - 81px);
+        }
+
+        .sidebar-header {
+            padding: 30px 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .sidebar-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .count {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .gallery {
+            padding: 20px;
+        }
+
+        .card {
+            background: #fafafa;
+            border: 2px solid transparent;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .card:hover {
+            border-color: #e0e0e0;
+        }
+
+        .card.active {
+            border-color: #FF4B26;
+            background: #ffffff;
+        }
+
+        .card-preview {
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            padding: 15px;
+            overflow: hidden;
+        }
+
+        .card-preview svg {
+            height: 100%;
+            width: auto;
+        }
+
+        .card-info {
+            padding: 12px 15px;
+            border-top: 1px solid #e0e0e0;
+            background: #fafafa;
+        }
+
+        .card.active .card-info {
+            background: #ffffff;
+        }
+
+        .card-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: #1a1a1a;
+            margin-bottom: 5px;
+        }
+
+        .card.active .card-name {
+            color: #FF4B26;
+        }
+
+        .card-colors {
+            font-size: 11px;
+            color: #999;
+        }
+
+        /* Main */
+        .main {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview {
+            flex: 1;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+            min-height: 500px;
+        }
+
+        #previewSVG {
+            max-height: 70vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #previewSVG svg {
+            height: 100%;
+            width: auto;
+        }
+
+        .empty {
+            text-align: center;
+            color: #999;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            opacity: 0.3;
+            margin-bottom: 20px;
+        }
+
+        /* Controls */
+        .controls {
+            background: #f9f9f9;
+            border-top: 1px solid #e0e0e0;
+            padding: 30px 40px;
+        }
+
+        .controls-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .controls-header {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .color-item {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+        }
+
+        .color-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .color-inputs {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="color"] {
+            width: 50px;
+            height: 50px;
+            border: 1px solid #e0e0e0;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            height: 50px;
+            border: 1px solid #e0e0e0;
+            background: #ffffff;
+            color: #1a1a1a;
+            padding: 0 15px;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #FF4B26;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f5f5f5;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ccc;
+        }
+
+        .loading {
+            padding: 40px;
+            text-align: center;
+            color: #999;
+        }
+
+        .error {
+            padding: 40px;
+            text-align: center;
+            color: #FF4B26;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">FLARE <span>CUSTOM</span></div>
+            <div class="actions">
+                <button class="btn" onclick="reset()" id="btnReset" disabled>Réinitialiser</button>
+                <button class="btn" onclick="downloadSVG()" id="btnSVG" disabled>SVG</button>
+                <button class="btn btn-primary" onclick="downloadPNG()" id="btnPNG" disabled>PNG</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">Templates</div>
+                <div class="count" id="count">Chargement...</div>
+            </div>
+            <div class="gallery" id="gallery">
+                <div class="loading">Chargement des templates...</div>
+            </div>
+        </aside>
+
+        <main class="main">
+            <section class="preview">
+                <div id="previewSVG">
+                    <div class="empty">
+                        <div class="empty-icon">⬅</div>
+                        <div>Sélectionnez un template</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="controls">
+                <div class="controls-content">
+                    <div class="controls-header">Personnalisation des couleurs</div>
+                    <div class="color-grid" id="colorGrid">
+                        <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">
+                            Sélectionnez un template pour modifier les couleurs
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        let templates = [];
+        let currentIndex = -1;
+        let currentColors = {};
+
+        // Initialisation
+        async function init() {
+            try {
+                // Charger la liste des SVG
+                const response = await fetch('../../api/get-svg-list.php');
+                const data = await response.json();
+
+                console.log('Réponse PHP:', data);
+
+                if (!data.success) {
+                    showError(data.error);
+                    return;
+                }
+
+                if (data.files.length === 0) {
+                    showError('Aucun fichier SVG trouvé dans /svg/');
+                    return;
+                }
+
+                // Charger chaque SVG
+                for (const file of data.files) {
+                    try {
+                        const svgResponse = await fetch('/svg/' + file);
+                        const svgText = await svgResponse.text();
+                        
+                        const colors = extractColors(svgText);
+                        
+                        templates.push({
+                            name: file,
+                            content: svgText,
+                            colors: colors
+                        });
+
+                        console.log('Template chargé:', file, colors.length, 'couleurs');
+                    } catch (e) {
+                        console.error('Erreur chargement:', file, e);
+                    }
+                }
+
+                if (templates.length === 0) {
+                    showError('Aucun template chargé');
+                    return;
+                }
+
+                // Afficher
+                renderGallery();
+                document.getElementById('count').textContent = templates.length + ' template' + (templates.length > 1 ? 's' : '');
+
+            } catch (error) {
+                console.error('Erreur init:', error);
+                showError('Erreur: ' + error.message);
+            }
+        }
+
+        // Extraire les couleurs du SVG
+        function extractColors(svg) {
+            const colors = new Set();
+            
+            // Depuis les styles
+            const styleMatch = svg.match(/<style[^>]*>([\s\S]*?)<\/style>/gi);
+            if (styleMatch) {
+                styleMatch.forEach(style => {
+                    const matches = style.match(/#[0-9A-Fa-f]{6}/g);
+                    if (matches) {
+                        matches.forEach(c => colors.add(c.toUpperCase()));
+                    }
+                });
+            }
+
+            // Depuis les attributs fill
+            const fillMatches = svg.match(/fill="#[0-9A-Fa-f]{6}"/gi);
+            if (fillMatches) {
+                fillMatches.forEach(m => {
+                    const c = m.match(/#[0-9A-Fa-f]{6}/i);
+                    if (c) colors.add(c[0].toUpperCase());
+                });
+            }
+
+            // Depuis les attributs stroke
+            const strokeMatches = svg.match(/stroke="#[0-9A-Fa-f]{6}"/gi);
+            if (strokeMatches) {
+                strokeMatches.forEach(m => {
+                    const c = m.match(/#[0-9A-Fa-f]{6}/i);
+                    if (c) colors.add(c[0].toUpperCase());
+                });
+            }
+
+            return Array.from(colors);
+        }
+
+        // Afficher la galerie
+        function renderGallery() {
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = '';
+
+            templates.forEach((tpl, i) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => selectTemplate(i);
+
+                // Parser pour miniature
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(tpl.content, 'image/svg+xml');
+                const svg = doc.querySelector('svg');
+
+                const name = tpl.name.replace('.svg', '').substring(0, 25);
+
+                card.innerHTML = `
+                    <div class="card-preview">${svg ? svg.outerHTML : ''}</div>
+                    <div class="card-info">
+                        <div class="card-name">${name}</div>
+                        <div class="card-colors">${tpl.colors.length} couleurs</div>
+                    </div>
+                `;
+
+                gallery.appendChild(card);
+            });
+        }
+
+        // Sélectionner un template
+        function selectTemplate(index) {
+            if (index < 0 || index >= templates.length) return;
+
+            currentIndex = index;
+            const tpl = templates[index];
+
+            // Marquer actif
+            document.querySelectorAll('.card').forEach((c, i) => {
+                c.classList.toggle('active', i === index);
+            });
+
+            // Initialiser couleurs
+            currentColors = {};
+            tpl.colors.forEach(c => {
+                currentColors[c] = c;
+            });
+
+            // Afficher
+            renderPreview();
+            renderColors();
+
+            // Activer boutons
+            document.getElementById('btnReset').disabled = false;
+            document.getElementById('btnSVG').disabled = false;
+            document.getElementById('btnPNG').disabled = false;
+        }
+
+        // Afficher preview
+        function renderPreview() {
+            if (currentIndex < 0) return;
+
+            let svgContent = templates[currentIndex].content;
+
+            // Remplacer couleurs si nécessaire
+            Object.entries(currentColors).forEach(([orig, curr]) => {
+                if (orig !== curr) {
+                    const regex = new RegExp(orig, 'gi');
+                    svgContent = svgContent.replace(regex, curr);
+                }
+            });
+
+            // Injecter directement
+            document.getElementById('previewSVG').innerHTML = svgContent;
+        }
+
+        // Afficher contrôles couleurs
+        function renderColors() {
+            const grid = document.getElementById('colorGrid');
+            const colors = Object.keys(currentColors);
+
+            if (colors.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">Aucune couleur détectée</div>';
+                return;
+            }
+
+            grid.innerHTML = colors.map((color, i) => `
+                <div class="color-item">
+                    <div class="color-label">Couleur ${i + 1}</div>
+                    <div class="color-inputs">
+                        <input type="color" value="${color}" onchange="changeColor('${color}', this.value)">
+                        <input type="text" value="${color}" onchange="changeColorText('${color}', this.value)" maxlength="7">
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Changer couleur
+        function changeColor(oldColor, newColor) {
+            currentColors[oldColor] = newColor.toUpperCase();
+            renderPreview();
+        }
+
+        // Changer couleur depuis texte
+        function changeColorText(oldColor, newColor) {
+            newColor = newColor.trim().toUpperCase();
+            if (!newColor.startsWith('#')) newColor = '#' + newColor;
+            
+            if (!/^#[0-9A-F]{6}$/.test(newColor)) {
+                alert('Format invalide. Utilisez #RRGGBB');
+                renderColors();
+                return;
+            }
+
+            currentColors[oldColor] = newColor;
+            renderPreview();
+            renderColors();
+        }
+
+        // Réinitialiser
+        function reset() {
+            if (currentIndex < 0) return;
+            
+            const tpl = templates[currentIndex];
+            tpl.colors.forEach(c => {
+                currentColors[c] = c;
+            });
+
+            renderPreview();
+            renderColors();
+        }
+
+        // Télécharger SVG
+        function downloadSVG() {
+            const svg = document.querySelector('#previewSVG svg');
+            if (!svg) return;
+
+            const data = new XMLSerializer().serializeToString(svg);
+            const blob = new Blob([data], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = templates[currentIndex].name.replace('.svg', '_custom.svg');
+            a.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
+        // Télécharger PNG
+        function downloadPNG() {
+            const svg = document.querySelector('#previewSVG svg');
+            if (!svg) return;
+
+            const data = new XMLSerializer().serializeToString(svg);
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+
+            img.onload = () => {
+                canvas.width = img.width * 2;
+                canvas.height = img.height * 2;
+                ctx.scale(2, 2);
+                ctx.drawImage(img, 0, 0);
+
+                canvas.toBlob(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = templates[currentIndex].name.replace('.svg', '_custom.png');
+                    a.click();
+                    URL.revokeObjectURL(url);
+                });
+            };
+
+            img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(data)));
+        }
+
+        // Afficher erreur
+        function showError(msg) {
+            document.getElementById('gallery').innerHTML = `<div class="error">⚠️ ${msg}</div>`;
+            document.getElementById('count').textContent = 'Erreur';
+        }
+
+        // Démarrer
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

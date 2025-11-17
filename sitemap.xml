@@ -9,372 +9,281 @@
      ======================================== -->
 <url>
     <loc>https://flare-custom.com/</loc>
-    <lastmod>2025-11-03</lastmod>
+    <lastmod>2025-11-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
 </url>
 
 <!-- ========================================
-     SPORTS COLLECTIFS - HAUTE PRIORITÉ
+     PAGES PRODUITS - SPORTS COLLECTIFS (PRIORITÉ ÉLEVÉE)
      ======================================== -->
 
 <!-- Football -->
 <url>
-    <loc>https://flare-custom.com/equipement-football-personnalise-sublimation</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://flare-custom.com/pages/products/equipement-football-personnalise-sublimation.html</loc>
+    <lastmod>2025-11-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
 </url>
 
 <!-- Rugby -->
 <url>
-    <loc>https://flare-custom.com/equipement-rugby-personnalise-sublimation</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://flare-custom.com/pages/products/equipement-rugby-personnalise-sublimation.html</loc>
+    <lastmod>2025-11-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
 </url>
 
 <!-- Basketball -->
 <url>
-    <loc>https://flare-custom.com/equipement-basketball-personnalise-sublimation</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://flare-custom.com/pages/products/equipement-basketball-personnalise-sublimation.html</loc>
+    <lastmod>2025-11-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
 </url>
 
 <!-- Handball -->
 <url>
-    <loc>https://flare-custom.com/equipement-handball-personnalise-sublimation</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://flare-custom.com/pages/products/equipement-handball-personnalise-sublimation.html</loc>
+    <lastmod>2025-11-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
 </url>
 
 <!-- Volleyball -->
 <url>
-    <loc>https://flare-custom.com/equipement-volleyball-personnalise-sublimation</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://flare-custom.com/pages/products/equipement-volleyball-personnalise-sublimation.html</loc>
+    <lastmod>2025-11-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
 </url>
 
 <!-- ========================================
-     SPORTS INDIVIDUELS - PRIORITÉ ÉLEVÉE
+     PAGES PRODUITS - SPORTS INDIVIDUELS (PRIORITÉ ÉLEVÉE)
      ======================================== -->
 
 <!-- Running -->
 <url>
-    <loc>https://flare-custom.com/equipement-running-course-pied-personnalise</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://flare-custom.com/pages/products/equipement-running-course-pied-personnalise.html</loc>
+    <lastmod>2025-11-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
 </url>
 
 <!-- Cyclisme -->
 <url>
-    <loc>https://flare-custom.com/equipement-cyclisme-velo-personnalise-sublimation</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://flare-custom.com/pages/products/equipement-cyclisme-velo-personnalise-sublimation.html</loc>
+    <lastmod>2025-11-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
 </url>
 
 <!-- Triathlon -->
 <url>
-    <loc>https://flare-custom.com/equipement-triathlon-personnalise-sublimation</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://flare-custom.com/pages/products/equipement-triathlon-personnalise-sublimation.html</loc>
+    <lastmod>2025-11-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
 </url>
 
 <!-- Pétanque -->
 <url>
-    <loc>https://flare-custom.com/equipement-petanque-personnalise-club</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://flare-custom.com/pages/products/equipement-petanque-personnalise-club.html</loc>
+    <lastmod>2025-11-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
 </url>
 
 <!-- ========================================
-     LIFESTYLE - PRIORITÉ MOYENNE
+     PAGES PRODUITS - LIFESTYLE (PRIORITÉ MOYENNE)
      ======================================== -->
 
 <!-- Sportswear -->
 <url>
-    <loc>https://flare-custom.com/sportswear-vetements-sport-personnalises</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://flare-custom.com/pages/products/sportswear-vetements-sport-personnalises.html</loc>
+    <lastmod>2025-11-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+</url>
+
+<!-- Maillots -->
+<url>
+    <loc>https://flare-custom.com/pages/products/maillot.html</loc>
+    <lastmod>2025-11-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+</url>
+
+<!-- Maillots Sport Personnalisés -->
+<url>
+    <loc>https://flare-custom.com/pages/products/maillots-sport-personnalises.html</loc>
+    <lastmod>2025-11-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+</url>
+
+<!-- Maillots Club Petit Budget -->
+<url>
+    <loc>https://flare-custom.com/pages/products/maillots-club-petit-budget.html</loc>
+    <lastmod>2025-11-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
 </url>
 
 <!-- Merchandising -->
 <url>
-    <loc>https://flare-custom.com/merchandising-accessoires-club-personnalises</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://flare-custom.com/pages/products/merchandising-accessoires-club-personnalises.html</loc>
+    <lastmod>2025-11-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+</url>
+
+<!-- Équipements Sportifs Pas Cher -->
+<url>
+    <loc>https://flare-custom.com/pages/products/equipements-sportifs-pas-cher.html</loc>
+    <lastmod>2025-11-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
 </url>
 
 <!-- ========================================
-     PAGES INFORMATIVES SEO
+     PAGES INFORMATIVES ET LÉGALES
      ======================================== -->
-
-<!-- Process de fabrication -->
-<url>
-    <loc>https://flare-custom.com/process-fabrication-sublimation-equipements-sportifs</loc>
-    <lastmod>2025-11-03</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-</url>
 
 <!-- Innovation sublimation -->
 <url>
-    <loc>https://flare-custom.com/innovation-technologie-sublimation-textile-sportif</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://flare-custom.com/pages/info/innovation-technologie-sublimation-textile-sportif.html</loc>
+    <lastmod>2025-11-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
 </url>
 
 <!-- FAQ -->
 <url>
-    <loc>https://flare-custom.com/faq-questions-frequentes-equipements-personnalises</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://flare-custom.com/pages/info/faq-questions-frequentes-equipements-personnalises.html</loc>
+    <lastmod>2025-11-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
 </url>
 
 <!-- Guide des tailles -->
 <url>
-    <loc>https://flare-custom.com/guide-tailles-equipements-sportifs</loc>
-    <lastmod>2025-11-03</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-</url>
-
-<!-- Entretien -->
-<url>
-    <loc>https://flare-custom.com/conseils-entretien-equipements-sublimes</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://flare-custom.com/pages/info/guide-tailles-equipements-sportifs.html</loc>
+    <lastmod>2025-11-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
 </url>
 
 <!-- Avis clients -->
 <url>
-    <loc>https://flare-custom.com/avis-temoignages-clients-clubs-sportifs</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://flare-custom.com/pages/info/avis-temoignages-clients-clubs-sportifs.html</loc>
+    <lastmod>2025-11-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
 </url>
 
-<!-- ========================================
-     PAGES CATÉGORIES PRODUITS SEO
-     ======================================== -->
-
-<!-- Maillots football -->
+<!-- Guide de personnalisation -->
 <url>
-    <loc>https://flare-custom.com/maillots-football-personnalises-sublimation</loc>
-    <lastmod>2025-11-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
+    <loc>https://flare-custom.com/pages/info/guide-personnalisation-sublimation.html</loc>
+    <lastmod>2025-11-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
 </url>
-
-<!-- Shorts football -->
-<url>
-    <loc>https://flare-custom.com/shorts-football-personnalises-sublimation</loc>
-    <lastmod>2025-11-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-</url>
-
-<!-- Survêtements -->
-<url>
-    <loc>https://flare-custom.com/survetements-training-personnalises-club</loc>
-    <lastmod>2025-11-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-</url>
-
-<!-- Maillots rugby -->
-<url>
-    <loc>https://flare-custom.com/maillots-rugby-personnalises-sublimation-renforces</loc>
-    <lastmod>2025-11-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-</url>
-
-<!-- Maillots basketball -->
-<url>
-    <loc>https://flare-custom.com/maillots-basketball-personnalises-sublimation-respirants</loc>
-    <lastmod>2025-11-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-</url>
-
-<!-- Cuissards cyclisme -->
-<url>
-    <loc>https://flare-custom.com/cuissards-cyclisme-personnalises-chamois</loc>
-    <lastmod>2025-11-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-</url>
-
-<!-- Maillots cyclisme -->
-<url>
-    <loc>https://flare-custom.com/maillots-cyclisme-personnalises-aero-sublimation</loc>
-    <lastmod>2025-11-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-</url>
-
-<!-- ========================================
-     PAGES B2B / CLUBS / REVENDEURS
-     ======================================== -->
 
 <!-- Programme Revendeurs -->
 <url>
-    <loc>https://flare-custom.com/programme-revendeurs-partenaires</loc>
-    <lastmod>2025-11-03</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-</url>
-
-<!-- Équiper son club -->
-<url>
-    <loc>https://flare-custom.com/equiper-club-sportif-personnalisation-volume</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://flare-custom.com/pages/info/programme-revendeurs-partenaires.html</loc>
+    <lastmod>2025-11-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
 </url>
 
 <!-- Tarifs clubs -->
 <url>
-    <loc>https://flare-custom.com/tarifs-degressifs-clubs-associations-sportives</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://flare-custom.com/pages/info/tarifs-degressifs-clubs.html</loc>
+    <lastmod>2025-11-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+</url>
+
+<!-- Devis -->
+<url>
+    <loc>https://flare-custom.com/pages/info/devis.html</loc>
+    <lastmod>2025-11-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+</url>
+
+<!-- Contact -->
+<url>
+    <loc>https://flare-custom.com/pages/info/contact.html</loc>
+    <lastmod>2025-11-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
 </url>
 
-<!-- Devis gratuit -->
+<!-- Configurateur -->
 <url>
-    <loc>https://flare-custom.com/devis-gratuit-equipements-sportifs-personnalises</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://flare-custom.com/pages/info/configurateur.html</loc>
+    <lastmod>2025-11-14</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.8</priority>
 </url>
 
-<!-- ========================================
-     PAGES SEO LONGUE TRAÎNE
-     ======================================== -->
-
-<!-- Maillots personnalisés pas cher -->
+<!-- Livraison délais Europe -->
 <url>
-    <loc>https://flare-custom.com/maillots-football-personnalises-pas-cher-qualite</loc>
-    <lastmod>2025-11-03</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-</url>
-
-<!-- Fabrication France/Europe -->
-<url>
-    <loc>https://flare-custom.com/fabrication-europeenne-equipements-sportifs-made-in-europe</loc>
-    <lastmod>2025-11-03</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-</url>
-
-<!-- Sublimation textile -->
-<url>
-    <loc>https://flare-custom.com/sublimation-textile-sportif-impression-haute-definition</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://flare-custom.com/pages/info/livraison-delais-europe.html</loc>
+    <lastmod>2025-11-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
 </url>
 
-<!-- Personnalisation maillots -->
+<!-- Retours Échanges Garantie -->
 <url>
-    <loc>https://flare-custom.com/personnalisation-maillots-sport-noms-numeros-logos</loc>
-    <lastmod>2025-11-03</lastmod>
+    <loc>https://flare-custom.com/pages/info/retours-echanges-garantie.html</loc>
+    <lastmod>2025-11-14</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-</url>
-
-<!-- Équipements clubs -->
-<url>
-    <loc>https://flare-custom.com/equipements-complets-clubs-sportifs-pack-team</loc>
-    <lastmod>2025-11-03</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-</url>
-
-<!-- ========================================
-     PAGES LÉGALES
-     ======================================== -->
-
-<url>
-    <loc>https://flare-custom.com/mentions-legales</loc>
-    <lastmod>2025-11-03</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-</url>
-
-<url>
-    <loc>https://flare-custom.com/conditions-generales-vente</loc>
-    <lastmod>2025-11-03</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-</url>
-
-<url>
-    <loc>https://flare-custom.com/politique-confidentialite</loc>
-    <lastmod>2025-11-03</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-</url>
-
-<url>
-    <loc>https://flare-custom.com/gestion-cookies</loc>
-    <lastmod>2025-11-03</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-</url>
-
-<!-- ========================================
-     BLOG SEO (optionnel mais recommandé)
-     ======================================== -->
-
-<url>
-    <loc>https://flare-custom.com/blog</loc>
-    <lastmod>2025-11-03</lastmod>
-    <changefreq>weekly</changefreq>
     <priority>0.6</priority>
 </url>
 
+<!-- Droit Rétractation 14 jours -->
 <url>
-    <loc>https://flare-custom.com/blog/comment-choisir-equipements-football-club</loc>
-    <lastmod>2025-11-03</lastmod>
-    <changefreq>monthly</changefreq>
+    <loc>https://flare-custom.com/pages/info/droit-retractation-14-jours.html</loc>
+    <lastmod>2025-11-14</lastmod>
+    <changefreq>yearly</changefreq>
     <priority>0.5</priority>
 </url>
 
+<!-- Mentions légales -->
 <url>
-    <loc>https://flare-custom.com/blog/sublimation-vs-flocage-quelle-difference</loc>
-    <lastmod>2025-11-03</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
+    <loc>https://flare-custom.com/pages/info/mentions-legales.html</loc>
+    <lastmod>2025-11-14</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
 </url>
 
+<!-- Conditions générales de vente -->
 <url>
-    <loc>https://flare-custom.com/blog/entretenir-maillots-sublimes-longue-duree</loc>
-    <lastmod>2025-11-03</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
+    <loc>https://flare-custom.com/pages/info/conditions-generales-vente.html</loc>
+    <lastmod>2025-11-14</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
 </url>
 
+<!-- Politique confidentialité RGPD -->
 <url>
-    <loc>https://flare-custom.com/blog/tendances-design-maillots-2025</loc>
-    <lastmod>2025-11-03</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
+    <loc>https://flare-custom.com/pages/info/politique-confidentialite-rgpd.html</loc>
+    <lastmod>2025-11-14</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+</url>
+
+<!-- Politique cookies -->
+<url>
+    <loc>https://flare-custom.com/pages/info/politique-cookies.html</loc>
+    <lastmod>2025-11-14</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
 </url>
 
 </urlset>

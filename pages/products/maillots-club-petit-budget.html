@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maillots Club Petit Budget Personnalisés | Solutions Économiques - FLARE CUSTOM</title>
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    
+    <meta name="description" content="Maillots de club personnalisés pour petits budgets. Solutions économiques sans compromis qualité. Sublimation européenne. Devis gratuit 24h. À partir de 14€.">
+    
+    <link rel="canonical" href="https://flare-custom.com/maillots-club-petit-budget">
+    
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+
+    <style>
+        /* 🔥 HERO 2/3 + 1/3 avec IMAGE FULL */
+        .hero-budget {
+            min-height: 70vh;
+            background: linear-gradient(135deg, #000000 0%, #121212 50%, #000000 100%);
+            margin-top: 80px;
+            position: relative;
+            display: flex;
+            align-items: stretch;
+            overflow: hidden;
+        }
+
+        .hero-budget-content {
+            flex: 2;
+            padding: 0rem 5%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-budget-image {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-budget-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            position: absolute;
+            inset: 0;
+        }
+
+        .hero-budget-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(255, 75, 38, 0.15), transparent 60%);
+            z-index: 1;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 24px;
+        }
+
+        .breadcrumb a {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .breadcrumb a:hover {
+            color: #FF4B26;
+        }
+
+        .hero-budget-eyebrow {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #FF4B26;
+            margin-bottom: 16px;
+        }
+
+        .hero-budget-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(48px, 8vw, 80px);
+            line-height: 0.95;
+            letter-spacing: 1px;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        .hero-budget-subtitle {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(40px, 7vw, 72px);
+            line-height: 0.95;
+            letter-spacing: 1px;
+            color: #FF4B26;
+            margin-bottom: 32px;
+        }
+
+        .hero-budget-desc {
+            font-size: clamp(16px, 2vw, 18px);
+            line-height: 1.6;
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 40px;
+            max-width: 600px;
+        }
+
+        .hero-budget-cta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 48px;
+        }
+
+        .btn-hero-primary, .btn-hero-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 40px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-hero-primary {
+            background: #FF4B26;
+            color: #fff;
+        }
+
+        .btn-hero-primary:hover {
+            background: #E63910;
+            transform: translateY(-2px);
+        }
+
+        .btn-hero-secondary {
+            background: transparent;
+            color: #fff;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-hero-secondary:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: #fff;
+        }
+
+        /* 🔥 BADGES HERO */
+        .hero-budget-features {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .feature-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: rgba(255,255,255,0.9);
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .feature-badge:hover {
+            background: rgba(255, 75, 38, 0.1);
+            border-color: rgba(255, 75, 38, 0.3);
+        }
+
+        .feature-badge svg {
+            color: #FF4B26;
+            width: 20px;
+            height: 20px;
+        }
+
+        /* 🔥 TRUST BAR */
+        .trust-bar {
+            background: #fff;
+            padding: 48px 5%;
+            border-top: 1px solid #E5E7EB;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .trust-items {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            text-align: center;
+        }
+
+        .trust-item strong {
+            display: block;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 48px;
+            color: #FF4B26;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .trust-item span {
+            font-size: 14px;
+            color: #6B7280;
+            font-weight: 600;
+        }
+
+        /* 🔥 SECTIONS */
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .section-eyebrow {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #FF4B26;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(40px, 6vw, 64px);
+            line-height: 1.1;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        .section-description {
+            font-size: 18px;
+            line-height: 1.7;
+            color: #6B7280;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* 🔥 SOLUTIONS - 3 COLONNES */
+        .solutions-section {
+            padding: 100px 5%;
+            background: #f9fafb;
+        }
+
+        .solutions-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .solution-card {
+            background: #fff;
+            padding: 40px 32px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+        }
+
+        .solution-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(255, 75, 38, 0.12);
+        }
+
+        .solution-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #FF4B26, #E63910);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .solution-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #000;
+            margin-bottom: 12px;
+        }
+
+        .solution-desc {
+            font-size: 16px;
+            line-height: 1.7;
+            color: #6B7280;
+        }
+
+        /* 🔥 TARIFS - 4 CARTES */
+        .pricing-cards {
+            padding: 100px 5%;
+            background: #fff;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto 60px;
+        }
+
+        .price-card {
+            background: #fff;
+            padding: 48px 32px;
+            text-align: center;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .price-card:hover {
+            border-color: #FF4B26;
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(255, 75, 38, 0.12);
+        }
+
+        .price-card.featured {
+            border-color: #FF4B26;
+            transform: scale(1.05);
+            box-shadow: 0 12px 40px rgba(255, 75, 38, 0.15);
+        }
+
+        .price-card.premium {
+            background: #000;
+            border-color: #000;
+            color: #fff;
+        }
+
+        .price-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #FF4B26;
+            color: #fff;
+            padding: 6px 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .price-volume {
+            font-size: 13px;
+            font-weight: 700;
+            color: #6B7280;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+        }
+
+        .price-card.premium .price-volume {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .price-amount {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 56px;
+            line-height: 1;
+            color: #000;
+            margin-bottom: 8px;
+        }
+
+        .price-card.premium .price-amount {
+            color: #fff;
+        }
+
+        .price-unit {
+            font-size: 20px;
+            color: #6B7280;
+        }
+
+        .price-card.premium .price-unit {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .price-saving {
+            font-size: 14px;
+            color: #FF4B26;
+            font-weight: 700;
+            margin-bottom: 32px;
+        }
+
+        .price-cta {
+            display: block;
+            padding: 16px;
+            background: #000;
+            color: #fff;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            border-radius: 6px;
+        }
+
+        .price-card.featured .price-cta,
+        .price-card.premium .price-cta {
+            background: #FF4B26;
+        }
+
+        .price-cta:hover {
+            background: #FF4B26;
+            transform: translateY(-2px);
+        }
+
+        /* 🔥 SPORTS GRID - BLANC + OMBRE */
+        .sports-section {
+            padding: 100px 5%;
+            background: #f9fafb;
+        }
+
+        .sports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sport-card {
+            position: relative;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.06);
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            text-decoration: none;
+            display: block;
+        }
+
+        .sport-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.12);
+        }
+
+        .sport-card-content {
+            padding: 32px;
+        }
+
+        .sport-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .sport-card h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 32px;
+            line-height: 1;
+            letter-spacing: -0.01em;
+            color: #000;
+            margin-bottom: 8px;
+        }
+
+        .sport-card p {
+            font-size: 15px;
+            color: #6B7280;
+            margin-bottom: 16px;
+        }
+
+        .sport-link {
+            font-size: 24px;
+            color: #FF4B26;
+            transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+            display: inline-block;
+        }
+
+        .sport-card:hover .sport-link {
+            transform: translateX(8px);
+        }
+
+        /* 🔥 CONSEILS */
+        .tips-section {
+            padding: 100px 5%;
+            background: #fff;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .tip-card {
+            background: #f9fafb;
+            padding: 40px;
+            border-left: 4px solid #FF4B26;
+            border-radius: 8px;
+        }
+
+        .tip-number {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 48px;
+            color: #FF4B26;
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+
+        .tip-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #000;
+            margin-bottom: 12px;
+        }
+
+        .tip-desc {
+            font-size: 16px;
+            line-height: 1.7;
+            color: #6B7280;
+        }
+
+        /* 🔥 FAQ */
+        .faq-section {
+            padding: 100px 5%;
+            background: #f9fafb;
+        }
+
+        .faq-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .faq-accordion {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        details {
+            background: #fff;
+            padding: 24px 32px;
+            border-left: 4px solid #E5E7EB;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        details:hover {
+            border-left-color: #FF4B26;
+        }
+
+        details[open] {
+            border-left-color: #FF4B26;
+        }
+
+        summary {
+            font-size: 18px;
+            font-weight: 700;
+            color: #000;
+            list-style: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .faq-icon {
+            color: #FF4B26;
+            font-size: 20px;
+            transition: transform 0.3s;
+        }
+
+        details[open] .faq-icon {
+            transform: rotate(45deg);
+        }
+
+        details p {
+            margin-top: 16px;
+            line-height: 1.7;
+            color: #6B7280;
+        }
+
+        /* 🔥 CTA FINAL */
+        .cta-final-section {
+            padding: 120px 5%;
+            background: linear-gradient(135deg, #000000 0%, #121212 50%, #000000 100%);
+            color: #fff;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-final-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 75, 38, 0.1), transparent 70%);
+        }
+
+        .cta-final-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-final-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(48px, 8vw, 80px);
+            line-height: 1;
+            letter-spacing: 2px;
+            margin-bottom: 24px;
+        }
+
+        .cta-final-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 80px;
+        }
+
+        .btn-cta-primary, .btn-cta-secondary {
+            display: inline-block;
+            padding: 24px 56px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-cta-primary {
+            background: #FF4B26;
+            color: #fff;
+        }
+
+        .btn-cta-primary:hover {
+            background: #E63910;
+            transform: translateY(-2px);
+        }
+
+        .btn-cta-secondary {
+            background: transparent;
+            color: #fff;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-cta-secondary:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: #fff;
+        }
+
+        /* 🔥 4 STATS EN LIGNE */
+        .cta-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            padding-top: 60px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 48px;
+            color: #FF4B26;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* 🔥 RESPONSIVE */
+        @media (max-width: 1200px) {
+            .pricing-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .solutions-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .cta-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 32px;
+            }
+
+            .tips-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-budget {
+                flex-direction: column;
+                min-height: auto;
+            }
+
+            .hero-budget-content {
+                padding: 4rem 5% 3rem;
+            }
+
+            .hero-budget-image {
+                min-height: 300px;
+            }
+
+            .hero-budget-features {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .feature-badge {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .trust-items {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 24px;
+            }
+
+            .pricing-grid,
+            .solutions-grid,
+            .sports-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-stats {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 🔥 HEADER DYNAMIQUE -->
+    <div id="dynamic-header"></div>
+
+    <!-- 🔥 HERO 2/3 + 1/3 -->
+    <section class="hero-budget">
+        <div class="hero-budget-overlay"></div>
+        
+        <!-- 2/3 TEXTE -->
+        <div class="hero-budget-content">
+            <div class="breadcrumb">
+                <a href="/">Accueil</a>
+                <span>/</span>
+                <span style="color: #FF4B26;">Petit Budget</span>
+            </div>
+            
+            <h1>
+                <span class="hero-budget-eyebrow">💰 Solutions Économiques</span>
+                <div class="hero-budget-title">Maillots Club</div>
+                <div class="hero-budget-subtitle">Petit Budget</div>
+            </h1>
+            
+            <p class="hero-budget-desc">
+                Équipez votre club sans exploser le budget. Qualité européenne garantie.<br>
+                Kit complet enfant (maillot + short) à partir de <strong style="color: #FF4B26;">20.90€</strong> en volume 500+ pièces.
+            </p>
+            
+            <div class="hero-budget-cta">
+                <a href="/contact.html" class="btn-hero-primary">
+                    Devis Gratuit 24h
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </a>
+                <a href="#tarifs" class="btn-hero-secondary">
+                    Voir les Prix
+                </a>
+            </div>
+            
+            <!-- 🔥 BADGES -->
+            <div class="hero-budget-features">
+                <div class="feature-badge">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+                    </svg>
+                    <span>Qualité garantie 1 an</span>
+                </div>
+                <div class="feature-badge">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 12L11 14L15 10M21 12C21 16.971 16.971 21 12 21C7.029 21 3 16.971 3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12Z" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    <span>Aucun minimum</span>
+                </div>
+                <div class="feature-badge">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="currentColor"/>
+                    </svg>
+                    <span>Prix enfant -10%</span>
+                </div>
+                <div class="feature-badge">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 8V12L15 15M21 12C21 16.971 16.971 21 12 21C7.029 21 3 16.971 3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12Z" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    <span>Livraison 3-4 semaines</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1/3 IMAGE -->
+        <div class="hero-budget-image">
+            <img src="https://flare-custom.com/photos/produits/FLARE-FTBMAIH-316-1.webp" alt="Maillots club petit budget" loading="eager" width="800" height="1200">
+        </div>
+    </section>
+
+    <!-- 🔥 TRUST BAR -->
+    <section class="trust-bar">
+        <div class="trust-items">
+            <div class="trust-item">
+                <strong>20.90€</strong>
+                <span>Kit enfant dès (500+)</span>
+            </div>
+            <div class="trust-item">
+                <strong>0€</strong>
+                <span>Frais cachés</span>
+            </div>
+            <div class="trust-item">
+                <strong>-10%</strong>
+                <span>Prix enfant vs adulte</span>
+            </div>
+            <div class="trust-item">
+                <strong>24h</strong>
+                <span>Réponse devis</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🔥 SOLUTIONS - 3 COLONNES -->
+    <section class="solutions-section">
+        <div class="section-header">
+            <div class="section-eyebrow">Nos Solutions</div>
+            <h2 class="section-title">
+                Comment Équiper Votre Club<br>
+                <span style="color: #FF4B26;">Sans Exploser Le Budget ?</span>
+            </h2>
+            <p class="section-description">
+                Des solutions concrètes pour les clubs amateurs, associations sportives et écoles avec budgets limités.
+            </p>
+        </div>
+
+        <div class="solutions-grid">
+            <div class="solution-card">
+                <div class="solution-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                        <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="white" stroke-width="2"/>
+                        <circle cx="9" cy="7" r="4" stroke="white" stroke-width="2"/>
+                        <path d="M23 21V19C23 17.9 22.5 16.9 21.8 16.2" stroke="white" stroke-width="2"/>
+                        <path d="M16 3.2C16.7 3.9 17.2 4.9 17.2 6C17.2 7.1 16.7 8.1 16 8.8" stroke="white" stroke-width="2"/>
+                    </svg>
+                </div>
+                <h3 class="solution-title">Achat Groupé</h3>
+                <p class="solution-desc">Regroupez plusieurs équipes pour atteindre les paliers de réduction. À partir de 20 maillots : -25%. Simple et efficace.</p>
+            </div>
+
+            <div class="solution-card">
+                <div class="solution-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="3" width="7" height="7" stroke="white" stroke-width="2"/>
+                        <rect x="14" y="3" width="7" height="7" stroke="white" stroke-width="2"/>
+                        <rect x="14" y="14" width="7" height="7" stroke="white" stroke-width="2"/>
+                        <rect x="3" y="14" width="7" height="7" stroke="white" stroke-width="2"/>
+                    </svg>
+                </div>
+                <h3 class="solution-title">Design Simple</h3>
+                <p class="solution-desc">Optez pour nos templates optimisés. Design professionnel, personnalisation complète, coûts réduits. Pas de frais de création.</p>
+            </div>
+
+            <div class="solution-card">
+                <div class="solution-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" stroke-width="2"/>
+                        <path d="M2 17L12 22L22 17" stroke="white" stroke-width="2"/>
+                        <path d="M2 12L12 17L22 12" stroke="white" stroke-width="2"/>
+                    </svg>
+                </div>
+                <h3 class="solution-title">Commande Échelonnée</h3>
+                <p class="solution-desc">Étalez vos achats sur l'année. Commandez par catégorie d'âge selon votre budget. Planifiez vos commandes sur plusieurs mois.</p>
+            </div>
+
+            <div class="solution-card">
+                <div class="solution-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                        <path d="M21 16V8C21 6.89543 20.1046 6 19 6H5C3.89543 6 3 6.89543 3 8V16C3 17.1046 3.89543 18 5 18H19C20.1046 18 21 17.1046 21 16Z" stroke="white" stroke-width="2"/>
+                        <path d="M1 10H23" stroke="white" stroke-width="2"/>
+                    </svg>
+                </div>
+                <h3 class="solution-title">Subventions</h3>
+                <p class="solution-desc">Nous vous aidons à monter vos dossiers de subvention municipale. Factures détaillées conformes. Accompagnement inclus.</p>
+            </div>
+
+            <div class="solution-card">
+                <div class="solution-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2"/>
+                        <path d="M12 6V12L16 14" stroke="white" stroke-width="2"/>
+                    </svg>
+                </div>
+                <h3 class="solution-title">Anticiper</h3>
+                <p class="solution-desc">Commandez hors saison (avril-juin) pour bénéficier de nos meilleures conditions. Planning optimisé, meilleurs tarifs.</p>
+            </div>
+
+            <div class="solution-card">
+                <div class="solution-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                        <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.7088 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="white" stroke-width="2"/>
+                        <path d="M22 4L12 14.01L9 11.01" stroke="white" stroke-width="2"/>
+                    </svg>
+                </div>
+                <h3 class="solution-title">Qualité Durable</h3>
+                <p class="solution-desc">Tissus résistants garantis 1 an. Un investissement qui dure 2-3 saisons. Économie sur le long terme.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🔥 TARIFS - 4 CARTES -->
+    <section id="tarifs" class="pricing-cards">
+        <div class="section-header">
+            <div class="section-eyebrow">Tarifs Club</div>
+            <h2 class="section-title">
+                Prix Adaptés Aux<br>
+                <span style="color: #FF4B26;">Petits Budgets</span>
+            </h2>
+            <p class="section-description">
+                Tarifs dégressifs automatiques. Plus vous commandez, plus vous économisez. Idéal pour clubs amateurs.
+            </p>
+        </div>
+
+        <div class="pricing-grid">
+            <!-- 1-4 pcs -->
+            <div class="price-card">
+                <div class="price-volume">1-4 kits</div>
+                <div class="price-amount">51.90€<span class="price-unit">/kit</span></div>
+                <div class="price-saving">Maillot 29€ + Short 22€</div>
+                <a href="/contact.html" class="price-cta">Commander</a>
+            </div>
+
+            <!-- 20-49 pcs - Featured -->
+            <div class="price-card featured">
+                <div class="price-badge">Équipe U15</div>
+                <div class="price-volume">20-49 kits</div>
+                <div class="price-amount">38.90€<span class="price-unit">/kit</span></div>
+                <div class="price-saving">Maillot 22€ + Short 17€</div>
+                <a href="/contact.html" class="price-cta">Commander</a>
+            </div>
+
+            <!-- 100-249 pcs - Premium -->
+            <div class="price-card premium">
+                <div class="price-badge">Multi-Équipes</div>
+                <div class="price-volume">100-249 kits</div>
+                <div class="price-amount">30.90€<span class="price-unit">/kit</span></div>
+                <div class="price-saving">Maillot 17€ + Short 13€</div>
+                <a href="/contact.html" class="price-cta">Commander</a>
+            </div>
+
+            <!-- 500+ pcs -->
+            <div class="price-card featured">
+                <div class="price-volume">500+ kits</div>
+                <div class="price-amount">20.90€<span class="price-unit">/kit</span></div>
+                <div class="price-saving">Maillot 12€ + Short 9€</div>
+                <a href="/contact.html" class="price-cta">Commander</a>
+            </div>
+        </div>
+
+        <div style="text-align: center; background: #f9fafb; padding: 32px; border-left: 4px solid #FF4B26; max-width: 1400px; margin: 0 auto; border-radius: 8px;">
+            <p style="font-size: 15px; color: #6B7280; margin: 0;">
+                <strong style="color: #000;">💡 Tarifs enfant</strong> : Prix affichés = tarif enfant (-10% vs adulte). Kit Performance Mesh 130 personnalisé (maillot + short). Regroupez catégories U11, U13, U15, U17 pour atteindre paliers. 
+                <a href="/contact.html" style="color: #FF4B26; text-decoration: none; font-weight: 700;">Devis groupé gratuit</a>
+            </p>
+        </div>
+    </section>
+
+    <!-- 🔥 CONSEILS BUDGET -->
+    <section class="tips-section">
+        <div class="section-header">
+            <div class="section-eyebrow">Conseils Pratiques</div>
+            <h2 class="section-title">
+                6 Astuces Pour<br>
+                <span style="color: #FF4B26;">Optimiser Votre Budget</span>
+            </h2>
+        </div>
+
+        <div class="tips-grid">
+            <div class="tip-card">
+                <div class="tip-number">01</div>
+                <h3 class="tip-title">Commandez Tôt</h3>
+                <p class="tip-desc">Anticipez vos besoins de 2-3 mois. Avril-juin = meilleures conditions. Évitez la rush de septembre. Prix négociables hors saison.</p>
+            </div>
+
+            <div class="tip-card">
+                <div class="tip-number">02</div>
+                <h3 class="tip-title">Achat Groupé Inter-Clubs</h3>
+                <p class="tip-desc">Contactez les clubs voisins. Mutualisez les commandes. Atteignez les paliers 100-500 pièces facilement. Économies massives.</p>
+            </div>
+
+            <div class="tip-card">
+                <div class="tip-number">03</div>
+                <h3 class="tip-title">Templates Gratuits</h3>
+                <p class="tip-desc">Utilisez nos modèles pré-conçus. Personnalisation couleurs + logos incluse. Pas de frais de création (économie 50€+).</p>
+            </div>
+
+            <div class="tip-card">
+                <div class="tip-number">04</div>
+                <h3 class="tip-title">Demandez Des Subventions</h3>
+                <p class="tip-desc">Mairie, conseil départemental, région. Factures conformes fournies. Dossier type disponible. Accompagnement inclus.</p>
+            </div>
+
+            <div class="tip-card">
+                <div class="tip-number">05</div>
+                <h3 class="tip-title">Shorts Économiques</h3>
+                <p class="tip-desc">Short seul à 9.90€. Parfait pour entraînements. Tissus résistants même qualité. Complétez votre équipement progressivement.</p>
+            </div>
+
+            <div class="tip-card">
+                <div class="tip-number">06</div>
+                <h3 class="tip-title">Qualité = Économie</h3>
+                <p class="tip-desc">Investissez dans la durabilité. Tissus garantis 1 an. Tiennent 2-3 saisons. Coût réel : 7-10€/an par joueur.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🔥 TOUS LES SPORTS -->
+    <section class="sports-section">
+        <div class="section-header">
+            <div class="section-eyebrow">Tous Sports</div>
+            <h2 class="section-title">
+                Solutions Budget Pour<br>
+                <span style="color: #FF4B26;">Tous Vos Sports</span>
+            </h2>
+        </div>
+
+        <div class="sports-grid">
+            <a href="/equipement-football-personnalise-sublimation.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">⚽</span>
+                    <h3>Football</h3>
+                    <p>Clubs amateurs, écoles, loisir</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/equipements-rugby-personnalises-maillots-shorts-sublimation.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">🏉</span>
+                    <h3>Rugby</h3>
+                    <p>Associations, clubs territoriaux</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/equipements-basketball-personnalises-maillots-shorts-sublimation.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">🏀</span>
+                    <h3>Basketball</h3>
+                    <p>Écoles, collèges, amateurs</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/equipements-handball-personnalises-maillots-shorts-sublimation.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">🤾</span>
+                    <h3>Handball</h3>
+                    <p>Clubs régionaux, scolaires</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/equipements-volleyball-personnalises-maillots-shorts-sublimation.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">🏐</span>
+                    <h3>Volleyball</h3>
+                    <p>Loisir, associations, écoles</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/equipements-running-course-personnalises-debardeurs-shorts-sublimation.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">🏃</span>
+                    <h3>Running</h3>
+                    <p>Clubs course à pied, trails</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/equipements-cyclisme-velo-personnalises-maillots-cuissards-sublimation.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">🚴</span>
+                    <h3>Cyclisme</h3>
+                    <p>Clubs cyclotourisme, VTT</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/equipements-triathlon-personnalises-combinaisons-sublimation.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">🏊</span>
+                    <h3>Triathlon</h3>
+                    <p>Clubs multi-disciplines</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/sportswear-vetements-sport-personnalises.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">👕</span>
+                    <h3>Sportswear</h3>
+                    <p>Survêtements, hoodies clubs</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- 🔥 FAQ -->
+    <section class="faq-section">
+        <div class="faq-container">
+            <div class="section-header">
+                <div class="section-eyebrow">Questions Budget</div>
+                <h2 class="section-title" style="color: #000;">
+                    Vos Questions Sur<br>
+                    <span style="color: #FF4B26;">Les Petits Budgets</span>
+                </h2>
+            </div>
+
+            <div class="faq-accordion">
+                <details>
+                    <summary>
+                        Quel est le prix minimum pour équiper une équipe ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        Pour une équipe U15 de 15 joueurs (catégorie 20-49 kits), comptez 38.90€/kit enfant = 583.50€ total. Avec design + livraison incluse. Prix unitaire enfant : maillot 22€ + short 17€ = 38.90€/joueur.
+                    </p>
+                </details>
+
+                <details>
+                    <summary>
+                        Le prix inclut-il maillot ET short ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        Oui ! Prix affichés = kit complet (maillot + short personnalisés). Short seul également disponible à 9.90€ pour entraînements ou budget très serré.
+                    </p>
+                </details>
+
+                <details>
+                    <summary>
+                        Comment obtenir des subventions ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        Nous fournissons factures détaillées conformes aux exigences. Dossier type disponible. Accompagnement gratuit pour monter votre demande municipale/départementale.
+                    </p>
+                </details>
+
+                <details>
+                    <summary>
+                        Les templates gratuits sont-ils vraiment personnalisables ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        Oui totalement. Changez couleurs, ajoutez logos, noms, numéros. Personnalisation complète incluse. Seul le design de base est pré-conçu (économie 50€).
+                    </p>
+                </details>
+
+                <details>
+                    <summary>
+                        Peut-on commander progressivement ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        Oui. Commandez d'abord les U15, puis U17 le mois suivant, etc. Même design = cohérence. Vous atteignez progressivement les paliers de réduction.
+                    </p>
+                </details>
+
+                <details>
+                    <summary>
+                        La qualité est-elle maintenue sur les petits budgets ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        Absolument. Mêmes tissus techniques, même sublimation, même garantie 1 an. Prix bas = optimisation process, pas compromis qualité. Made in Europe garanti.
+                    </p>
+                </details>
+            </div>
+
+            <div style="text-align: center; margin-top: 48px;">
+                <a href="/faq-questions-frequentes-equipements-personnalises.html" style="display: inline-block; padding: 16px 40px; background: #fff; color: #000; text-decoration: none; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; border: 2px solid #E5E7EB; transition: all 0.3s; border-radius: 8px;">Toutes Les FAQ</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🔥 CTA FINAL -->
+    <section class="cta-final-section">
+        <div class="cta-final-overlay"></div>
+        
+        <div class="cta-final-container">
+            <div class="section-eyebrow">Budget Maîtrisé</div>
+            
+            <h2 class="cta-final-title">
+                Équipez Votre Club<br>
+                <span style="color: #FF4B26;">Sans Exploser Le Budget</span>
+            </h2>
+            
+            <p style="font-size: clamp(16px, 2.5vw, 20px); line-height: 1.6; color: rgba(255,255,255,0.85); margin-bottom: 48px; max-width: 700px; margin-left: auto; margin-right: auto;">
+                Devis personnalisé gratuit. Solutions adaptées aux petits budgets. Accompagnement subventions inclus.
+            </p>
+            
+            <div class="cta-final-buttons">
+                <a href="/contact.html" class="btn-cta-primary">Demander Mon Devis</a>
+                <a href="https://wa.me/359885813134" class="btn-cta-secondary">WhatsApp Direct</a>
+            </div>
+
+            <div class="cta-stats">
+                <div class="stat-item">
+                    <div class="stat-number">20.90€</div>
+                    <div class="stat-label">Kit enfant dès</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">0€</div>
+                    <div class="stat-label">Frais cachés</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">-10%</div>
+                    <div class="stat-label">Tarif enfant</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">1 An</div>
+                    <div class="stat-label">Garantie qualité</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🔥 FOOTER DYNAMIQUE -->
+    <div id="dynamic-footer"></div>
+
+    <script src="../../assets/js/components-loader.js"></script>
+    <script src="../../assets/js/script.js"></script>
+</body>
+</html>
