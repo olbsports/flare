@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Configurez votre devis personnalisé en ligne avec notre assistant intelligent. Obtenez un devis instantané pour vos équipements sportifs personnalisés FLARE CUSTOM.">
+    <meta name="keywords" content="devis personnalisé, configurateur, équipement sportif, personnalisation, FLARE CUSTOM">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Configurateur de Devis - FLARE CUSTOM">
+    <meta property="og:description" content="Créez votre devis personnalisé en quelques clics avec notre configurateur intelligent.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://flare-custom.com/pages/info/configurateur-devis.html">
+    <meta property="og:image" content="https://flare-custom.com/assets/images/og-configurateur.jpg">
+
+    <title>Configurateur de Devis | FLARE CUSTOM - Équipements Sportifs Personnalisés</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/assets/images/favicon.png">
+
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="/assets/css/styles.css" as="style">
+    <link rel="preload" href="/assets/css/configurateur-chat.css" as="style">
+    <link rel="preload" href="/assets/js/csv-parser.js" as="script">
+    <link rel="preload" href="/assets/js/configurateur-chat.js" as="script">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="stylesheet" href="/assets/css/configurateur-chat.css">
+
+    <!-- Schema.org structured data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Configurateur de Devis FLARE CUSTOM",
+        "description": "Configurez votre devis personnalisé pour équipements sportifs en ligne",
+        "url": "https://flare-custom.com/pages/info/configurateur-devis.html",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "offers": {
+            "@type": "Offer",
+            "category": "Équipements sportifs personnalisés"
+        },
+        "provider": {
+            "@type": "Organization",
+            "name": "FLARE CUSTOM",
+            "url": "https://flare-custom.com",
+            "contactPoint": {
+                "@type": "ContactPoint",
+                "telephone": "+359885813134",
+                "email": "contact@flare-custom.com",
+                "contactType": "Customer Service"
+            }
+        }
+    }
+    </script>
+
+    <style>
+        /* Critical CSS pour éviter le FOUC */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #FF6B00 0%, #E56000 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+            color: #ffffff;
+            font-size: 1.2rem;
+            margin-top: 1.5rem;
+            font-weight: 600;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Chargement du configurateur...</div>
+    </div>
+
+    <!-- Header (chargé dynamiquement) -->
+    <div id="header-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="configurateur-container">
+
+        <!-- En-tête du configurateur -->
+        <header class="configurateur-header">
+            <h1>🎯 Configurateur de Devis Intelligent</h1>
+            <p>Créez votre devis personnalisé en quelques étapes avec notre assistant virtuel</p>
+        </header>
+
+        <!-- Indicateur d'étapes -->
+        <div class="steps-indicator" id="steps-indicator">
+            <div class="step-dot active"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+        </div>
+
+        <!-- Zone de chat et résumé -->
+        <div class="chat-wrapper">
+
+            <!-- Chat Container -->
+            <div class="chat-container">
+                <div class="chat-messages" id="chat-messages">
+                    <!-- Les messages seront ajoutés dynamiquement ici -->
+                </div>
+            </div>
+
+            <!-- Résumé du panier -->
+            <aside class="cart-summary">
+                <h3>📋 Votre Configuration</h3>
+                <div id="cart-summary-content">
+                    <p style="color: #666; text-align: center; padding: 2rem 0;">
+                        Commencez la configuration pour voir votre résumé ici
+                    </p>
+                </div>
+            </aside>
+
+        </div>
+
+        <!-- Section avantages -->
+        <section style="margin-top: 4rem; padding: 3rem 2rem; background: white; border-radius: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.1);">
+            <h2 style="text-align: center; color: #1a1a1a; margin-bottom: 3rem; font-size: 2rem;">Pourquoi choisir notre configurateur ?</h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+                <div style="text-align: center; padding: 1.5rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">⚡</div>
+                    <h3 style="color: #FF6B00; margin-bottom: 0.5rem;">Rapide & Intuitif</h3>
+                    <p style="color: #666; line-height: 1.6;">Obtenez votre devis en moins de 5 minutes avec notre assistant guidé</p>
+                </div>
+
+                <div style="text-align: center; padding: 1.5rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">💰</div>
+                    <h3 style="color: #FF6B00; margin-bottom: 0.5rem;">Prix Transparents</h3>
+                    <p style="color: #666; line-height: 1.6;">Visualisez le prix en temps réel selon vos choix et quantités</p>
+                </div>
+
+                <div style="text-align: center; padding: 1.5rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🎨</div>
+                    <h3 style="color: #FF6B00; margin-bottom: 0.5rem;">100% Personnalisable</h3>
+                    <p style="color: #666; line-height: 1.6;">Configurez vos équipements selon vos besoins et votre identité</p>
+                </div>
+
+                <div style="text-align: center; padding: 1.5rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📧</div>
+                    <h3 style="color: #FF6B00; margin-bottom: 0.5rem;">Devis par Email</h3>
+                    <p style="color: #666; line-height: 1.6;">Recevez votre devis détaillé directement dans votre boîte mail</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ rapide -->
+        <section style="margin-top: 3rem; padding: 2rem;">
+            <h2 style="text-align: center; color: #1a1a1a; margin-bottom: 2rem;">Questions Fréquentes</h2>
+
+            <div style="max-width: 800px; margin: 0 auto;">
+                <details style="background: white; padding: 1.5rem; margin-bottom: 1rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer;">
+                    <summary style="font-weight: 600; color: #1a1a1a; font-size: 1.1rem;">Combien de temps pour recevoir mon devis ?</summary>
+                    <p style="color: #666; margin-top: 1rem; line-height: 1.6;">Vous recevrez votre devis par email immédiatement après la soumission. Notre équipe vous recontactera sous 24h avec une proposition détaillée et personnalisée.</p>
+                </details>
+
+                <details style="background: white; padding: 1.5rem; margin-bottom: 1rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer;">
+                    <summary style="font-weight: 600; color: #1a1a1a; font-size: 1.1rem;">Les prix affichés sont-ils définitifs ?</summary>
+                    <p style="color: #666; margin-top: 1rem; line-height: 1.6;">Les prix affichés sont des estimations HT basées sur nos tarifs standards. Le devis final peut varier en fonction de vos options de personnalisation (design, logos, etc.).</p>
+                </details>
+
+                <details style="background: white; padding: 1.5rem; margin-bottom: 1rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer;">
+                    <summary style="font-weight: 600; color: #1a1a1a; font-size: 1.1rem;">Quelle est la quantité minimale ?</summary>
+                    <p style="color: #666; margin-top: 1rem; line-height: 1.6;">Nous acceptons les commandes à partir d'1 pièce. Cependant, nos prix dégressifs rendent les commandes de 10 pièces et plus particulièrement avantageuses.</p>
+                </details>
+
+                <details style="background: white; padding: 1.5rem; margin-bottom: 1rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer;">
+                    <summary style="font-weight: 600; color: #1a1a1a; font-size: 1.1rem;">Puis-je modifier mon devis après l'envoi ?</summary>
+                    <p style="color: #666; margin-top: 1rem; line-height: 1.6;">Absolument ! Contactez-nous par email ou téléphone, nous serons ravis d'ajuster votre devis selon vos nouveaux besoins.</p>
+                </details>
+            </div>
+        </section>
+
+        <!-- Contact alternatif -->
+        <section style="margin-top: 3rem; padding: 2rem; background: linear-gradient(135deg, #FF6B00 0%, #E56000 100%); border-radius: 20px; text-align: center; color: white;">
+            <h2 style="margin-bottom: 1rem;">Besoin d'aide ?</h2>
+            <p style="margin-bottom: 2rem; font-size: 1.1rem;">Notre équipe est à votre disposition pour vous accompagner</p>
+
+            <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;">
+                <a href="mailto:contact@flare-custom.com" style="color: white; text-decoration: none; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 1.5rem;">📧</span>
+                    <span>contact@flare-custom.com</span>
+                </a>
+
+                <a href="https://wa.me/359885813134" target="_blank" rel="noopener" style="color: white; text-decoration: none; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 1.5rem;">📱</span>
+                    <span>+359 885 813 134</span>
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer (chargé dynamiquement) -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="/assets/js/components-loader.js"></script>
+    <script src="/assets/js/csv-parser.js"></script>
+    <script src="/assets/js/configurateur-chat.js"></script>
+
+    <script>
+        // Cacher le loading screen une fois la page chargée
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const loadingScreen = document.getElementById('loading-screen');
+                loadingScreen.classList.add('hidden');
+
+                // Supprimer complètement après l'animation
+                setTimeout(function() {
+                    loadingScreen.remove();
+                }, 500);
+            }, 500);
+        });
+
+        // Analytics - Track page view
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'page_view', {
+                page_title: 'Configurateur de Devis',
+                page_location: window.location.href,
+                page_path: window.location.pathname
+            });
+        }
+
+        // Track configurateur steps (à intégrer avec le moteur de chat)
+        function trackStep(stepName, stepData) {
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'configurateur_step', {
+                    step_name: stepName,
+                    step_data: JSON.stringify(stepData)
+                });
+            }
+
+            console.log('Step tracked:', stepName, stepData);
+        }
+
+        // Track quote submission
+        function trackQuoteSubmission(quoteData) {
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'quote_submission', {
+                    value: quoteData.prix.total,
+                    currency: 'EUR',
+                    items: [{
+                        item_name: quoteData.produit.nom,
+                        quantity: quoteData.quantite,
+                        price: quoteData.prix.unitaire
+                    }]
+                });
+            }
+
+            console.log('Quote submission tracked:', quoteData);
+        }
+    </script>
+
+    <!-- Service Worker pour PWA (optionnel) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(function(registration) {
+                    console.log('Service Worker registered:', registration);
+                })
+                .catch(function(error) {
+                    console.log('Service Worker registration failed:', error);
+                });
+        }
+    </script>
+
+</body>
+</html>
