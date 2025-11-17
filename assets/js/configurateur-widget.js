@@ -282,19 +282,172 @@ class FlareConfigurateurWidget {
 
         const genres = this.csvParser.getGenresBySportAndFamily(sportToUse, this.config.famille);
 
-        this.addBotMessage('Homme ou Femme ?');
+        this.addBotMessage('Pour qui est-ce ?');
 
-        const options = genres.map(genre => ({
-            id: genre,
-            title: genre,
-            desc: genre === 'Homme' ? '👨' : '👩'
-        }));
+        // Créer les options avec Homme, Femme et Enfant
+        const options = [];
+
+        if (genres.includes('Homme')) {
+            options.push({
+                id: 'Homme',
+                title: 'Homme',
+                desc: '👨'
+            });
+        }
+
+        if (genres.includes('Femme')) {
+            options.push({
+                id: 'Femme',
+                title: 'Femme',
+                desc: '👩'
+            });
+        }
+
+        // Ajouter Enfant si Homme existe (on affichera les produits Homme pour les enfants)
+        if (genres.includes('Homme')) {
+            options.push({
+                id: 'Enfant',
+                title: 'Enfant',
+                desc: '👶'
+            });
+        }
 
         this.showOptions(options, (selected) => {
-            this.config.genre = selected.id;
+            this.config.genreSelected = selected.id;
+
+            // Si Enfant, on cherche les produits Homme avec -10%
+            if (selected.id === 'Enfant') {
+                this.config.genre = 'Homme';
+                this.config.isEnfant = true;
+            } else {
+                this.config.genre = selected.id;
+                this.config.isEnfant = false;
+            }
+
             this.addUserMessage(selected.title);
-            this.showProducts();
+            this.showFilterOptions();
         });
+    }
+
+    /**
+     * Affiche les options de filtrage (manches, col, etc.)
+     */
+    showFilterOptions() {
+        // Utiliser le sport déterminé pour les produits (peut être SPORTSWEAR)
+        const sportToUse = this.config.sportForProducts || this.config.sport;
+
+        // Récupérer tous les produits disponibles
+        let products = this.csvParser.getProductsBySportFamilyGenre(
+            sportToUse,
+            this.config.famille,
+            this.config.genre
+        );
+
+        if (products.length === 0) {
+            this.showProducts();
+            return;
+        }
+
+        // Extraire les variations disponibles (manches, col, etc.)
+        const variations = this.extractProductVariations(products);
+
+        // Poser les questions de filtrage si nécessaire
+        if (variations.manches && variations.manches.length > 1) {
+            this.addBotMessage('Quel type de manches préférez-vous ?');
+
+            const options = variations.manches.map(manche => ({
+                id: manche,
+                title: manche,
+                desc: manche.includes('Courtes') ? '👕' : '🧥'
+            }));
+
+            this.showOptions(options, (selected) => {
+                this.config.manchesFilter = selected.id;
+                this.addUserMessage(selected.title);
+
+                // Continuer avec les autres filtres ou afficher les produits
+                this.continueFilteringOrShowProducts(variations);
+            });
+        } else if (variations.col && variations.col.length > 1) {
+            this.addBotMessage('Quel type de col souhaitez-vous ?');
+
+            const options = variations.col.map(col => ({
+                id: col,
+                title: col,
+                desc: '👔'
+            }));
+
+            this.showOptions(options, (selected) => {
+                this.config.colFilter = selected.id;
+                this.addUserMessage(selected.title);
+                this.showProducts();
+            });
+        } else {
+            // Pas de filtrage nécessaire, afficher directement les produits
+            this.showProducts();
+        }
+    }
+
+    /**
+     * Continue le filtrage ou affiche les produits
+     */
+    continueFilteringOrShowProducts(variations) {
+        if (variations.col && variations.col.length > 1) {
+            this.addBotMessage('Quel type de col souhaitez-vous ?');
+
+            const options = variations.col.map(col => ({
+                id: col,
+                title: col,
+                desc: '👔'
+            }));
+
+            this.showOptions(options, (selected) => {
+                this.config.colFilter = selected.id;
+                this.addUserMessage(selected.title);
+                this.showProducts();
+            });
+        } else {
+            this.showProducts();
+        }
+    }
+
+    /**
+     * Extrait les variations disponibles dans les produits
+     */
+    extractProductVariations(products) {
+        const variations = {
+            manches: new Set(),
+            col: new Set()
+        };
+
+        products.forEach(product => {
+            const titre = product.TITRE_VENDEUR || '';
+
+            // Détecter le type de manches
+            if (titre.includes('Manches Courtes') || titre.includes('MC ')) {
+                variations.manches.add('Manches Courtes');
+            } else if (titre.includes('Manches Longues') || titre.includes('ML ')) {
+                variations.manches.add('Manches Longues');
+            } else if (titre.includes('Sans Manche') || titre.includes('Débardeur')) {
+                variations.manches.add('Sans Manches');
+            }
+
+            // Détecter le type de col
+            if (titre.includes('Col Bord Côte') || titre.includes('col bord côte')) {
+                variations.col.add('Col Bord Côte');
+            } else if (titre.includes('Col Tissu') || titre.includes('col tissu')) {
+                variations.col.add('Col Tissu');
+            } else if (titre.includes('Col Rond')) {
+                variations.col.add('Col Rond');
+            } else if (titre.includes('Col V')) {
+                variations.col.add('Col V');
+            }
+        });
+
+        return {
+            manches: Array.from(variations.manches),
+            col: Array.from(variations.col)
+        };
     }
 
     /**
@@ -304,13 +457,39 @@ class FlareConfigurateurWidget {
         // Utiliser le sport déterminé pour les produits (peut être SPORTSWEAR)
         const sportToUse = this.config.sportForProducts || this.config.sport;
 
-        const products = this.csvParser.getProductsBySportFamilyGenre(
+        let products = this.csvParser.getProductsBySportFamilyGenre(
             sportToUse,
             this.config.famille,
             this.config.genre
         );
 
-        this.addBotMessage('Parfait ! Voici nos modèles disponibles pour vous :');
+        // Appliquer les filtres sélectionnés
+        if (this.config.manchesFilter) {
+            products = products.filter(p => {
+                const titre = p.TITRE_VENDEUR || '';
+                if (this.config.manchesFilter === 'Manches Courtes') {
+                    return titre.includes('Manches Courtes') || titre.includes('MC ');
+                } else if (this.config.manchesFilter === 'Manches Longues') {
+                    return titre.includes('Manches Longues') || titre.includes('ML ');
+                } else if (this.config.manchesFilter === 'Sans Manches') {
+                    return titre.includes('Sans Manche') || titre.includes('Débardeur');
+                }
+                return true;
+            });
+        }
+
+        if (this.config.colFilter) {
+            products = products.filter(p => {
+                const titre = p.TITRE_VENDEUR || '';
+                return titre.includes(this.config.colFilter) || titre.toLowerCase().includes(this.config.colFilter.toLowerCase());
+            });
+        }
+
+        const messageIntro = this.config.isEnfant
+            ? 'Parfait ! Voici nos modèles disponibles pour enfants (tailles adaptées avec -10% sur les prix) :'
+            : 'Parfait ! Voici nos modèles disponibles pour vous :';
+
+        this.addBotMessage(messageIntro);
 
         products.forEach(product => {
             this.addProductCard(product, (selected) => {
@@ -349,7 +528,18 @@ class FlareConfigurateurWidget {
                 const qty = parseInt(input.value);
                 if (qty && qty > 0) {
                     this.config.quantite = qty;
-                    this.config.prix = this.csvParser.calculatePrice(this.config.produit, qty);
+                    let prix = this.csvParser.calculatePrice(this.config.produit, qty);
+
+                    // Appliquer -10% pour les enfants
+                    if (this.config.isEnfant) {
+                        prix = {
+                            unitPrice: prix.unitPrice * 0.9,
+                            totalPrice: prix.totalPrice * 0.9,
+                            tier: prix.tier
+                        };
+                    }
+
+                    this.config.prix = prix;
 
                     btn.disabled = true;
                     input.disabled = true;
@@ -454,7 +644,9 @@ class FlareConfigurateurWidget {
         const estimationMin = Math.floor(this.config.prix.totalPrice * 0.9 / 50) * 50;
         const estimationMax = Math.ceil(this.config.prix.totalPrice * 1.1 / 50) * 50;
 
-        this.addBotMessage(`Parfait ! Voici un récapitulatif de votre demande :\n\n📦 ${this.config.produit.TITRE_VENDEUR}\n🏷️ ${this.config.quantite} pièces\n\n💰 Prix unitaire : ${prixUnitaireMin}€ - ${prixUnitaireMax}€ HT/pièce\n💰 Estimation totale : ${estimationMin}€ - ${estimationMax}€ HT\n\n✨ Nous vous enverrons un devis détaillé et personnalisé sous 24h !`);
+        const remiseEnfantText = this.config.isEnfant ? '\n🎁 Remise enfant -10% déjà appliquée !' : '';
+
+        this.addBotMessage(`Parfait ! Voici un récapitulatif de votre demande :\n\n📦 ${this.config.produit.TITRE_VENDEUR}\n👤 ${this.config.genreSelected}\n🏷️ ${this.config.quantite} pièces\n\n💰 Prix unitaire : ${prixUnitaireMin}€ - ${prixUnitaireMax}€ HT/pièce\n💰 Estimation totale : ${estimationMin}€ - ${estimationMax}€ HT${remiseEnfantText}\n\n✨ Nous vous enverrons un devis détaillé et personnalisé sous 24h !`);
 
         const formHtml = `
             <div style="background: linear-gradient(135deg, rgba(255, 107, 0, 0.05) 0%, rgba(255, 107, 0, 0.1) 100%); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
