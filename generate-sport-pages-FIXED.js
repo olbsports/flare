@@ -1,19 +1,59 @@
 const fs = require('fs');
 
+// Fonctions de parsing CSV correct (gère quotes et multi-lignes)
+function parseCSV(content) {
+    const lines = [];
+    let currentLine = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < content.length; i++) {
+        const char = content[i];
+        if (char === '"') {
+            inQuotes = !inQuotes;
+        } else if (char === '\n' && !inQuotes) {
+            if (currentLine.trim()) lines.push(currentLine);
+            currentLine = '';
+            continue;
+        }
+        currentLine += char;
+    }
+    if (currentLine.trim()) lines.push(currentLine);
+    return lines;
+}
+
+function parseCSVLine(line) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"') {
+            inQuotes = !inQuotes;
+        } else if (char === ';' && !inQuotes) {
+            result.push(current.trim());
+            current = '';
+        } else {
+            current += char;
+        }
+    }
+    result.push(current.trim());
+    return result;
+}
+
 // Lire et parser le CSV
 const csvPath = './assets/data/PRICING-FLARE-2025.csv';
 const csvContent = fs.readFileSync(csvPath, 'utf-8');
-const lines = csvContent.split('\n');
-const headers = lines[0].split(';');
+const lines = parseCSV(csvContent);
+const headers = parseCSVLine(lines[0]);
 
 // Parser le CSV
 const products = [];
 for (let i = 1; i < lines.length; i++) {
-    if (!lines[i].trim()) continue;
-    const values = lines[i].split(';');
+    const values = parseCSVLine(lines[i]);
     const product = {};
     headers.forEach((header, index) => {
-        product[header.trim()] = values[index] ? values[index].trim() : '';
+        product[header] = values[index] || '';
     });
     if (product.SPORT && product.FAMILLE_PRODUIT && product.FAMILLE_PRODUIT.length > 0 && !product.FAMILLE_PRODUIT.startsWith('-') && !product.FAMILLE_PRODUIT.startsWith('http')) {
         products.push(product);
@@ -84,12 +124,7 @@ function generateProductCard(product) {
         product.PHOTO_3,
         product.PHOTO_4,
         product.PHOTO_5
-    ].filter(p => p && p.trim());
-
-    // Si pas de photos, ne pas afficher le produit
-    if (photos.length === 0) {
-        return '';
-    }
+    ].filter(p => p && p.trim() && p.startsWith('http'));
 
     const finitions = product.FINITION ? product.FINITION.split(',').map(f => f.trim()) : [];
     const prixQty500 = parseFloat(product.QTY_500) || 0;
