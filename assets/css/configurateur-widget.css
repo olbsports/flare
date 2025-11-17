@@ -96,7 +96,7 @@
     position: absolute;
     bottom: 80px;
     right: 0;
-    width: 400px;
+    width: 480px;
     max-width: calc(100vw - 40px);
     height: 600px;
     max-height: calc(100vh - 120px);
