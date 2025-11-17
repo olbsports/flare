@@ -35,10 +35,21 @@ class CSVParser {
     parseCSV(csvText) {
         console.log('📋 Parsing CSV, taille:', csvText.length, 'caractères');
 
-        const lines = csvText.split('\n');
-        console.log('📋 Nombre de lignes:', lines.length);
+        // Parser le CSV ligne par ligne en tenant compte des champs multi-lignes
+        const rows = this.parseCSVRows(csvText);
+        console.log('📋 Nombre de lignes parsées:', rows.length);
 
-        const headers = lines[0].split(';');
+        if (rows.length === 0) {
+            console.error('❌ Aucune ligne parsée');
+            return {
+                products: [],
+                sports: [],
+                families: new Map(),
+                genres: []
+            };
+        }
+
+        const headers = rows[0];
         console.log('📋 Headers:', headers);
         console.log('📋 Nombre de headers:', headers.length);
 
@@ -46,14 +57,9 @@ class CSVParser {
         let productsWithoutPrice = 0;
 
         // Parse chaque ligne de produit
-        for (let i = 1; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (!line) {
-                skippedLines++;
-                continue;
-            }
+        for (let i = 1; i < rows.length; i++) {
+            const values = rows[i];
 
-            const values = this.parseCSVLine(line);
             if (values.length < headers.length) {
                 console.warn(`⚠️ Ligne ${i}: ${values.length} valeurs au lieu de ${headers.length}`);
                 skippedLines++;
@@ -102,7 +108,7 @@ class CSVParser {
         }
 
         console.log('📊 Statistiques parsing:');
-        console.log('  - Lignes traitées:', lines.length - 1);
+        console.log('  - Lignes traitées:', rows.length - 1);
         console.log('  - Lignes vides:', skippedLines);
         console.log('  - Produits sans prix:', productsWithoutPrice);
         console.log('  - Produits validés:', this.products.length);
@@ -114,6 +120,80 @@ class CSVParser {
             families: this.families,
             genres: Array.from(this.genres).sort()
         };
+    }
+
+    /**
+     * Parse le CSV en tenant compte des champs multi-lignes entre guillemets
+     * @param {string} csvText - Contenu du CSV
+     * @returns {Array<Array<string>>} - Tableau de lignes (chaque ligne est un tableau de valeurs)
+     */
+    parseCSVRows(csvText) {
+        const rows = [];
+        let currentRow = [];
+        let currentField = '';
+        let insideQuotes = false;
+        let i = 0;
+
+        while (i < csvText.length) {
+            const char = csvText[i];
+            const nextChar = csvText[i + 1];
+
+            if (char === '"') {
+                if (insideQuotes && nextChar === '"') {
+                    // Double quote = échappement
+                    currentField += '"';
+                    i += 2;
+                    continue;
+                } else {
+                    // Toggle quotes
+                    insideQuotes = !insideQuotes;
+                    i++;
+                    continue;
+                }
+            }
+
+            if (!insideQuotes) {
+                if (char === ';') {
+                    // Fin de champ
+                    currentRow.push(currentField);
+                    currentField = '';
+                    i++;
+                    continue;
+                }
+
+                if (char === '\n' || (char === '\r' && nextChar === '\n')) {
+                    // Fin de ligne
+                    currentRow.push(currentField);
+                    if (currentRow.length > 0 && currentRow.some(f => f.trim() !== '')) {
+                        rows.push(currentRow);
+                    }
+                    currentRow = [];
+                    currentField = '';
+
+                    // Skip CRLF ou LF
+                    if (char === '\r' && nextChar === '\n') {
+                        i += 2;
+                    } else {
+                        i++;
+                    }
+                    continue;
+                }
+            }
+
+            // Ajouter le caractère au champ actuel
+            currentField += char;
+            i++;
+        }
+
+        // Ajouter le dernier champ/ligne si nécessaire
+        if (currentField || currentRow.length > 0) {
+            currentRow.push(currentField);
+            if (currentRow.some(f => f.trim() !== '')) {
+                rows.push(currentRow);
+            }
+        }
+
+        return rows;
     }
 
     /**
