@@ -233,6 +233,11 @@ function generateProductCard(product) {
         product.PHOTO_5
     ].filter(p => p && p.trim());
 
+    // Si pas de photos, ne pas afficher le produit
+    if (photos.length === 0) {
+        return '';
+    }
+
     const finitions = product.FINITION ? product.FINITION.split(',').map(f => f.trim()) : [];
     const prixQty500 = parseFloat(product.QTY_500) || 0;
     const prixAdulte = prixQty500.toFixed(2);
@@ -245,7 +250,7 @@ function generateProductCard(product) {
     ).join('');
 
     const dotsHTML = photos.map((_, index) =>
-        `<button class="slider-dot ${index === 0 ? 'active' : ''}" data-slide="${index}" aria-label="Photo ${index + 1}"></button>`
+        `<button class="slider-dot ${index === 0 ? 'active' : ''}" data-slide="${index}" aria-label="Voir photo ${index + 1}"></button>`
     ).join('');
 
     const finitionsHTML = finitions.map(f =>
@@ -257,26 +262,25 @@ function generateProductCard(product) {
                         <div class="product-slider">
                             ${slidesHTML}
                         </div>
-                        ${photos.length > 1 ? `
                         <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M15 18l-6-6 6-6"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M9 18l6-6-6-6"/>
-                            </svg>
-                        </button>
-                        <div class="slider-dots">
-                            ${dotsHTML}
-                        </div>
-                        ` : ''}
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
+            <button class="slider-nav next" aria-label="Photo suivante">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
+                        <div class="product-slider-dots">${dotsHTML}</div>
+                        <div class="product-badges"></div>
                     </div>
-                    <div class="product-content">
-                        <div class="product-sport">${product.SPORT}</div>
+                    <div class="product-info">
+                        <div class="product-family">${product.FAMILLE_PRODUIT}</div>
                         <h3 class="product-name">${product.TITRE_VENDEUR}</h3>
-                        <div class="product-genre">${product.GENRE}</div>
+                        <div class="product-specs">
+                            <span class="product-spec">${product.SPORT}</span><span class="product-spec">${product.GENRE || 'Unisexe'}</span>
+                        </div>
                         <div class="product-finitions">${finitionsHTML}</div>
                         <div class="product-pricing">
                             <div class="product-price-label">À partir de</div>
@@ -290,7 +294,8 @@ function generateProductCard(product) {
                             </div>
                         </div>
                     </div>
-                </div>`;
+                </div>
+`;
 }
 
 // Fonction pour générer la page HTML complète
