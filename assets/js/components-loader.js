@@ -102,13 +102,25 @@ window.toggleMobileSection = function(button) {
 
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🔥 Chargement composants...');
-    
+
+    // Détecter le chemin relatif vers la racine
+    const path = window.location.pathname;
+    let basePath = '';
+
+    if (path.includes('/pages/products/') || path.includes('/pages/info/')) {
+        basePath = '../../';
+    } else if (path.includes('/pages/components/')) {
+        basePath = '../../';
+    } else {
+        basePath = '';
+    }
+
     // Charger header et footer
     await Promise.all([
-        loadComponent('dynamic-header', '/pages/components/header.html'),
-        loadComponent('dynamic-footer', '/pages/components/footer.html')
+        loadComponent('dynamic-header', basePath + 'pages/components/header.html'),
+        loadComponent('dynamic-footer', basePath + 'pages/components/footer.html')
     ]);
-    
+
     console.log('✅ Composants chargés');
     
     // Fermer TOUS les menus immédiatement
