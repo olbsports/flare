@@ -1,0 +1,40 @@
+{
+  "articles": [
+    {
+      "id": "comment-choisir-equipement-rugby-personnalise",
+      "title": "Comment Choisir son Équipement de Rugby Personnalisé ?",
+      "slug": "comment-choisir-equipement-rugby-personnalise",
+      "description": "Guide complet pour choisir les meilleurs équipements de rugby personnalisés pour votre club : tissus, coupes, personnalisation.",
+      "image": "/assets/images/blog/rugby-equipment.jpg",
+      "category": "Guide",
+      "date": "2025-01-15",
+      "author": "FLARE CUSTOM",
+      "readTime": "5 min",
+      "featured": true
+    },
+    {
+      "id": "sublimation-vs-serigraphie-quelle-difference",
+      "title": "Sublimation vs Sérigraphie : Quelle Différence ?",
+      "slug": "sublimation-vs-serigraphie-quelle-difference",
+      "description": "Découvrez les avantages de la sublimation textile par rapport à la sérigraphie pour vos équipements sportifs personnalisés.",
+      "image": "/assets/images/blog/sublimation-technique.jpg",
+      "category": "Technologie",
+      "date": "2025-01-10",
+      "author": "FLARE CUSTOM",
+      "readTime": "4 min",
+      "featured": true
+    },
+    {
+      "id": "5-conseils-personnalisation-maillot-football",
+      "title": "5 Conseils pour Personnaliser vos Maillots de Football",
+      "slug": "5-conseils-personnalisation-maillot-football",
+      "description": "Les meilleurs conseils pour créer des maillots de football uniques qui représentent parfaitement votre club.",
+      "image": "/assets/images/blog/football-jersey.jpg",
+      "category": "Conseils",
+      "date": "2025-01-05",
+      "author": "FLARE CUSTOM",
+      "readTime": "6 min",
+      "featured": false
+    }
+  ]
+}

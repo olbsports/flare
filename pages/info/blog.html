@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - Conseils et Actualités Équipements Sportifs | FLARE CUSTOM</title>
+    <meta name="description" content="Découvrez nos guides, conseils et actualités sur les équipements sportifs personnalisés, la sublimation textile et la personnalisation pour clubs.">
+
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+
+    <style>
+        .blog-hero {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 120px 20px 80px;
+            text-align: center;
+            color: #fff;
+        }
+
+        .blog-hero h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 64px;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .blog-hero p {
+            font-size: 20px;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .blog-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 20px;
+        }
+
+        .blog-filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 60px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            padding: 12px 30px;
+            border: 2px solid #FF4B26;
+            background: transparent;
+            color: #1a1a2e;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 50px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: #FF4B26;
+            color: #fff;
+        }
+
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 40px;
+        }
+
+        .blog-card {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .blog-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+
+        .blog-card-image {
+            width: 100%;
+            height: 240px;
+            background: linear-gradient(135deg, #FF4B26 0%, #ff6b4a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            position: relative;
+        }
+
+        .blog-card-category {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #FF4B26;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .blog-card-content {
+            padding: 30px;
+        }
+
+        .blog-card-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .blog-card-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #1a1a2e;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+
+        .blog-card-description {
+            font-size: 15px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .blog-card-link {
+            color: #FF4B26;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .blog-card-link:after {
+            content: '→';
+            transition: transform 0.3s;
+        }
+
+        .blog-card:hover .blog-card-link:after {
+            transform: translateX(5px);
+        }
+
+        .no-articles {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+            font-size: 18px;
+        }
+
+        @media (max-width: 768px) {
+            .blog-hero h1 {
+                font-size: 48px;
+            }
+
+            .blog-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="dynamic-header"></div>
+
+    <section class="blog-hero">
+        <h1>BLOG FLARE CUSTOM</h1>
+        <p>Guides, conseils et actualités sur les équipements sportifs personnalisés</p>
+    </section>
+
+    <section class="blog-container">
+        <div class="blog-filters">
+            <button class="filter-btn active" data-category="all">Tous</button>
+            <button class="filter-btn" data-category="Guide">Guides</button>
+            <button class="filter-btn" data-category="Technologie">Technologie</button>
+            <button class="filter-btn" data-category="Conseils">Conseils</button>
+        </div>
+
+        <div class="blog-grid" id="blogGrid">
+            <!-- Articles chargés dynamiquement -->
+        </div>
+
+        <div class="no-articles" id="noArticles" style="display: none;">
+            Aucun article trouvé dans cette catégorie.
+        </div>
+    </section>
+
+    <div id="dynamic-footer"></div>
+
+    <script src="../../assets/js/components-loader.js"></script>
+    <script>
+        // Charger les articles depuis le JSON
+        async function loadBlogArticles() {
+            try {
+                const response = await fetch('../../assets/data/blog-articles.json');
+                const data = await response.json();
+                return data.articles;
+            } catch (error) {
+                console.error('Erreur chargement articles:', error);
+                return [];
+            }
+        }
+
+        // Afficher les articles
+        function displayArticles(articles) {
+            const grid = document.getElementById('blogGrid');
+            const noArticles = document.getElementById('noArticles');
+
+            if (articles.length === 0) {
+                grid.style.display = 'none';
+                noArticles.style.display = 'block';
+                return;
+            }
+
+            grid.style.display = 'grid';
+            noArticles.style.display = 'none';
+
+            grid.innerHTML = articles.map(article => `
+                <div class="blog-card" onclick="window.location.href='../blog/${article.slug}.html'">
+                    <div class="blog-card-image">
+                        <div class="blog-card-category">${article.category}</div>
+                        📝
+                    </div>
+                    <div class="blog-card-content">
+                        <div class="blog-card-meta">
+                            <span>📅 ${formatDate(article.date)}</span>
+                            <span>⏱️ ${article.readTime}</span>
+                        </div>
+                        <h2 class="blog-card-title">${article.title}</h2>
+                        <p class="blog-card-description">${article.description}</p>
+                        <span class="blog-card-link">Lire l'article</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Formater la date
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('fr-FR', options);
+        }
+
+        // Filtrer les articles
+        let allArticles = [];
+
+        async function initBlog() {
+            allArticles = await loadBlogArticles();
+            displayArticles(allArticles);
+
+            // Gestion des filtres
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Activer le bouton
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    // Filtrer
+                    const category = btn.dataset.category;
+                    const filtered = category === 'all'
+                        ? allArticles
+                        : allArticles.filter(a => a.category === category);
+
+                    displayArticles(filtered);
+                });
+            });
+        }
+
+        // Initialiser au chargement
+        initBlog();
+    </script>
+</body>
+</html>
