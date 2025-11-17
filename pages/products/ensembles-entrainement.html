@@ -3,963 +3,1282 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ensembles Entraînement Personnalisés | Tenue Sport Complète - FLARE CUSTOM</title>
-    <meta name="description" content="Ensembles d'entraînement personnalisés complets. T-shirts, shorts, pantalons, sweats. fabrication européenne, personnalisation illimitée. Devis gratuit.">
+    <title>Ensembles d'entraînement personnalisés pour clubs sportifs - FLARE CUSTOM</title>
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta name="http-equiv" content="X-Content-Type-Options" content="nosniff">
 
-    <link rel="preload" href="../../assets/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="../../assets/css/style.css"></noscript>
+    <meta name="description" content="Ensembles d'entraînement personnalisés pour clubs : survêtements, hoodies, pantalons techniques. Look unifié professionnel. Sublimation sans minimum de commande. Devis gratuit 24h.">
+
+    <link rel="canonical" href="https://flare-custom.com/ensembles-entrainement">
+
+    <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="../../assets/css/components.css">
-    <link rel="stylesheet" href="../../assets/css/style-sport.css">
-</head>
-<body>
-    <div id="dynamic-header"></div>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
 
-    <!-- HERO SECTION -->
-    <section class="hero-sport">
-        <div class="hero-sport-content">
-            <span class="hero-sport-eyebrow">TENUES COMPLÈTES</span>
-            <h1 class="hero-sport-title">ENSEMBLES ENTRAÎNEMENT</h1>
-            <p class="hero-sport-subtitle">Ensembles d'entraînement complets personnalisés. T-shirts, shorts, pantalons, sweats assortis. Coordination parfaite, confort optimal. fabrication européenne, prix dégressifs.</p>
+    <style>
+        /* 🔥 HERO 2/3 + 1/3 avec IMAGE FULL */
+        .hero-prix {
+            min-height: 70vh;
+            background: linear-gradient(135deg, #000000 0%, #121212 50%, #000000 100%);
+            margin-top: 80px;
+            position: relative;
+            display: flex;
+            align-items: stretch;
+            overflow: hidden;
+        }
 
-            <div class="hero-sport-cta">
-                <a href="/pages/info/contact.html" class="btn-hero-primary">
-                    DEMANDER UN DEVIS
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M5 12h14m-7-7l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                </a>
-                <a href="https://wa.me/359885813134" class="btn-hero-secondary" target="_blank" rel="noopener">
-                    WHATSAPP
-                </a>
-            </div>
+      .hero-prix-content {
+    flex: 2;
+    padding: 0rem 5%;
+    display: flex
+;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+}
 
-            <div class="hero-sport-features">
-                <div class="feature-badge">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
-                    </svg>
-                    Fabrication européenne
-                </div>
-                <div class="feature-badge">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
-                    </svg>
-                    Livraison 2-3 semaines
-                </div>
-                <div class="feature-badge">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
-                    </svg>
-                    Personnalisation illimitée
-                </div>
-            </div>
-        </div>
-    </section>
+        .hero-prix-image {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
 
-    <!-- PRODUCTS SECTION -->
-    <section class="products-section">
-        <div class="products-container">
-            <div class="products-header">
-                <div class="products-header-left">
-                    <h2 class="section-title">NOS PRODUITS</h2>
-                    <p class="products-count" id="productsCount">67623 produits</p>
-                </div>
-                <div class="products-filters">
-                    <select id="filterSport" class="filter-select">
-                        <option value="">Tous les sports</option>
-                        <option value="FOOTBALL">Football</option>
-                        <option value="BASKETBALL">Basketball</option>
-                        <option value="RUGBY">Rugby</option>
-                        <option value="RUNNING">Running</option>
-                        <option value="CYCLISME">Cyclisme</option>
-                        <option value="VOLLEYBALL">Volleyball</option>
-                        <option value="HANDBALL">Handball</option>
-                    </select>
-                    <select id="filterGenre" class="filter-select">
-                        <option value="">Tous les genres</option>
-                        <option value="Homme">Homme</option>
-                        <option value="Femme">Femme</option>
-                        <option value="Unisexe">Unisexe</option>
-                    </select>
-                </div>
-            </div>
+        .hero-prix-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    position: absolute;
+    inset: 0;
+}
 
-            <div class="products-grid" id="productsGrid">
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-000-1.webp" alt="Polo Manches Courtes - Premium Jersey 140 ECO Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-000-2.webp" alt="Polo Manches Courtes - Premium Jersey 140 ECO Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-000-3.webp" alt="Polo Manches Courtes - Premium Jersey 140 ECO Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-000-4.webp" alt="Polo Manches Courtes - Premium Jersey 140 ECO Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-000-5.webp" alt="Polo Manches Courtes - Premium Jersey 140 ECO Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Polo</div>
-                        <h3 class="product-name">Polo Manches Courtes - Premium Jersey 140 ECO Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">SPORTSWEAR</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Courtes, Col Tissu</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">31.66€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-001-1.webp" alt="Polo Manches Courtes - Premium Jersey 140 ECO Femme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-001-2.webp" alt="Polo Manches Courtes - Premium Jersey 140 ECO Femme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-001-3.webp" alt="Polo Manches Courtes - Premium Jersey 140 ECO Femme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-001-4.webp" alt="Polo Manches Courtes - Premium Jersey 140 ECO Femme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-001-5.webp" alt="Polo Manches Courtes - Premium Jersey 140 ECO Femme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Polo</div>
-                        <h3 class="product-name">Polo Manches Courtes - Premium Jersey 140 ECO Femme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">SPORTSWEAR</span><span class="product-spec">Femme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Courtes, Col Tissu</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">31.66€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-002-1.webp" alt="Polo Premium Manches Courtes Milano Col Bord Côte - Premium Jersey 140 ECO Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-002-2.webp" alt="Polo Premium Manches Courtes Milano Col Bord Côte - Premium Jersey 140 ECO Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-002-3.webp" alt="Polo Premium Manches Courtes Milano Col Bord Côte - Premium Jersey 140 ECO Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-002-4.webp" alt="Polo Premium Manches Courtes Milano Col Bord Côte - Premium Jersey 140 ECO Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-002-5.webp" alt="Polo Premium Manches Courtes Milano Col Bord Côte - Premium Jersey 140 ECO Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Polo</div>
-                        <h3 class="product-name">Polo Premium Manches Courtes Milano Col Bord Côte - Premium Jersey 140 ECO Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">SPORTSWEAR</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Courtes, Col Bord Côte</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">35.06€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-003-1.webp" alt="Polo Premium Manches Courtes Milano Col Bord Côte - Premium Jersey 140 ECO Femme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-003-2.webp" alt="Polo Premium Manches Courtes Milano Col Bord Côte - Premium Jersey 140 ECO Femme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-003-3.webp" alt="Polo Premium Manches Courtes Milano Col Bord Côte - Premium Jersey 140 ECO Femme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-003-4.webp" alt="Polo Premium Manches Courtes Milano Col Bord Côte - Premium Jersey 140 ECO Femme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-003-5.webp" alt="Polo Premium Manches Courtes Milano Col Bord Côte - Premium Jersey 140 ECO Femme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Polo</div>
-                        <h3 class="product-name">Polo Premium Manches Courtes Milano Col Bord Côte - Premium Jersey 140 ECO Femme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">SPORTSWEAR</span><span class="product-spec">Femme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Courtes, Col Bord Côte</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">35.06€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-004-1.webp" alt="Polo Manches Courtes - Premium Piqué 210 ECO Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-004-2.webp" alt="Polo Manches Courtes - Premium Piqué 210 ECO Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-004-3.webp" alt="Polo Manches Courtes - Premium Piqué 210 ECO Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-004-4.webp" alt="Polo Manches Courtes - Premium Piqué 210 ECO Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-004-5.webp" alt="Polo Manches Courtes - Premium Piqué 210 ECO Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Polo</div>
-                        <h3 class="product-name">Polo Manches Courtes - Premium Piqué 210 ECO Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">SPORTSWEAR</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Courtes, Col Tissu</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">35.06€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-005-1.webp" alt="Polo Manches Courtes - Premium Piqué 210 ECO Femme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-005-2.webp" alt="Polo Manches Courtes - Premium Piqué 210 ECO Femme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-005-3.webp" alt="Polo Manches Courtes - Premium Piqué 210 ECO Femme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-005-4.webp" alt="Polo Manches Courtes - Premium Piqué 210 ECO Femme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-005-5.webp" alt="Polo Manches Courtes - Premium Piqué 210 ECO Femme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Polo</div>
-                        <h3 class="product-name">Polo Manches Courtes - Premium Piqué 210 ECO Femme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">SPORTSWEAR</span><span class="product-spec">Femme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Courtes, Col Tissu</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">35.06€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-006-1.webp" alt="Polo Premium Manches Courtes Piqué Col Bord Côte - Premium Piqué 210 ECO Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-006-2.webp" alt="Polo Premium Manches Courtes Piqué Col Bord Côte - Premium Piqué 210 ECO Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-006-3.webp" alt="Polo Premium Manches Courtes Piqué Col Bord Côte - Premium Piqué 210 ECO Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-006-4.webp" alt="Polo Premium Manches Courtes Piqué Col Bord Côte - Premium Piqué 210 ECO Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-006-5.webp" alt="Polo Premium Manches Courtes Piqué Col Bord Côte - Premium Piqué 210 ECO Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Polo</div>
-                        <h3 class="product-name">Polo Premium Manches Courtes Piqué Col Bord Côte - Premium Piqué 210 ECO Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">SPORTSWEAR</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Courtes, Col Bord Côte</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">38.04€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-007-1.webp" alt="Polo Premium Manches Courtes Piqué Col Bord Côte - Premium Piqué 210 ECO Femme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-007-2.webp" alt="Polo Premium Manches Courtes Piqué Col Bord Côte - Premium Piqué 210 ECO Femme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-007-3.webp" alt="Polo Premium Manches Courtes Piqué Col Bord Côte - Premium Piqué 210 ECO Femme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-007-4.webp" alt="Polo Premium Manches Courtes Piqué Col Bord Côte - Premium Piqué 210 ECO Femme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-007-5.webp" alt="Polo Premium Manches Courtes Piqué Col Bord Côte - Premium Piqué 210 ECO Femme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Polo</div>
-                        <h3 class="product-name">Polo Premium Manches Courtes Piqué Col Bord Côte - Premium Piqué 210 ECO Femme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">SPORTSWEAR</span><span class="product-spec">Femme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Courtes, Col Bord Côte</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">38.04€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-008-1.webp" alt="Polo Manches Longues - Premium Jersey 140 ECO Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-008-2.webp" alt="Polo Manches Longues - Premium Jersey 140 ECO Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-008-3.webp" alt="Polo Manches Longues - Premium Jersey 140 ECO Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-008-4.webp" alt="Polo Manches Longues - Premium Jersey 140 ECO Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-008-5.webp" alt="Polo Manches Longues - Premium Jersey 140 ECO Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Polo</div>
-                        <h3 class="product-name">Polo Manches Longues - Premium Jersey 140 ECO Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">SPORTSWEAR</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Longues, Col Tissu</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">35.91€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-009-1.webp" alt="Polo Manches Longues - Premium Jersey 140 ECO Femme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-009-2.webp" alt="Polo Manches Longues - Premium Jersey 140 ECO Femme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-009-3.webp" alt="Polo Manches Longues - Premium Jersey 140 ECO Femme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-009-4.webp" alt="Polo Manches Longues - Premium Jersey 140 ECO Femme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-009-5.webp" alt="Polo Manches Longues - Premium Jersey 140 ECO Femme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Polo</div>
-                        <h3 class="product-name">Polo Manches Longues - Premium Jersey 140 ECO Femme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">SPORTSWEAR</span><span class="product-spec">Femme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Longues, Col Tissu</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">35.91€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-010-1.webp" alt="Polo Premium Manches Longues Milano Col Bord Côte - Premium Jersey 140 ECO Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-010-2.webp" alt="Polo Premium Manches Longues Milano Col Bord Côte - Premium Jersey 140 ECO Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-010-3.webp" alt="Polo Premium Manches Longues Milano Col Bord Côte - Premium Jersey 140 ECO Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-010-4.webp" alt="Polo Premium Manches Longues Milano Col Bord Côte - Premium Jersey 140 ECO Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-010-5.webp" alt="Polo Premium Manches Longues Milano Col Bord Côte - Premium Jersey 140 ECO Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Polo</div>
-                        <h3 class="product-name">Polo Premium Manches Longues Milano Col Bord Côte - Premium Jersey 140 ECO Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">SPORTSWEAR</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Longues, Col Bord Côte</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">39.31€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-011-1.webp" alt="Polo Premium Manches Longues Milano Col Bord Côte - Premium Jersey 140 ECO Femme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-011-2.webp" alt="Polo Premium Manches Longues Milano Col Bord Côte - Premium Jersey 140 ECO Femme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-011-3.webp" alt="Polo Premium Manches Longues Milano Col Bord Côte - Premium Jersey 140 ECO Femme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-011-4.webp" alt="Polo Premium Manches Longues Milano Col Bord Côte - Premium Jersey 140 ECO Femme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-011-5.webp" alt="Polo Premium Manches Longues Milano Col Bord Côte - Premium Jersey 140 ECO Femme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Polo</div>
-                        <h3 class="product-name">Polo Premium Manches Longues Milano Col Bord Côte - Premium Jersey 140 ECO Femme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">SPORTSWEAR</span><span class="product-spec">Femme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Longues, Col Bord Côte</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">39.31€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-012-1.webp" alt="Polo Manches Longues - Premium Piqué 210 ECO Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-012-2.webp" alt="Polo Manches Longues - Premium Piqué 210 ECO Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-012-3.webp" alt="Polo Manches Longues - Premium Piqué 210 ECO Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-012-4.webp" alt="Polo Manches Longues - Premium Piqué 210 ECO Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-012-5.webp" alt="Polo Manches Longues - Premium Piqué 210 ECO Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Polo</div>
-                        <h3 class="product-name">Polo Manches Longues - Premium Piqué 210 ECO Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">SPORTSWEAR</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Longues, Col Tissu</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">40.16€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-013-1.webp" alt="Polo Manches Longues - Premium Piqué 210 ECO Femme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-013-2.webp" alt="Polo Manches Longues - Premium Piqué 210 ECO Femme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-013-3.webp" alt="Polo Manches Longues - Premium Piqué 210 ECO Femme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-013-4.webp" alt="Polo Manches Longues - Premium Piqué 210 ECO Femme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-013-5.webp" alt="Polo Manches Longues - Premium Piqué 210 ECO Femme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Polo</div>
-                        <h3 class="product-name">Polo Manches Longues - Premium Piqué 210 ECO Femme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">SPORTSWEAR</span><span class="product-spec">Femme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Longues, Col Tissu</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">40.16€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-014-1.webp" alt="Polo Premium Manches Longues Piqué Col Bord Côte - Premium Piqué 210 ECO Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-014-2.webp" alt="Polo Premium Manches Longues Piqué Col Bord Côte - Premium Piqué 210 ECO Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-014-3.webp" alt="Polo Premium Manches Longues Piqué Col Bord Côte - Premium Piqué 210 ECO Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-014-4.webp" alt="Polo Premium Manches Longues Piqué Col Bord Côte - Premium Piqué 210 ECO Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLH-014-5.webp" alt="Polo Premium Manches Longues Piqué Col Bord Côte - Premium Piqué 210 ECO Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Polo</div>
-                        <h3 class="product-name">Polo Premium Manches Longues Piqué Col Bord Côte - Premium Piqué 210 ECO Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">SPORTSWEAR</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Longues, Col Bord Côte</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">43.56€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-015-1.webp" alt="Polo Premium Manches Longues Piqué Col Bord Côte - Premium Piqué 210 ECO Femme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-015-2.webp" alt="Polo Premium Manches Longues Piqué Col Bord Côte - Premium Piqué 210 ECO Femme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-015-3.webp" alt="Polo Premium Manches Longues Piqué Col Bord Côte - Premium Piqué 210 ECO Femme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-015-4.webp" alt="Polo Premium Manches Longues Piqué Col Bord Côte - Premium Piqué 210 ECO Femme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SPWPOLF-015-5.webp" alt="Polo Premium Manches Longues Piqué Col Bord Côte - Premium Piqué 210 ECO Femme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Polo</div>
-                        <h3 class="product-name">Polo Premium Manches Longues Piqué Col Bord Côte - Premium Piqué 210 ECO Femme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">SPORTSWEAR</span><span class="product-spec">Femme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Longues, Col Bord Côte</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">43.56€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+        .hero-prix-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(255, 75, 38, 0.15), transparent 60%);
+            z-index: 1;
+        }
 
-    <!-- FEATURES SECTION -->
-    <section class="seo-mega">
-        <div class="seo-hero">
-            <span class="seo-hero-badge">AVANTAGES</span>
-            <h2 class="seo-hero-title">Pourquoi choisir FLARE CUSTOM ?</h2>
-            <p class="seo-hero-intro">La référence européenne de l'équipement sportif personnalisé en sublimation</p>
-        </div>
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 24px;
+        }
 
-        <div class="seo-cards-3">
-            <div class="seo-card">
-                <div class="seo-card-icon">🎨</div>
-                <h3>Personnalisation illimitée</h3>
-                <p>Sublimation intégrale pour des designs uniques sans limite de couleurs. Créez l'équipement qui vous ressemble.</p>
-            </div>
-            <div class="seo-card">
-                <div class="seo-card-icon">🏆</div>
-                <h3>Qualité Professionnelle</h3>
-                <p>Tissus techniques premium, coutures renforcées, finitions soignées. qualité certifiée pour une durabilité maximale.</p>
-            </div>
-            <div class="seo-card">
-                <div class="seo-card-icon">⚡</div>
-                <h3>Livraison rapide</h3>
-                <p>Fabrication européenne et livraison express 2-3 semaines. Service client réactif et suivi personnalisé.</p>
-            </div>
-        </div>
-    </section>
+        .breadcrumb a {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
 
-    <!-- CTA SECTION -->
-    <section class="cta-redesign">
-        <div class="cta-redesign-container">
-            <h2 class="cta-redesign-title">Prêt à Équiper Votre Équipe ?</h2>
-            <p class="cta-redesign-subtitle">
-                Demandez votre devis gratuit en moins de 24h. Notre équipe vous accompagne dans votre projet.
-            </p>
-            <div class="cta-redesign-features">
-                <span>✓ Devis gratuit sous 24h</span>
-                <span>✓ Mockup 3D inclus</span>
-                <span>✓ Prix dégressifs</span>
-                <span>✓ Paiement sécurisé</span>
-            </div>
-            <div class="cta-redesign-buttons">
-                <a href="/pages/info/contact.html" class="btn-cta-primary">Demander un Devis</a>
-                <a href="https://wa.me/359885813134" target="_blank" rel="noopener" class="btn-cta-secondary">WhatsApp</a>
-            </div>
-        </div>
-    </section>
+        .breadcrumb a:hover {
+            color: #FF4B26;
+        }
 
-    <div id="dynamic-footer"></div>
+        .hero-prix-eyebrow {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #FF4B26;
+            margin-bottom: 16px;
+        }
 
-    <script src="../../assets/js/components-loader.js" defer></script>
-    <script src="../../assets/js/script.js" defer></script>
+        .hero-prix-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(48px, 8vw, 80px);
+            line-height: 0.95;
+            letter-spacing: 1px;
+            color: #fff;
+            margin-bottom: 12px;
+        }
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Product slider functionality
-            document.querySelectorAll('.product-card').forEach(card => {
-                const slides = card.querySelectorAll('.product-slide');
-                const dots = card.querySelectorAll('.slider-dot');
-                const prevBtn = card.querySelector('.slider-nav.prev');
-                const nextBtn = card.querySelector('.slider-nav.next');
-                let currentSlide = 0;
+        .hero-prix-subtitle {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(40px, 7vw, 72px);
+            line-height: 0.95;
+            letter-spacing: 1px;
+            color: #FF4B26;
+            margin-bottom: 32px;
+        }
 
-                function showSlide(index) {
-                    slides.forEach(slide => slide.classList.remove('active'));
-                    dots.forEach(dot => dot.classList.remove('active'));
-                    if (slides[index] && dots[index]) {
-                        slides[index].classList.add('active');
-                        dots[index].classList.add('active');
-                    }
-                }
+        .hero-prix-desc {
+            font-size: clamp(16px, 2vw, 18px);
+            line-height: 1.6;
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 40px;
+            max-width: 600px;
+        }
 
-                if (prevBtn) prevBtn.addEventListener('click', () => {
-                    currentSlide = (currentSlide - 1 + slides.length) % slides.length;
-                    showSlide(currentSlide);
-                });
+        .hero-prix-cta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 48px;
+        }
 
-                if (nextBtn) nextBtn.addEventListener('click', () => {
-                    currentSlide = (currentSlide + 1) % slides.length;
-                    showSlide(currentSlide);
-                });
+        .btn-hero-primary, .btn-hero-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 40px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
 
-                dots.forEach((dot, index) => {
-                    dot.addEventListener('click', () => {
-                        currentSlide = index;
-                        showSlide(currentSlide);
-                    });
-                });
-            });
+        .btn-hero-primary {
+            background: #FF4B26;
+            color: #fff;
+        }
 
-            // Filter functionality
-            const filterSport = document.getElementById('filterSport');
-            const filterGenre = document.getElementById('filterGenre');
-            const productsGrid = document.getElementById('productsGrid');
-            const productsCount = document.getElementById('productsCount');
+        .btn-hero-primary:hover {
+            background: #E63910;
+            transform: translateY(-2px);
+        }
 
-            function filterProducts() {
-                const cards = Array.from(productsGrid.querySelectorAll('.product-card'));
-                let visibleCount = 0;
+        .btn-hero-secondary {
+            background: transparent;
+            color: #fff;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
 
-                cards.forEach(card => {
-                    const specs = card.querySelectorAll('.product-spec');
-                    const sport = specs[0]?.textContent || '';
-                    const genre = specs[1]?.textContent || '';
+        .btn-hero-secondary:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: #fff;
+        }
 
-                    let show = true;
+        /* 🔥 BADGES HERO - STYLE PAGES SPORTS */
+        .hero-prix-features {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
 
-                    if (filterSport.value && !sport.includes(filterSport.value)) show = false;
-                    if (filterGenre.value && !genre.includes(filterGenre.value)) show = false;
+        .feature-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: rgba(255,255,255,0.9);
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
 
-                    card.style.display = show ? 'block' : 'none';
-                    if (show) visibleCount++;
-                });
+        .feature-badge:hover {
+            background: rgba(255, 75, 38, 0.1);
+            border-color: rgba(255, 75, 38, 0.3);
+        }
 
-                productsCount.textContent = `${visibleCount} produit${visibleCount > 1 ? 's' : ''}`;
+        .feature-badge svg {
+            color: #FF4B26;
+            width: 20px;
+            height: 20px;
+        }
+
+        /* 🔥 TRUST BAR */
+        .trust-bar {
+            background: #fff;
+            padding: 48px 5%;
+            border-top: 1px solid #E5E7EB;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .trust-items {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            text-align: center;
+        }
+
+        .trust-item strong {
+            display: block;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 48px;
+            color: #FF4B26;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .trust-item span {
+            font-size: 14px;
+            color: #6B7280;
+            font-weight: 600;
+        }
+
+        /* 🔥 SECTIONS STYLES */
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .section-eyebrow {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #FF4B26;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(40px, 6vw, 64px);
+            line-height: 1.1;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        .section-description {
+            font-size: 18px;
+            line-height: 1.7;
+            color: #6B7280;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* 🔥 POURQUOI PAS CHER - 3 COLONNES */
+        .advantages-section {
+            padding: 100px 5%;
+            background: #f9fafb;
+        }
+
+        .advantages-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .advantage-card {
+            background: #fff;
+            padding: 40px 32px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+        }
+
+        .advantage-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(255, 75, 38, 0.12);
+        }
+
+        .advantage-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #FF4B26, #E63910);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .advantage-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #000;
+            margin-bottom: 12px;
+        }
+
+        .advantage-desc {
+            font-size: 16px;
+            line-height: 1.7;
+            color: #6B7280;
+        }
+
+        /* 🔥 TARIFS - 4 CARTES SEULEMENT */
+        .pricing-cards {
+            padding: 100px 5%;
+            background: #f9fafb;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto 60px;
+        }
+
+        .price-card {
+            background: #fff;
+            padding: 48px 32px;
+            text-align: center;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .price-card:hover {
+            border-color: #FF4B26;
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(255, 75, 38, 0.12);
+        }
+
+        .price-card.featured {
+            border-color: #FF4B26;
+            transform: scale(1.05);
+            box-shadow: 0 12px 40px rgba(255, 75, 38, 0.15);
+        }
+
+        .price-card.premium {
+            background: #000;
+            border-color: #000;
+            color: #fff;
+        }
+
+        .price-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #FF4B26;
+            color: #fff;
+            padding: 6px 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .price-volume {
+            font-size: 13px;
+            font-weight: 700;
+            color: #6B7280;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+        }
+
+        .price-card.premium .price-volume {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .price-amount {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 56px;
+            line-height: 1;
+            color: #000;
+            margin-bottom: 8px;
+        }
+
+        .price-card.premium .price-amount {
+            color: #fff;
+        }
+
+        .price-unit {
+            font-size: 20px;
+            color: #6B7280;
+        }
+
+        .price-card.premium .price-unit {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .price-saving {
+            font-size: 14px;
+            color: #FF4B26;
+            font-weight: 700;
+            margin-bottom: 32px;
+        }
+
+        .price-cta {
+            display: block;
+            padding: 16px;
+            background: #000;
+            color: #fff;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            border-radius: 6px;
+        }
+
+        .price-card.featured .price-cta,
+        .price-card.premium .price-cta {
+            background: #FF4B26;
+        }
+
+        .price-cta:hover {
+            background: #FF4B26;
+            transform: translateY(-2px);
+        }
+
+        /* 🔥 SPORTS GRID - STYLE INDEX (blanc + ombre) */
+        .sports-section {
+            padding: 100px 5%;
+            background: #fff;
+        }
+
+        .sports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sport-card {
+            position: relative;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.06);
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            text-decoration: none;
+            display: block;
+        }
+
+        .sport-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.12);
+        }
+
+        .sport-card-content {
+            padding: 32px;
+        }
+
+        .sport-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .sport-card h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 32px;
+            line-height: 1;
+            letter-spacing: -0.01em;
+            color: #000;
+            margin-bottom: 8px;
+        }
+
+        .sport-card p {
+            font-size: 15px;
+            color: #6B7280;
+            margin-bottom: 16px;
+        }
+
+        .sport-link {
+            font-size: 24px;
+            color: #FF4B26;
+            transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+            display: inline-block;
+        }
+
+        .sport-card:hover .sport-link {
+            transform: translateX(8px);
+        }
+
+        /* 🔥 COMPARAISON TABLE */
+        .comparison-section {
+            padding: 100px 5%;
+            background: #121212;
+            color: #fff;
+        }
+
+        .comparison-table {
+            background: #fff;
+            color: #000;
+            overflow-x: auto;
+            border-radius: 0;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .comparison-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .comparison-table thead tr {
+            background: #f9fafb;
+        }
+
+        .comparison-table th {
+            padding: 24px;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #E5E7EB;
+        }
+
+        .comparison-table th:first-child {
+            text-align: left;
+        }
+
+        .comparison-table th:nth-child(2) {
+            background: #FFF5F3;
+        }
+
+        .comparison-table td {
+            padding: 20px;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .comparison-table td:first-child {
+            font-weight: 600;
+        }
+
+        .comparison-table td:nth-child(2) {
+            text-align: center;
+            background: #FFF5F3;
+        }
+
+        .comparison-table td:nth-child(3) {
+            text-align: center;
+            color: #9CA3AF;
+        }
+
+        .highlight-price {
+            color: #FF4B26;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        /* 🔥 FAQ */
+        .faq-section {
+            padding: 100px 5%;
+            background: #fff;
+        }
+
+        .faq-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .faq-accordion {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        details {
+            background: #f9fafb;
+            padding: 24px 32px;
+            border-left: 4px solid #E5E7EB;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        details:hover {
+            border-left-color: #FF4B26;
+        }
+
+        details[open] {
+            border-left-color: #FF4B26;
+            background: #fff;
+        }
+
+        summary {
+            font-size: 18px;
+            font-weight: 700;
+            color: #000;
+            list-style: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .faq-icon {
+            color: #FF4B26;
+            font-size: 20px;
+            transition: transform 0.3s;
+        }
+
+        details[open] .faq-icon {
+            transform: rotate(45deg);
+        }
+
+        details p {
+            margin-top: 16px;
+            line-height: 1.7;
+            color: #6B7280;
+        }
+
+        /* 🔥 CTA FINAL */
+        .cta-final-section {
+            padding: 120px 5%;
+            background: linear-gradient(135deg, #000000 0%, #121212 50%, #000000 100%);
+            color: #fff;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-final-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 75, 38, 0.1), transparent 70%);
+        }
+
+        .cta-final-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-final-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(48px, 8vw, 80px);
+            line-height: 1;
+            letter-spacing: 2px;
+            margin-bottom: 24px;
+        }
+
+        .cta-final-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 80px;
+        }
+
+        .btn-cta-primary, .btn-cta-secondary {
+            display: inline-block;
+            padding: 24px 56px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-cta-primary {
+            background: #FF4B26;
+            color: #fff;
+        }
+
+        .btn-cta-primary:hover {
+            background: #E63910;
+            transform: translateY(-2px);
+        }
+
+        .btn-cta-secondary {
+            background: transparent;
+            color: #fff;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-cta-secondary:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: #fff;
+        }
+
+        /* 🔥 4 STATS EN LIGNE SUR DESKTOP */
+        .cta-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            padding-top: 60px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 48px;
+            color: #FF4B26;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* 🔥 RESPONSIVE */
+        @media (max-width: 1200px) {
+            .pricing-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
 
-            if (filterSport) filterSport.addEventListener('change', filterProducts);
-            if (filterGenre) filterGenre.addEventListener('change', filterProducts);
-        });
-    </script>
+            .advantages-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .cta-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 32px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-prix {
+                flex-direction: column;
+                min-height: auto;
+            }
+
+            .hero-prix-content {
+                padding: 4rem 5% 3rem;
+            }
+
+            .hero-prix-image {
+                min-height: 300px;
+            }
+
+            .hero-prix-features {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .feature-badge {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .trust-items {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 24px;
+            }
+
+            .pricing-grid,
+            .advantages-grid,
+            .sports-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-stats {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .comparison-table {
+                font-size: 14px;
+            }
+
+            .comparison-table th,
+            .comparison-table td {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 🔥 HEADER DYNAMIQUE -->
+    <div id="dynamic-header"></div>
+
+    <!-- 🔥 HERO 2/3 + 1/3 avec IMAGE -->
+    <section class="hero-prix">
+        <div class="hero-prix-overlay"></div>
+
+        <!-- 2/3 TEXTE -->
+        <div class="hero-prix-content">
+            <div class="breadcrumb">
+                <a href="/">Accueil</a>
+                <span>/</span>
+                <span style="color: #FF4B26;">Ensembles Entraînement</span>
+            </div>
+
+            <h1>
+                <span class="hero-prix-eyebrow">💪 Look Unifié Professionnel</span>
+                <div class="hero-prix-title">Ensembles Entraînement</div>
+                <div class="hero-prix-subtitle">Personnalisés</div>
+            </h1>
+
+            <p class="hero-prix-desc">
+                Survêtements, hoodies, pantalons techniques personnalisés pour vos entraînements. <strong style="color: #FF4B26;">Look unifié professionnel.</strong><br>
+                Sublimation permanente. Fabrication européenne. Réductions jusqu'à -60% sur volume.
+            </p>
+
+            <div class="hero-prix-cta">
+                <a href="/pages/info/contact.html" class="btn-hero-primary">
+                    Devis gratuit 24h
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </a>
+                <a href="#tarifs-ensembles" class="btn-hero-secondary">
+                    Voir Les Prix
+                </a>
+            </div>
+
+            <!-- 🔥 BADGES STYLE PAGES SPORTS -->
+            <div class="hero-prix-features">
+                <div class="feature-badge">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+                    </svg>
+                    <span>Look unifié pro</span>
+                </div>
+                <div class="feature-badge">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 12L11 14L15 10M21 12C21 16.971 16.971 21 12 21C7.029 21 3 16.971 3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12Z" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    <span>Tissus techniques</span>
+                </div>
+                <div class="feature-badge">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M13 10V3L4 14H11V21L20 10H13Z" fill="currentColor"/>
+                    </svg>
+                    <span>Sublimation durable</span>
+                </div>
+                <div class="feature-badge">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 8V12L15 15M21 12C21 16.971 16.971 21 12 21C7.029 21 3 16.971 3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12Z" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    <span>Sans minimum</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1/3 IMAGE FULL -->
+        <div class="hero-prix-image">
+            <img src="https://flare-custom.com/photos/produits/FLARE-FTBSWH-327-1.webp" alt="Ensembles entraînement personnalisés" loading="eager" width="800" height="1200">
+        </div>
+    </section>
+
+    <!-- 🔥 TRUST BAR -->
+    <section class="trust-bar">
+        <div class="trust-items">
+            <div class="trust-item">
+                <strong>100%</strong>
+                <span>Personnalisables</span>
+            </div>
+            <div class="trust-item">
+                <strong>300+</strong>
+                <span>Clubs équipés</span>
+            </div>
+            <div class="trust-item">
+                <strong>24h</strong>
+                <span>Réponse devis</span>
+            </div>
+            <div class="trust-item">
+                <strong>1 An</strong>
+                <span>Garantie qualité</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🔥 POURQUOI ENSEMBLES - 3 COLONNES -->
+    <section class="advantages-section">
+        <div class="section-header">
+            <div class="section-eyebrow">Ensembles Complets</div>
+            <h2 class="section-title">
+                Pourquoi Choisir Nos<br>
+                <span style="color: #FF4B26;">Ensembles Entraînement ?</span>
+            </h2>
+            <p class="section-description">
+                Équipez votre club avec un look professionnel unifié. Survêtements, hoodies, pantalons techniques personnalisés à votre image.
+            </p>
+        </div>
+
+        <div class="advantages-grid">
+            <div class="advantage-card">
+                <div class="advantage-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 17L12 22L22 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 12L12 17L22 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h3 class="advantage-title">Look Unifié Pro</h3>
+                <p class="advantage-desc">Tous vos joueurs avec le même équipement entraînement. Logos, couleurs club parfaitement coordonnés. Image professionnelle garantie.</p>
+            </div>
+
+            <div class="advantage-card">
+                <div class="advantage-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="3" width="18" height="18" rx="2" stroke="white" stroke-width="2"/>
+                        <path d="M9 12L11 14L15 10" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h3 class="advantage-title">Tissus Techniques</h3>
+                <p class="advantage-desc">Polyester respirant, stretch 4 directions, séchage rapide. Confort optimal pour tous vos entraînements intensifs.</p>
+            </div>
+
+            <div class="advantage-card">
+                <div class="advantage-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                        <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.7088 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M22 4L12 14.01L9 11.01" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h3 class="advantage-title">Sublimation Permanente</h3>
+                <p class="advantage-desc">Logos, noms, numéros intégrés au tissu. Ne se décolle jamais. Résiste lavages, transpiration, frottements intensifs.</p>
+            </div>
+
+            <div class="advantage-card">
+                <div class="advantage-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2"/>
+                        <path d="M12 6V12L16 14" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h3 class="advantage-title">Création Personnalisée</h3>
+                <p class="advantage-desc">Design sur-mesure à vos couleurs. Logos placés exactement comme vous souhaitez. Équipe design experte 50€ forfait.</p>
+            </div>
+
+            <div class="advantage-card">
+                <div class="advantage-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                        <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="9" cy="7" r="4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M23 21V19C23 17.9 22.5 16.9 21.8 16.2" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M16 3.2C16.7 3.9 17.2 4.9 17.2 6C17.2 7.1 16.7 8.1 16 8.8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h3 class="advantage-title">Toutes Tailles</h3>
+                <p class="advantage-desc">Du XS au 4XL disponibles. Tailles enfants et adultes. Chaque joueur équipé parfaitement à sa taille réelle.</p>
+            </div>
+
+            <div class="advantage-card">
+                <div class="advantage-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                        <path d="M21 7L13 15L9 11L3 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M16 7H21V12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h3 class="advantage-title">Prix Dégressifs</h3>
+                <p class="advantage-desc">Plus vous commandez, plus vous économisez. Jusqu'à -60% sur 500+ pièces. Tarifs automatiques transparents volume.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🔥 TARIFS - 4 CARTES SEULEMENT -->
+    <section id="tarifs-ensembles" class="pricing-cards">
+        <div class="section-header">
+            <div class="section-eyebrow">Tarifs Ensembles</div>
+            <h2 class="section-title">
+                Prix Indicatifs<br>
+                <span style="color: #FF4B26;">Ensembles Entraînement</span>
+            </h2>
+            <p class="section-description">
+                Tarifs pour survêtements complets (veste + pantalon) personnalisés sublimation. Réductions automatiques sur volume.
+            </p>
+        </div>
+
+        <div class="pricing-grid">
+            <!-- Prix 1-4 -->
+            <div class="price-card">
+                <div class="price-volume">1-4 pièces</div>
+                <div class="price-amount">48€<span class="price-unit">/set</span></div>
+                <div class="price-saving">Prix unitaire</div>
+                <a href="/pages/info/contact.html" class="price-cta">Commander</a>
+            </div>
+
+            <!-- Prix 20-49 - Featured -->
+            <div class="price-card featured">
+                <div class="price-badge">Populaire</div>
+                <div class="price-volume">20-49 pièces</div>
+                <div class="price-amount">38€<span class="price-unit">/set</span></div>
+                <div class="price-saving">-21% d'économie</div>
+                <a href="/pages/info/contact.html" class="price-cta">Commander</a>
+            </div>
+
+            <!-- Prix 100-249 - Premium -->
+            <div class="price-card premium">
+                <div class="price-badge">Best Seller</div>
+                <div class="price-volume">100-249 pièces</div>
+                <div class="price-amount">28€<span class="price-unit">/set</span></div>
+                <div class="price-saving">-42% d'économie</div>
+                <a href="/pages/info/contact.html" class="price-cta">Commander</a>
+            </div>
+
+            <!-- Prix 500+ -->
+            <div class="price-card featured">
+                <div class="price-volume">500+ pièces</div>
+                <div class="price-amount">22€<span class="price-unit">/set</span></div>
+                <div class="price-saving">-54% d'économie</div>
+                <a href="/pages/info/contact.html" class="price-cta">Commander</a>
+            </div>
+        </div>
+
+        <div style="text-align: center; background: #fff; padding: 32px; border-left: 4px solid #FF4B26; max-width: 1400px; margin: 0 auto; border-radius: 8px;">
+            <p style="font-size: 15px; color: #6B7280; margin: 0;">
+                <strong style="color: #000;">💡 Tarifs indicatifs</strong> pour survêtements polyester 180g/m². Hoodies, pantalons seuls disponibles aussi.
+                <a href="/pages/info/contact.html" style="color: #FF4B26; text-decoration: none; font-weight: 700; border-bottom: 1px solid #FF4B26;">Devis personnalisé gratuit sous 24h</a>.
+            </p>
+        </div>
+    </section>
+
+    <!-- 🔥 TYPES PRODUITS -->
+    <section class="sports-section">
+        <div class="section-header">
+            <div class="section-eyebrow">Gamme Complète</div>
+            <h2 class="section-title">
+                Tous Les Produits<br>
+                <span style="color: #FF4B26;">Entraînement Disponibles</span>
+            </h2>
+        </div>
+
+        <div class="sports-grid">
+            <a href="/sportswear-vetements-sport-personnalises.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">🧥</span>
+                    <h3>Survêtements</h3>
+                    <p>Ensembles complets veste + pantalon</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/sportswear-vetements-sport-personnalises.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">👕</span>
+                    <h3>Hoodies</h3>
+                    <p>Sweat à capuche personnalisés</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/sportswear-vetements-sport-personnalises.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">👖</span>
+                    <h3>Pantalons</h3>
+                    <p>Pantalons techniques training</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/sportswear-vetements-sport-personnalises.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">🎽</span>
+                    <h3>Sweats</h3>
+                    <p>Sweats col rond ou zippés</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/sportswear-vetements-sport-personnalises.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">🧢</span>
+                    <h3>Accessoires</h3>
+                    <p>Sacs, casquettes, bonnets</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/pages/info/contact.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">📦</span>
+                    <h3>Pack Complet</h3>
+                    <p>Ensemble club tout-en-un</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- 🔥 COMPARAISON -->
+    <section class="comparison-section">
+        <div class="section-header">
+            <div class="section-eyebrow">Comparaison Transparente</div>
+            <h2 class="section-title" style="color: #fff;">
+                FLARE CUSTOM vs<br>
+                <span style="color: #FF4B26;">Autres Fournisseurs</span>
+            </h2>
+        </div>
+
+        <div class="comparison-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Critère</th>
+                        <th>FLARE CUSTOM</th>
+                        <th>Concurrence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Prix survêtement (50 pcs)</td>
+                        <td><strong class="highlight-price">38€</strong></td>
+                        <td>55-70€</td>
+                    </tr>
+                    <tr>
+                        <td>Personnalisation</td>
+                        <td><strong class="highlight-price">Sublimation permanente</strong></td>
+                        <td>Flocage/Broderie</td>
+                    </tr>
+                    <tr>
+                        <td>Design graphique</td>
+                        <td><strong class="highlight-price">50€ forfait</strong></td>
+                        <td>100-200€</td>
+                    </tr>
+                    <tr>
+                        <td>Délai fabrication</td>
+                        <td><strong class="highlight-price">3-4 semaines</strong></td>
+                        <td>5-8 semaines</td>
+                    </tr>
+                    <tr>
+                        <td>Quantité minimum</td>
+                        <td><strong class="highlight-price">Aucune</strong></td>
+                        <td>15-25 pièces</td>
+                    </tr>
+                    <tr>
+                        <td>Tissus techniques</td>
+                        <td><strong class="highlight-price">Polyester pro respirant</strong></td>
+                        <td>Basique standard</td>
+                    </tr>
+                    <tr>
+                        <td>Garantie</td>
+                        <td><strong class="highlight-price">1 an</strong></td>
+                        <td>3-6 mois</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="text-align: center; margin-top: 48px;">
+            <a href="/pages/info/contact.html" style="display: inline-block; padding: 20px 48px; background: #FF4B26; color: #fff; text-decoration: none; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; transition: all 0.3s;">Demander Mon Devis</a>
+        </div>
+    </section>
+
+    <!-- 🔥 FAQ -->
+    <section class="faq-section">
+        <div class="faq-container">
+            <div class="section-header">
+                <div class="section-eyebrow">Questions Fréquentes</div>
+                <h2 class="section-title" style="color: #000;">FAQ Ensembles Entraînement</h2>
+            </div>
+
+            <div class="faq-accordion">
+                <details>
+                    <summary>
+                        Peut-on commander seulement vestes ou pantalons ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        Oui absolument. Vous pouvez commander vestes, pantalons, hoodies, sweats séparément ou en ensemble complet. Tarifs ajustés selon votre choix. Devis personnalisé gratuit sous 24h.
+                    </p>
+                </details>
+
+                <details>
+                    <summary>
+                        Les tailles enfants sont-elles disponibles ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        Oui, du 6 ans au 14 ans pour enfants. Du XS au 4XL pour adultes. Chaque joueur équipé parfaitement à sa taille. Guide des tailles fourni avec chaque devis.
+                    </p>
+                </details>
+
+                <details>
+                    <summary>
+                        Quelle personnalisation est possible ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        Logos club, sponsors, noms joueurs, numéros. Placés où vous voulez (poitrine, dos, manches, jambes). Sublimation permanente intégrée au tissu. Design 50€ forfait unique.
+                    </p>
+                </details>
+
+                <details>
+                    <summary>
+                        Les couleurs sont-elles exactement comme demandé ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        Oui. Sublimation permet toutes couleurs Pantone exactes. Validation visuel 3D avant production. Modification gratuite jusqu'à validation finale devis.
+                    </p>
+                </details>
+
+                <details>
+                    <summary>
+                        Peut-on mélanger plusieurs modèles ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        Oui. Commandez survêtements + hoodies + pantalons dans une seule commande. Tarifs dégressifs appliqués sur le total global des pièces commandées.
+                    </p>
+                </details>
+
+                <details>
+                    <summary>
+                        Quelle est la durée de vie des ensembles ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        3-5 ans utilisation intensive. Sublimation ne se décolle jamais. Tissus techniques résistants lavages répétés 60°C. Garantie 1 an pièces + main d'œuvre incluse.
+                    </p>
+                </details>
+            </div>
+
+            <div style="text-align: center; margin-top: 48px;">
+                <a href="/faq-questions-frequentes-equipements-personnalises.html" style="display: inline-block; padding: 16px 40px; background: #fff; color: #000; text-decoration: none; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; border: 2px solid #E5E7EB; transition: all 0.3s; border-radius: 8px;">Toutes Les FAQ</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🔥 CTA FINAL - 4 STATS EN LIGNE -->
+    <section class="cta-final-section">
+        <div class="cta-final-overlay"></div>
+
+        <div class="cta-final-container">
+            <div class="section-eyebrow">Équipez Votre Club</div>
+
+            <h2 class="cta-final-title">
+                Devis Ensembles<br>
+                <span style="color: #FF4B26;">Gratuit 24h</span>
+            </h2>
+
+            <p style="font-size: clamp(16px, 2.5vw, 20px); line-height: 1.6; color: rgba(255,255,255,0.85); margin-bottom: 48px; max-width: 700px; margin-left: auto; margin-right: auto;">
+                Look unifié professionnel. Sublimation permanente. Fabrication européenne. Prix dégressifs automatiques.
+            </p>
+
+            <div class="cta-final-buttons">
+                <a href="/pages/info/contact.html" class="btn-cta-primary">Demander Mon Devis</a>
+                <a href="https://wa.me/359885813134" class="btn-cta-secondary">WhatsApp Direct</a>
+            </div>
+
+            <div class="cta-stats">
+                <div class="stat-item">
+                    <div class="stat-number">300+</div>
+                    <div class="stat-label">Clubs équipés</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">24h</div>
+                    <div class="stat-label">Réponse garantie</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">1 An</div>
+                    <div class="stat-label">Garantie qualité</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Personnalisable</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🔥 FOOTER DYNAMIQUE -->
+    <div id="dynamic-footer"></div>
+
+    <script src="../../assets/js/components-loader.js"></script>
+    <script src="../../assets/js/script.js"></script>
 </body>
 </html>
