@@ -191,12 +191,12 @@ class FlareConfigurateurWidget {
      * Affiche le message de bienvenue
      */
     showWelcome() {
-        this.addBotMessage('Bonjour ! 👋 Je suis votre assistant FLARE CUSTOM.\n\nJe vais vous aider à obtenir un devis personnalisé en quelques clics. C\'est parti !');
+        this.addBotMessage('Bonjour ! 👋 Bienvenue chez FLARE CUSTOM.\n\n🎯 Obtenez votre devis personnalisé en 2 minutes !\n✅ 100% gratuit et sans engagement\n✅ Réponse sous 24h');
 
         setTimeout(() => {
-            this.addBotMessage('Pour quel sport souhaitez-vous des équipements ?');
+            this.addBotMessage('Pour commencer, pour quel sport souhaitez-vous des équipements ?');
             this.showSportOptions();
-        }, 1000);
+        }, 1200);
     }
 
     /**
@@ -287,7 +287,7 @@ class FlareConfigurateurWidget {
             this.config.genre
         );
 
-        this.addBotMessage('Voici nos modèles disponibles :');
+        this.addBotMessage('Parfait ! Voici nos modèles disponibles pour vous :');
 
         products.forEach(product => {
             this.addProductCard(product, (selected) => {
@@ -302,19 +302,15 @@ class FlareConfigurateurWidget {
      * Affiche l'input de quantité
      */
     showQuantityInput() {
-        const tiers = this.csvParser.getPriceTiers(this.config.produit);
-
-        let tiersText = '📊 Tarifs dégressifs:\n\n';
-        tiers.slice(0, 4).forEach(tier => {
-            tiersText += `• ${tier.label}: ${tier.price.toFixed(2)}€\n`;
-        });
-
-        this.addBotMessage(tiersText + '\nCombien de pièces ?');
+        this.addBotMessage('Excellent choix ! 👍\n\nDe combien de pièces avez-vous besoin ?\n\n💡 Plus la quantité est élevée, plus le prix unitaire est avantageux !');
 
         const inputHtml = `
             <div class="flare-input-group">
-                <input type="number" class="flare-input" id="qty-input" placeholder="Ex: 20" min="1" value="10">
-                <button class="flare-btn" id="qty-btn">Valider</button>
+                <input type="number" class="flare-input" id="qty-input" placeholder="Ex: 20 pièces" min="1" value="15">
+                <button class="flare-btn" id="qty-btn">Continuer →</button>
+            </div>
+            <div style="text-align: center; margin-top: 8px; font-size: 12px; color: #666;">
+                💰 Tarifs dégressifs : plus vous commandez, plus c'est avantageux !
             </div>
         `;
 
@@ -351,34 +347,49 @@ class FlareConfigurateurWidget {
      * Affiche le formulaire de contact
      */
     showContactForm() {
-        this.addBotMessage(`Prix estimé: ${this.config.prix.totalPrice.toFixed(2)}€ HT\n(${this.config.prix.unitPrice.toFixed(2)}€/pièce)\n\nVos coordonnées pour recevoir le devis :`);
+        // Calculer l'estimation (on arrondit pour donner une fourchette)
+        const estimationMin = Math.floor(this.config.prix.totalPrice * 0.9 / 50) * 50;
+        const estimationMax = Math.ceil(this.config.prix.totalPrice * 1.1 / 50) * 50;
+
+        this.addBotMessage(`Parfait ! Voici un récapitulatif de votre demande :\n\n📦 ${this.config.produit.TITRE_VENDEUR}\n🏷️ ${this.config.quantite} pièces\n\n💰 Estimation : ${estimationMin}€ - ${estimationMax}€ HT\n\n✨ Nous vous enverrons un devis détaillé et personnalisé sous 24h !`);
 
         const formHtml = `
+            <div style="background: linear-gradient(135deg, rgba(255, 107, 0, 0.05) 0%, rgba(255, 107, 0, 0.1) 100%); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
+                <div style="font-size: 13px; color: #666; margin-bottom: 8px;">
+                    ✅ Devis gratuit et sans engagement<br>
+                    ✅ Réponse sous 24h<br>
+                    ✅ Accompagnement personnalisé
+                </div>
+            </div>
+
             <div class="flare-form-group">
                 <label class="flare-form-label">Prénom *</label>
-                <input type="text" class="flare-input" id="prenom" required>
+                <input type="text" class="flare-input" id="prenom" placeholder="Votre prénom" required>
             </div>
             <div class="flare-form-group">
                 <label class="flare-form-label">Nom *</label>
-                <input type="text" class="flare-input" id="nom" required>
+                <input type="text" class="flare-input" id="nom" placeholder="Votre nom" required>
             </div>
             <div class="flare-form-group">
                 <label class="flare-form-label">Email *</label>
-                <input type="email" class="flare-input" id="email" required>
+                <input type="email" class="flare-input" id="email" placeholder="votre@email.com" required>
             </div>
             <div class="flare-form-group">
                 <label class="flare-form-label">Téléphone *</label>
-                <input type="tel" class="flare-input" id="tel" required>
+                <input type="tel" class="flare-input" id="tel" placeholder="+33 6 12 34 56 78" required>
             </div>
             <div class="flare-form-group">
                 <label class="flare-form-label">Club / Entreprise</label>
-                <input type="text" class="flare-input" id="club">
+                <input type="text" class="flare-input" id="club" placeholder="Nom de votre club ou entreprise">
             </div>
             <div class="flare-form-group">
-                <label class="flare-form-label">Personnalisation (couleurs, logos...)</label>
-                <textarea class="flare-textarea" id="perso" placeholder="Ex: Bleu et blanc, logo du club..."></textarea>
+                <label class="flare-form-label">Vos souhaits de personnalisation</label>
+                <textarea class="flare-textarea" id="perso" placeholder="Couleurs souhaitées, logos, numéros, textes...&#10;&#10;Ex: Bleu et blanc, logo du club sur le devant, numéros dans le dos"></textarea>
             </div>
-            <button class="flare-btn" id="submit-btn">📧 Recevoir mon devis</button>
+            <button class="flare-btn" id="submit-btn">🚀 Recevoir mon devis gratuit</button>
+            <div style="text-align: center; margin-top: 12px; font-size: 11px; color: #999;">
+                🔒 Vos données sont sécurisées et ne seront jamais partagées
+            </div>
         `;
 
         this.addHTML(formHtml);
@@ -460,10 +471,18 @@ class FlareConfigurateurWidget {
     showSuccess() {
         const successHtml = `
             <div class="flare-success">
-                <div class="flare-success-icon">✅</div>
-                <h4>Devis envoyé !</h4>
-                <p>Vous allez recevoir un email à:<br><strong>${this.config.contact.email}</strong></p>
-                <p style="margin-top: 12px;">Notre équipe vous recontactera sous 24h</p>
+                <div class="flare-success-icon">🎉</div>
+                <h4>Demande envoyée avec succès !</h4>
+                <p>Vous allez recevoir votre devis personnalisé à :<br><strong>${this.config.contact.email}</strong></p>
+                <p style="margin-top: 12px; font-size: 12px;">
+                    ✅ Notre équipe vous recontactera sous 24h<br>
+                    ✅ Devis détaillé avec prix et options<br>
+                    ✅ Accompagnement personnalisé gratuit
+                </p>
+                <p style="margin-top: 16px; font-size: 11px; color: rgba(255,255,255,0.8);">
+                    📧 Pensez à vérifier vos spams si vous ne recevez rien<br>
+                    📱 Besoin urgent ? WhatsApp : +359 885 813 134
+                </p>
             </div>
         `;
 
@@ -474,6 +493,7 @@ class FlareConfigurateurWidget {
             const badge = this.container.querySelector('.flare-chat-bubble-badge');
             badge.textContent = '✓';
             badge.style.background = '#4CAF50';
+            badge.style.display = 'flex';
         }, 1000);
     }
 
@@ -645,8 +665,14 @@ class FlareConfigurateurWidget {
                  onerror="this.src='/assets/images/placeholder.jpg'">
             <div class="flare-product-info">
                 <div class="flare-product-name">${product.TITRE_VENDEUR}</div>
-                <div class="flare-product-details">${product.TISSU} • ${product.GRAMMAGE}</div>
-                <div class="flare-product-price">À partir de ${parseFloat(product.QTY_1).toFixed(2)}€</div>
+                <div class="flare-product-details">
+                    <div style="margin-bottom: 4px;">
+                        <strong>📏 Tissu:</strong> ${product.TISSU}
+                    </div>
+                    <div>
+                        <strong>⚖️ Grammage:</strong> ${product.GRAMMAGE}
+                    </div>
+                </div>
             </div>
         `;
 
