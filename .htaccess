@@ -150,54 +150,33 @@ AddDefaultCharset UTF-8
 </IfModule>
 
 # ============================================
-# 8. BLOCK SENSITIVE FILES
+# 8. BLOCK SENSITIVE FILES & SECURITY
 # ============================================
 
 # Bloquer les fichiers cachés (commençant par .)
 <FilesMatch "^\.">
-    Order allow,deny
-    Deny from all
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
 </FilesMatch>
 
-# Bloquer les fichiers de configuration et backups
-<FilesMatch "(\.htaccess|\.htpasswd|\.txt|\.log|\.bak|\.sql|\.zip|\.tar|\.gz)$">
-    Order allow,deny
-    Deny from all
-</FilesMatch>
-
-# Autoriser robots.txt et README.txt explicitement
-<FilesMatch "^(robots\.txt|README\.txt)$">
-    Order allow,deny
-    Allow from all
+# Bloquer l'accès aux fichiers sensibles sauf robots.txt et README.txt
+<FilesMatch "(\.htaccess|\.htpasswd|\.log|\.bak|\.sql|\.zip|\.tar|\.gz)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
 </FilesMatch>
 
 # Bloquer l'accès au répertoire config
-<DirectoryMatch "^.*/config">
-    Order allow,deny
-    Deny from all
-</DirectoryMatch>
-
-# Empêcher le listing des répertoires
-Options -Indexes
-
-# Protéger contre l'injection de code dans les uploads
-<FilesMatch "\.(php|phtml|php3|php4|php5|pl|py|jsp|asp|sh|cgi)$">
-    <IfModule mod_php5.c>
-        php_flag engine off
-    </IfModule>
-    <IfModule mod_php7.c>
-        php_flag engine off
-    </IfModule>
-</FilesMatch>
-
-# Autoriser PHP uniquement dans le dossier /api/
-<Directory "/api">
-    <FilesMatch "\.php$">
-        <IfModule mod_php5.c>
-            php_flag engine on
-        </IfModule>
-        <IfModule mod_php7.c>
-            php_flag engine on
-        </IfModule>
-    </FilesMatch>
-</Directory>
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^config/ - [F,L]
+</IfModule>
