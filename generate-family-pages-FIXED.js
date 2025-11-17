@@ -435,10 +435,21 @@ function generateFamilyPage(family, config) {
     template = template.replace(/<title>.*?<\/title>/, `<title>${config.seoTitle}</title>`);
     template = template.replace(/<meta name="description" content=".*?"/, `<meta name="description" content="${config.seoDescription}"`);
 
+    // Remplacer TOUS les "108 modèles" par le nombre correct pour cette famille
+    const productCount = productsByFamily[family]?.length || 0;
+    template = template.replace(/108 modèles/g, `${productCount} modèles`);
+
     // Remplacer le hero
-    template = template.replace(/108 modèles personnalisables tous sports/g, config.eyebrow);
+    template = template.replace(/\d+ modèles personnalisables tous sports/g, config.eyebrow);
     template = template.replace(/Maillots Sport Sublimation/g, config.title);
-    template = template.replace(/108 modèles tous sports\. Tissus techniques haute performance.*?pièces\./g, config.subtitle);
+
+    // Remplacer la section description
+    const sectionDescRegex = /<p class="section-description">\s*.*?<\/p>/s;
+    const sectionDescReplacement = `<p class="section-description">
+                    ${productCount} modèles tous sports. Tissus techniques haute performance,<br>
+                    Personnalisation illimitée, fabrication européenne certifiée.
+                </p>`;
+    template = template.replace(sectionDescRegex, sectionDescReplacement);
 
     // Remplacer TOUS les "maillot/maillots" par le terme de la famille
     const familyTerms = {
