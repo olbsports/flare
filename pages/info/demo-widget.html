@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Démo Widget Configurateur | FLARE CUSTOM</title>
+
+    <!-- Styles de base -->
+    <link rel="stylesheet" href="/assets/css/styles.css">
+
+    <!-- ========================================
+         INTÉGRATION DU WIDGET - 2 LIGNES !
+         ======================================== -->
+
+    <!-- 1. CSS du widget -->
+    <link rel="stylesheet" href="/assets/css/configurateur-widget.css">
+
+    <!-- 2. Scripts du widget (CSV Parser + Widget) -->
+    <script src="/assets/js/csv-parser.js" defer></script>
+    <script src="/assets/js/configurateur-widget.js" defer></script>
+
+    <!-- Fin de l'intégration -->
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .demo-container {
+            max-width: 800px;
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .demo-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .demo-section h2 {
+            color: #FF6B00;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .code-block {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 1rem 0;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #FF6B00 0%, #E56000 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 0, 0.3);
+        }
+
+        .alert {
+            background: linear-gradient(135deg, rgba(255, 107, 0, 0.1) 0%, rgba(255, 107, 0, 0.15) 100%);
+            border-left: 4px solid #FF6B00;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+
+        .alert-title {
+            font-weight: 700;
+            color: #FF6B00;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="demo-container">
+        <h1>🎯 Widget Configurateur</h1>
+        <p class="subtitle">Devis express en 2 minutes - Version bulle flottante</p>
+
+        <!-- Alerte d'instruction -->
+        <div class="alert">
+            <div class="alert-title">👉 Regardez en bas à droite !</div>
+            <p style="margin: 0;">Cliquez sur la bulle orange pour tester le configurateur de devis interactif.</p>
+        </div>
+
+        <!-- Section : Fonctionnalités -->
+        <div class="demo-section">
+            <h2>✨ Fonctionnalités</h2>
+            <ul class="feature-list">
+                <li>
+                    <span class="feature-icon">💬</span>
+                    <span><strong>Bulle flottante</strong> - S'affiche en bas à droite sur toutes les pages</span>
+                </li>
+                <li>
+                    <span class="feature-icon">⚡</span>
+                    <span><strong>Rapide</strong> - Parcours optimisé en 2 minutes</span>
+                </li>
+                <li>
+                    <span class="feature-icon">🎯</span>
+                    <span><strong>Intuitif</strong> - Interface chat simple et guidée</span>
+                </li>
+                <li>
+                    <span class="feature-icon">📱</span>
+                    <span><strong>Responsive</strong> - Fonctionne sur mobile, tablet et desktop</span>
+                </li>
+                <li>
+                    <span class="feature-icon">📧</span>
+                    <span><strong>Email automatique</strong> - Envoi instantané du récapitulatif</span>
+                </li>
+                <li>
+                    <span class="feature-icon">💰</span>
+                    <span><strong>Prix en temps réel</strong> - Calcul automatique selon la quantité</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Section : Installation -->
+        <div class="demo-section">
+            <h2>🚀 Installation ultra-simple</h2>
+            <p>Ajoutez ces 3 lignes dans le <code>&lt;head&gt;</code> de votre page :</p>
+
+            <div class="code-block">
+&lt;!-- CSS du widget --&gt;<br>
+&lt;link rel="stylesheet" href="/assets/css/configurateur-widget.css"&gt;<br>
+<br>
+&lt;!-- Scripts du widget --&gt;<br>
+&lt;script src="/assets/js/csv-parser.js" defer&gt;&lt;/script&gt;<br>
+&lt;script src="/assets/js/configurateur-widget.js" defer&gt;&lt;/script&gt;
+            </div>
+
+            <p style="margin-top: 1rem; color: #4CAF50; font-weight: 600;">
+                ✅ C'est tout ! Le widget apparaît automatiquement
+            </p>
+        </div>
+
+        <!-- Section : Parcours -->
+        <div class="demo-section">
+            <h2>🗺️ Parcours utilisateur</h2>
+            <ol style="line-height: 2;">
+                <li>L'utilisateur clique sur la bulle orange</li>
+                <li>Sélection du <strong>sport</strong> (Football, Rugby, etc.)</li>
+                <li>Choix de la <strong>famille de produit</strong> (Maillot, Short, etc.)</li>
+                <li>Sélection <strong>Homme/Femme</strong></li>
+                <li>Choix du <strong>modèle</strong> avec photo et prix</li>
+                <li>Saisie de la <strong>quantité</strong> (prix dégressif automatique)</li>
+                <li>Formulaire de <strong>contact</strong> et personnalisation</li>
+                <li><strong>Envoi automatique</strong> du devis par email</li>
+            </ol>
+        </div>
+
+        <!-- Section : Intégration -->
+        <div class="demo-section">
+            <h2>📍 Où intégrer le widget ?</h2>
+            <p>Le widget peut être intégré sur :</p>
+            <ul style="line-height: 2;">
+                <li>✅ <strong>Page d'accueil</strong> - Pour capter les visiteurs</li>
+                <li>✅ <strong>Pages produits</strong> - Pour faciliter la demande de devis</li>
+                <li>✅ <strong>Toutes les pages</strong> - Via le header ou footer commun</li>
+            </ul>
+        </div>
+
+        <!-- Section : Personnalisation -->
+        <div class="demo-section">
+            <h2>🎨 Personnalisation</h2>
+            <p>Modifiez les couleurs dans <code>/assets/css/configurateur-widget.css</code> :</p>
+            <div class="code-block">
+:root {<br>
+&nbsp;&nbsp;--widget-primary: #FF6B00; /* Votre couleur */<br>
+&nbsp;&nbsp;--widget-primary-dark: #E56000;<br>
+}
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div style="text-align: center; margin-top: 3rem;">
+            <a href="/" class="cta-button">← Retour à l'accueil</a>
+        </div>
+
+        <!-- Footer info -->
+        <div style="margin-top: 3rem; padding-top: 2rem; border-top: 2px solid #e0e0e0; text-align: center; color: #999;">
+            <p><strong>FLARE CUSTOM</strong> - Équipements sportifs personnalisés</p>
+            <p>
+                📧 <a href="mailto:contact@flare-custom.com" style="color: #FF6B00;">contact@flare-custom.com</a> •
+                📱 <a href="tel:+359885813134" style="color: #FF6B00;">+359 885 813 134</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Le widget s'affiche automatiquement en bas à droite ! -->
+
+</body>
+</html>
