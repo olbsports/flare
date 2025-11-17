@@ -1780,13 +1780,14 @@ section {
 .hero-adidas {
     position: relative;
     min-height: 80vh;
-    display: grid
-;
+    display: grid;
     grid-template-columns: 1fr 1fr;
     align-items: center;
-    padding: 125px 80px 80px;
+    padding: 125px 5% 80px;
     background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
     gap: 60px;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 /* === GAUCHE - TEXTE === */
@@ -1897,7 +1898,7 @@ section {
     width: 100%;
     height: 500px;
     margin-bottom: -27px;
-    overflow: visible;
+    overflow: hidden;
     z-index: 0;
 }
 
@@ -1968,8 +1969,8 @@ section {
 @media (max-width: 1024px) {
     .hero-adidas {
         grid-template-columns: 1fr;
-        padding: 100px 40px 60px;
-        gap: 50px;
+        padding: 100px 5% 60px;
+        gap: 40px;
     }
 
     .hero-adidas-content {
@@ -2004,7 +2005,7 @@ section {
     }
 
     .hero-adidas-title {
-        font-size: 52px;
+        font-size: clamp(42px, 10vw, 52px);
     }
 
     .hero-adidas-subtitle {
