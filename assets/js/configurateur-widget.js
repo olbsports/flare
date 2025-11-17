@@ -481,9 +481,11 @@ class FlareConfigurateurWidget {
      * Ajoute du HTML brut
      */
     addHTML(html) {
-        const div = document.createElement('div');
-        div.innerHTML = html;
-        this.messagesContainer.appendChild(div);
+        const wrapper = document.createElement('div');
+        wrapper.style.width = '100%';
+        wrapper.style.marginTop = '12px';
+        wrapper.innerHTML = html;
+        this.messagesContainer.appendChild(wrapper);
         this.scrollToBottom();
     }
 
@@ -491,6 +493,10 @@ class FlareConfigurateurWidget {
      * Affiche des options
      */
     showOptions(options, callback) {
+        const wrapper = document.createElement('div');
+        wrapper.style.width = '100%';
+        wrapper.style.marginTop = '12px';
+
         const container = document.createElement('div');
         container.className = 'flare-options';
 
@@ -503,12 +509,16 @@ class FlareConfigurateurWidget {
 
             btn.addEventListener('click', () => {
                 btn.classList.add('selected');
-                container.querySelectorAll('.flare-option-btn').forEach(b => {
-                    if (b !== btn) b.disabled = true;
+                const allBtns = container.querySelectorAll('.flare-option-btn');
+                allBtns.forEach(b => {
+                    if (b !== btn) {
+                        b.disabled = true;
+                        b.style.opacity = '0.5';
+                    }
                 });
                 setTimeout(() => {
-                    container.style.opacity = '0.6';
-                    container.style.pointerEvents = 'none';
+                    wrapper.style.opacity = '0.6';
+                    wrapper.style.pointerEvents = 'none';
                     callback(option);
                 }, 300);
             });
@@ -516,7 +526,8 @@ class FlareConfigurateurWidget {
             container.appendChild(btn);
         });
 
-        this.messagesContainer.appendChild(container);
+        wrapper.appendChild(container);
+        this.messagesContainer.appendChild(wrapper);
         this.scrollToBottom();
     }
 
@@ -524,6 +535,10 @@ class FlareConfigurateurWidget {
      * Affiche une carte produit
      */
     addProductCard(product, callback) {
+        const wrapper = document.createElement('div');
+        wrapper.style.width = '100%';
+        wrapper.style.marginTop = '8px';
+
         const card = document.createElement('div');
         card.className = 'flare-product-card';
         card.innerHTML = `
@@ -542,15 +557,18 @@ class FlareConfigurateurWidget {
             card.classList.add('selected');
             const allCards = this.messagesContainer.querySelectorAll('.flare-product-card');
             allCards.forEach(c => {
-                if (c !== card) c.style.opacity = '0.5';
+                if (c !== card) {
+                    c.style.opacity = '0.5';
+                    c.style.pointerEvents = 'none';
+                }
             });
             setTimeout(() => {
-                allCards.forEach(c => c.style.pointerEvents = 'none');
                 callback(product);
             }, 300);
         });
 
-        this.messagesContainer.appendChild(card);
+        wrapper.appendChild(card);
+        this.messagesContainer.appendChild(wrapper);
         this.scrollToBottom();
     }
 
