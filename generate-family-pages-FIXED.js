@@ -272,9 +272,9 @@ const familySEOContent = {
 
 <p>Nos <strong>shorts techniques performance</strong> utilisent tissus <strong>ultra-légers respirants</strong> évacuant transpiration rapidement maintenant jambes sèches fraîches durant efforts intensifs. La <strong>ceinture élastique ajustable</strong> avec cordon serrage assure maintien parfait confortable sans glissement pendant courses sprints sauts.</p>
 
-<p>La <strong>personnalisation short sublimation</strong> transforme chaque pièce en support visuel club : grands logos couleurs vives cuisses, sponsors réglementaires, numéros joueurs géants lisibilité arbitres, bandes latérales contrastées modernes, dégradés coordonnés maillots. La sublimation garantit <strong>durabilité couleurs</strong> lavages répétés clubs intensifs.</p>
+<p>La <strong>personnalisation short sublimation</strong> transforme chaque pièce en support visuel club : grands logos couleurs vives cuisses, sponsors réglementaires, numéros joueurs géants lisibilité arbitres, bandes latérales contrastées modernes, dégradés coordonnés hauts équipes. La sublimation garantit <strong>durabilité couleurs</strong> lavages répétés clubs intensifs.</p>
 
-<p>Les <strong>shorts club personnalisés</strong> conviennent football matchs entraînements, rugby shorts légers respirants, basketball débardeurs assortis, volleyball shorts femme ajustés, running trails courses route, handball sports salle et compétitions outdoor toutes disciplines. Idéals <strong>tenues complètes coordonnées</strong> maillots clubs.</p>
+<p>Les <strong>shorts club personnalisés</strong> conviennent football matchs entraînements, rugby shorts légers respirants, basketball débardeurs assortis, volleyball shorts femme ajustés, running trails courses route, handball sports salle et compétitions outdoor toutes disciplines. Idéals <strong>tenues complètes coordonnées</strong> hauts clubs.</p>
 
 <p>Gamme complète : <strong>shorts classiques</strong> longueur standard mi-cuisse, <strong>shorts courts</strong> liberté mouvement maximale, <strong>shorts longs</strong> protection cuisses basketball, <strong>shorts réversibles</strong> double face économiques entraînements. Versions <strong>femme ajustées</strong> coupe anatomique spécifique confort optimal.</p>
 
@@ -293,7 +293,7 @@ const familySEOContent = {
 
 <p>Nos <strong>cuissards techniques performance</strong> intègrent <strong>peau chamois haute densité</strong> multi-couches absorbant chocs vibrations selle protégeant zone périnéale durant heures parcours. Les bretelles larges ergonomiques répartissent poids uniformément épaules sans compression thoracique respirant librement.</p>
 
-<p>La <strong>personnalisation cuissard sublimation</strong> permet designs clubs spectaculaires : grands logos cuisses dos, sponsors partenaires réglementaires cyclisme, numéros dossards compétitions, bandes latérales contrastées, dégradés coordonnés maillots équipes. La sublimation assure <strong>résistance frottements</strong> selle lavages fréquents sans usure prématurée.</p>
+<p>La <strong>personnalisation cuissard sublimation</strong> permet designs clubs spectaculaires : grands logos cuisses dos, sponsors partenaires réglementaires cyclisme, numéros dossards compétitions, bandes latérales contrastées, dégradés coordonnés hauts équipes. La sublimation assure <strong>résistance frottements</strong> selle lavages fréquents sans usure prématurée.</p>
 
 <p>Les <strong>cuissards club personnalisés</strong> conviennent parfaitement cyclisme route sorties entraînements longues distances, VTT randonnées trails techniques, cyclosportives compétitions amateurs, cyclotourisme séjours itinérants et entraînements home-trainer indoor. Essentiels <strong>confort sorties longues</strong> clubs cyclistes.</p>
 
@@ -439,6 +439,39 @@ function generateFamilyPage(family, config) {
     template = template.replace(/108 modèles personnalisables tous sports/g, config.eyebrow);
     template = template.replace(/Maillots Sport Sublimation/g, config.title);
     template = template.replace(/108 modèles tous sports\. Tissus techniques haute performance.*?pièces\./g, config.subtitle);
+
+    // Remplacer TOUS les "maillot/maillots" par le terme de la famille
+    const familyTerms = {
+        'Polo': { singular: 'polo', plural: 'polos', singularCap: 'Polo', pluralCap: 'Polos' },
+        'Sweat': { singular: 'sweat', plural: 'sweats', singularCap: 'Sweat', pluralCap: 'Sweats' },
+        'T-Shirt': { singular: 't-shirt', plural: 't-shirts', singularCap: 'T-shirt', pluralCap: 'T-shirts' },
+        'Débardeur': { singular: 'débardeur', plural: 'débardeurs', singularCap: 'Débardeur', pluralCap: 'Débardeurs' },
+        'Sweat à Capuche': { singular: 'sweat à capuche', plural: 'sweats à capuche', singularCap: 'Sweat à capuche', pluralCap: 'Sweats à capuche' },
+        'Veste': { singular: 'veste', plural: 'vestes', singularCap: 'Veste', pluralCap: 'Vestes' },
+        'Pantalon': { singular: 'pantalon', plural: 'pantalons', singularCap: 'Pantalon', pluralCap: 'Pantalons' },
+        'Gilet': { singular: 'gilet', plural: 'gilets', singularCap: 'Gilet', pluralCap: 'Gilets' },
+        'Coupe-Vent': { singular: 'coupe-vent', plural: 'coupe-vent', singularCap: 'Coupe-vent', pluralCap: 'Coupe-vent' },
+        'Short': { singular: 'short', plural: 'shorts', singularCap: 'Short', pluralCap: 'Shorts' },
+        'Cuissard': { singular: 'cuissard', plural: 'cuissards', singularCap: 'Cuissard', pluralCap: 'Cuissards' },
+        'Corsaire': { singular: 'corsaire', plural: 'corsaires', singularCap: 'Corsaire', pluralCap: 'Corsaires' },
+        'Combinaison Triathlon': { singular: 'combinaison triathlon', plural: 'combinaisons triathlon', singularCap: 'Combinaison triathlon', pluralCap: 'Combinaisons triathlon' }
+    };
+
+    const terms = familyTerms[family];
+    if (terms) {
+        // Remplacer toutes les occurrences de "maillot" par le terme approprié
+        template = template.replace(/\bmaillots personnalisés\b/gi, `${terms.plural} personnalisés`);
+        template = template.replace(/\bMaillots personnalisés\b/g, `${terms.pluralCap} personnalisés`);
+        template = template.replace(/\bNos maillots\b/g, `Nos ${terms.plural}`);
+        template = template.replace(/\bdes maillots\b/gi, `des ${terms.plural}`);
+        template = template.replace(/\bvos maillots\b/gi, `vos ${terms.plural}`);
+        template = template.replace(/\bles maillots\b/gi, `les ${terms.plural}`);
+        template = template.replace(/\bde maillots\b/gi, `de ${terms.plural}`);
+        template = template.replace(/\bmaillot\b/gi, terms.singular);
+        template = template.replace(/\bMaillot\b/g, terms.singularCap);
+        template = template.replace(/\bmaillots\b/gi, terms.plural);
+        template = template.replace(/\bMaillots\b/g, terms.pluralCap);
+    }
 
     // Remplacer le compteur de produits
     template = template.replace(/108 produits/g, `${familyProducts.length} produits`);
