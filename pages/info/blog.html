@@ -11,167 +11,429 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
 
     <style>
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+
         .blog-hero {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            padding: 120px 20px 80px;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            padding: 160px 20px 100px;
             text-align: center;
             color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .blog-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(255, 75, 38, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 107, 74, 0.1) 0%, transparent 50%);
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .blog-hero-content {
+            position: relative;
+            z-index: 1;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .blog-hero-badge {
+            display: inline-block;
+            background: rgba(255, 75, 38, 0.2);
+            border: 2px solid rgba(255, 75, 38, 0.5);
+            padding: 8px 24px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
         }
 
         .blog-hero h1 {
             font-family: 'Bebas Neue', sans-serif;
-            font-size: 64px;
-            margin-bottom: 20px;
-            letter-spacing: 2px;
+            font-size: 72px;
+            margin-bottom: 25px;
+            letter-spacing: 3px;
+            background: linear-gradient(135deg, #fff 0%, #FF4B26 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .blog-hero p {
-            font-size: 20px;
+            font-size: 22px;
             opacity: 0.9;
-            max-width: 700px;
+            max-width: 750px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+
+        .blog-search-container {
+            max-width: 600px;
             margin: 0 auto;
+            position: relative;
+        }
+
+        .blog-search {
+            width: 100%;
+            padding: 18px 50px 18px 24px;
+            font-size: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .blog-search:focus {
+            outline: none;
+            border-color: #FF4B26;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .blog-search::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            opacity: 0.6;
         }
 
         .blog-container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 80px 20px;
+            padding: 100px 20px;
+        }
+
+        .blog-filters-section {
+            margin-bottom: 80px;
+            text-align: center;
+        }
+
+        .filters-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 25px;
         }
 
         .blog-filters {
             display: flex;
             gap: 15px;
-            margin-bottom: 60px;
             flex-wrap: wrap;
             justify-content: center;
         }
 
         .filter-btn {
-            padding: 12px 30px;
-            border: 2px solid #FF4B26;
-            background: transparent;
+            padding: 14px 32px;
+            border: 2px solid #e0e0e0;
+            background: #fff;
             color: #1a1a2e;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             border-radius: 50px;
             font-size: 14px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .filter-btn:hover,
+        .filter-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 75, 38, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .filter-btn:hover::before {
+            left: 100%;
+        }
+
+        .filter-btn:hover {
+            border-color: #FF4B26;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 75, 38, 0.2);
+        }
+
         .filter-btn.active {
-            background: #FF4B26;
+            background: linear-gradient(135deg, #FF4B26 0%, #ff6b4a 100%);
+            border-color: #FF4B26;
             color: #fff;
+            box-shadow: 0 8px 25px rgba(255, 75, 38, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .articles-count {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 16px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .articles-count span {
+            color: #FF4B26;
+            font-weight: 800;
         }
 
         .blog-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 40px;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 50px;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
         }
 
         .blog-card {
             background: #fff;
-            border-radius: 12px;
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.08);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
+            position: relative;
+        }
+
+        .blog-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 20px;
+            border: 2px solid transparent;
+            transition: all 0.5s;
+            pointer-events: none;
         }
 
         .blog-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(255, 75, 38, 0.15);
+        }
+
+        .blog-card:hover::after {
+            border-color: rgba(255, 75, 38, 0.3);
         }
 
         .blog-card-image {
             width: 100%;
-            height: 240px;
+            height: 260px;
             background: linear-gradient(135deg, #FF4B26 0%, #ff6b4a 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 80px;
+            font-size: 90px;
             position: relative;
+            overflow: hidden;
+        }
+
+        .blog-card-image::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 30%,
+                rgba(255, 255, 255, 0.1) 50%,
+                transparent 70%
+            );
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
         }
 
         .blog-card-category {
             position: absolute;
-            top: 15px;
-            left: 15px;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 11px;
+            font-weight: 800;
             color: #FF4B26;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
         }
 
         .blog-card-content {
-            padding: 30px;
+            padding: 40px 35px;
         }
 
         .blog-card-meta {
             display: flex;
-            gap: 20px;
+            gap: 25px;
             font-size: 13px;
-            color: #666;
-            margin-bottom: 15px;
+            color: #999;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .blog-card-meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .blog-card-title {
-            font-size: 22px;
-            font-weight: 800;
+            font-size: 24px;
+            font-weight: 900;
             color: #1a1a2e;
-            margin-bottom: 15px;
-            line-height: 1.3;
+            margin-bottom: 18px;
+            line-height: 1.4;
+            transition: color 0.3s;
+        }
+
+        .blog-card:hover .blog-card-title {
+            color: #FF4B26;
         }
 
         .blog-card-description {
-            font-size: 15px;
+            font-size: 16px;
             color: #666;
-            line-height: 1.6;
-            margin-bottom: 20px;
+            line-height: 1.7;
+            margin-bottom: 25px;
         }
 
         .blog-card-link {
             color: #FF4B26;
-            font-weight: 700;
+            font-weight: 800;
             font-size: 14px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            transition: gap 0.3s;
         }
 
-        .blog-card-link:after {
+        .blog-card-link::after {
             content: '→';
+            font-size: 18px;
             transition: transform 0.3s;
         }
 
-        .blog-card:hover .blog-card-link:after {
+        .blog-card:hover .blog-card-link {
+            gap: 15px;
+        }
+
+        .blog-card:hover .blog-card-link::after {
             transform: translateX(5px);
         }
 
         .no-articles {
             text-align: center;
-            padding: 60px 20px;
-            color: #666;
+            padding: 100px 20px;
+            color: #999;
             font-size: 18px;
+            background: #f9f9f9;
+            border-radius: 20px;
+        }
+
+        .no-articles-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 1200px) {
+            .blog-grid {
+                grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+                gap: 40px;
+            }
         }
 
         @media (max-width: 768px) {
+            .blog-hero {
+                padding: 140px 20px 80px;
+            }
+
             .blog-hero h1 {
-                font-size: 48px;
+                font-size: 52px;
+                letter-spacing: 2px;
+            }
+
+            .blog-hero p {
+                font-size: 18px;
             }
 
             .blog-grid {
                 grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .blog-filters {
+                gap: 10px;
+            }
+
+            .filter-btn {
+                padding: 12px 24px;
+                font-size: 12px;
+            }
+
+            .blog-container {
+                padding: 60px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .blog-hero h1 {
+                font-size: 42px;
+            }
+
+            .blog-card-title {
+                font-size: 20px;
             }
         }
     </style>
@@ -180,16 +442,31 @@
     <div id="dynamic-header"></div>
 
     <section class="blog-hero">
-        <h1>BLOG FLARE CUSTOM</h1>
-        <p>Guides, conseils et actualités sur les équipements sportifs personnalisés</p>
+        <div class="blog-hero-content">
+            <span class="blog-hero-badge">📚 Blog</span>
+            <h1>BLOG FLARE CUSTOM</h1>
+            <p>Guides, conseils et actualités sur les équipements sportifs personnalisés, la sublimation textile et les tendances du sport</p>
+            <div class="blog-search-container">
+                <input type="text" class="blog-search" id="searchInput" placeholder="Rechercher un article...">
+                <span class="search-icon">🔍</span>
+            </div>
+        </div>
     </section>
 
     <section class="blog-container">
-        <div class="blog-filters">
-            <button class="filter-btn active" data-category="all">Tous</button>
-            <button class="filter-btn" data-category="Guide">Guides</button>
-            <button class="filter-btn" data-category="Technologie">Technologie</button>
-            <button class="filter-btn" data-category="Conseils">Conseils</button>
+        <div class="blog-filters-section">
+            <h2 class="filters-title">Filtrer par catégorie</h2>
+            <div class="blog-filters">
+                <button class="filter-btn active" data-category="all">Tous les articles</button>
+                <button class="filter-btn" data-category="Guide">Guides</button>
+                <button class="filter-btn" data-category="Technologie">Technologie</button>
+                <button class="filter-btn" data-category="Conseils">Conseils</button>
+                <button class="filter-btn" data-category="Actualités">Actualités</button>
+            </div>
+        </div>
+
+        <div class="articles-count" id="articlesCount">
+            <span id="countNumber">0</span> article(s)
         </div>
 
         <div class="blog-grid" id="blogGrid">
@@ -197,7 +474,8 @@
         </div>
 
         <div class="no-articles" id="noArticles" style="display: none;">
-            Aucun article trouvé dans cette catégorie.
+            <div class="no-articles-icon">📭</div>
+            <p>Aucun article trouvé dans cette catégorie.</p>
         </div>
     </section>
 
@@ -221,6 +499,10 @@
         function displayArticles(articles) {
             const grid = document.getElementById('blogGrid');
             const noArticles = document.getElementById('noArticles');
+            const countNumber = document.getElementById('countNumber');
+
+            // Mettre à jour le compteur
+            countNumber.textContent = articles.length;
 
             if (articles.length === 0) {
                 grid.style.display = 'none';
@@ -231,11 +513,19 @@
             grid.style.display = 'grid';
             noArticles.style.display = 'none';
 
+            // Icône selon catégorie
+            const categoryIcons = {
+                'Guide': '📖',
+                'Technologie': '⚙️',
+                'Conseils': '💡',
+                'Actualités': '📰'
+            };
+
             grid.innerHTML = articles.map(article => `
                 <div class="blog-card" onclick="window.location.href='../blog/${article.slug}.html'">
                     <div class="blog-card-image">
                         <div class="blog-card-category">${article.category}</div>
-                        📝
+                        ${categoryIcons[article.category] || '📝'}
                     </div>
                     <div class="blog-card-content">
                         <div class="blog-card-meta">
@@ -258,6 +548,27 @@
 
         // Filtrer les articles
         let allArticles = [];
+        let currentCategory = 'all';
+        let searchTerm = '';
+
+        function filterArticles() {
+            let filtered = allArticles;
+
+            // Filtrer par catégorie
+            if (currentCategory !== 'all') {
+                filtered = filtered.filter(a => a.category === currentCategory);
+            }
+
+            // Filtrer par recherche
+            if (searchTerm) {
+                filtered = filtered.filter(a =>
+                    a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    a.description.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+            }
+
+            displayArticles(filtered);
+        }
 
         async function initBlog() {
             allArticles = await loadBlogArticles();
@@ -271,13 +582,16 @@
                     btn.classList.add('active');
 
                     // Filtrer
-                    const category = btn.dataset.category;
-                    const filtered = category === 'all'
-                        ? allArticles
-                        : allArticles.filter(a => a.category === category);
-
-                    displayArticles(filtered);
+                    currentCategory = btn.dataset.category;
+                    filterArticles();
                 });
+            });
+
+            // Gestion de la recherche
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', (e) => {
+                searchTerm = e.target.value;
+                filterArticles();
             });
         }
 
