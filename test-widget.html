@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEST Widget - Debug Mode</title>
+
+    <!-- Widget CSS -->
+    <link rel="stylesheet" href="/assets/css/configurateur-widget.css">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #FF6B00;
+            margin-bottom: 20px;
+        }
+
+        .instructions {
+            background: #fff3e6;
+            border-left: 4px solid #FF6B00;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .console-box {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 20px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .status {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .status-item {
+            flex: 1;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .status-ok {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            color: #856404;
+        }
+
+        button {
+            background: #FF6B00;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        button:hover {
+            background: #E56000;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="test-container">
+        <h1>🧪 TEST Widget Configurateur - Mode Debug</h1>
+
+        <div class="instructions">
+            <h3>📋 Instructions</h3>
+            <ol>
+                <li><strong>Ouvrez la console</strong> (F12 ou Clic droit → Inspecter → Console)</li>
+                <li><strong>Cliquez sur la bulle orange</strong> en bas à droite</li>
+                <li><strong>Regardez les logs</strong> dans la console</li>
+                <li><strong>Testez les clics</strong> sur les boutons</li>
+            </ol>
+        </div>
+
+        <div class="status">
+            <div class="status-item status-pending" id="status-widget">
+                <strong>Widget</strong><br>
+                En attente...
+            </div>
+            <div class="status-item status-pending" id="status-csv">
+                <strong>CSV</strong><br>
+                En attente...
+            </div>
+            <div class="status-item status-pending" id="status-chat">
+                <strong>Chat</strong><br>
+                Non ouvert
+            </div>
+        </div>
+
+        <div>
+            <button onclick="testWidget()">🔍 Vérifier Widget</button>
+            <button onclick="testCSV()">📊 Vérifier CSV</button>
+            <button onclick="openChat()">💬 Ouvrir Chat</button>
+            <button onclick="clearConsole()">🧹 Nettoyer Console</button>
+        </div>
+
+        <div class="console-box" id="console-output">
+            <div>Logs de la console apparaîtront ici...</div>
+            <div>Ouvrez F12 pour voir plus de détails</div>
+        </div>
+    </div>
+
+    <!-- Widget Scripts -->
+    <script src="/assets/js/csv-parser.js"></script>
+    <script src="/assets/js/configurateur-widget.js"></script>
+
+    <!-- Test Scripts -->
+    <script>
+        // Intercept console.log
+        const originalLog = console.log;
+        const outputDiv = document.getElementById('console-output');
+
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+
+            const logLine = document.createElement('div');
+            logLine.textContent = '> ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ');
+            logLine.style.marginBottom = '5px';
+            outputDiv.appendChild(logLine);
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        };
+
+        console.error = function(...args) {
+            originalLog.apply(console, args);
+
+            const logLine = document.createElement('div');
+            logLine.textContent = '❌ ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ');
+            logLine.style.color = '#ff0000';
+            logLine.style.marginBottom = '5px';
+            outputDiv.appendChild(logLine);
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        };
+
+        // Test functions
+        function testWidget() {
+            console.log('🧪 TEST: Vérification du widget...');
+
+            if (typeof flareWidget !== 'undefined') {
+                console.log('✅ Widget trouvé:', flareWidget);
+                document.getElementById('status-widget').className = 'status-item status-ok';
+                document.getElementById('status-widget').innerHTML = '<strong>Widget</strong><br>✅ Chargé';
+
+                if (flareWidget.container) {
+                    console.log('✅ Container widget présent');
+                } else {
+                    console.error('❌ Container widget manquant');
+                }
+            } else {
+                console.error('❌ Widget non trouvé');
+                document.getElementById('status-widget').className = 'status-item status-error';
+                document.getElementById('status-widget').innerHTML = '<strong>Widget</strong><br>❌ Non chargé';
+            }
+        }
+
+        function testCSV() {
+            console.log('🧪 TEST: Vérification du CSV...');
+
+            if (typeof flareWidget !== 'undefined' && flareWidget.dataLoaded) {
+                console.log('✅ CSV chargé:', flareWidget.data);
+                console.log('✅ Nombre de produits:', flareWidget.data.products.length);
+                console.log('✅ Sports:', flareWidget.data.sports);
+                document.getElementById('status-csv').className = 'status-item status-ok';
+                document.getElementById('status-csv').innerHTML = '<strong>CSV</strong><br>✅ ' + flareWidget.data.products.length + ' produits';
+            } else if (typeof flareWidget !== 'undefined' && flareWidget.dataLoading) {
+                console.log('⏳ CSV en cours de chargement...');
+                document.getElementById('status-csv').className = 'status-item status-pending';
+                document.getElementById('status-csv').innerHTML = '<strong>CSV</strong><br>⏳ Chargement...';
+            } else {
+                console.error('❌ CSV non chargé');
+                document.getElementById('status-csv').className = 'status-item status-error';
+                document.getElementById('status-csv').innerHTML = '<strong>CSV</strong><br>❌ Non chargé';
+            }
+        }
+
+        function openChat() {
+            console.log('🧪 TEST: Ouverture du chat...');
+
+            if (typeof flareWidget !== 'undefined') {
+                const bubble = document.querySelector('.flare-chat-bubble');
+                if (bubble) {
+                    console.log('✅ Bulle trouvée, clic simulé');
+                    bubble.click();
+                    document.getElementById('status-chat').className = 'status-item status-ok';
+                    document.getElementById('status-chat').innerHTML = '<strong>Chat</strong><br>✅ Ouvert';
+                } else {
+                    console.error('❌ Bulle non trouvée');
+                }
+            }
+        }
+
+        function clearConsole() {
+            outputDiv.innerHTML = '<div>Console nettoyée</div>';
+        }
+
+        // Auto-test au chargement
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                console.log('🚀 Auto-test démarré...');
+                testWidget();
+                setTimeout(testCSV, 2000);
+            }, 1000);
+        });
+    </script>
+
+</body>
+</html>

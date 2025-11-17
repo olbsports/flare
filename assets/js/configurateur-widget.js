@@ -21,23 +21,41 @@ class FlareConfigurateurWidget {
         this.isOpen = false;
         this.container = null;
         this.messagesContainer = null;
+        this.dataLoaded = false;
+        this.dataLoading = false;
     }
 
     /**
      * Initialise le widget
      */
     async init() {
+        console.log('🚀 Initialisation du widget...');
         this.createWidget();
         this.attachEvents();
 
         // Charger le CSV
+        this.loadData();
+    }
+
+    /**
+     * Charge les données CSV
+     */
+    async loadData() {
+        if (this.dataLoading || this.dataLoaded) return;
+
+        this.dataLoading = true;
+        console.log('📊 Chargement des données...');
+
         try {
             this.csvParser = new CSVParser();
             this.data = await this.csvParser.loadCSV('/assets/data/PRICING-FLARE-2025.csv');
+            this.dataLoaded = true;
             console.log('✅ Données chargées:', this.data.products.length, 'produits');
         } catch (error) {
             console.error('❌ Erreur chargement CSV:', error);
+            this.dataLoaded = false;
         }
+        this.dataLoading = false;
     }
 
     /**
@@ -106,7 +124,7 @@ class FlareConfigurateurWidget {
     /**
      * Ouvre le widget
      */
-    open() {
+    async open() {
         const window = this.container.querySelector('.flare-chat-window');
         const bubble = this.container.querySelector('.flare-chat-bubble');
 
@@ -116,7 +134,17 @@ class FlareConfigurateurWidget {
 
         // Premier message si pas encore fait
         if (this.currentStep === 'welcome') {
-            setTimeout(() => this.showWelcome(), 300);
+            // Attendre que les données soient chargées
+            if (!this.dataLoaded) {
+                this.addBotMessage('⏳ Chargement des données...');
+                await this.loadData();
+            }
+
+            if (this.dataLoaded) {
+                setTimeout(() => this.showWelcome(), 300);
+            } else {
+                this.addBotMessage('❌ Erreur de chargement. Veuillez rafraîchir la page ou contactez-nous:\n📧 contact@flare-custom.com\n📱 +359885813134');
+            }
         }
 
         // Cacher le badge
@@ -152,7 +180,15 @@ class FlareConfigurateurWidget {
      * Affiche les options de sport
      */
     showSportOptions() {
-        if (!this.data) return;
+        console.log('🏀 showSportOptions appelé, data:', this.data);
+
+        if (!this.data || !this.data.sports) {
+            console.error('❌ Pas de données disponibles');
+            this.addBotMessage('❌ Erreur: données non disponibles. Veuillez rafraîchir la page.');
+            return;
+        }
+
+        console.log('📋 Sports disponibles:', this.data.sports);
 
         const options = this.data.sports.map(sport => ({
             id: sport,
@@ -160,7 +196,10 @@ class FlareConfigurateurWidget {
             desc: this.getSportEmoji(sport)
         }));
 
+        console.log('✅ Options créées:', options);
+
         this.showOptions(options, (selected) => {
+            console.log('✅ Sport sélectionné:', selected);
             this.config.sport = selected.id;
             this.addUserMessage(selected.title);
             this.showFamilyOptions();
@@ -493,6 +532,8 @@ class FlareConfigurateurWidget {
      * Affiche des options
      */
     showOptions(options, callback) {
+        console.log('🔘 showOptions appelé avec', options.length, 'options');
+
         const wrapper = document.createElement('div');
         wrapper.style.width = '100%';
         wrapper.style.marginTop = '12px';
@@ -500,14 +541,17 @@ class FlareConfigurateurWidget {
         const container = document.createElement('div');
         container.className = 'flare-options';
 
-        options.forEach(option => {
+        options.forEach((option, index) => {
             const btn = document.createElement('button');
             btn.className = 'flare-option-btn';
             btn.innerHTML = `
                 <div class="flare-option-title">${option.desc} ${option.title}</div>
             `;
 
+            console.log(`✅ Bouton ${index} créé:`, option.title);
+
             btn.addEventListener('click', () => {
+                console.log('👆 Clic sur:', option.title);
                 btn.classList.add('selected');
                 const allBtns = container.querySelectorAll('.flare-option-btn');
                 allBtns.forEach(b => {
@@ -528,6 +572,7 @@ class FlareConfigurateurWidget {
 
         wrapper.appendChild(container);
         this.messagesContainer.appendChild(wrapper);
+        console.log('✅ Options ajoutées au DOM');
         this.scrollToBottom();
     }
 
