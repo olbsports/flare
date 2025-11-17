@@ -23,6 +23,7 @@ class FlareConfigurateurWidget {
         this.messagesContainer = null;
         this.dataLoaded = false;
         this.dataLoading = false;
+        this.loadPromise = null; // Promise pour attendre le chargement
     }
 
     /**
@@ -41,21 +42,43 @@ class FlareConfigurateurWidget {
      * Charge les données CSV
      */
     async loadData() {
-        if (this.dataLoading || this.dataLoaded) return;
-
-        this.dataLoading = true;
-        console.log('📊 Chargement des données...');
-
-        try {
-            this.csvParser = new CSVParser();
-            this.data = await this.csvParser.loadCSV('/assets/data/PRICING-FLARE-2025.csv');
-            this.dataLoaded = true;
-            console.log('✅ Données chargées:', this.data.products.length, 'produits');
-        } catch (error) {
-            console.error('❌ Erreur chargement CSV:', error);
-            this.dataLoaded = false;
+        // Si déjà chargé, retourner immédiatement
+        if (this.dataLoaded) {
+            console.log('✅ Données déjà chargées');
+            return;
         }
-        this.dataLoading = false;
+
+        // Si en cours de chargement, attendre la promesse existante
+        if (this.loadPromise) {
+            console.log('⏳ Chargement déjà en cours, attente...');
+            return this.loadPromise;
+        }
+
+        // Démarrer le chargement
+        this.dataLoading = true;
+        console.log('📊 Démarrage du chargement des données...');
+
+        this.loadPromise = (async () => {
+            try {
+                this.csvParser = new CSVParser();
+                this.data = await this.csvParser.loadCSV('/assets/data/PRICING-FLARE-2025.csv');
+                this.dataLoaded = true;
+                console.log('✅ Données chargées:', this.data);
+                console.log('✅ Nombre de produits:', this.data.products ? this.data.products.length : 0);
+                console.log('✅ Sports disponibles:', this.data.sports);
+                console.log('✅ Type de sports:', typeof this.data.sports, Array.isArray(this.data.sports));
+            } catch (error) {
+                console.error('❌ Erreur chargement CSV:', error);
+                console.error('❌ Stack:', error.stack);
+                this.dataLoaded = false;
+                throw error; // Propager l'erreur
+            } finally {
+                this.dataLoading = false;
+                this.loadPromise = null; // Réinitialiser la promesse
+            }
+        })();
+
+        return this.loadPromise;
     }
 
     /**
