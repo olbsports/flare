@@ -420,6 +420,32 @@
     cursor: not-allowed;
 }
 
+/* Bouton secondaire (outline) */
+.flare-btn-secondary {
+    background: transparent;
+    color: var(--widget-primary);
+    border: 2px solid var(--widget-primary);
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 12px;
+}
+
+.flare-btn-secondary:hover {
+    background: var(--widget-primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+}
+
+.flare-btn-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* Indicateur de frappe */
 .flare-typing {
     display: flex;

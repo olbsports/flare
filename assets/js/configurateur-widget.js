@@ -453,7 +453,7 @@ class FlareConfigurateurWidget {
     /**
      * Affiche les produits
      */
-    showProducts() {
+    showProducts(showAll = false) {
         // Utiliser le sport déterminé pour les produits (peut être SPORTSWEAR)
         const sportToUse = this.config.sportForProducts || this.config.sport;
 
@@ -463,26 +463,33 @@ class FlareConfigurateurWidget {
             this.config.genre
         );
 
-        // Appliquer les filtres sélectionnés
-        if (this.config.manchesFilter) {
-            products = products.filter(p => {
-                const titre = p.TITRE_VENDEUR || '';
-                if (this.config.manchesFilter === 'Manches Courtes') {
-                    return titre.includes('Manches Courtes') || titre.includes('MC ');
-                } else if (this.config.manchesFilter === 'Manches Longues') {
-                    return titre.includes('Manches Longues') || titre.includes('ML ');
-                } else if (this.config.manchesFilter === 'Sans Manches') {
-                    return titre.includes('Sans Manche') || titre.includes('Débardeur');
-                }
-                return true;
-            });
-        }
+        const totalProducts = products.length;
+        let hasFilters = false;
 
-        if (this.config.colFilter) {
-            products = products.filter(p => {
-                const titre = p.TITRE_VENDEUR || '';
-                return titre.includes(this.config.colFilter) || titre.toLowerCase().includes(this.config.colFilter.toLowerCase());
-            });
+        // Appliquer les filtres sélectionnés seulement si showAll = false
+        if (!showAll) {
+            if (this.config.manchesFilter) {
+                hasFilters = true;
+                products = products.filter(p => {
+                    const titre = p.TITRE_VENDEUR || '';
+                    if (this.config.manchesFilter === 'Manches Courtes') {
+                        return titre.includes('Manches Courtes') || titre.includes('MC ');
+                    } else if (this.config.manchesFilter === 'Manches Longues') {
+                        return titre.includes('Manches Longues') || titre.includes('ML ');
+                    } else if (this.config.manchesFilter === 'Sans Manches') {
+                        return titre.includes('Sans Manche') || titre.includes('Débardeur');
+                    }
+                    return true;
+                });
+            }
+
+            if (this.config.colFilter) {
+                hasFilters = true;
+                products = products.filter(p => {
+                    const titre = p.TITRE_VENDEUR || '';
+                    return titre.includes(this.config.colFilter) || titre.toLowerCase().includes(this.config.colFilter.toLowerCase());
+                });
+            }
         }
 
         const messageIntro = this.config.isEnfant
@@ -498,6 +505,29 @@ class FlareConfigurateurWidget {
                 this.showQuantityInput();
             });
         });
+
+        // Ajouter un bouton "Voir tous les produits" si des filtres ont été appliqués et qu'on n'affiche pas déjà tous les produits
+        if (hasFilters && !showAll && products.length < totalProducts) {
+            const btnHtml = `
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="flare-btn-secondary" id="show-all-products-btn" type="button">
+                        🔍 Voir tous les produits (${totalProducts})
+                    </button>
+                </div>
+            `;
+            this.addHTML(btnHtml);
+
+            setTimeout(() => {
+                const btn = document.getElementById('show-all-products-btn');
+                if (btn) {
+                    btn.addEventListener('click', () => {
+                        btn.disabled = true;
+                        // Effacer les messages précédents de produits
+                        this.showProducts(true);
+                    });
+                }
+            }, 100);
+        }
     }
 
     /**
@@ -951,6 +981,18 @@ class FlareConfigurateurWidget {
         const card = document.createElement('div');
         card.className = 'flare-product-card';
         card.style.cursor = 'pointer';
+        const finitionHtml = product.FINITION ? `
+            <div style="margin-bottom: 4px;">
+                <strong>✨ Finitions:</strong> ${product.FINITION}
+            </div>
+        ` : '';
+
+        const etiquettesHtml = product.ETIQUETTES ? `
+            <div style="margin-bottom: 4px;">
+                <strong>🏷️ Labels:</strong> ${product.ETIQUETTES}
+            </div>
+        ` : '';
+
         card.innerHTML = `
             <img src="${product.PHOTO_1 || '/assets/images/placeholder.jpg'}"
                  alt="${product.TITRE_VENDEUR}"
@@ -962,9 +1004,11 @@ class FlareConfigurateurWidget {
                     <div style="margin-bottom: 4px;">
                         <strong>📏 Tissu:</strong> ${product.TISSU}
                     </div>
-                    <div>
+                    <div style="margin-bottom: 4px;">
                         <strong>⚖️ Grammage:</strong> ${product.GRAMMAGE}
                     </div>
+                    ${finitionHtml}
+                    ${etiquettesHtml}
                 </div>
             </div>
         `;
