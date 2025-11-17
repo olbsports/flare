@@ -630,6 +630,9 @@ class FlareConfigurateurWidget {
                 this.addUserMessage(`Oui, ajouter ${selected.title}`);
                 // Revenir à la sélection de genre pour cette nouvelle famille
                 this.config.famille = selected.id;
+                // Réinitialiser les filtres pour le nouveau produit
+                this.config.manchesFilter = null;
+                this.config.colFilter = null;
                 this.showGenreOptions();
             }
         });
@@ -949,12 +952,30 @@ class FlareConfigurateurWidget {
                 }, 300);
             };
 
-            btn.addEventListener('click', clickHandler);
-            // Ajouter aussi un gestionnaire pour le touch sur mobile
+            // Touch handling pour mobile - détecter tap vs scroll
+            let touchStartY = 0;
+            let touchStartX = 0;
+
+            btn.addEventListener('touchstart', (e) => {
+                touchStartY = e.touches[0].clientY;
+                touchStartX = e.touches[0].clientX;
+            }, { passive: true });
+
             btn.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                clickHandler(e);
+                const touchEndY = e.changedTouches[0].clientY;
+                const touchEndX = e.changedTouches[0].clientX;
+                const deltaY = Math.abs(touchEndY - touchStartY);
+                const deltaX = Math.abs(touchEndX - touchStartX);
+
+                // Si le mouvement est < 10px, c'est un tap, pas un scroll
+                if (deltaY < 10 && deltaX < 10) {
+                    e.preventDefault();
+                    clickHandler(e);
+                }
+                // Sinon, laisser le scroll se faire normalement
             });
+
+            btn.addEventListener('click', clickHandler);
 
             container.appendChild(btn);
         });
@@ -1034,11 +1055,30 @@ class FlareConfigurateurWidget {
             }, 300);
         };
 
-        card.addEventListener('click', clickHandler);
+        // Touch handling pour mobile - détecter tap vs scroll
+        let touchStartY = 0;
+        let touchStartX = 0;
+
+        card.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+            touchStartX = e.touches[0].clientX;
+        }, { passive: true });
+
         card.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            clickHandler(e);
+            const touchEndY = e.changedTouches[0].clientY;
+            const touchEndX = e.changedTouches[0].clientX;
+            const deltaY = Math.abs(touchEndY - touchStartY);
+            const deltaX = Math.abs(touchEndX - touchStartX);
+
+            // Si le mouvement est < 10px, c'est un tap, pas un scroll
+            if (deltaY < 10 && deltaX < 10) {
+                e.preventDefault();
+                clickHandler(e);
+            }
+            // Sinon, laisser le scroll se faire normalement
         });
+
+        card.addEventListener('click', clickHandler);
 
         wrapper.appendChild(card);
         this.messagesContainer.appendChild(wrapper);
