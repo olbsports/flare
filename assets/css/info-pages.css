@@ -1,0 +1,440 @@
+/* INFO PAGES CSS - Pour pages Floquage, Made in Europe, Sublimation, Tissus, Innovation, etc. */
+
+/* === CONTAINER === */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* === INTRO BLOCK === */
+.intro-block {
+    text-align: center;
+    max-width: 900px;
+    margin: 0 auto 60px;
+}
+
+.intro-block h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 5vw, 52px);
+    line-height: 1.1;
+    letter-spacing: 1px;
+    margin-bottom: 24px;
+    color: #000;
+}
+
+.large-text {
+    font-size: 18px;
+    line-height: 1.8;
+    color: #666;
+}
+
+.large-text strong {
+    color: #000;
+    font-weight: 700;
+}
+
+/* === FEATURES GRID === */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-bottom: 80px;
+}
+
+.feature-card {
+    background: #f9f9f9;
+    padding: 40px 30px;
+    border-radius: 8px;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.feature-icon {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+.feature-card h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    color: #000;
+}
+
+.feature-card p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #666;
+}
+
+/* === HIGHLIGHT SECTION === */
+.highlight-section {
+    background: #f9f9f9;
+    padding: 60px 40px;
+    border-radius: 12px;
+    margin: 80px 0;
+}
+
+.highlight-section h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(32px, 5vw, 48px);
+    text-align: center;
+    margin-bottom: 50px;
+    color: #000;
+    letter-spacing: 1px;
+}
+
+/* === PROCESS STEPS === */
+.process-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 30px;
+    margin-bottom: 40px;
+    padding: 30px;
+    background: #fff;
+    border-radius: 8px;
+    transition: box-shadow 0.3s;
+}
+
+.process-step:hover {
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.step-number {
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    background: #FF4B26;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 1px;
+}
+
+.step-content h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    color: #000;
+}
+
+.step-content p {
+    font-size: 16px;
+    line-height: 1.7;
+    color: #666;
+}
+
+/* === INFO SECTION === */
+.info-section {
+    margin: 80px 0;
+}
+
+.info-section h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(32px, 5vw, 48px);
+    text-align: center;
+    margin-bottom: 50px;
+    color: #000;
+    letter-spacing: 1px;
+}
+
+/* === SERVICE LIST === */
+.service-list {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.service-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 30px;
+    padding: 25px;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+.service-icon {
+    flex-shrink: 0;
+    font-size: 28px;
+    color: #FF4B26;
+}
+
+.service-text h4 {
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #000;
+}
+
+.service-text p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #666;
+}
+
+/* === BENEFITS GRID === */
+.benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin: 60px 0;
+}
+
+.benefit-card {
+    padding: 30px 25px;
+    background: #fff;
+    border: 2px solid #f0f0f0;
+    border-radius: 8px;
+    text-align: center;
+    transition: border-color 0.3s;
+}
+
+.benefit-card:hover {
+    border-color: #FF4B26;
+}
+
+.benefit-number {
+    display: inline-block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    color: #FF4B26;
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+}
+
+.benefit-card h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    color: #000;
+}
+
+.benefit-card p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #666;
+}
+
+/* === COMPARISON TABLE === */
+.comparison-section {
+    margin: 80px 0;
+}
+
+.comparison-section h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(32px, 5vw, 48px);
+    text-align: center;
+    margin-bottom: 50px;
+    color: #000;
+    letter-spacing: 1px;
+}
+
+.comparison-table {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.comparison-table thead {
+    background: #000;
+    color: #fff;
+}
+
+.comparison-table th {
+    padding: 20px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 1px;
+    text-align: left;
+}
+
+.comparison-table td {
+    padding: 18px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.comparison-table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.comparison-table .check {
+    color: #4CAF50;
+    font-weight: 700;
+}
+
+.comparison-table .cross {
+    color: #FF4B26;
+    font-weight: 700;
+}
+
+/* === SPEC CARDS === */
+.specs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    margin: 60px 0;
+}
+
+.spec-card {
+    background: linear-gradient(135deg, #f9f9f9 0%, #fff 100%);
+    padding: 30px 25px;
+    border-radius: 8px;
+    border-left: 4px solid #FF4B26;
+}
+
+.spec-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #FF4B26;
+    margin-bottom: 12px;
+}
+
+.spec-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: #000;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.spec-description {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #666;
+}
+
+/* === CTA SECTION === */
+.cta-section {
+    background: #000;
+    color: #fff;
+    padding: 80px 5%;
+    text-align: center;
+    margin: 80px 0 0;
+}
+
+.cta-section h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 6vw, 60px);
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+}
+
+.cta-section p {
+    font-size: 18px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.8);
+    max-width: 700px;
+    margin: 0 auto 40px;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-primary {
+    display: inline-block;
+    padding: 18px 40px;
+    background: #FF4B26;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: 4px;
+    transition: background 0.3s, transform 0.3s;
+}
+
+.btn-primary:hover {
+    background: #e63910;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    display: inline-block;
+    padding: 18px 40px;
+    background: transparent;
+    color: #fff;
+    border: 2px solid #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: 4px;
+    transition: background 0.3s, color 0.3s, transform 0.3s;
+}
+
+.btn-secondary:hover {
+    background: #fff;
+    color: #000;
+    transform: translateY(-2px);
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .process-step {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .step-number {
+        margin: 0 auto 20px;
+    }
+
+    .benefits-grid,
+    .specs-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .comparison-table {
+        font-size: 14px;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+        padding: 12px 10px;
+    }
+
+    .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        max-width: 300px;
+    }
+}
