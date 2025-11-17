@@ -180,7 +180,15 @@
     // Charger et générer
     async function loadAndGenerate() {
         try {
-            const response = await fetch('/assets/data/tableaux-tailles-complet.json');
+            // Détecter le chemin relatif vers les données
+            const path = window.location.pathname;
+            let dataPath = 'assets/data/tableaux-tailles-complet.json';
+
+            if (path.includes('/pages/')) {
+                dataPath = '../../assets/data/tableaux-tailles-complet.json';
+            }
+
+            const response = await fetch(dataPath);
             const data = await response.json();
             
             const container = document.getElementById('tableaux-container');
