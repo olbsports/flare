@@ -98,30 +98,22 @@
 </IfModule>
 
 # ============================================
-# 4. FORCE HTTPS
+# 4. REWRITE RULES (HTTPS, WEBP, CONFIG)
 # ============================================
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    
+
     # Redirection HTTP -> HTTPS
     RewriteCond %{HTTPS} off
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-</IfModule>
 
-# ============================================
-# 5. SERVE WEBP IF SUPPORTED
-# ============================================
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    
-    # Check if browser supports WebP
+    # Bloquer l'accès au répertoire config
+    RewriteRule ^config/ - [F,L]
+
+    # Serve WebP if supported
     RewriteCond %{HTTP_ACCEPT} image/webp
-    
-    # Check if WebP version exists
     RewriteCond %{REQUEST_FILENAME} (.*)\.(jpe?g|png)$
     RewriteCond %1.webp -f
-    
-    # Serve WebP instead
     RewriteRule (.*)\.(jpe?g|png)$ $1.webp [T=image/webp,E=accept:1,L]
 </IfModule>
 
@@ -150,7 +142,7 @@ AddDefaultCharset UTF-8
 </IfModule>
 
 # ============================================
-# 8. BLOCK SENSITIVE FILES & SECURITY
+# 8. BLOCK SENSITIVE FILES
 # ============================================
 
 # Bloquer les fichiers cachés (commençant par .)
@@ -164,7 +156,7 @@ AddDefaultCharset UTF-8
     </IfModule>
 </FilesMatch>
 
-# Bloquer l'accès aux fichiers sensibles sauf robots.txt et README.txt
+# Bloquer l'accès aux fichiers sensibles
 <FilesMatch "(\.htaccess|\.htpasswd|\.log|\.bak|\.sql|\.zip|\.tar|\.gz)$">
     <IfModule mod_authz_core.c>
         Require all denied
@@ -174,9 +166,3 @@ AddDefaultCharset UTF-8
         Deny from all
     </IfModule>
 </FilesMatch>
-
-# Bloquer l'accès au répertoire config
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteRule ^config/ - [F,L]
-</IfModule>
