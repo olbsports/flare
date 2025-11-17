@@ -190,6 +190,12 @@ class FlareConfigurateurWidget {
 
         console.log('📋 Sports disponibles:', this.data.sports);
 
+        if (!this.data.sports || this.data.sports.length === 0) {
+            console.error('❌ Aucun sport disponible dans les données');
+            this.addBotMessage('❌ Erreur: aucun sport disponible. Contactez-nous:\n📧 contact@flare-custom.com');
+            return;
+        }
+
         const options = this.data.sports.map(sport => ({
             id: sport,
             title: this.formatSportName(sport),
@@ -537,6 +543,7 @@ class FlareConfigurateurWidget {
         const wrapper = document.createElement('div');
         wrapper.style.width = '100%';
         wrapper.style.marginTop = '12px';
+        wrapper.style.pointerEvents = 'auto'; // S'assurer que les interactions sont activées
 
         const container = document.createElement('div');
         container.className = 'flare-options';
@@ -544,15 +551,23 @@ class FlareConfigurateurWidget {
         options.forEach((option, index) => {
             const btn = document.createElement('button');
             btn.className = 'flare-option-btn';
+            btn.type = 'button'; // Spécifier explicitement le type
             btn.innerHTML = `
                 <div class="flare-option-title">${option.desc} ${option.title}</div>
             `;
 
             console.log(`✅ Bouton ${index} créé:`, option.title);
 
-            btn.addEventListener('click', () => {
+            // Gestionnaire de clic avec bind explicite
+            const clickHandler = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 console.log('👆 Clic sur:', option.title);
+
+                // Désactiver immédiatement le bouton pour éviter les doubles clics
+                btn.disabled = true;
                 btn.classList.add('selected');
+
                 const allBtns = container.querySelectorAll('.flare-option-btn');
                 allBtns.forEach(b => {
                     if (b !== btn) {
@@ -560,11 +575,19 @@ class FlareConfigurateurWidget {
                         b.style.opacity = '0.5';
                     }
                 });
+
                 setTimeout(() => {
                     wrapper.style.opacity = '0.6';
                     wrapper.style.pointerEvents = 'none';
                     callback(option);
                 }, 300);
+            };
+
+            btn.addEventListener('click', clickHandler);
+            // Ajouter aussi un gestionnaire pour le touch sur mobile
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                clickHandler(e);
             });
 
             container.appendChild(btn);
@@ -572,7 +595,11 @@ class FlareConfigurateurWidget {
 
         wrapper.appendChild(container);
         this.messagesContainer.appendChild(wrapper);
-        console.log('✅ Options ajoutées au DOM');
+        console.log('✅ Options ajoutées au DOM, wrapper pointer-events:', wrapper.style.pointerEvents);
+
+        // Forcer un reflow pour s'assurer que les styles sont appliqués
+        wrapper.offsetHeight;
+
         this.scrollToBottom();
     }
 
@@ -583,9 +610,11 @@ class FlareConfigurateurWidget {
         const wrapper = document.createElement('div');
         wrapper.style.width = '100%';
         wrapper.style.marginTop = '8px';
+        wrapper.style.pointerEvents = 'auto'; // S'assurer que les interactions sont activées
 
         const card = document.createElement('div');
         card.className = 'flare-product-card';
+        card.style.cursor = 'pointer';
         card.innerHTML = `
             <img src="${product.PHOTO_1 || '/assets/images/placeholder.jpg'}"
                  alt="${product.TITRE_VENDEUR}"
@@ -598,8 +627,14 @@ class FlareConfigurateurWidget {
             </div>
         `;
 
-        card.addEventListener('click', () => {
+        const clickHandler = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('👆 Clic sur produit:', product.TITRE_VENDEUR);
+
             card.classList.add('selected');
+            card.style.pointerEvents = 'none';
+
             const allCards = this.messagesContainer.querySelectorAll('.flare-product-card');
             allCards.forEach(c => {
                 if (c !== card) {
@@ -607,13 +642,24 @@ class FlareConfigurateurWidget {
                     c.style.pointerEvents = 'none';
                 }
             });
+
             setTimeout(() => {
                 callback(product);
             }, 300);
+        };
+
+        card.addEventListener('click', clickHandler);
+        card.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            clickHandler(e);
         });
 
         wrapper.appendChild(card);
         this.messagesContainer.appendChild(wrapper);
+
+        // Forcer un reflow
+        wrapper.offsetHeight;
+
         this.scrollToBottom();
     }
 
