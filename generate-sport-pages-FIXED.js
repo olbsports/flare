@@ -209,6 +209,28 @@ function generateSportPage(sport, config) {
     template = template.replace(/Maillots Sport Sublimation/g, config.title);
     template = template.replace(/108 modèles tous sports\. Tissus techniques haute performance.*?pièces\./g, config.subtitle);
 
+    // Remplacer TOUS les "maillot/maillots" par le terme approprié
+    const sportTerms = {
+        'MERCHANDISING': { singular: 'accessoire', plural: 'accessoires', singularCap: 'Accessoire', pluralCap: 'Accessoires' },
+        'SPORTSWEAR': { singular: 'vêtement', plural: 'vêtements', singularCap: 'Vêtement', pluralCap: 'Vêtements' }
+    };
+
+    const terms = sportTerms[sport];
+    if (terms) {
+        // Remplacer toutes les occurrences de "maillot" par le terme approprié
+        template = template.replace(/\bmaillots personnalisés\b/gi, `${terms.plural} personnalisés`);
+        template = template.replace(/\bMaillots personnalisés\b/g, `${terms.pluralCap} personnalisés`);
+        template = template.replace(/\bNos maillots\b/g, `Nos ${terms.plural}`);
+        template = template.replace(/\bdes maillots\b/gi, `des ${terms.plural}`);
+        template = template.replace(/\bvos maillots\b/gi, `vos ${terms.plural}`);
+        template = template.replace(/\bles maillots\b/gi, `les ${terms.plural}`);
+        template = template.replace(/\bde maillots\b/gi, `de ${terms.plural}`);
+        template = template.replace(/\bmaillot\b/gi, terms.singular);
+        template = template.replace(/\bMaillot\b/g, terms.singularCap);
+        template = template.replace(/\bmaillots\b/gi, terms.plural);
+        template = template.replace(/\bMaillots\b/g, terms.pluralCap);
+    }
+
     // Remplacer le compteur de produits
     template = template.replace(/108 produits/g, `${sportProducts.length} produits`);
 
