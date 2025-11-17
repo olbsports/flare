@@ -10,83 +10,83 @@
     <link rel="stylesheet" href="../../assets/css/components.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
 
-    <style>
+        <style>
         .article-hero {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            padding: 140px 20px 80px;
+            padding: 160px 40px 100px;
             color: #fff;
         }
 
         .article-hero-container {
-            max-width: 900px;
+            max-width: 1100px;
             margin: 0 auto;
         }
 
         .article-category {
             display: inline-block;
             background: #FF4B26;
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 12px;
+            padding: 10px 24px;
+            border-radius: 25px;
+            font-size: 13px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 20px;
+            letter-spacing: 1.5px;
+            margin-bottom: 30px;
         }
 
         .article-title {
             font-family: 'Bebas Neue', sans-serif;
-            font-size: 56px;
-            line-height: 1.2;
-            margin-bottom: 25px;
-            letter-spacing: 1px;
+            font-size: 72px;
+            line-height: 1.1;
+            margin-bottom: 35px;
+            letter-spacing: 2px;
         }
 
         .article-meta {
             display: flex;
-            gap: 30px;
-            font-size: 15px;
+            gap: 35px;
+            font-size: 16px;
             opacity: 0.9;
         }
 
         .article-content {
-            max-width: 800px;
+            max-width: 1100px;
             margin: 0 auto;
-            padding: 80px 20px;
+            padding: 100px 40px;
         }
 
         .article-content h2 {
             font-family: 'Bebas Neue', sans-serif;
-            font-size: 36px;
+            font-size: 42px;
             color: #1a1a2e;
-            margin: 50px 0 25px;
-            letter-spacing: 1px;
+            margin: 60px 0 30px;
+            letter-spacing: 1.5px;
         }
 
         .article-content h3 {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 800;
             color: #1a1a2e;
-            margin: 40px 0 20px;
+            margin: 50px 0 25px;
         }
 
         .article-content p {
-            font-size: 18px;
-            line-height: 1.8;
+            font-size: 20px;
+            line-height: 2.0;
             color: #333;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
         }
 
         .article-content ul, .article-content ol {
-            margin: 25px 0;
-            padding-left: 30px;
+            margin: 30px 0;
+            padding-left: 40px;
         }
 
         .article-content li {
-            font-size: 18px;
-            line-height: 1.8;
+            font-size: 20px;
+            line-height: 2.0;
             color: #333;
-            margin-bottom: 15px;
+            margin-bottom: 18px;
         }
 
         .article-content strong {
@@ -104,117 +104,126 @@
             color: #ff6b4a;
         }
 
+        .article-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 40px 0;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .article-content table thead {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+        }
+
+        .article-content table th {
+            padding: 20px 24px;
+            font-weight: 800;
+            text-align: left;
+            font-size: 18px;
+            letter-spacing: 0.5px;
+        }
+
+        .article-content table td {
+            padding: 18px 24px;
+            border-bottom: 1px solid #eee;
+            font-size: 18px;
+            line-height: 1.8;
+        }
+
+        .article-content table tbody tr:hover {
+            background: #f8f9fa;
+            transition: background 0.3s ease;
+        }
+
+        .article-content table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
         .article-cta {
             background: linear-gradient(135deg, #FF4B26 0%, #ff6b4a 100%);
-            padding: 60px 40px;
+            padding: 70px 50px;
             text-align: center;
             color: #fff;
-            border-radius: 12px;
-            margin: 60px 0;
+            border-radius: 16px;
+            margin: 70px 0;
         }
 
         .article-cta h3 {
             font-family: 'Bebas Neue', sans-serif;
-            font-size: 36px;
-            margin-bottom: 20px;
+            font-size: 42px;
+            margin-bottom: 25px;
             color: #fff;
         }
 
         .article-cta p {
-            font-size: 18px;
-            margin-bottom: 30px;
+            font-size: 20px;
+            margin-bottom: 35px;
             opacity: 0.95;
             color: #fff;
         }
 
         .article-cta-btn {
             display: inline-block;
-            padding: 18px 48px;
+            padding: 20px 52px;
             background: #fff;
             color: #FF4B26;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 2px;
-            font-size: 14px;
+            font-size: 15px;
             border-radius: 50px;
             text-decoration: none;
             transition: all 0.3s;
-            margin: 0 10px;
+            margin: 0 12px;
         }
 
         .article-cta-btn:hover {
             transform: scale(1.05);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
         }
 
         .back-to-blog {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             color: #FF4B26;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 14px;
-            margin-bottom: 30px;
+            letter-spacing: 1.2px;
+            font-size: 15px;
+            margin-bottom: 40px;
             text-decoration: none;
         }
 
-        .back-to-blog:hover {
-            gap: 15px;
-        }
-
-        .comparison-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 30px 0;
-            background: #fff;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .comparison-table th {
-            background: #1a1a2e;
-            color: #fff;
-            padding: 15px;
-            text-align: left;
-            font-weight: 700;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .comparison-table td {
-            padding: 15px;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 16px;
-        }
-
-        .comparison-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .comparison-table tr:hover {
-            background: #f9f9f9;
-        }
-
         @media (max-width: 768px) {
+            .article-hero {
+                padding: 140px 20px 80px;
+            }
+
             .article-title {
-                font-size: 40px;
+                font-size: 42px;
+            }
+
+            .article-content {
+                padding: 60px 20px;
             }
 
             .article-content h2 {
-                font-size: 28px;
+                font-size: 32px;
             }
 
-            .comparison-table {
-                font-size: 14px;
+            .article-content h3 {
+                font-size: 24px;
             }
 
-            .comparison-table th,
-            .comparison-table td {
-                padding: 10px;
+            .article-content p,
+            .article-content li {
+                font-size: 18px;
+                line-height: 1.9;
             }
         }
     </style>
@@ -423,10 +432,10 @@
         <p>De nombreux clubs ont testé les deux techniques avant de nous choisir :</p>
 
         <p><strong>"Nous avions des maillots DTG qui se sont dégradés après une demi-saison. avec FLARE CUSTOM et la sublimation, nos équipements sont encore impeccables après 2 ans d'utilisation intensive !"</strong><br>
-        - Club de rugby AS Montpellier</p>
+        - Marc D., responsable équipement rugby, Montpellier</p>
 
         <p><strong>"La différence de qualité est flagrante. Les couleurs sont plus vives, le tissu plus agréable à porter, et surtout ça dure dans le temps. On ne reviendra jamais en arrière."</strong><br>
-        - Équipe de basketball Lyon Elite</p>
+        - Sophie L., capitaine basketball, Lyon</p>
 
         <div class="article-cta">
             <h3>Testez la qualité de la Sublimation FLARE CUSTOM</h3>

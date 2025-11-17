@@ -3,1151 +3,1275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tenues match Complètes | Équipement Compétition - FLARE CUSTOM</title>
-    <meta name="description" content="Tenues match complètes personnalisées. Maillot + short assortis. Tous sports, fabrication européenne. Devis gratuit 24h.">
+    <title>Tenues Match Complètes Personnalisées | Maillot + Short - FLARE CUSTOM</title>
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
 
-    <link rel="preload" href="../../assets/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="../../assets/css/style.css"></noscript>
+    <meta name="description" content="Tenues match complètes personnalisées : maillot + short assortis. Design coordonné, sublimation premium. Pour tous sports. Devis gratuit 24h.">
+
+    <link rel="canonical" href="https://flare-custom.com/tenues-match-completes">
+
+    <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="../../assets/css/components.css">
-    <link rel="stylesheet" href="../../assets/css/style-sport.css">
-</head>
-<body>
-    <div id="dynamic-header"></div>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
 
-    <!-- HERO SECTION -->
-    <section class="hero-sport">
-        <div class="hero-sport-content">
-            <span class="hero-sport-eyebrow">ÉQUIPEMENT COMPÉTITION</span>
-            <h1 class="hero-sport-title">TENUES MATCH COMPLÈTES</h1>
-            <p class="hero-sport-subtitle">Tenues match complètes personnalisées. Maillot et short parfaitement coordonnés, haute performance, designs professionnels. fabrication européenne, prix dégressifs.</p>
+    <style>
+        /* 🔥 HERO 2/3 + 1/3 avec IMAGE FULL */
+        .hero-prix {
+            min-height: 70vh;
+            background: #f5f5f5;
+            margin-top: 80px;
+            position: relative;
+            display: flex;
+            align-items: stretch;
+            overflow: hidden;
+        }
 
-            <div class="hero-sport-cta">
-                <a href="/pages/info/contact.html" class="btn-hero-primary">
-                    DEMANDER UN DEVIS
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M5 12h14m-7-7l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                </a>
-                <a href="https://wa.me/359885813134" class="btn-hero-secondary" target="_blank" rel="noopener">
-                    WHATSAPP
-                </a>
-            </div>
+      .hero-prix-content {
+    flex: 2;
+    padding: 0rem 5%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+}
 
-            <div class="hero-sport-features">
-                <div class="feature-badge">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
-                    </svg>
-                    Fabrication européenne
-                </div>
-                <div class="feature-badge">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
-                    </svg>
-                    Livraison 2-3 semaines
-                </div>
-                <div class="feature-badge">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
-                    </svg>
-                    Personnalisation illimitée
-                </div>
-            </div>
-        </div>
-    </section>
+        .hero-prix-image {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
 
-    <!-- PRODUCTS SECTION -->
-    <section class="products-section">
-        <div class="products-container">
-            <div class="products-header">
-                <div class="products-header-left">
-                    <h2 class="section-title">NOS PRODUITS</h2>
-                    <p class="products-count" id="productsCount">82628 produits</p>
-                </div>
-                <div class="products-filters">
-                    <select id="filterSport" class="filter-select">
-                        <option value="">Tous les sports</option>
-                        <option value="FOOTBALL">Football</option>
-                        <option value="BASKETBALL">Basketball</option>
-                        <option value="RUGBY">Rugby</option>
-                        <option value="RUNNING">Running</option>
-                        <option value="CYCLISME">Cyclisme</option>
-                        <option value="VOLLEYBALL">Volleyball</option>
-                        <option value="HANDBALL">Handball</option>
-                    </select>
-                    <select id="filterGenre" class="filter-select">
-                        <option value="">Tous les genres</option>
-                        <option value="Homme">Homme</option>
-                        <option value="Femme">Femme</option>
-                        <option value="Unisexe">Unisexe</option>
-                    </select>
-                </div>
-            </div>
+        .hero-prix-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    position: absolute;
+    inset: 0;
+}
 
-            <div class="products-grid" id="productsGrid">
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-FTBMAIH-070-1.webp" alt="Maillot football Américain - Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-FTBMAIH-070-2.webp" alt="Maillot football Américain - Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-FTBMAIH-070-3.webp" alt="Maillot football Américain - Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-FTBMAIH-070-4.webp" alt="Maillot football Américain - Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-FTBMAIH-070-5.webp" alt="Maillot football Américain - Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Maillot</div>
-                        <h3 class="product-name">Maillot football Américain - Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">AUTRES_SPORTS</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Courtes</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">59.29€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-HOCMAIH-072-1.webp" alt="Maillot Hockey sur Glace - Premium Jersey 220 ECO Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-HOCMAIH-072-2.webp" alt="Maillot Hockey sur Glace - Premium Jersey 220 ECO Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-HOCMAIH-072-3.webp" alt="Maillot Hockey sur Glace - Premium Jersey 220 ECO Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-HOCMAIH-072-4.webp" alt="Maillot Hockey sur Glace - Premium Jersey 220 ECO Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-HOCMAIH-072-5.webp" alt="Maillot Hockey sur Glace - Premium Jersey 220 ECO Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Maillot</div>
-                        <h3 class="product-name">Maillot Hockey sur Glace - Premium Jersey 220 ECO Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">AUTRES_SPORTS</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Longues</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">42.29€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-HOCMAIH-073-1.webp" alt="Maillot Hockey sur Glace Réversible - Pro Shield 280 ECO Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-HOCMAIH-073-2.webp" alt="Maillot Hockey sur Glace Réversible - Pro Shield 280 ECO Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-HOCMAIH-073-3.webp" alt="Maillot Hockey sur Glace Réversible - Pro Shield 280 ECO Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-HOCMAIH-073-4.webp" alt="Maillot Hockey sur Glace Réversible - Pro Shield 280 ECO Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-HOCMAIH-073-5.webp" alt="Maillot Hockey sur Glace Réversible - Pro Shield 280 ECO Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Maillot</div>
-                        <h3 class="product-name">Maillot Hockey sur Glace Réversible - Pro Shield 280 ECO Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">AUTRES_SPORTS</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Réversible, Manches Longues</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">55.25€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-BSBMAIH-076-1.webp" alt="Maillot Baseball - 160 gr/m² Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-BSBMAIH-076-2.webp" alt="Maillot Baseball - 160 gr/m² Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-BSBMAIH-076-3.webp" alt="Maillot Baseball - 160 gr/m² Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-BSBMAIH-076-4.webp" alt="Maillot Baseball - 160 gr/m² Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-BSBMAIH-076-5.webp" alt="Maillot Baseball - 160 gr/m² Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Maillot</div>
-                        <h3 class="product-name">Maillot Baseball - 160 gr/m² Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">AUTRES_SPORTS</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Courtes</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">46.54€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-BOXSHTH-078-1.webp" alt="Short de Boxe - Swim Tech Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-BOXSHTH-078-2.webp" alt="Short de Boxe - Swim Tech Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-BOXSHTH-078-3.webp" alt="Short de Boxe - Swim Tech Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-BOXSHTH-078-4.webp" alt="Short de Boxe - Swim Tech Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-BOXSHTH-078-5.webp" alt="Short de Boxe - Swim Tech Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Short</div>
-                        <h3 class="product-name">Short de Boxe - Swim Tech Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">AUTRES_SPORTS</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">ÉCO, Aquatique, Séchage Rapide</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">55.04€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-NATSHTH-082-1.webp" alt="Short de Bain - Swim Tech Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-NATSHTH-082-2.webp" alt="Short de Bain - Swim Tech Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-NATSHTH-082-3.webp" alt="Short de Bain - Swim Tech Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-NATSHTH-082-4.webp" alt="Short de Bain - Swim Tech Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-NATSHTH-082-5.webp" alt="Short de Bain - Swim Tech Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Short</div>
-                        <h3 class="product-name">Short de Bain - Swim Tech Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">AUTRES_SPORTS</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">ÉCO, Aquatique, Séchage Rapide</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">27.41€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-NATSHTH-083-1.webp" alt="Short de Bain - Active Stretch Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-NATSHTH-083-2.webp" alt="Short de Bain - Active Stretch Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-NATSHTH-083-3.webp" alt="Short de Bain - Active Stretch Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-NATSHTH-083-4.webp" alt="Short de Bain - Active Stretch Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-NATSHTH-083-5.webp" alt="Short de Bain - Active Stretch Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Short</div>
-                        <h3 class="product-name">Short de Bain - Active Stretch Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">AUTRES_SPORTS</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">ÉCO, Élastique, Aquatique, Séchage Rapide</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">33.79€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-NATMAIH-084-1.webp" alt="Maillot de Bain 1 Pièce Compétition - Swim Tech Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-NATMAIH-084-2.webp" alt="Maillot de Bain 1 Pièce Compétition - Swim Tech Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-NATMAIH-084-3.webp" alt="Maillot de Bain 1 Pièce Compétition - Swim Tech Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-NATMAIH-084-4.webp" alt="Maillot de Bain 1 Pièce Compétition - Swim Tech Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-NATMAIH-084-5.webp" alt="Maillot de Bain 1 Pièce Compétition - Swim Tech Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Maillot</div>
-                        <h3 class="product-name">Maillot de Bain 1 Pièce Compétition - Swim Tech Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">AUTRES_SPORTS</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">ÉCO, Aquatique, Séchage Rapide</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">40.16€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-NATMAIH-085-1.webp" alt="Maillot de Bain 2 Pièces - Swim Tech Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-NATMAIH-085-2.webp" alt="Maillot de Bain 2 Pièces - Swim Tech Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-NATMAIH-085-3.webp" alt="Maillot de Bain 2 Pièces - Swim Tech Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-NATMAIH-085-4.webp" alt="Maillot de Bain 2 Pièces - Swim Tech Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-NATMAIH-085-5.webp" alt="Maillot de Bain 2 Pièces - Swim Tech Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Maillot</div>
-                        <h3 class="product-name">Maillot de Bain 2 Pièces - Swim Tech Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">AUTRES_SPORTS</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">ÉCO, Aquatique, Séchage Rapide</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">40.16€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SRFMAIH-086-1.webp" alt="Rashguard Surf Manches Courtes - Swim Tech Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SRFMAIH-086-2.webp" alt="Rashguard Surf Manches Courtes - Swim Tech Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SRFMAIH-086-3.webp" alt="Rashguard Surf Manches Courtes - Swim Tech Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SRFMAIH-086-4.webp" alt="Rashguard Surf Manches Courtes - Swim Tech Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SRFMAIH-086-5.webp" alt="Rashguard Surf Manches Courtes - Swim Tech Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Maillot</div>
-                        <h3 class="product-name">Rashguard Surf Manches Courtes - Swim Tech Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">AUTRES_SPORTS</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Courtes</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">35.91€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SRFMAIH-087-1.webp" alt="Rashguard Surf Manches Longues - Swim Tech Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SRFMAIH-087-2.webp" alt="Rashguard Surf Manches Longues - Swim Tech Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SRFMAIH-087-3.webp" alt="Rashguard Surf Manches Longues - Swim Tech Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SRFMAIH-087-4.webp" alt="Rashguard Surf Manches Longues - Swim Tech Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-SRFMAIH-087-5.webp" alt="Rashguard Surf Manches Longues - Swim Tech Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Maillot</div>
-                        <h3 class="product-name">Rashguard Surf Manches Longues - Swim Tech Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">AUTRES_SPORTS</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Longues</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">41.44€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VTTMAIH-098-1.webp" alt="Maillot VTT Descente - Performance Mesh 130 Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VTTMAIH-098-2.webp" alt="Maillot VTT Descente - Performance Mesh 130 Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VTTMAIH-098-3.webp" alt="Maillot VTT Descente - Performance Mesh 130 Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VTTMAIH-098-4.webp" alt="Maillot VTT Descente - Performance Mesh 130 Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VTTMAIH-098-5.webp" alt="Maillot VTT Descente - Performance Mesh 130 Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Maillot</div>
-                        <h3 class="product-name">Maillot VTT Descente - Performance Mesh 130 Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">TRIATHLON</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Courtes</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">33.92€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VTTMAIH-099-1.webp" alt="Maillot VTT Descente - Performance Mesh 160 Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VTTMAIH-099-2.webp" alt="Maillot VTT Descente - Performance Mesh 160 Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VTTMAIH-099-3.webp" alt="Maillot VTT Descente - Performance Mesh 160 Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VTTMAIH-099-4.webp" alt="Maillot VTT Descente - Performance Mesh 160 Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VTTMAIH-099-5.webp" alt="Maillot VTT Descente - Performance Mesh 160 Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Maillot</div>
-                        <h3 class="product-name">Maillot VTT Descente - Performance Mesh 160 Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">TRIATHLON</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Courtes</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">38.04€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIH-100-1.webp" alt="Maillot Volleyball sans Manches - Air Mesh ECO Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIH-100-2.webp" alt="Maillot Volleyball sans Manches - Air Mesh ECO Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIH-100-3.webp" alt="Maillot Volleyball sans Manches - Air Mesh ECO Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIH-100-4.webp" alt="Maillot Volleyball sans Manches - Air Mesh ECO Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIH-100-5.webp" alt="Maillot Volleyball sans Manches - Air Mesh ECO Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Maillot</div>
-                        <h3 class="product-name">Maillot Volleyball sans Manches - Air Mesh ECO Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">VOLLEYBALL</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">ÉCO, Respirant</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">26.56€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIF-101-1.webp" alt="Maillot Volleyball sans Manches - Air Mesh ECO Femme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIF-101-2.webp" alt="Maillot Volleyball sans Manches - Air Mesh ECO Femme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIF-101-3.webp" alt="Maillot Volleyball sans Manches - Air Mesh ECO Femme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIF-101-4.webp" alt="Maillot Volleyball sans Manches - Air Mesh ECO Femme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIF-101-5.webp" alt="Maillot Volleyball sans Manches - Air Mesh ECO Femme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Maillot</div>
-                        <h3 class="product-name">Maillot Volleyball sans Manches - Air Mesh ECO Femme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">VOLLEYBALL</span><span class="product-spec">Femme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">ÉCO, Respirant</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">26.56€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIH-102-1.webp" alt="Maillot Volleyball sans Manches - Performance Mesh 130 ECO Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIH-102-2.webp" alt="Maillot Volleyball sans Manches - Performance Mesh 130 ECO Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIH-102-3.webp" alt="Maillot Volleyball sans Manches - Performance Mesh 130 ECO Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIH-102-4.webp" alt="Maillot Volleyball sans Manches - Performance Mesh 130 ECO Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIH-102-5.webp" alt="Maillot Volleyball sans Manches - Performance Mesh 130 ECO Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Maillot</div>
-                        <h3 class="product-name">Maillot Volleyball sans Manches - Performance Mesh 130 ECO Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">VOLLEYBALL</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">ÉCO, Respirant, Performance</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">26.56€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIF-103-1.webp" alt="Maillot Volleyball sans Manches - Performance Mesh 130 ECO Femme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIF-103-2.webp" alt="Maillot Volleyball sans Manches - Performance Mesh 130 ECO Femme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIF-103-3.webp" alt="Maillot Volleyball sans Manches - Performance Mesh 130 ECO Femme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIF-103-4.webp" alt="Maillot Volleyball sans Manches - Performance Mesh 130 ECO Femme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIF-103-5.webp" alt="Maillot Volleyball sans Manches - Performance Mesh 130 ECO Femme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Maillot</div>
-                        <h3 class="product-name">Maillot Volleyball sans Manches - Performance Mesh 130 ECO Femme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">VOLLEYBALL</span><span class="product-spec">Femme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">ÉCO, Respirant, Performance</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">26.56€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIH-104-1.webp" alt="Maillot Volleyball Réversible sans Manches - Reversible Pro Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIH-104-2.webp" alt="Maillot Volleyball Réversible sans Manches - Reversible Pro Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIH-104-3.webp" alt="Maillot Volleyball Réversible sans Manches - Reversible Pro Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIH-104-4.webp" alt="Maillot Volleyball Réversible sans Manches - Reversible Pro Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIH-104-5.webp" alt="Maillot Volleyball Réversible sans Manches - Reversible Pro Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Maillot</div>
-                        <h3 class="product-name">Maillot Volleyball Réversible sans Manches - Reversible Pro Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">VOLLEYBALL</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Réversible</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">38.04€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIF-105-1.webp" alt="Maillot Volleyball Réversible sans Manches - Reversible Pro Femme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIF-105-2.webp" alt="Maillot Volleyball Réversible sans Manches - Reversible Pro Femme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIF-105-3.webp" alt="Maillot Volleyball Réversible sans Manches - Reversible Pro Femme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIF-105-4.webp" alt="Maillot Volleyball Réversible sans Manches - Reversible Pro Femme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIF-105-5.webp" alt="Maillot Volleyball Réversible sans Manches - Reversible Pro Femme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Maillot</div>
-                        <h3 class="product-name">Maillot Volleyball Réversible sans Manches - Reversible Pro Femme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">VOLLEYBALL</span><span class="product-spec">Femme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Réversible</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">38.04€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        <div class="product-slider">
-                            <div class="product-slide active">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIH-106-1.webp" alt="Maillot Volleyball Manches Courtes - Air Mesh ECO Homme - Photo 1" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIH-106-2.webp" alt="Maillot Volleyball Manches Courtes - Air Mesh ECO Homme - Photo 2" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIH-106-3.webp" alt="Maillot Volleyball Manches Courtes - Air Mesh ECO Homme - Photo 3" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIH-106-4.webp" alt="Maillot Volleyball Manches Courtes - Air Mesh ECO Homme - Photo 4" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                            <div class="product-slide ">
-                                <img src="https://flare-custom.com/photos/produits/FLARE-VLBMAIH-106-5.webp" alt="Maillot Volleyball Manches Courtes - Air Mesh ECO Homme - Photo 5" class="product-image" loading="lazy" width="420" height="560" decoding="async">
-                            </div>
-                        </div>
-                        <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </button>
-                        <div class="product-slider-dots"><button class="slider-dot active" data-slide="0" aria-label="Voir photo 1"></button><button class="slider-dot " data-slide="1" aria-label="Voir photo 2"></button><button class="slider-dot " data-slide="2" aria-label="Voir photo 3"></button><button class="slider-dot " data-slide="3" aria-label="Voir photo 4"></button><button class="slider-dot " data-slide="4" aria-label="Voir photo 5"></button></div>
-                        <div class="product-badges"></div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-family">Maillot</div>
-                        <h3 class="product-name">Maillot Volleyball Manches Courtes - Air Mesh ECO Homme</h3>
-                        <div class="product-specs">
-                            <span class="product-spec">VOLLEYBALL</span><span class="product-spec">Homme</span>
-                        </div>
-                        <div class="product-finitions"><span class="product-finition-badge">Manches Courtes</span></div>
-                        <div class="product-pricing">
-                            <div class="product-price-label">À partir de</div>
-                            <div class="product-price-adulte">
-                                <span class="product-price">27.54€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+        .hero-prix-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(255, 75, 38, 0.05), transparent 60%);
+            z-index: 1;
+        }
 
-    <!-- FEATURES SECTION -->
-    <section class="seo-mega">
-        <div class="seo-hero">
-            <span class="seo-hero-badge">AVANTAGES</span>
-            <h2 class="seo-hero-title">Pourquoi choisir FLARE CUSTOM ?</h2>
-            <p class="seo-hero-intro">La référence européenne de l'équipement sportif personnalisé en sublimation</p>
-        </div>
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: rgba(0,0,0,0.6);
+            margin-bottom: 24px;
+        }
 
-        <div class="seo-cards-3">
-            <div class="seo-card">
-                <div class="seo-card-icon">🎨</div>
-                <h3>Personnalisation illimitée</h3>
-                <p>Sublimation intégrale pour des designs uniques sans limite de couleurs. Créez l'équipement qui vous ressemble.</p>
-            </div>
-            <div class="seo-card">
-                <div class="seo-card-icon">🏆</div>
-                <h3>Qualité Professionnelle</h3>
-                <p>Tissus techniques premium, coutures renforcées, finitions soignées. qualité certifiée pour une durabilité maximale.</p>
-            </div>
-            <div class="seo-card">
-                <div class="seo-card-icon">⚡</div>
-                <h3>Livraison rapide</h3>
-                <p>Fabrication européenne et livraison express 2-3 semaines. Service client réactif et suivi personnalisé.</p>
-            </div>
-        </div>
-    </section>
+        .breadcrumb a {
+            color: rgba(0,0,0,0.6);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
 
-    <!-- CTA SECTION -->
-    <section class="cta-redesign">
-        <div class="cta-redesign-container">
-            <h2 class="cta-redesign-title">Prêt à Équiper Votre Équipe ?</h2>
-            <p class="cta-redesign-subtitle">
-                Demandez votre devis gratuit en moins de 24h. Notre équipe vous accompagne dans votre projet.
-            </p>
-            <div class="cta-redesign-features">
-                <span>✓ Devis gratuit sous 24h</span>
-                <span>✓ Mockup 3D inclus</span>
-                <span>✓ Prix dégressifs</span>
-                <span>✓ Paiement sécurisé</span>
-            </div>
-            <div class="cta-redesign-buttons">
-                <a href="/pages/info/contact.html" class="btn-cta-primary">Demander un Devis</a>
-                <a href="https://wa.me/359885813134" target="_blank" rel="noopener" class="btn-cta-secondary">WhatsApp</a>
-            </div>
-        </div>
-    </section>
+        .breadcrumb a:hover {
+            color: #FF4B26;
+        }
 
-    <div id="dynamic-footer"></div>
+        .hero-prix-eyebrow {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #FF4B26;
+            margin-bottom: 16px;
+        }
 
-    <script src="../../assets/js/components-loader.js" defer></script>
-    <script src="../../assets/js/script.js" defer></script>
+        .hero-prix-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(48px, 8vw, 80px);
+            line-height: 0.95;
+            letter-spacing: 1px;
+            color: #000;
+            margin-bottom: 12px;
+        }
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Product slider functionality
-            document.querySelectorAll('.product-card').forEach(card => {
-                const slides = card.querySelectorAll('.product-slide');
-                const dots = card.querySelectorAll('.slider-dot');
-                const prevBtn = card.querySelector('.slider-nav.prev');
-                const nextBtn = card.querySelector('.slider-nav.next');
-                let currentSlide = 0;
+        .hero-prix-subtitle {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(40px, 7vw, 72px);
+            line-height: 0.95;
+            letter-spacing: 1px;
+            color: #FF4B26;
+            margin-bottom: 32px;
+        }
 
-                function showSlide(index) {
-                    slides.forEach(slide => slide.classList.remove('active'));
-                    dots.forEach(dot => dot.classList.remove('active'));
-                    if (slides[index] && dots[index]) {
-                        slides[index].classList.add('active');
-                        dots[index].classList.add('active');
-                    }
-                }
+        .hero-prix-desc {
+            font-size: clamp(16px, 2vw, 18px);
+            line-height: 1.6;
+            color: rgba(0,0,0,0.85);
+            margin-bottom: 40px;
+            max-width: 600px;
+        }
 
-                if (prevBtn) prevBtn.addEventListener('click', () => {
-                    currentSlide = (currentSlide - 1 + slides.length) % slides.length;
-                    showSlide(currentSlide);
-                });
+        .hero-prix-cta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 48px;
+        }
 
-                if (nextBtn) nextBtn.addEventListener('click', () => {
-                    currentSlide = (currentSlide + 1) % slides.length;
-                    showSlide(currentSlide);
-                });
+        .btn-hero-primary, .btn-hero-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 40px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
 
-                dots.forEach((dot, index) => {
-                    dot.addEventListener('click', () => {
-                        currentSlide = index;
-                        showSlide(currentSlide);
-                    });
-                });
-            });
+        .btn-hero-primary {
+            background: #FF4B26;
+            color: #fff;
+        }
 
-            // Filter functionality
-            const filterSport = document.getElementById('filterSport');
-            const filterGenre = document.getElementById('filterGenre');
-            const productsGrid = document.getElementById('productsGrid');
-            const productsCount = document.getElementById('productsCount');
+        .btn-hero-primary:hover {
+            background: #E63910;
+            transform: translateY(-2px);
+        }
 
-            function filterProducts() {
-                const cards = Array.from(productsGrid.querySelectorAll('.product-card'));
-                let visibleCount = 0;
+        .btn-hero-secondary {
+            background: transparent;
+            color: #000;
+            border: 2px solid rgba(0,0,0,0.3);
+        }
 
-                cards.forEach(card => {
-                    const specs = card.querySelectorAll('.product-spec');
-                    const sport = specs[0]?.textContent || '';
-                    const genre = specs[1]?.textContent || '';
+        .btn-hero-secondary:hover {
+            background: rgba(0,0,0,0.05);
+            border-color: #000;
+        }
 
-                    let show = true;
+        /* 🔥 BADGES HERO - STYLE PAGES SPORTS */
+        .hero-prix-features {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
 
-                    if (filterSport.value && !sport.includes(filterSport.value)) show = false;
-                    if (filterGenre.value && !genre.includes(filterGenre.value)) show = false;
+        .feature-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            color: rgba(0,0,0,0.9);
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
 
-                    card.style.display = show ? 'block' : 'none';
-                    if (show) visibleCount++;
-                });
+        .feature-badge:hover {
+            background: rgba(255, 75, 38, 0.1);
+            border-color: rgba(255, 75, 38, 0.3);
+        }
 
-                productsCount.textContent = `${visibleCount} produit${visibleCount > 1 ? 's' : ''}`;
+        .feature-badge svg {
+            color: #FF4B26;
+            width: 20px;
+            height: 20px;
+        }
+
+        /* 🔥 TRUST BAR */
+        .trust-bar {
+            background: #fff;
+            padding: 48px 5%;
+            border-top: 1px solid #E5E7EB;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .trust-items {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            text-align: center;
+        }
+
+        .trust-item strong {
+            display: block;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 48px;
+            color: #FF4B26;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .trust-item span {
+            font-size: 14px;
+            color: #6B7280;
+            font-weight: 600;
+        }
+
+        /* 🔥 SECTIONS STYLES */
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .section-eyebrow {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #FF4B26;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(40px, 6vw, 64px);
+            line-height: 1.1;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        .section-description {
+            font-size: 18px;
+            line-height: 1.7;
+            color: #6B7280;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* 🔥 POURQUOI PAS CHER - 3 COLONNES */
+        .advantages-section {
+            padding: 100px 5%;
+            background: #f9fafb;
+        }
+
+        .advantages-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .advantage-card {
+            background: #fff;
+            padding: 40px 32px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+        }
+
+        .advantage-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(255, 75, 38, 0.12);
+        }
+
+        .advantage-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #FF4B26, #E63910);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .advantage-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #000;
+            margin-bottom: 12px;
+        }
+
+        .advantage-desc {
+            font-size: 16px;
+            line-height: 1.7;
+            color: #6B7280;
+        }
+
+        /* 🔥 TARIFS - 4 CARTES SEULEMENT */
+        .pricing-cards {
+            padding: 100px 5%;
+            background: #f9fafb;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto 60px;
+        }
+
+        .price-card {
+            background: #fff;
+            padding: 48px 32px;
+            text-align: center;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .price-card:hover {
+            border-color: #FF4B26;
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(255, 75, 38, 0.12);
+        }
+
+        .price-card.featured {
+            border-color: #FF4B26;
+            transform: scale(1.05);
+            box-shadow: 0 12px 40px rgba(255, 75, 38, 0.15);
+        }
+
+        .price-card.premium {
+            background: #000;
+            border-color: #000;
+            color: #fff;
+        }
+
+        .price-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #FF4B26;
+            color: #fff;
+            padding: 6px 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .price-volume {
+            font-size: 13px;
+            font-weight: 700;
+            color: #6B7280;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+        }
+
+        .price-card.premium .price-volume {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .price-amount {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 56px;
+            line-height: 1;
+            color: #000;
+            margin-bottom: 8px;
+        }
+
+        .price-card.premium .price-amount {
+            color: #fff;
+        }
+
+        .price-unit {
+            font-size: 20px;
+            color: #6B7280;
+        }
+
+        .price-card.premium .price-unit {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .price-saving {
+            font-size: 14px;
+            color: #FF4B26;
+            font-weight: 700;
+            margin-bottom: 32px;
+        }
+
+        .price-cta {
+            display: block;
+            padding: 16px;
+            background: #000;
+            color: #fff;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            border-radius: 6px;
+        }
+
+        .price-card.featured .price-cta,
+        .price-card.premium .price-cta {
+            background: #FF4B26;
+        }
+
+        .price-cta:hover {
+            background: #FF4B26;
+            transform: translateY(-2px);
+        }
+
+        /* 🔥 SPORTS GRID - STYLE INDEX (blanc + ombre) */
+        .sports-section {
+            padding: 100px 5%;
+            background: #fff;
+        }
+
+        .sports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sport-card {
+            position: relative;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.06);
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            text-decoration: none;
+            display: block;
+        }
+
+        .sport-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.12);
+        }
+
+        .sport-card-content {
+            padding: 32px;
+        }
+
+        .sport-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .sport-card h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 32px;
+            line-height: 1;
+            letter-spacing: -0.01em;
+            color: #000;
+            margin-bottom: 8px;
+        }
+
+        .sport-card p {
+            font-size: 15px;
+            color: #6B7280;
+            margin-bottom: 16px;
+        }
+
+        .sport-link {
+            font-size: 24px;
+            color: #FF4B26;
+            transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+            display: inline-block;
+        }
+
+        .sport-card:hover .sport-link {
+            transform: translateX(8px);
+        }
+
+        /* 🔥 COMPARAISON TABLE */
+        .comparison-section {
+            padding: 100px 5%;
+            background: #f5f5f5;
+            color: #000;
+        }
+
+        .comparison-table {
+            background: #fff;
+            color: #000;
+            overflow-x: auto;
+            border-radius: 0;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .comparison-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .comparison-table thead tr {
+            background: #f9fafb;
+        }
+
+        .comparison-table th {
+            padding: 24px;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #E5E7EB;
+        }
+
+        .comparison-table th:first-child {
+            text-align: left;
+        }
+
+        .comparison-table th:nth-child(2) {
+            background: #FFF5F3;
+        }
+
+        .comparison-table td {
+            padding: 20px;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .comparison-table td:first-child {
+            font-weight: 600;
+        }
+
+        .comparison-table td:nth-child(2) {
+            text-align: center;
+            background: #FFF5F3;
+        }
+
+        .comparison-table td:nth-child(3) {
+            text-align: center;
+            color: #9CA3AF;
+        }
+
+        .highlight-price {
+            color: #FF4B26;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        /* 🔥 FAQ */
+        .faq-section {
+            padding: 100px 5%;
+            background: #fff;
+        }
+
+        .faq-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .faq-accordion {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        details {
+            background: #f9fafb;
+            padding: 24px 32px;
+            border-left: 4px solid #E5E7EB;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        details:hover {
+            border-left-color: #FF4B26;
+        }
+
+        details[open] {
+            border-left-color: #FF4B26;
+            background: #fff;
+        }
+
+        summary {
+            font-size: 18px;
+            font-weight: 700;
+            color: #000;
+            list-style: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .faq-icon {
+            color: #FF4B26;
+            font-size: 20px;
+            transition: transform 0.3s;
+        }
+
+        details[open] .faq-icon {
+            transform: rotate(45deg);
+        }
+
+        details p {
+            margin-top: 16px;
+            line-height: 1.7;
+            color: #6B7280;
+        }
+
+        /* 🔥 CTA FINAL */
+        .cta-final-section {
+            padding: 120px 5%;
+            background: #f5f5f5;
+            color: #000;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-final-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 75, 38, 0.05), transparent 70%);
+        }
+
+        .cta-final-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-final-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(48px, 8vw, 80px);
+            line-height: 1;
+            letter-spacing: 2px;
+            margin-bottom: 24px;
+        }
+
+        .cta-final-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 80px;
+        }
+
+        .btn-cta-primary, .btn-cta-secondary {
+            display: inline-block;
+            padding: 24px 56px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-cta-primary {
+            background: #FF4B26;
+            color: #fff;
+        }
+
+        .btn-cta-primary:hover {
+            background: #E63910;
+            transform: translateY(-2px);
+        }
+
+        .btn-cta-secondary {
+            background: transparent;
+            color: #000;
+            border: 2px solid rgba(0,0,0,0.3);
+        }
+
+        .btn-cta-secondary:hover {
+            background: rgba(0,0,0,0.05);
+            border-color: #000;
+        }
+
+        /* 🔥 4 STATS EN LIGNE SUR DESKTOP */
+        .cta-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            padding-top: 60px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 48px;
+            color: #FF4B26;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: rgba(0,0,0,0.7);
+        }
+
+        /* 🔥 RESPONSIVE */
+        @media (max-width: 1200px) {
+            .pricing-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
 
-            if (filterSport) filterSport.addEventListener('change', filterProducts);
-            if (filterGenre) filterGenre.addEventListener('change', filterProducts);
-        });
-    </script>
+            .advantages-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .cta-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 32px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-prix {
+                flex-direction: column;
+                min-height: auto;
+            }
+
+            .hero-prix-content {
+                padding: 4rem 5% 3rem;
+            }
+
+            .hero-prix-image {
+                min-height: 300px;
+            }
+
+            .hero-prix-features {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .feature-badge {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .trust-items {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 24px;
+            }
+
+            .pricing-grid,
+            .advantages-grid,
+            .sports-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-stats {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .comparison-table {
+                font-size: 14px;
+            }
+
+            .comparison-table th,
+            .comparison-table td {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 🔥 HEADER DYNAMIQUE -->
+    <div id="dynamic-header"></div>
+
+    <!-- 🔥 HERO 2/3 + 1/3 avec IMAGE -->
+    <section class="hero-prix">
+        <div class="hero-prix-overlay"></div>
+
+        <!-- 2/3 TEXTE -->
+        <div class="hero-prix-content">
+            <div class="breadcrumb">
+                <a href="/">Accueil</a>
+                <span>/</span>
+                <span style="color: #FF4B26;">Tenues Match Complètes</span>
+            </div>
+
+            <h1>
+                <span class="hero-prix-eyebrow">⚡ Ensembles Coordonnés</span>
+                <div class="hero-prix-title">Tenues Match</div>
+                <div class="hero-prix-subtitle">Complètes</div>
+            </h1>
+
+            <p class="hero-prix-desc">
+                Maillot + short parfaitement assortis. Design coordonné professionnel. Sublimation premium durable. Prêts pour la compétition.
+            </p>
+
+            <div class="hero-prix-cta">
+                <a href="/pages/info/contact.html" class="btn-hero-primary">
+                    Devis gratuit 24h
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </a>
+                <a href="#tarifs-tenues" class="btn-hero-secondary">
+                    Voir Nos Prix
+                </a>
+            </div>
+
+            <!-- 🔥 BADGES STYLE PAGES SPORTS -->
+            <div class="hero-prix-features">
+                <div class="feature-badge">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+                    </svg>
+                    <span>Design coordonné</span>
+                </div>
+                <div class="feature-badge">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 12L11 14L15 10M21 12C21 16.971 16.971 21 12 21C7.029 21 3 16.971 3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12Z" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    <span>Tous sports</span>
+                </div>
+                <div class="feature-badge">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M13 10V3L4 14H11V21L20 10H13Z" fill="currentColor"/>
+                    </svg>
+                    <span>Prix dégressifs</span>
+                </div>
+                <div class="feature-badge">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 8V12L15 15M21 12C21 16.971 16.971 21 12 21C7.029 21 3 16.971 3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12Z" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    <span>Livraison 3-4 sem</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1/3 IMAGE FULL -->
+        <div class="hero-prix-image">
+            <img src="https://flare-custom.com/photos/produits/FLARE-FTBMAIH-316-1.webp" alt="Tenues match complètes personnalisées" loading="eager" width="800" height="1200">
+        </div>
+    </section>
+
+    <!-- 🔥 TRUST BAR -->
+    <section class="trust-bar">
+        <div class="trust-items">
+            <div class="trust-item">
+                <strong>100%</strong>
+                <span>Designs assortis</span>
+            </div>
+            <div class="trust-item">
+                <strong>-40%</strong>
+                <span>En pack vs séparé</span>
+            </div>
+            <div class="trust-item">
+                <strong>24h</strong>
+                <span>Réponse devis</span>
+            </div>
+            <div class="trust-item">
+                <strong>1 An</strong>
+                <span>Garantie qualité</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🔥 POURQUOI TENUES COMPLÈTES - 3 COLONNES -->
+    <section class="advantages-section">
+        <div class="section-header">
+            <div class="section-eyebrow">Ensembles Coordonnés</div>
+            <h2 class="section-title">
+                Pourquoi Choisir Des<br>
+                <span style="color: #FF4B26;">Tenues Match Complètes ?</span>
+            </h2>
+            <p class="section-description">
+                Design harmonieux, look professionnel, économies substantielles. Tout pour équiper votre équipe avec style et cohérence.
+            </p>
+        </div>
+
+        <div class="advantages-grid">
+            <div class="advantage-card">
+                <div class="advantage-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                        <path d="M3 6h18M9 6v12M15 6v12M3 18h18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h3 class="advantage-title">Design Coordonné</h3>
+                <p class="advantage-desc">Maillot + short avec même identité visuelle. Couleurs, motifs, logos parfaitement harmonisés. Look professionnel unifié.</p>
+            </div>
+
+            <div class="advantage-card">
+                <div class="advantage-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                        <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z" fill="white"/>
+                    </svg>
+                </div>
+                <h3 class="advantage-title">Économie Réelle</h3>
+                <p class="advantage-desc">Jusqu'à -40% vs achat séparé. Pack complet plus avantageux. Frais de création uniques pour l'ensemble. Budget optimisé.</p>
+            </div>
+
+            <div class="advantage-card">
+                <div class="advantage-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 17L12 22L22 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 12L12 17L22 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h3 class="advantage-title">Gestion Simplifiée</h3>
+                <p class="advantage-desc">Une seule commande pour tout. Stock unifié. Tailles coordonnées. Distribution facilitée. Gain de temps administratif.</p>
+            </div>
+
+            <div class="advantage-card">
+                <div class="advantage-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="white" stroke-width="2"/>
+                        <path d="M12 6V12L16 14" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h3 class="advantage-title">Prêt Pour Match</h3>
+                <p class="advantage-desc">Tenue complète réglementaire. Aucun risque d'incompatibilité. Tous joueurs équipés identiquement. Performance optimale garantie.</p>
+            </div>
+
+            <div class="advantage-card">
+                <div class="advantage-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="white"/>
+                    </svg>
+                </div>
+                <h3 class="advantage-title">Qualité Pro</h3>
+                <p class="advantage-desc">Tissus techniques haut de gamme. Sublimation permanente. Coupes athlétiques étudiées. Résistance compétition garantie 1 an.</p>
+            </div>
+
+            <div class="advantage-card">
+                <div class="advantage-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="3" width="18" height="18" rx="2" stroke="white" stroke-width="2"/>
+                        <path d="M9 12L11 14L15 10" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h3 class="advantage-title">Personnalisation Totale</h3>
+                <p class="advantage-desc">Logos, sponsors, noms, numéros. Design unique ou templates pros. Couleurs libres. Créativité sans limite pour votre identité.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🔥 TARIFS - 4 CARTES TENUES -->
+    <section id="tarifs-tenues" class="pricing-cards">
+        <div class="section-header">
+            <div class="section-eyebrow">Tarifs Ensembles</div>
+            <h2 class="section-title">
+                Prix Tenues Complètes<br>
+                <span style="color: #FF4B26;">Maillot + Short</span>
+            </h2>
+            <p class="section-description">
+                Tarifs dégressifs automatiques. Ensemble coordonné plus avantageux que séparé. Économisez jusqu'à 40%.
+            </p>
+        </div>
+
+        <div class="pricing-grid">
+            <!-- Prix 1-4 -->
+            <div class="price-card">
+                <div class="price-volume">1-4 tenues</div>
+                <div class="price-amount">32€<span class="price-unit">/tenue</span></div>
+                <div class="price-saving">Maillot + Short</div>
+                <a href="/pages/info/contact.html" class="price-cta">Commander</a>
+            </div>
+
+            <!-- Prix 20-49 - Featured -->
+            <div class="price-card featured">
+                <div class="price-badge">Équipe Complète</div>
+                <div class="price-volume">20-49 tenues</div>
+                <div class="price-amount">24€<span class="price-unit">/tenue</span></div>
+                <div class="price-saving">-25% d'économie</div>
+                <a href="/pages/info/contact.html" class="price-cta">Commander</a>
+            </div>
+
+            <!-- Prix 100-249 - Premium -->
+            <div class="price-card premium">
+                <div class="price-badge">Multi-Équipes</div>
+                <div class="price-volume">100-249 tenues</div>
+                <div class="price-amount">17€<span class="price-unit">/tenue</span></div>
+                <div class="price-saving">-47% d'économie</div>
+                <a href="/pages/info/contact.html" class="price-cta">Commander</a>
+            </div>
+
+            <!-- Prix 500+ -->
+            <div class="price-card featured">
+                <div class="price-volume">500+ tenues</div>
+                <div class="price-amount">14€<span class="price-unit">/tenue</span></div>
+                <div class="price-saving">-56% d'économie</div>
+                <a href="/pages/info/contact.html" class="price-cta">Commander</a>
+            </div>
+        </div>
+
+        <div style="text-align: center; background: #fff; padding: 32px; border-left: 4px solid #FF4B26; max-width: 1400px; margin: 0 auto; border-radius: 8px;">
+            <p style="font-size: 15px; color: #6B7280; margin: 0;">
+                <strong style="color: #000;">💡 Tarifs indicatifs</strong> pour ensemble maillot 130g/m² Performance Mesh + short assorti.
+                <a href="/pages/info/contact.html" style="color: #FF4B26; text-decoration: none; font-weight: 700; border-bottom: 1px solid #FF4B26;">Devis personnalisé gratuit sous 24h</a> pour vos besoins spécifiques.
+            </p>
+        </div>
+    </section>
+
+    <!-- 🔥 TOUS LES SPORTS - STYLE INDEX -->
+    <section class="sports-section">
+        <div class="section-header">
+            <div class="section-eyebrow">Tous Les Sports</div>
+            <h2 class="section-title">
+                Tenues Complètes Pour<br>
+                <span style="color: #FF4B26;">Tous Vos Sports</span>
+            </h2>
+        </div>
+
+        <div class="sports-grid">
+            <a href="/equipement-football-personnalise-sublimation.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">⚽</span>
+                    <h3>Football</h3>
+                    <p>Tenues match officielles</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/equipements-rugby-personnalises-maillots-shorts-sublimation.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">🏉</span>
+                    <h3>Rugby</h3>
+                    <p>Ensembles renforcés</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/equipements-basketball-personnalises-maillots-shorts-sublimation.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">🏀</span>
+                    <h3>Basketball</h3>
+                    <p>Débardeur + short coordonné</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/equipements-handball-personnalises-maillots-shorts-sublimation.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">🤾</span>
+                    <h3>Handball</h3>
+                    <p>Tenues techniques complètes</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/equipements-volleyball-personnalises-maillots-shorts-sublimation.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">🏐</span>
+                    <h3>Volleyball</h3>
+                    <p>Ensembles performance</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+
+            <a href="/equipements-running-course-personnalises-debardeurs-shorts-sublimation.html" class="sport-card">
+                <div class="sport-card-content">
+                    <span class="sport-icon">🏃</span>
+                    <h3>Running</h3>
+                    <p>Tenues course légères</p>
+                    <span class="sport-link">→</span>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- 🔥 COMPARAISON -->
+    <section class="comparison-section">
+        <div class="section-header">
+            <div class="section-eyebrow">Pack vs Séparé</div>
+            <h2 class="section-title">
+                Tenue Complète vs<br>
+                <span style="color: #FF4B26;">Achat Séparé</span>
+            </h2>
+        </div>
+
+        <div class="comparison-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Critère</th>
+                        <th>Tenue Complète</th>
+                        <th>Achat Séparé</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Prix unitaire (50 pcs)</td>
+                        <td><strong class="highlight-price">20€</strong></td>
+                        <td>28-35€</td>
+                    </tr>
+                    <tr>
+                        <td>Design coordonné</td>
+                        <td><strong class="highlight-price">Garanti</strong></td>
+                        <td>Aléatoire</td>
+                    </tr>
+                    <tr>
+                        <td>Frais de création</td>
+                        <td><strong class="highlight-price">50€ forfait</strong></td>
+                        <td>50€ × 2 = 100€</td>
+                    </tr>
+                    <tr>
+                        <td>Gestion commande</td>
+                        <td><strong class="highlight-price">Unique</strong></td>
+                        <td>Double</td>
+                    </tr>
+                    <tr>
+                        <td>Délai de livraison</td>
+                        <td><strong class="highlight-price">3-4 semaines</strong></td>
+                        <td>6-8 semaines</td>
+                    </tr>
+                    <tr>
+                        <td>Garantie ensemble</td>
+                        <td><strong class="highlight-price">1 an</strong></td>
+                        <td>Séparée</td>
+                    </tr>
+                    <tr>
+                        <td>Économie réalisée</td>
+                        <td><strong class="highlight-price">Jusqu'à -40%</strong></td>
+                        <td>0%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="text-align: center; margin-top: 48px;">
+            <a href="/pages/info/contact.html" style="display: inline-block; padding: 20px 48px; background: #FF4B26; color: #fff; text-decoration: none; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; transition: all 0.3s;">Demander Mon Devis</a>
+        </div>
+    </section>
+
+    <!-- 🔥 FAQ -->
+    <section class="faq-section">
+        <div class="faq-container">
+            <div class="section-header">
+                <div class="section-eyebrow">Questions Fréquentes</div>
+                <h2 class="section-title" style="color: #000;">Questions Tenues Complètes</h2>
+            </div>
+
+            <div class="faq-accordion">
+                <details>
+                    <summary>
+                        Pourquoi choisir une tenue complète ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        Design parfaitement coordonné, économie jusqu'à 40%, gestion simplifiée (1 seule commande), look professionnel unifié. Plus avantageux à tous points de vue.
+                    </p>
+                </details>
+
+                <details>
+                    <summary>
+                        Puis-je personnaliser chaque élément ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        Oui totalement. Logos, sponsors, noms, numéros sur maillot et short. Design harmonisé mais personnalisation complète de chaque pièce selon vos besoins.
+                    </p>
+                </details>
+
+                <details>
+                    <summary>
+                        Le short est-il vraiment assorti au maillot ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        Oui, garantie 100%. Même palette couleurs, même style graphique, même qualité tissus. Design pensé globalement pour harmonie parfaite visuelle.
+                    </p>
+                </details>
+
+                <details>
+                    <summary>
+                        Combien j'économise vs achat séparé ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        Jusqu'à 40% d'économie. Prix pack dégressif + frais création uniques + livraison optimisée. Ex : 50 tenues = 1000€ vs 1400€ séparé = 400€ économisés.
+                    </p>
+                </details>
+
+                <details>
+                    <summary>
+                        Puis-je commander des shorts supplémentaires après ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        Oui. Design conservé 2 ans. Vous pouvez recommander shorts seuls ultérieurement dans même design pour compléter stock ou remplacer usure.
+                    </p>
+                </details>
+
+                <details>
+                    <summary>
+                        Les tailles sont-elles cohérentes maillot/short ?
+                        <span class="faq-icon">+</span>
+                    </summary>
+                    <p>
+                        Oui, barème tailles unifié. Si joueur porte L maillot, short L correspondra. Guide tailles fourni pour faciliter commande groupée équipe complète.
+                    </p>
+                </details>
+            </div>
+
+            <div style="text-align: center; margin-top: 48px;">
+                <a href="/faq-questions-frequentes-equipements-personnalises.html" style="display: inline-block; padding: 16px 40px; background: #fff; color: #000; text-decoration: none; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; border: 2px solid #E5E7EB; transition: all 0.3s; border-radius: 8px;">Toutes Les FAQ</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🔥 CTA FINAL - 4 STATS EN LIGNE -->
+    <section class="cta-final-section">
+        <div class="cta-final-overlay"></div>
+
+        <div class="cta-final-container">
+            <div class="section-eyebrow">Prêt à Commander ?</div>
+
+            <h2 class="cta-final-title">
+                Obtenez Votre Devis<br>
+                <span style="color: #FF4B26;">Gratuit 24h</span>
+            </h2>
+
+            <p style="font-size: clamp(16px, 2.5vw, 20px); line-height: 1.6; color: rgba(0,0,0,0.85); margin-bottom: 48px; max-width: 700px; margin-left: auto; margin-right: auto;">
+                Tenues complètes coordonnées. Design pro. Économie garantie. Sans engagement.
+            </p>
+
+            <div class="cta-final-buttons">
+                <a href="/pages/info/contact.html" class="btn-cta-primary">Demander Mon Devis</a>
+                <a href="https://wa.me/359885813134" class="btn-cta-secondary">WhatsApp Direct</a>
+            </div>
+
+            <div class="cta-stats">
+                <div class="stat-item">
+                    <div class="stat-number">-40%</div>
+                    <div class="stat-label">vs achat séparé</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Design coordonné</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">1 An</div>
+                    <div class="stat-label">Garantie qualité</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">24h</div>
+                    <div class="stat-label">Réponse garantie</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🔥 FOOTER DYNAMIQUE -->
+    <div id="dynamic-footer"></div>
+
+    <script src="../../assets/js/components-loader.js"></script>
+    <script src="../../assets/js/script.js"></script>
 </body>
 </html>
