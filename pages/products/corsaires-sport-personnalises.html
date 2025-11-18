@@ -16,377 +16,399 @@
     <link rel="preload" href="../../assets/css/components.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="../../assets/css/components.css"></noscript>
 
-    <style>
-/* ===== HERO MODERNE - DESIGN IDENTIQUE PAGE D'ACCUEIL ===== */
-        .hero-sport,
-        .hero-faq,
-        .hero-livraison,
-        .hero-contact,
-        .hero-budget,
-        .hero-retours,
-        .hero-revendeur,
-        .hero-page,
-        .hero-innovation-v2 {
-            position: relative;
-            min-height: 70vh;
-            display: grid;
-            grid-template-columns: 1.1fr 1fr;
-            align-items: center;
-            padding: 140px 5% 100px;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #f1f3f5 100%);
-            gap: 80px;
-            max-width: 100%;
-            overflow: hidden;
-            margin-top: 0 !important;
-        }
+    <style>/* ========================================
+   HERO UNIVERSEL - DESIGN SIMPLE ET MODERNE
+   Pour toutes les pages (produits + info)
+   ======================================== */
 
-        /* Formes décoratives animées */
-        .hero-sport::before,
-        .hero-faq::before,
-        .hero-livraison::before,
-        .hero-contact::before,
-        .hero-budget::before,
-        .hero-retours::before,
-        .hero-revendeur::before,
-        .hero-page::before {
-            content: '';
-            position: absolute;
-            width: 800px;
-            height: 800px;
-            background: radial-gradient(circle, rgba(255,75,38,0.12) 0%, transparent 70%);
-            border-radius: 50%;
-            top: -300px;
-            right: -200px;
-            z-index: 0;
-            animation: pulse 8s ease-in-out infinite;
-        }
+.hero-sport,
+.hero-faq,
+.hero-livraison,
+.hero-contact,
+.hero-budget,
+.hero-retours,
+.hero-revendeur,
+.hero-page,
+.hero-innovation-v2,
+.hero-adidas {
+    position: relative;
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 100px 5% 80px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #f1f3f5 100%);
+    overflow: hidden;
+}
 
-        .hero-sport::after,
-        .hero-faq::after,
-        .hero-livraison::after,
-        .hero-contact::after,
-        .hero-budget::after,
-        .hero-retours::after,
-        .hero-revendeur::after,
-        .hero-page::after {
-            content: '';
-            position: absolute;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(0,123,255,0.08) 0%, transparent 70%);
-            border-radius: 50%;
-            bottom: -200px;
-            left: -150px;
-            z-index: 0;
-            animation: pulse 10s ease-in-out infinite reverse;
-        }
+/* Formes décoratives subtiles */
+.hero-sport::before,
+.hero-faq::before,
+.hero-livraison::before,
+.hero-contact::before,
+.hero-budget::before,
+.hero-retours::before,
+.hero-revendeur::before,
+.hero-page::before,
+.hero-adidas::before {
+    content: '';
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255,75,38,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    top: -200px;
+    right: -100px;
+    z-index: 0;
+    animation: pulse 8s ease-in-out infinite;
+}
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-        }
+.hero-sport::after,
+.hero-faq::after,
+.hero-livraison::after,
+.hero-contact::after,
+.hero-budget::after,
+.hero-retours::after,
+.hero-revendeur::after,
+.hero-page::after,
+.hero-adidas::after {
+    content: '';
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(0,123,255,0.06) 0%, transparent 70%);
+    border-radius: 50%;
+    bottom: -100px;
+    left: -80px;
+    z-index: 0;
+    animation: pulse 10s ease-in-out infinite reverse;
+}
 
-        .hero-sport-content,
-        .hero-faq-content,
-        .hero-livraison-content,
-        .hero-contact-content,
-        .hero-budget-content,
-        .hero-retours-content,
-        .hero-revendeur-content,
-        .hero-page-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 80px;
-            align-items: center;
-            position: relative;
-            z-index: 1;
-        }
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+}
 
-        .hero-sport-left,
-        .hero-faq-left,
-        .hero-livraison-left,
-        .hero-contact-left,
-        .hero-budget-left,
-        .hero-retours-left,
-        .hero-revendeur-left,
-        .hero-page-left {
-            animation: fadeInLeft 1s ease;
-            position: relative;
-            z-index: 1;
-        }
+/* Contenu centré */
+.hero-sport-content,
+.hero-faq-content,
+.hero-livraison-content,
+.hero-contact-content,
+.hero-budget-content,
+.hero-retours-content,
+.hero-revendeur-content,
+.hero-page-content,
+.hero-innovation-content-v2,
+.hero-adidas-content {
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    animation: fadeInUp 0.8s ease;
+}
 
-        @keyframes fadeInLeft {
-            from { opacity: 0; transform: translateX(-40px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
-        .hero-sport-right,
-        .hero-faq-right,
-        .hero-livraison-right,
-        .hero-contact-right,
-        .hero-budget-right,
-        .hero-retours-right,
-        .hero-revendeur-right,
-        .hero-page-right {
-            animation: fadeInRight 1s ease 0.3s backwards;
-            position: relative;
-            z-index: 1;
-        }
+/* Eyebrow */
+.hero-sport-eyebrow,
+.hero-faq-eyebrow,
+.hero-livraison-eyebrow,
+.hero-contact-eyebrow,
+.hero-budget-eyebrow,
+.hero-retours-eyebrow,
+.hero-revendeur-eyebrow,
+.hero-page-eyebrow,
+.hero-eyebrow,
+.hero-eyebrow-v2 {
+    display: inline-block;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #FF4B26;
+    margin-bottom: 20px;
+}
 
-        @keyframes fadeInRight {
-            from { opacity: 0; transform: translateX(40px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
+/* Titre */
+.hero-sport-title,
+.hero-faq-title,
+.hero-livraison-title,
+.hero-contact-title,
+.hero-budget-title,
+.hero-retours-title,
+.hero-revendeur-title,
+.hero-page-title,
+.hero-title,
+.hero-title-v2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 64px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    color: #1a1a1a;
+}
 
-        .hero-sport-eyebrow,
-        .hero-faq-eyebrow,
-        .hero-livraison-eyebrow,
-        .hero-contact-eyebrow,
-        .hero-budget-eyebrow,
-        .hero-retours-eyebrow,
-        .hero-revendeur-eyebrow,
-        .hero-page-eyebrow,
-        .hero-eyebrow,
-        .hero-eyebrow-v2 {
-            display: inline-block;
-            padding: 10px 24px;
-            background: linear-gradient(135deg, #FF4B26 0%, #E63910 100%);
-            color: #fff;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-bottom: 32px;
-            border-radius: 50px;
-            box-shadow: 0 4px 20px rgba(255,75,38,0.3);
-        }
+/* Sous-titre */
+.hero-sport-subtitle,
+.hero-faq-subtitle,
+.hero-livraison-subtitle,
+.hero-contact-subtitle,
+.hero-budget-subtitle,
+.hero-budget-desc,
+.hero-retours-subtitle,
+.hero-revendeur-subtitle,
+.hero-page-subtitle,
+.hero-subtitle,
+.hero-subtitle-v2 {
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+    color: #495057;
+    max-width: 700px;
+    margin: 0 auto 40px;
+    font-weight: 400;
+}
 
-        .hero-sport-title,
-        .hero-faq-title,
-        .hero-livraison-title,
-        .hero-contact-title,
-        .hero-budget-title,
-        .hero-retours-title,
-        .hero-revendeur-title,
-        .hero-page-title,
-        .hero-title,
-        .hero-title-v2 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: clamp(64px, 8vw, 120px);
-            font-weight: 700;
-            line-height: 0.95;
-            letter-spacing: 2px;
-            margin-bottom: 28px;
-            color: #1a1a1a;
-        }
+/* CTA Buttons */
+.hero-sport-cta,
+.hero-faq-cta,
+.hero-livraison-cta,
+.hero-contact-cta,
+.hero-budget-cta,
+.hero-retours-cta,
+.hero-revendeur-cta,
+.hero-page-cta,
+.hero-cta {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
 
-        .hero-sport-subtitle,
-        .hero-faq-subtitle,
-        .hero-livraison-subtitle,
-        .hero-contact-subtitle,
-        .hero-budget-subtitle,
-        .hero-budget-desc,
-        .hero-retours-subtitle,
-        .hero-revendeur-subtitle,
-        .hero-page-subtitle,
-        .hero-subtitle,
-        .hero-subtitle-v2 {
-            font-size: clamp(16px, 2vw, 20px);
-            line-height: 1.7;
-            color: #495057;
-            margin-bottom: 48px;
-            max-width: 600px;
-            font-weight: 400;
-        }
+.btn-hero-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 32px;
+    background: #FF4B26;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 15px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: none;
+}
 
-        .hero-sport-cta,
-        .hero-faq-cta,
-        .hero-livraison-cta,
-        .hero-contact-cta,
-        .hero-budget-cta,
-        .hero-retours-cta,
-        .hero-revendeur-cta {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
+.btn-hero-primary:hover {
+    background: #E63910;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255,75,38,0.3);
+}
 
-        .btn-hero-primary,
-        .btn-primary {
-            padding: 18px 48px;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            color: #fff;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 14px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            border-radius: 50px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            position: relative;
-            overflow: hidden;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-        }
+.btn-hero-primary svg {
+    width: 18px;
+    height: 18px;
+}
 
-        .btn-hero-primary::before,
-        .btn-primary::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
+.btn-hero-secondary,
+.btn-cta-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 32px;
+    background: transparent;
+    color: #1a1a1a;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 15px;
+    border: 2px solid #1a1a1a;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
 
-        .btn-hero-primary:hover::before,
-        .btn-primary:hover::before {
-            left: 100%;
-        }
+.btn-hero-secondary:hover,
+.btn-cta-outline:hover {
+    background: #1a1a1a;
+    color: #fff;
+    transform: translateY(-2px);
+}
 
-        .btn-hero-primary:hover,
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-        }
+.btn-hero-secondary svg,
+.btn-cta-outline svg {
+    width: 18px;
+    height: 18px;
+}
 
-        .btn-hero-secondary,
-        .btn-secondary {
-            padding: 18px 48px;
-            background: transparent;
-            color: #1a1a1a;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 14px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            border-radius: 50px;
-            border: 2px solid #1a1a1a;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            display: inline-flex;
-            align-items: center;
-        }
+/* Masquer éléments inutiles */
+.hero-sport-left,
+.hero-sport-right,
+.hero-faq-left,
+.hero-faq-right,
+.hero-livraison-left,
+.hero-livraison-right,
+.hero-contact-left,
+.hero-contact-right,
+.hero-budget-left,
+.hero-budget-right,
+.hero-retours-left,
+.hero-retours-right,
+.hero-revendeur-left,
+.hero-revendeur-right,
+.hero-page-left,
+.hero-page-right,
+.hero-sport-features,
+.hero-faq-features,
+.hero-livraison-features,
+.hero-contact-features,
+.hero-budget-features,
+.hero-retours-features,
+.hero-revendeur-features,
+.hero-page-features,
+.hero-sport-background,
+.hero-sport-overlay,
+.hero-contact-background,
+.hero-faq-background,
+.hero-livraison-background,
+.hero-budget-overlay,
+.hero-budget-image,
+.hero-innovation-bg,
+.breadcrumb {
+    display: none !important;
+}
 
-        .btn-hero-secondary::before,
-        .btn-secondary::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: #1a1a1a;
-            transform: translate(-50%, -50%);
-            transition: width 0.4s, height 0.4s;
-            z-index: -1;
-        }
+/* EXCEPTION: Contact garde ses badges */
+.hero-contact-badges {
+    display: flex !important;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 48px;
+}
 
-        .btn-hero-secondary:hover::before,
-        .btn-secondary:hover::before {
-            width: 300px;
-            height: 300px;
-        }
+.hero-badge,
+.contact-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
 
-        .btn-hero-secondary:hover,
-        .btn-secondary:hover {
-            color: #fff;
-        }
+.hero-badge:hover,
+.contact-badge:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
 
-        .hero-sport-features,
-        .hero-faq-features,
-        .hero-livraison-features,
-        .hero-contact-features,
-        .hero-budget-features,
-        .hero-retours-features,
-        .hero-revendeur-features,
-        .hero-contact-badges {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            background: #fff;
-            padding: 3rem;
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-            transition: all 0.4s ease;
-        }
+.hero-badge svg,
+.contact-badge svg {
+    width: 18px;
+    height: 18px;
+    color: #FF4B26;
+    stroke: #FF4B26;
+    fill: #FF4B26;
+}
 
-        .hero-sport-features:hover,
-        .hero-faq-features:hover,
-        .hero-contact-badges:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 30px 80px rgba(0,0,0,0.15);
-        }
+.hero-badge span,
+.contact-badge span {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
 
-        .feature-badge,
-        .contact-badge {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 24px 20px;
-            background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
-            border-radius: 16px;
-            border: 1px solid rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+    .hero-sport,
+    .hero-faq,
+    .hero-livraison,
+    .hero-contact,
+    .hero-budget,
+    .hero-adidas {
+        min-height: 50vh;
+        padding: 80px 5% 60px;
+    }
 
-        .feature-badge::before,
-        .contact-badge::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: linear-gradient(180deg, #FF4B26 0%, #E63910 100%);
-            transition: width 0.3s ease;
-        }
+    .hero-sport-title,
+    .hero-faq-title,
+    .hero-livraison-title,
+    .hero-contact-title,
+    .hero-budget-title,
+    .hero-title {
+        font-size: 52px;
+    }
 
-        .feature-badge:hover::before,
-        .contact-badge:hover::before {
-            width: 100%;
-            opacity: 0.05;
-        }
+    .hero-contact-badges {
+        gap: 12px;
+    }
+}
 
-        .feature-badge:hover,
-        .contact-badge:hover {
-            background: #fff;
-            transform: translateX(5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-        }
+@media (max-width: 768px) {
+    .hero-sport,
+    .hero-faq,
+    .hero-livraison,
+    .hero-contact,
+    .hero-budget,
+    .hero-adidas {
+        min-height: auto;
+        padding: 60px 5% 50px;
+    }
 
-        .feature-badge svg,
-        .contact-badge svg {
-            width: 40px;
-            height: 40px;
-            color: #FF4B26;
-            fill: #FF4B26;
-            flex-shrink: 0;
-            transition: transform 0.3s ease;
-        }
+    .hero-sport-title,
+    .hero-faq-title,
+    .hero-livraison-title,
+    .hero-contact-title,
+    .hero-budget-title,
+    .hero-title {
+        font-size: 40px;
+    }
 
-        .feature-badge:hover svg,
-        .contact-badge:hover svg {
-            transform: scale(1.1) rotate(5deg);
-        }
+    .hero-sport-subtitle,
+    .hero-faq-subtitle,
+    .hero-livraison-subtitle,
+    .hero-subtitle {
+        font-size: 16px;
+    }
 
-        .feature-badge span,
-        .contact-badge span {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1a1a1a;
-            line-height: 1.4;
-        }
+    .hero-sport-cta,
+    .hero-faq-cta,
+    .hero-livraison-cta,
+    .hero-contact-cta,
+    .hero-cta {
+        flex-direction: column;
+        gap: 12px;
+    }
 
-        /* Masquer anciens éléments */
+    .btn-hero-primary,
+    .btn-hero-secondary,
+    .btn-cta-outline {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .hero-contact-badges {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .hero-badge,
+    .contact-badge {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+
+/* Masquer anciens éléments */
         .hero-sport-background,
         .hero-sport-overlay,
         .hero-contact-background,
@@ -455,6 +477,7 @@
                 justify-content: center;
             }
         }
+    
     </style>
 </head>
 <body>
@@ -462,49 +485,10 @@
 
             <section class="hero-sport">
         <div class="hero-sport-content">
-            <div class="hero-sport-left">
-                <span class="hero-sport-eyebrow">corsaires personnalisés</span>
-                <h1 class="hero-sport-title">Corsaire Sport Personnalisé</h1>
-                <p class="hero-sport-subtitle">8 modèles personnalisables tous sports · fabrication européenne · design illimité</p>
-
-                <div class="hero-sport-cta">
-                <a href="#products" class="btn-hero-primary">
-                    <span>Voir les produits</span>
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                </a>
-                <a href="/pages/info/contact.html" class="btn-hero-secondary">Demander un devis</a>
-            </div>
-            </div>
-
-            <div class="hero-sport-right">
-                <div class="hero-sport-features">
-                <div class="feature-badge">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-                    </svg>
-                    <span>Design illimité</span>
-                </div>
-                <div class="feature-badge">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M9 12L11 14L15 10M21 12C21 16.971 16.971 21 12 21C7.029 21 3 16.971 3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12Z"/>
-                    </svg>
-                    <span>Qualité pro</span>
-                </div>
-                <div class="feature-badge">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M13 10V3L4 14H11V21L20 10H13Z"/>
-                    </svg>
-                    <span>Livraison rapide</span>
-                </div>
-                <div class="feature-badge">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 8V12L15 15M21 12C21 16.971 16.971 21 12 21C7.029 21 3 16.971 3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12Z"/>
-                    </svg>
-                    <span>Prix dégressifs</span>
-                </div>
-            </div>
+            <span class="hero-sport-eyebrow">corsaires personnalisés</span>
+            <h1 class="hero-sport-title">Corsaire Sport Personnalisé</h1>
+            <p class="hero-sport-subtitle">8 modèles personnalisables tous sports · fabrication européenne · design illimité</p>
+        </div>
             </div>
         </div>
     </section>
