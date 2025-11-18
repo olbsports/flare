@@ -26,6 +26,138 @@
             .slider-dot,.btn-search{min-width:12px;min-height:12px;margin:0 4px;padding:4pxmin-width:12px;min-height:12px;display:inline-flex;align-items:center;justify-content:center}
             .slider-dot{min-width:12px;min-height:12px;width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,0.5);border:none;cursor:pointer;transition:all 0.3s;margin:0 3px;padding:0}
         .slider-dot.active,.slider-dot:hover{background:#00D9FF;transform:scale(1.2)}
+    
+        /* ===== HERO 2 COLONNES COMPACT AVEC FOND GRIS ===== */
+        .hero-sport {
+            background: #f5f5f5;
+            margin-top: 80px;
+            padding: 2.5rem 5% 2rem;
+        }
+        .hero-sport-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+        .hero-sport-left {
+            text-align: left;
+        }
+        .hero-sport-right {
+            background: #fff;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .hero-sport-eyebrow {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #FF4B26;
+            padding: 10px 24px;
+            border: 1px solid #FF4B26;
+            margin-bottom: 24px;
+        }
+        .hero-sport-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(42px, 6vw, 64px);
+            line-height: 1.05;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            color: #1a1a1a;
+        }
+        .hero-sport-subtitle {
+            font-size: clamp(15px, 2vw, 18px);
+            line-height: 1.7;
+            color: #666;
+            margin-bottom: 32px;
+        }
+        .hero-sport-cta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 0;
+        }
+        .btn-hero-primary {
+            padding: 16px 36px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-decoration: none;
+            background: #FF4B26;
+            color: #fff;
+            border-radius: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+        .btn-hero-primary:hover {
+            background: #E63910;
+            transform: translateY(-2px);
+        }
+        .btn-hero-secondary {
+            padding: 16px 36px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-decoration: none;
+            background: transparent;
+            color: #1a1a1a;
+            border: 2px solid #1a1a1a;
+            border-radius: 0;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        .btn-hero-secondary:hover {
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .hero-sport-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .feature-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: #f8f8f8;
+            border-radius: 8px;
+        }
+        .feature-badge svg {
+            width: 24px;
+            height: 24px;
+            color: #FF4B26;
+            fill: #FF4B26;
+            flex-shrink: 0;
+        }
+        .feature-badge span {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+        .breadcrumb {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero-sport-content {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            .hero-sport-left {
+                text-align: center;
+            }
+        }
     </style>
     <meta name="description" content="Combinaisons triathlon personnalisées. Tissus compressifs hydrodynamiques, séchage rapide. Combinaisons intégrales et shorts tri. design sur mesure.">
     <meta name="keywords" content="combinaison triathlon personnalisée, tenue triathlon club, equipement tri, combi triathlon, short triathlon, trifonction personnalisée">
@@ -54,30 +186,15 @@
 
 
     <!-- Hero Sport -->
-    <section class="hero-sport">
-        <div class="hero-sport-background">
-            <img src="https://images.unsplash.com/photo-1530549387789-4c1017266635?w=1920&q=80" alt="TRIATHLON équipements personnalisés" fetchpriority="high" decoding="async">
-            <div class="hero-sport-overlay"></div>
-        </div>
-        
+    
+        <section class="hero-sport">
         <div class="hero-sport-content">
-            <div class="breadcrumb">
-                <a href="../../index.html">Accueil</a>
-                <span>/</span>
-                <span>Triathlon</span>
-            </div>
-            
-            <h1 class="hero-sport-title">
+            <div class="hero-sport-left">
                 <span class="hero-sport-eyebrow">🏊‍♂️ Triathlon</span>
-                <span class="hero-sport-main">Équipements Triathlon</span>
-                <span class="hero-sport-sub">Personnalisés Sublimation</span>
-            </h1>
-            
-            <p class="hero-sport-desc">
-                Combinaisons et trifonctions triathlon. Tissus compressifs hydrodynamiques.<br>Peau chamois confort, séchage rapide. Multi-discipline. à partir de 68.90€.
-            </p>
-            
-            <div class="hero-sport-cta">
+                <h1 class="hero-sport-title">Équipements Triathlon</h1>
+                <p class="hero-sport-subtitle">Personnalisés Sublimation</p>
+
+                <div class="hero-sport-cta">
                 <a href="#products" class="btn-hero-primary">
                     Voir les produits
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
@@ -86,8 +203,10 @@
                 </a>
                 <a href="/pages/info/contact.html" class="btn-hero-secondary">Demander un devis</a>
             </div>
-            
-            <div class="hero-sport-features">
+            </div>
+
+            <div class="hero-sport-right">
+                <div class="hero-sport-features">
                 <div class="feature-badge">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
@@ -112,6 +231,7 @@
                     </svg>
                     <span>Prix dégressifs</span>
                 </div>
+            </div>
             </div>
         </div>
     </section>
