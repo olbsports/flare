@@ -79,7 +79,9 @@ function generateDescription(product) {
 
     if (product.DESCRIPTION_SEO) {
         description += `<h3>Caractéristiques spécifiques</h3>\n\n`;
-        description += `<p>${product.DESCRIPTION_SEO}</p>\n\n`;
+        // Nettoyer la description : retirer guillemets, tirets et espaces au début
+        const cleanDescription = product.DESCRIPTION_SEO.replace(/^["'\-\s]+/, '');
+        description += `<p>${cleanDescription}</p>\n\n`;
     }
 
     description += `<h3>Fabrication Européenne Certifiée</h3>\n\n`;
