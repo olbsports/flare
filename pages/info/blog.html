@@ -18,7 +18,6 @@
 .hero-sport,
 .hero-faq,
 .hero-livraison,
-.hero-contact,
 .hero-budget,
 .hero-retours,
 .hero-revendeur,
@@ -36,11 +35,35 @@
     overflow: hidden;
 }
 
+/* HERO CONTACT - FOND ORANGE */
+.hero-contact {
+    position: relative;
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 100px 5% 80px;
+    background: linear-gradient(135deg, #FF4B26 0%, #E63910 100%);
+    overflow: hidden;
+}
+
+.hero-contact .hero-contact-eyebrow {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.hero-contact .hero-contact-title {
+    color: #fff;
+}
+
+.hero-contact .hero-contact-subtitle {
+    color: rgba(255, 255, 255, 0.95);
+}
+
 /* Formes décoratives subtiles */
 .hero-sport::before,
 .hero-faq::before,
 .hero-livraison::before,
-.hero-contact::before,
 .hero-budget::before,
 .hero-retours::before,
 .hero-revendeur::before,
@@ -61,7 +84,6 @@
 .hero-sport::after,
 .hero-faq::after,
 .hero-livraison::after,
-.hero-contact::after,
 .hero-budget::after,
 .hero-retours::after,
 .hero-revendeur::after,
@@ -72,6 +94,33 @@
     width: 400px;
     height: 400px;
     background: radial-gradient(circle, rgba(0,123,255,0.06) 0%, transparent 70%);
+    border-radius: 50%;
+    bottom: -100px;
+    left: -80px;
+    z-index: 0;
+    animation: pulse 10s ease-in-out infinite reverse;
+}
+
+/* Contact - formes blanches subtiles sur fond orange */
+.hero-contact::before {
+    content: '';
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    top: -200px;
+    right: -100px;
+    z-index: 0;
+    animation: pulse 8s ease-in-out infinite;
+}
+
+.hero-contact::after {
+    content: '';
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
     border-radius: 50%;
     bottom: -100px;
     left: -80px;
@@ -410,9 +459,9 @@
     color: #fff;
     padding: 14px 5%;
     border-bottom: 1px solid #333;
-    margin-top: 5em;
 }
 
+.trust-items,
 .trust-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -431,9 +480,84 @@
     font-weight: 600;
 }
 
+.trust-item strong {
+    font-size: 20px;
+    font-weight: 700;
+    color: #FF4B26;
+    display: block;
+}
+
+.trust-item span {
+    font-size: 13px;
+    font-weight: 400;
+    color: #ccc;
+}
+
 .trust-item svg {
     stroke: #FF4B26;
     flex-shrink: 0;
+}
+
+/* ========================================
+   FEATURE BADGES - BADGES CARACTÉRISTIQUES
+   ======================================== */
+
+.feature-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 20px 0;
+}
+
+.feature-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #FF4B26 0%, #E63910 100%);
+    color: #fff;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.feature-badge svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+/* ========================================
+   PRODUCT TABS - RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .tabs-nav {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .tab-btn {
+        padding: 12px 16px;
+        font-size: 14px;
+        flex: 1 1 auto;
+        min-width: calc(50% - 4px);
+    }
+
+    .product-tabs {
+        padding: 0 3%;
+        margin: 40px auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .tab-btn {
+        min-width: 100%;
+        text-align: center;
+    }
 }
 
 
