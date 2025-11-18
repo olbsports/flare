@@ -4,318 +4,399 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configurateur SVG - FLARE CUSTOM</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <style>/* ========================================
+   HERO UNIVERSEL - DESIGN SIMPLE ET MODERNE
+   Pour toutes les pages (produits + info)
+   ======================================== */
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #f5f5f5;
-            color: #1a1a1a;
-        }
+.hero-sport,
+.hero-faq,
+.hero-livraison,
+.hero-contact,
+.hero-budget,
+.hero-retours,
+.hero-revendeur,
+.hero-page,
+.hero-innovation-v2,
+.hero-adidas {
+    position: relative;
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 100px 5% 80px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #f1f3f5 100%);
+    overflow: hidden;
+}
 
-        /* Header */
-        .header {
-            background: #ffffff;
-            border-bottom: 1px solid #e0e0e0;
-            padding: 20px 40px;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
+/* Formes décoratives subtiles */
+.hero-sport::before,
+.hero-faq::before,
+.hero-livraison::before,
+.hero-contact::before,
+.hero-budget::before,
+.hero-retours::before,
+.hero-revendeur::before,
+.hero-page::before,
+.hero-adidas::before {
+    content: '';
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255,75,38,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    top: -200px;
+    right: -100px;
+    z-index: 0;
+    animation: pulse 8s ease-in-out infinite;
+}
 
-        .header-content {
-            max-width: 1800px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+.hero-sport::after,
+.hero-faq::after,
+.hero-livraison::after,
+.hero-contact::after,
+.hero-budget::after,
+.hero-retours::after,
+.hero-revendeur::after,
+.hero-page::after,
+.hero-adidas::after {
+    content: '';
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(0,123,255,0.06) 0%, transparent 70%);
+    border-radius: 50%;
+    bottom: -100px;
+    left: -80px;
+    z-index: 0;
+    animation: pulse 10s ease-in-out infinite reverse;
+}
 
-        .logo {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1a1a1a;
-            letter-spacing: 1px;
-        }
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+}
 
-        .logo span {
-            color: #FF4B26;
-        }
+/* Contenu centré */
+.hero-sport-content,
+.hero-faq-content,
+.hero-livraison-content,
+.hero-contact-content,
+.hero-budget-content,
+.hero-retours-content,
+.hero-revendeur-content,
+.hero-page-content,
+.hero-innovation-content-v2,
+.hero-adidas-content {
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    animation: fadeInUp 0.8s ease;
+}
 
-        .actions {
-            display: flex;
-            gap: 10px;
-        }
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
-        .btn {
-            padding: 10px 20px;
-            font-size: 13px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border: 1px solid #e0e0e0;
-            background: #ffffff;
-            color: #1a1a1a;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
+/* Eyebrow */
+.hero-sport-eyebrow,
+.hero-faq-eyebrow,
+.hero-livraison-eyebrow,
+.hero-contact-eyebrow,
+.hero-budget-eyebrow,
+.hero-retours-eyebrow,
+.hero-revendeur-eyebrow,
+.hero-page-eyebrow,
+.hero-eyebrow,
+.hero-eyebrow-v2 {
+    display: inline-block;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #FF4B26;
+    margin-bottom: 20px;
+}
 
-        .btn:hover:not(:disabled) {
-            background: #f5f5f5;
-        }
+/* Titre */
+.hero-sport-title,
+.hero-faq-title,
+.hero-livraison-title,
+.hero-contact-title,
+.hero-budget-title,
+.hero-retours-title,
+.hero-revendeur-title,
+.hero-page-title,
+.hero-title,
+.hero-title-v2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 64px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    color: #1a1a1a;
+}
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+/* Sous-titre */
+.hero-sport-subtitle,
+.hero-faq-subtitle,
+.hero-livraison-subtitle,
+.hero-contact-subtitle,
+.hero-budget-subtitle,
+.hero-budget-desc,
+.hero-retours-subtitle,
+.hero-revendeur-subtitle,
+.hero-page-subtitle,
+.hero-subtitle,
+.hero-subtitle-v2 {
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+    color: #495057;
+    max-width: 700px;
+    margin: 0 auto 40px;
+    font-weight: 400;
+}
 
-        .btn-primary {
-            background: #FF4B26;
-            color: #ffffff;
-            border-color: #FF4B26;
-        }
+/* CTA Buttons */
+.hero-sport-cta,
+.hero-faq-cta,
+.hero-livraison-cta,
+.hero-contact-cta,
+.hero-budget-cta,
+.hero-retours-cta,
+.hero-revendeur-cta,
+.hero-page-cta,
+.hero-cta {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
 
-        .btn-primary:hover:not(:disabled) {
-            background: #e63d1a;
-        }
+.btn-hero-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 32px;
+    background: #FF4B26;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 15px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: none;
+}
 
-        /* Layout */
-        .container {
-            max-width: 1800px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 320px 1fr;
-            min-height: calc(100vh - 81px);
-        }
+.btn-hero-primary:hover {
+    background: #E63910;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255,75,38,0.3);
+}
 
-        /* Sidebar */
-        .sidebar {
-            background: #ffffff;
-            border-right: 1px solid #e0e0e0;
-            overflow-y: auto;
-            height: calc(100vh - 81px);
-        }
+.btn-hero-primary svg {
+    width: 18px;
+    height: 18px;
+}
 
-        .sidebar-header {
-            padding: 30px 20px;
-            border-bottom: 1px solid #e0e0e0;
-        }
+.btn-hero-secondary,
+.btn-cta-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 32px;
+    background: transparent;
+    color: #1a1a1a;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 15px;
+    border: 2px solid #1a1a1a;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
 
-        .sidebar-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
-        }
+.btn-hero-secondary:hover,
+.btn-cta-outline:hover {
+    background: #1a1a1a;
+    color: #fff;
+    transform: translateY(-2px);
+}
 
-        .count {
-            font-size: 12px;
-            color: #999;
-        }
+.btn-hero-secondary svg,
+.btn-cta-outline svg {
+    width: 18px;
+    height: 18px;
+}
 
-        .gallery {
-            padding: 20px;
-        }
+/* Masquer éléments inutiles */
+.hero-sport-left,
+.hero-sport-right,
+.hero-faq-left,
+.hero-faq-right,
+.hero-livraison-left,
+.hero-livraison-right,
+.hero-contact-left,
+.hero-contact-right,
+.hero-budget-left,
+.hero-budget-right,
+.hero-retours-left,
+.hero-retours-right,
+.hero-revendeur-left,
+.hero-revendeur-right,
+.hero-page-left,
+.hero-page-right,
+.hero-sport-features,
+.hero-faq-features,
+.hero-livraison-features,
+.hero-contact-features,
+.hero-budget-features,
+.hero-retours-features,
+.hero-revendeur-features,
+.hero-page-features,
+.hero-sport-background,
+.hero-sport-overlay,
+.hero-contact-background,
+.hero-faq-background,
+.hero-livraison-background,
+.hero-budget-overlay,
+.hero-budget-image,
+.hero-innovation-bg,
+.breadcrumb {
+    display: none !important;
+}
 
-        .card {
-            background: #fafafa;
-            border: 2px solid transparent;
-            margin-bottom: 15px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
+/* EXCEPTION: Contact garde ses badges */
+.hero-contact-badges {
+    display: flex !important;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 48px;
+}
 
-        .card:hover {
-            border-color: #e0e0e0;
-        }
+.hero-badge,
+.contact-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
 
-        .card.active {
-            border-color: #FF4B26;
-            background: #ffffff;
-        }
+.hero-badge:hover,
+.contact-badge:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
 
-        .card-preview {
-            height: 180px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #ffffff;
-            padding: 15px;
-            overflow: hidden;
-        }
+.hero-badge svg,
+.contact-badge svg {
+    width: 18px;
+    height: 18px;
+    color: #FF4B26;
+    stroke: #FF4B26;
+    fill: #FF4B26;
+}
 
-        .card-preview svg {
-            height: 100%;
-            width: auto;
-        }
+.hero-badge span,
+.contact-badge span {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
 
-        .card-info {
-            padding: 12px 15px;
-            border-top: 1px solid #e0e0e0;
-            background: #fafafa;
-        }
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+    .hero-sport,
+    .hero-faq,
+    .hero-livraison,
+    .hero-contact,
+    .hero-budget,
+    .hero-adidas {
+        min-height: 50vh;
+        padding: 80px 5% 60px;
+    }
 
-        .card.active .card-info {
-            background: #ffffff;
-        }
+    .hero-sport-title,
+    .hero-faq-title,
+    .hero-livraison-title,
+    .hero-contact-title,
+    .hero-budget-title,
+    .hero-title {
+        font-size: 52px;
+    }
 
-        .card-name {
-            font-size: 13px;
-            font-weight: 500;
-            color: #1a1a1a;
-            margin-bottom: 5px;
-        }
+    .hero-contact-badges {
+        gap: 12px;
+    }
+}
 
-        .card.active .card-name {
-            color: #FF4B26;
-        }
+@media (max-width: 768px) {
+    .hero-sport,
+    .hero-faq,
+    .hero-livraison,
+    .hero-contact,
+    .hero-budget,
+    .hero-adidas {
+        min-height: auto;
+        padding: 60px 5% 50px;
+    }
 
-        .card-colors {
-            font-size: 11px;
-            color: #999;
-        }
+    .hero-sport-title,
+    .hero-faq-title,
+    .hero-livraison-title,
+    .hero-contact-title,
+    .hero-budget-title,
+    .hero-title {
+        font-size: 40px;
+    }
 
-        /* Main */
-        .main {
-            display: flex;
-            flex-direction: column;
-        }
+    .hero-sport-subtitle,
+    .hero-faq-subtitle,
+    .hero-livraison-subtitle,
+    .hero-subtitle {
+        font-size: 16px;
+    }
 
-        .preview {
-            flex: 1;
-            background: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 60px;
-            min-height: 500px;
-        }
+    .hero-sport-cta,
+    .hero-faq-cta,
+    .hero-livraison-cta,
+    .hero-contact-cta,
+    .hero-cta {
+        flex-direction: column;
+        gap: 12px;
+    }
 
-        #previewSVG {
-            max-height: 70vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    .btn-hero-primary,
+    .btn-hero-secondary,
+    .btn-cta-outline {
+        width: 100%;
+        justify-content: center;
+    }
 
-        #previewSVG svg {
-            height: 100%;
-            width: auto;
-        }
+    .hero-contact-badges {
+        flex-direction: column;
+        gap: 10px;
+    }
 
-        .empty {
-            text-align: center;
-            color: #999;
-        }
+    .hero-badge,
+    .contact-badge {
+        width: 100%;
+        justify-content: center;
+    }
+}
 
-        .empty-icon {
-            font-size: 64px;
-            opacity: 0.3;
-            margin-bottom: 20px;
-        }
 
-        /* Controls */
-        .controls {
-            background: #f9f9f9;
-            border-top: 1px solid #e0e0e0;
-            padding: 30px 40px;
-        }
 
-        .controls-content {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .controls-header {
-            font-size: 14px;
-            font-weight: 600;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 30px;
-        }
-
-        .color-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .color-item {
-            background: #ffffff;
-            border: 1px solid #e0e0e0;
-            padding: 20px;
-        }
-
-        .color-label {
-            font-size: 12px;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-
-        .color-inputs {
-            display: flex;
-            gap: 10px;
-        }
-
-        input[type="color"] {
-            width: 50px;
-            height: 50px;
-            border: 1px solid #e0e0e0;
-            cursor: pointer;
-            padding: 0;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            height: 50px;
-            border: 1px solid #e0e0e0;
-            background: #ffffff;
-            color: #1a1a1a;
-            padding: 0 15px;
-            font-size: 13px;
-            font-family: 'Courier New', monospace;
-            font-weight: 500;
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #FF4B26;
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f5f5f5;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #ccc;
-        }
-
-        .loading {
-            padding: 40px;
-            text-align: center;
-            color: #999;
-        }
-
-        .error {
-            padding: 40px;
-            text-align: center;
-            color: #FF4B26;
-        }
     </style>
 </head>
 <body>

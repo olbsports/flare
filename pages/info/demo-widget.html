@@ -21,117 +21,399 @@
 
     <!-- Fin de l'intégration -->
 
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    <style>/* ========================================
+   HERO UNIVERSEL - DESIGN SIMPLE ET MODERNE
+   Pour toutes les pages (produits + info)
+   ======================================== */
 
-        .demo-container {
-            max-width: 800px;
-            background: white;
-            border-radius: 20px;
-            padding: 3rem;
-            margin: 2rem;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
+.hero-sport,
+.hero-faq,
+.hero-livraison,
+.hero-contact,
+.hero-budget,
+.hero-retours,
+.hero-revendeur,
+.hero-page,
+.hero-innovation-v2,
+.hero-adidas {
+    position: relative;
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 100px 5% 80px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #f1f3f5 100%);
+    overflow: hidden;
+}
 
-        h1 {
-            color: #1a1a1a;
-            margin-bottom: 1rem;
-            font-size: 2.5rem;
-        }
+/* Formes décoratives subtiles */
+.hero-sport::before,
+.hero-faq::before,
+.hero-livraison::before,
+.hero-contact::before,
+.hero-budget::before,
+.hero-retours::before,
+.hero-revendeur::before,
+.hero-page::before,
+.hero-adidas::before {
+    content: '';
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255,75,38,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    top: -200px;
+    right: -100px;
+    z-index: 0;
+    animation: pulse 8s ease-in-out infinite;
+}
 
-        .subtitle {
-            color: #666;
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-        }
+.hero-sport::after,
+.hero-faq::after,
+.hero-livraison::after,
+.hero-contact::after,
+.hero-budget::after,
+.hero-retours::after,
+.hero-revendeur::after,
+.hero-page::after,
+.hero-adidas::after {
+    content: '';
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(0,123,255,0.06) 0%, transparent 70%);
+    border-radius: 50%;
+    bottom: -100px;
+    left: -80px;
+    z-index: 0;
+    animation: pulse 10s ease-in-out infinite reverse;
+}
 
-        .demo-section {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 2rem;
-            margin: 2rem 0;
-        }
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+}
 
-        .demo-section h2 {
-            color: #FF6B00;
-            margin-bottom: 1rem;
-            font-size: 1.5rem;
-        }
+/* Contenu centré */
+.hero-sport-content,
+.hero-faq-content,
+.hero-livraison-content,
+.hero-contact-content,
+.hero-budget-content,
+.hero-retours-content,
+.hero-revendeur-content,
+.hero-page-content,
+.hero-innovation-content-v2,
+.hero-adidas-content {
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    animation: fadeInUp 0.8s ease;
+}
 
-        .code-block {
-            background: #1a1a1a;
-            color: #00ff00;
-            padding: 1.5rem;
-            border-radius: 8px;
-            overflow-x: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            margin: 1rem 0;
-        }
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
-        .feature-list {
-            list-style: none;
-            padding: 0;
-        }
+/* Eyebrow */
+.hero-sport-eyebrow,
+.hero-faq-eyebrow,
+.hero-livraison-eyebrow,
+.hero-contact-eyebrow,
+.hero-budget-eyebrow,
+.hero-retours-eyebrow,
+.hero-revendeur-eyebrow,
+.hero-page-eyebrow,
+.hero-eyebrow,
+.hero-eyebrow-v2 {
+    display: inline-block;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #FF4B26;
+    margin-bottom: 20px;
+}
 
-        .feature-list li {
-            padding: 0.75rem 0;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
+/* Titre */
+.hero-sport-title,
+.hero-faq-title,
+.hero-livraison-title,
+.hero-contact-title,
+.hero-budget-title,
+.hero-retours-title,
+.hero-revendeur-title,
+.hero-page-title,
+.hero-title,
+.hero-title-v2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 64px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    color: #1a1a1a;
+}
 
-        .feature-list li:last-child {
-            border-bottom: none;
-        }
+/* Sous-titre */
+.hero-sport-subtitle,
+.hero-faq-subtitle,
+.hero-livraison-subtitle,
+.hero-contact-subtitle,
+.hero-budget-subtitle,
+.hero-budget-desc,
+.hero-retours-subtitle,
+.hero-revendeur-subtitle,
+.hero-page-subtitle,
+.hero-subtitle,
+.hero-subtitle-v2 {
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+    color: #495057;
+    max-width: 700px;
+    margin: 0 auto 40px;
+    font-weight: 400;
+}
 
-        .feature-icon {
-            font-size: 1.5rem;
-        }
+/* CTA Buttons */
+.hero-sport-cta,
+.hero-faq-cta,
+.hero-livraison-cta,
+.hero-contact-cta,
+.hero-budget-cta,
+.hero-retours-cta,
+.hero-revendeur-cta,
+.hero-page-cta,
+.hero-cta {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
 
-        .cta-button {
-            background: linear-gradient(135deg, #FF6B00 0%, #E56000 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 1rem 2rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s;
-            display: inline-block;
-            text-decoration: none;
-        }
+.btn-hero-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 32px;
+    background: #FF4B26;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 15px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: none;
+}
 
-        .cta-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255, 107, 0, 0.3);
-        }
+.btn-hero-primary:hover {
+    background: #E63910;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255,75,38,0.3);
+}
 
-        .alert {
-            background: linear-gradient(135deg, rgba(255, 107, 0, 0.1) 0%, rgba(255, 107, 0, 0.15) 100%);
-            border-left: 4px solid #FF6B00;
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin: 2rem 0;
-        }
+.btn-hero-primary svg {
+    width: 18px;
+    height: 18px;
+}
 
-        .alert-title {
-            font-weight: 700;
-            color: #FF6B00;
-            margin-bottom: 0.5rem;
-            font-size: 1.1rem;
-        }
+.btn-hero-secondary,
+.btn-cta-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 32px;
+    background: transparent;
+    color: #1a1a1a;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 15px;
+    border: 2px solid #1a1a1a;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-hero-secondary:hover,
+.btn-cta-outline:hover {
+    background: #1a1a1a;
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.btn-hero-secondary svg,
+.btn-cta-outline svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Masquer éléments inutiles */
+.hero-sport-left,
+.hero-sport-right,
+.hero-faq-left,
+.hero-faq-right,
+.hero-livraison-left,
+.hero-livraison-right,
+.hero-contact-left,
+.hero-contact-right,
+.hero-budget-left,
+.hero-budget-right,
+.hero-retours-left,
+.hero-retours-right,
+.hero-revendeur-left,
+.hero-revendeur-right,
+.hero-page-left,
+.hero-page-right,
+.hero-sport-features,
+.hero-faq-features,
+.hero-livraison-features,
+.hero-contact-features,
+.hero-budget-features,
+.hero-retours-features,
+.hero-revendeur-features,
+.hero-page-features,
+.hero-sport-background,
+.hero-sport-overlay,
+.hero-contact-background,
+.hero-faq-background,
+.hero-livraison-background,
+.hero-budget-overlay,
+.hero-budget-image,
+.hero-innovation-bg,
+.breadcrumb {
+    display: none !important;
+}
+
+/* EXCEPTION: Contact garde ses badges */
+.hero-contact-badges {
+    display: flex !important;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 48px;
+}
+
+.hero-badge,
+.contact-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.hero-badge:hover,
+.contact-badge:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.hero-badge svg,
+.contact-badge svg {
+    width: 18px;
+    height: 18px;
+    color: #FF4B26;
+    stroke: #FF4B26;
+    fill: #FF4B26;
+}
+
+.hero-badge span,
+.contact-badge span {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+    .hero-sport,
+    .hero-faq,
+    .hero-livraison,
+    .hero-contact,
+    .hero-budget,
+    .hero-adidas {
+        min-height: 50vh;
+        padding: 80px 5% 60px;
+    }
+
+    .hero-sport-title,
+    .hero-faq-title,
+    .hero-livraison-title,
+    .hero-contact-title,
+    .hero-budget-title,
+    .hero-title {
+        font-size: 52px;
+    }
+
+    .hero-contact-badges {
+        gap: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-sport,
+    .hero-faq,
+    .hero-livraison,
+    .hero-contact,
+    .hero-budget,
+    .hero-adidas {
+        min-height: auto;
+        padding: 60px 5% 50px;
+    }
+
+    .hero-sport-title,
+    .hero-faq-title,
+    .hero-livraison-title,
+    .hero-contact-title,
+    .hero-budget-title,
+    .hero-title {
+        font-size: 40px;
+    }
+
+    .hero-sport-subtitle,
+    .hero-faq-subtitle,
+    .hero-livraison-subtitle,
+    .hero-subtitle {
+        font-size: 16px;
+    }
+
+    .hero-sport-cta,
+    .hero-faq-cta,
+    .hero-livraison-cta,
+    .hero-contact-cta,
+    .hero-cta {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .btn-hero-primary,
+    .btn-hero-secondary,
+    .btn-cta-outline {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .hero-contact-badges {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .hero-badge,
+    .contact-badge {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+
+
     </style>
 </head>
 <body>
