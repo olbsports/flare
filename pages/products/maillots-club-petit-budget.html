@@ -18,56 +18,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
 
     <style>
-        /* 🔥 HERO 2/3 + 1/3 avec IMAGE FULL */
-        .hero-budget {
-            min-height: 70vh;
-            background: linear-gradient(135deg, #000000 0%, #121212 50%, #000000 100%);
-            margin-top: 80px;
-            position: relative;
-            display: flex;
-            align-items: stretch;
-            overflow: hidden;
-        }
-
-        .hero-budget-content {
-            flex: 2;
-            padding: 0rem 5%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            position: relative;
-            z-index: 2;
-        }
-
-        .hero-budget-image {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-budget-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            position: absolute;
-            inset: 0;
-        }
-
-        .hero-budget-overlay {
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at 30% 50%, rgba(255, 75, 38, 0.15), transparent 60%);
-            z-index: 1;
-        }
-
-        .breadcrumb {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            color: rgba(255,255,255,0.6);
-            margin-bottom: 24px;
-        }
+        
 
         .breadcrumb a {
             color: rgba(255,255,255,0.6);
@@ -752,6 +703,272 @@
             .cta-stats {
                 grid-template-columns: 1fr;
                 gap: 24px;
+            }
+        }
+    
+        /* ===== HERO 2 COLONNES - FOND GRIS + CARDS CARRÉES ===== */
+        .hero-sport,
+        .hero-faq,
+        .hero-livraison,
+        .hero-contact,
+        .hero-budget,
+        .hero-retours,
+        .hero-revendeur,
+        .hero-page,
+        .hero-innovation-v2 {
+            background: #e8e8e8 !important;
+            margin-top: 80px;
+            padding: 2.5rem 5% 2rem;
+            min-height: auto !important;
+            position: relative !important;
+        }
+
+        .hero-sport-content,
+        .hero-faq-content,
+        .hero-livraison-content,
+        .hero-contact-content,
+        .hero-budget-content,
+        .hero-retours-content,
+        .hero-revendeur-content,
+        .hero-page-content,
+        .hero-innovation-content-v2 {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-sport-left,
+        .hero-faq-left,
+        .hero-livraison-left,
+        .hero-contact-left,
+        .hero-budget-left,
+        .hero-retours-left,
+        .hero-revendeur-left,
+        .hero-page-left,
+        .hero-innovation-left {
+            text-align: left;
+        }
+
+        .hero-sport-right,
+        .hero-faq-right,
+        .hero-livraison-right,
+        .hero-contact-right,
+        .hero-budget-right,
+        .hero-retours-right,
+        .hero-revendeur-right,
+        .hero-page-right,
+        .hero-innovation-right {
+            background: #fff;
+            padding: 2.5rem;
+            border-radius: 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .hero-sport-eyebrow,
+        .hero-faq-eyebrow,
+        .hero-livraison-eyebrow,
+        .hero-contact-eyebrow,
+        .hero-budget-eyebrow,
+        .hero-retours-eyebrow,
+        .hero-revendeur-eyebrow,
+        .hero-page-eyebrow,
+        .hero-eyebrow {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #FF4B26;
+            padding: 10px 24px;
+            border: 2px solid #FF4B26;
+            margin-bottom: 24px;
+            background: transparent;
+            border-radius: 0;
+        }
+
+        .hero-sport-title,
+        .hero-faq-title,
+        .hero-livraison-title,
+        .hero-contact-title,
+        .hero-budget-title,
+        .hero-retours-title,
+        .hero-revendeur-title,
+        .hero-page-title,
+        .hero-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(42px, 6vw, 64px);
+            line-height: 1.05;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            color: #1a1a1a;
+        }
+
+        .hero-sport-subtitle,
+        .hero-faq-subtitle,
+        .hero-livraison-subtitle,
+        .hero-contact-subtitle,
+        .hero-budget-subtitle,
+        .hero-budget-desc,
+        .hero-retours-subtitle,
+        .hero-revendeur-subtitle,
+        .hero-page-subtitle,
+        .hero-subtitle {
+            font-size: clamp(15px, 2vw, 18px);
+            line-height: 1.7;
+            color: #666;
+            margin-bottom: 32px;
+        }
+
+        .hero-sport-cta,
+        .hero-faq-cta,
+        .hero-livraison-cta,
+        .hero-contact-cta,
+        .hero-budget-cta,
+        .hero-retours-cta,
+        .hero-revendeur-cta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 0;
+        }
+
+        .btn-hero-primary,
+        .btn-primary {
+            padding: 16px 36px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-decoration: none;
+            background: #FF4B26;
+            color: #fff;
+            border-radius: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-hero-primary:hover,
+        .btn-primary:hover {
+            background: #E63910;
+            transform: translateY(-2px);
+        }
+
+        .btn-hero-secondary,
+        .btn-secondary {
+            padding: 16px 36px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-decoration: none;
+            background: transparent;
+            color: #1a1a1a;
+            border: 2px solid #1a1a1a;
+            border-radius: 0;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .btn-hero-secondary:hover,
+        .btn-secondary:hover {
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        .hero-sport-features,
+        .hero-faq-features,
+        .hero-livraison-features,
+        .hero-contact-features,
+        .hero-budget-features,
+        .hero-retours-features,
+        .hero-revendeur-features,
+        .hero-contact-badges {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .feature-badge,
+        .contact-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px;
+            background: #f8f8f8;
+            border-radius: 0;
+            border-left: 3px solid #FF4B26;
+            transition: all 0.3s ease;
+        }
+
+        .feature-badge:hover,
+        .contact-badge:hover {
+            background: #f0f0f0;
+            border-left-color: #000;
+        }
+
+        .feature-badge svg,
+        .contact-badge svg {
+            width: 24px;
+            height: 24px;
+            color: #FF4B26;
+            fill: #FF4B26;
+            flex-shrink: 0;
+        }
+
+        .feature-badge span,
+        .contact-badge span {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        /* Masquer les anciens éléments */
+        .hero-sport-background,
+        .hero-sport-overlay,
+        .hero-contact-background,
+        .hero-faq-background,
+        .hero-livraison-background,
+        .hero-budget-overlay,
+        .hero-budget-image,
+        .breadcrumb {
+            display: none !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero-sport-content,
+            .hero-faq-content,
+            .hero-livraison-content,
+            .hero-contact-content,
+            .hero-budget-content,
+            .hero-retours-content,
+            .hero-revendeur-content,
+            .hero-page-content,
+            .hero-innovation-content-v2 {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            .hero-sport-left,
+            .hero-faq-left,
+            .hero-livraison-left,
+            .hero-contact-left,
+            .hero-budget-left,
+            .hero-retours-left,
+            .hero-revendeur-left {
+                text-align: center;
+            }
+            .hero-sport-features,
+            .hero-contact-badges {
+                grid-template-columns: 1fr;
             }
         }
     </style>

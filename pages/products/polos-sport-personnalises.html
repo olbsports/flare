@@ -17,650 +17,7 @@
     <noscript><link rel="stylesheet" href="../../assets/css/components.css"></noscript>
 
     <style>
-                /* ===== HERO 2 COLONNES COMPACT AVEC FOND GRIS ===== */
-        .hero-sport {
-            background: #f5f5f5;
-            margin-top: 80px;
-            padding: 2.5rem 5% 2rem;
-        }
-        .hero-sport-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 60px;
-            align-items: center;
-        }
-        .hero-sport-left {
-            text-align: left;
-        }
-        .hero-sport-right {
-            background: #fff;
-            padding: 2.5rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        }
-        .hero-sport-eyebrow {
-            display: inline-block;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            color: #FF4B26;
-            padding: 10px 24px;
-            border: 1px solid #FF4B26;
-            margin-bottom: 24px;
-        }
-        .hero-sport-title {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: clamp(42px, 6vw, 64px);
-            line-height: 1.05;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-            color: #1a1a1a;
-        }
-        .hero-sport-subtitle {
-            font-size: clamp(15px, 2vw, 18px);
-            line-height: 1.7;
-            color: #666;
-            margin-bottom: 32px;
-        }
-        .hero-sport-cta {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-            margin-bottom: 0;
-        }
-        .btn-hero-primary {
-            padding: 16px 36px;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            text-decoration: none;
-            background: #FF4B26;
-            color: #fff;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            border-radius: 6px;
-        }
-        .btn-hero-primary:hover {
-            background: #E63910;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255,75,38,0.3);
-        }
-        .btn-hero-secondary {
-            padding: 16px 36px;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            text-decoration: none;
-            background: transparent;
-            color: #1a1a1a;
-            border: 2px solid rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-            border-radius: 6px;
-        }
-        .btn-hero-secondary:hover {
-            background: #1a1a1a;
-            color: #fff;
-            border-color: #1a1a1a;
-        }
-        .hero-sport-features {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 16px;
-        }
-        .feature-badge {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: #1a1a1a;
-            font-size: 15px;
-            font-weight: 600;
-            padding: 14px 18px;
-            background: #fafafa;
-            border-radius: 8px;
-            border-left: 3px solid #FF4B26;
-        }
-        .feature-badge svg {
-            width: 22px;
-            height: 22px;
-            color: #FF4B26;
-            flex-shrink: 0;
-        }
-        /* Masquer les anciens éléments du hero */
-        .hero-sport-background,
-        .hero-sport-overlay,
-        .breadcrumb {
-            display: none;
-        }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .hero-sport-content {
-                grid-template-columns: 1fr;
-                gap: 40px;
-            }
-            .hero-sport-left {
-                text-align: center;
-            }
-        }
-
-        /* CTA SECTION PROPRE - SANS BORDURES ARRONDIES */
-        .cta-redesign {
-            background: #1a1a1a;
-            padding: 60px 5%;
-            margin: 80px 0;
-        }
-        .cta-redesign-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            text-align: center;
-        }
-        .cta-redesign-title {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: clamp(32px, 5vw, 48px);
-            color: #fff;
-            margin-bottom: 15px;
-            letter-spacing: 1px;
-        }
-        .cta-redesign-subtitle {
-            color: #ccc;
-            font-size: 18px;
-            margin-bottom: 35px;
-            line-height: 1.6;
-        }
-        .cta-redesign-features {
-            display: flex;
-            gap: 30px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 35px;
-        }
-        .cta-feature {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #fff;
-            font-size: 15px;
-        }
-        .cta-feature svg {
-            width: 20px;
-            height: 20px;
-            color: #FF4B26;
-            flex-shrink: 0;
-        }
-        .cta-redesign-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        .btn-cta-main {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 18px 40px;
-            background: #FF4B26;
-            color: #fff;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-        .btn-cta-main:hover {
-            background: #E63910;
-            transform: translateY(-2px);
-        }
-        .btn-cta-secondary {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 18px 40px;
-            background: #25D366;
-            color: #fff;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-        .btn-cta-secondary:hover {
-            background: #1fa855;
-            transform: translateY(-2px);
-        }
-
-        /* ===== SEO SECTION MODERNE - STYLE FAQ/GUIDE ===== */
-        .seo-mega {
-            background: #fff;
-            padding: 100px 5%;
-        }
-        
-        .seo-hero {
-            max-width: 900px;
-            margin: 0 auto 80px;
-            text-align: center;
-        }
-        .seo-hero-badge {
-            display: inline-block;
-            background: #000;
-            color: #fff;
-            padding: 8px 20px;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-        }
-        .seo-hero-title {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: clamp(36px, 6vw, 56px);
-            color: #1a1a1a;
-            margin-bottom: 20px;
-            line-height: 1.1;
-            letter-spacing: 2px;
-        }
-        .seo-hero-intro {
-            font-size: 18px;
-            color: #666;
-            line-height: 1.8;
-        }
-        
-        .seo-cards-3 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 40px;
-            margin: 80px auto;
-            max-width: 1200px;
-        }
-        .seo-card {
-            background: #f9f9f9;
-            padding: 40px 32px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        .seo-card:hover {
-            background: #fff;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-            transform: translateY(-4px);
-        }
-        .seo-card-icon {
-            font-size: 48px;
-            margin-bottom: 24px;
-        }
-        .seo-card h3 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 24px;
-            letter-spacing: 1px;
-            margin-bottom: 16px;
-            color: #000;
-        }
-        .seo-card p {
-            font-size: 15px;
-            line-height: 1.7;
-            color: #666;
-        }
-        
-        .seo-full-image {
-            background: #000;
-            color: #fff;
-            padding: 80px 5%;
-            margin: 80px 0;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 60px;
-            align-items: center;
-        }
-        .seo-full-content h2 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: clamp(32px, 5vw, 48px);
-            margin-bottom: 24px;
-            letter-spacing: 2px;
-        }
-        .seo-full-content p {
-            font-size: 16px;
-            line-height: 1.8;
-            color: #ccc;
-            margin-bottom: 20px;
-        }
-        .seo-full-image-wrapper {
-            text-align: center;
-            padding: 40px;
-            background: rgba(255,255,255,0.05);
-        }
-        
-        .seo-stats {
-            background: #f5f5f5;
-            padding: 80px 5%;
-            margin: 80px 0;
-        }
-        .seo-stats-grid {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 40px;
-            text-align: center;
-        }
-        .seo-stat-number {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 64px;
-            color: #FF4B26;
-            letter-spacing: 2px;
-            margin-bottom: 8px;
-        }
-        .seo-stat-label {
-            font-size: 15px;
-            color: #666;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .seo-alternating {
-            max-width: 1200px;
-            margin: 80px auto;
-            display: flex;
-            flex-direction: column;
-            gap: 80px;
-        }
-        .seo-alt-block {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 60px;
-            align-items: center;
-        }
-        .seo-alt-block:nth-child(even) {
-            direction: rtl;
-        }
-        .seo-alt-block:nth-child(even) > * {
-            direction: ltr;
-        }
-        .seo-alt-content h3 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 36px;
-            margin-bottom: 20px;
-            color: #000;
-            letter-spacing: 1px;
-        }
-        .seo-alt-content p {
-            font-size: 16px;
-            line-height: 1.8;
-            color: #666;
-            margin-bottom: 20px;
-        }
-        .seo-alt-visual {
-            background: #f9f9f9;
-            padding: 40px;
-        }
-        .seo-alt-visual ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .seo-alt-visual li {
-            padding: 12px 0;
-            border-bottom: 1px solid #e0e0e0;
-            font-size: 15px;
-            color: #333;
-            font-weight: 600;
-        }
-        .seo-alt-visual li:last-child {
-            border-bottom: none;
-        }
-        .seo-alt-visual li:before {
-            content: "✓";
-            color: #FF4B26;
-            font-weight: bold;
-            margin-right: 12px;
-        }
-        
-        /* TESTIMONIALS */
-        .seo-testimonials {
-            background: #f5f5f5;
-            padding: 80px 5%;
-            margin: 80px 0;
-        }
-        .seo-testimonials h2 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 48px;
-            text-align: center;
-            color: #000;
-            margin-bottom: 60px;
-            letter-spacing: 2px;
-        }
-        .seo-testimonials-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 40px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .seo-testimonial {
-            background: #fff;
-            padding: 40px 32px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        }
-        .testimonial-stars {
-            color: #FFB800;
-            font-size: 20px;
-            margin-bottom: 20px;
-        }
-        .testimonial-text {
-            color: #666;
-            line-height: 1.8;
-            margin-bottom: 20px;
-            font-style: italic;
-            font-size: 15px;
-        }
-        .testimonial-author {
-            color: #FF4B26;
-            font-weight: 700;
-            font-size: 14px;
-        }
-        
-        /* FAQ */
-        .seo-faq {
-            max-width: 900px;
-            margin: 80px auto;
-        }
-        .seo-faq h2 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 48px;
-            text-align: center;
-            color: #000;
-            margin-bottom: 60px;
-            letter-spacing: 2px;
-        }
-        .faq-accordion-item {
-            background: #fff;
-            border: 1px solid #e0e0e0;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-        .faq-accordion-question {
-            width: 100%;
-            padding: 24px 32px;
-            background: transparent;
-            border: none;
-            text-align: left;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 17px;
-            font-weight: 700;
-            color: #000;
-            transition: background 0.3s;
-        }
-        .faq-accordion-question:hover {
-            background: #f9f9f9;
-        }
-        .faq-accordion-icon {
-            font-size: 28px;
-            color: #FF4B26;
-            transition: transform 0.3s;
-            font-weight: 300;
-        }
-        .faq-accordion-item.active .faq-accordion-icon {
-            transform: rotate(45deg);
-        }
-        .faq-accordion-answer {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease;
-            padding: 0 32px;
-        }
-        .faq-accordion-item.active .faq-accordion-answer {
-            max-height: 800px;
-            padding: 0 32px 32px 32px;
-        }
-        .faq-accordion-answer p {
-            color: #666;
-            line-height: 1.8;
-            font-size: 15px;
-        }
-        
-        /* KEYWORDS */
-        .seo-keywords {
-            background: #f9f9f9;
-            padding: 40px;
-            border-top: 3px solid #FF4B26;
-            max-width: 1200px;
-            margin: 80px auto 0;
-        }
-        .seo-keywords h4 {
-            font-size: 16px;
-            color: #000;
-            margin-bottom: 20px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .seo-keywords p {
-            color: #666;
-            line-height: 2;
-            font-size: 14px;
-        }
-        
-        /* GROSSE SECTION SEO LONGUE TRAÎNE - TEXTE */
-        .seo-longtail-mega {
-            background: #fff;
-            padding: 80px 5%;
-            margin-top: 60px;
-            border-top: 1px solid #e0e0e0;
-        }
-        .seo-longtail-container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        .seo-longtail-header {
-            text-align: center;
-            margin-bottom: 60px;
-            max-width: 900px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .seo-longtail-badge {
-            display: inline-block;
-            background: #000;
-            color: #fff;
-            padding: 6px 20px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-        }
-        .seo-longtail-title {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: clamp(32px, 5vw, 48px);
-            color: #000;
-            margin-bottom: 16px;
-            letter-spacing: 2px;
-        }
-        .seo-longtail-intro {
-            font-size: 16px;
-            color: #666;
-            line-height: 1.8;
-        }
-        
-        .seo-longtail-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 30px;
-            margin-bottom: 60px;
-        }
-        .seo-longtail-column {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-            min-width: 0;
-        }
-        .seo-longtail-block {
-            background: transparent;
-        }
-        .seo-longtail-block h3 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 18px;
-            color: #000;
-            margin: 0 0 10px 0;
-            letter-spacing: 1px;
-            border-bottom: 2px solid #FF4B26;
-            padding-bottom: 6px;
-        }
-        .seo-longtail-block p {
-            font-size: 14px;
-            color: #555;
-            line-height: 1.7;
-            margin: 0;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-        }
-        .seo-longtail-block strong {
-            color: #000;
-            font-weight: 700;
-        }
-        
-        .seo-longtail-footer {
-            background: #f9f9f9;
-            padding: 50px 40px;
-            text-align: left;
-            border-top: 3px solid #FF4B26;
-            max-width: 1400px;
-            margin: 60px auto 0;
-        }
-        .seo-longtail-footer h3 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 28px;
-            color: #000;
-            margin: 0 0 30px 0;
-            text-align: center;
-            letter-spacing: 2px;
-        }
-        .seo-longtail-footer p {
-            font-size: 14px;
-            color: #555;
-            line-height: 1.8;
-            margin: 0 0 20px 0;
-            text-align: justify;
-        }
-        .seo-longtail-footer p:last-child {
-            margin-bottom: 0;
-            text-align: center;
-            padding-top: 20px;
-            border-top: 2px solid #FF4B26;
-            font-weight: 700;
-        }
-        .seo-longtail-footer strong {
-            color: #FF4B26;
-            font-weight: 700;
-        }
-
-        @media (max-width: 1200px) {
+                @media (max-width: 1200px) {
             .seo-longtail-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
@@ -689,6 +46,272 @@
             }
             .seo-alt-block:nth-child(even) {
                 direction: ltr;
+            }
+        }
+    
+        /* ===== HERO 2 COLONNES - FOND GRIS + CARDS CARRÉES ===== */
+        .hero-sport,
+        .hero-faq,
+        .hero-livraison,
+        .hero-contact,
+        .hero-budget,
+        .hero-retours,
+        .hero-revendeur,
+        .hero-page,
+        .hero-innovation-v2 {
+            background: #e8e8e8 !important;
+            margin-top: 80px;
+            padding: 2.5rem 5% 2rem;
+            min-height: auto !important;
+            position: relative !important;
+        }
+
+        .hero-sport-content,
+        .hero-faq-content,
+        .hero-livraison-content,
+        .hero-contact-content,
+        .hero-budget-content,
+        .hero-retours-content,
+        .hero-revendeur-content,
+        .hero-page-content,
+        .hero-innovation-content-v2 {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-sport-left,
+        .hero-faq-left,
+        .hero-livraison-left,
+        .hero-contact-left,
+        .hero-budget-left,
+        .hero-retours-left,
+        .hero-revendeur-left,
+        .hero-page-left,
+        .hero-innovation-left {
+            text-align: left;
+        }
+
+        .hero-sport-right,
+        .hero-faq-right,
+        .hero-livraison-right,
+        .hero-contact-right,
+        .hero-budget-right,
+        .hero-retours-right,
+        .hero-revendeur-right,
+        .hero-page-right,
+        .hero-innovation-right {
+            background: #fff;
+            padding: 2.5rem;
+            border-radius: 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .hero-sport-eyebrow,
+        .hero-faq-eyebrow,
+        .hero-livraison-eyebrow,
+        .hero-contact-eyebrow,
+        .hero-budget-eyebrow,
+        .hero-retours-eyebrow,
+        .hero-revendeur-eyebrow,
+        .hero-page-eyebrow,
+        .hero-eyebrow {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #FF4B26;
+            padding: 10px 24px;
+            border: 2px solid #FF4B26;
+            margin-bottom: 24px;
+            background: transparent;
+            border-radius: 0;
+        }
+
+        .hero-sport-title,
+        .hero-faq-title,
+        .hero-livraison-title,
+        .hero-contact-title,
+        .hero-budget-title,
+        .hero-retours-title,
+        .hero-revendeur-title,
+        .hero-page-title,
+        .hero-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(42px, 6vw, 64px);
+            line-height: 1.05;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            color: #1a1a1a;
+        }
+
+        .hero-sport-subtitle,
+        .hero-faq-subtitle,
+        .hero-livraison-subtitle,
+        .hero-contact-subtitle,
+        .hero-budget-subtitle,
+        .hero-budget-desc,
+        .hero-retours-subtitle,
+        .hero-revendeur-subtitle,
+        .hero-page-subtitle,
+        .hero-subtitle {
+            font-size: clamp(15px, 2vw, 18px);
+            line-height: 1.7;
+            color: #666;
+            margin-bottom: 32px;
+        }
+
+        .hero-sport-cta,
+        .hero-faq-cta,
+        .hero-livraison-cta,
+        .hero-contact-cta,
+        .hero-budget-cta,
+        .hero-retours-cta,
+        .hero-revendeur-cta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 0;
+        }
+
+        .btn-hero-primary,
+        .btn-primary {
+            padding: 16px 36px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-decoration: none;
+            background: #FF4B26;
+            color: #fff;
+            border-radius: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-hero-primary:hover,
+        .btn-primary:hover {
+            background: #E63910;
+            transform: translateY(-2px);
+        }
+
+        .btn-hero-secondary,
+        .btn-secondary {
+            padding: 16px 36px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-decoration: none;
+            background: transparent;
+            color: #1a1a1a;
+            border: 2px solid #1a1a1a;
+            border-radius: 0;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .btn-hero-secondary:hover,
+        .btn-secondary:hover {
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        .hero-sport-features,
+        .hero-faq-features,
+        .hero-livraison-features,
+        .hero-contact-features,
+        .hero-budget-features,
+        .hero-retours-features,
+        .hero-revendeur-features,
+        .hero-contact-badges {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .feature-badge,
+        .contact-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px;
+            background: #f8f8f8;
+            border-radius: 0;
+            border-left: 3px solid #FF4B26;
+            transition: all 0.3s ease;
+        }
+
+        .feature-badge:hover,
+        .contact-badge:hover {
+            background: #f0f0f0;
+            border-left-color: #000;
+        }
+
+        .feature-badge svg,
+        .contact-badge svg {
+            width: 24px;
+            height: 24px;
+            color: #FF4B26;
+            fill: #FF4B26;
+            flex-shrink: 0;
+        }
+
+        .feature-badge span,
+        .contact-badge span {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        /* Masquer les anciens éléments */
+        .hero-sport-background,
+        .hero-sport-overlay,
+        .hero-contact-background,
+        .hero-faq-background,
+        .hero-livraison-background,
+        .hero-budget-overlay,
+        .hero-budget-image,
+        .breadcrumb {
+            display: none !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero-sport-content,
+            .hero-faq-content,
+            .hero-livraison-content,
+            .hero-contact-content,
+            .hero-budget-content,
+            .hero-retours-content,
+            .hero-revendeur-content,
+            .hero-page-content,
+            .hero-innovation-content-v2 {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            .hero-sport-left,
+            .hero-faq-left,
+            .hero-livraison-left,
+            .hero-contact-left,
+            .hero-budget-left,
+            .hero-retours-left,
+            .hero-revendeur-left {
+                text-align: center;
+            }
+            .hero-sport-features,
+            .hero-contact-badges {
+                grid-template-columns: 1fr;
             }
         }
     </style>
