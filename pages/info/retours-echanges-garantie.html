@@ -23,75 +23,8 @@
     
 
         
-/* ===== NOUVEAU DESIGN CENTRÉ - PAGES INFO ===== */
-.hero-sport,
-.hero-faq,
-.hero-livraison,
-.hero-contact,
-.hero-budget,
-.hero-retours,
-.hero-revendeur,
-.hero-page,
-.hero-innovation-v2 {
-    position: relative;
-    min-height: 80vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 160px 5% 120px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #f1f3f5 100%);
-    overflow: hidden;
-    margin-top: 0 !important;
-}
 
-/* Formes décoratives animées */
-.hero-sport::before,
-.hero-faq::before,
-.hero-livraison::before,
-.hero-contact::before,
-.hero-budget::before,
-.hero-retours::before,
-.hero-revendeur::before,
-.hero-page::before {
-    content: '';
-    position: absolute;
-    width: 800px;
-    height: 800px;
-    background: radial-gradient(circle, rgba(255,75,38,0.12) 0%, transparent 70%);
-    border-radius: 50%;
-    top: -300px;
-    right: -200px;
-    z-index: 0;
-    animation: pulse 8s ease-in-out infinite;
-}
-
-.hero-sport::after,
-.hero-faq::after,
-.hero-livraison::after,
-.hero-contact::after,
-.hero-budget::after,
-.hero-retours::after,
-.hero-revendeur::after,
-.hero-page::after {
-    content: '';
-    position: absolute;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(0,123,255,0.08) 0%, transparent 70%);
-    border-radius: 50%;
-    bottom: -200px;
-    left: -150px;
-    z-index: 0;
-    animation: pulse 10s ease-in-out infinite reverse;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.1); opacity: 0.8; }
-}
-
-/* === CONTENU CENTRÉ === */
+/* ===== DESIGN CENTRÉ - PAGES INFO (SANS OVERRIDE) ===== */
 .hero-sport-content,
 .hero-faq-content,
 .hero-livraison-content,
@@ -102,17 +35,12 @@
 .hero-page-content {
     max-width: 1000px;
     margin: 0 auto;
+    text-align: center;
     position: relative;
     z-index: 1;
-    animation: fadeInUp 1s ease;
 }
 
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(40px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Masquer left/right si présents */
+/* Masquer left/right divisions */
 .hero-sport-left,
 .hero-faq-left,
 .hero-livraison-left,
@@ -151,6 +79,7 @@
     letter-spacing: 3px;
     font-size: 14px;
     margin-bottom: 24px;
+    font-family: 'Inter', sans-serif !important;
 }
 
 .hero-sport-title,
@@ -161,9 +90,9 @@
 .hero-retours-title,
 .hero-revendeur-title,
 .hero-page-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 72px;
-    font-weight: 700;
+    font-family: 'Bebas Neue', sans-serif !important;
+    font-size: 72px !important;
+    font-weight: 700 !important;
     letter-spacing: 2px;
     line-height: 1.1;
     margin-bottom: 28px;
@@ -185,6 +114,7 @@
     max-width: 700px;
     margin: 0 auto 48px;
     font-weight: 500;
+    font-family: 'Inter', sans-serif !important;
 }
 
 /* CTA Buttons centrés */
@@ -200,7 +130,7 @@
     gap: 16px;
     justify-content: center;
     flex-wrap: wrap;
-    margin-bottom: 64px;
+    margin-bottom: 32px;
 }
 
 .btn-hero-primary,
@@ -252,7 +182,7 @@
     transform: translateY(-4px);
 }
 
-/* Features en grille 2x2 */
+/* Masquer toutes les sections features */
 .hero-sport-features,
 .hero-faq-features,
 .hero-livraison-features,
@@ -262,59 +192,38 @@
 .hero-retours-features,
 .hero-revendeur-features,
 .hero-page-features {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    max-width: 800px;
-    margin: 0 auto;
+    display: none !important;
 }
 
-.feature-badge,
-.hero-badge,
-.contact-badge {
-    background: #fff;
-    padding: 28px 24px;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-    text-align: center;
-    border: 2px solid transparent;
+/* Responsive */
+@media (max-width: 1024px) {
+    .hero-sport-title,
+    .hero-faq-title,
+    .hero-livraison-title,
+    .hero-contact-title,
+    .hero-budget-title {
+        font-size: 56px !important;
+    }
 }
 
-.feature-badge:hover,
-.hero-badge:hover,
-.contact-badge:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 32px rgba(255,75,38,0.12);
-    border-color: rgba(255,75,38,0.2);
-}
+@media (max-width: 768px) {
+    .hero-sport-title,
+    .hero-faq-title,
+    .hero-livraison-title,
+    .hero-contact-title {
+        font-size: 42px !important;
+    }
 
-.feature-badge svg,
-.hero-badge svg,
-.contact-badge svg {
-    width: 48px;
-    height: 48px;
-    margin: 0 auto 16px;
-    display: block;
-    color: #FF4B26;
-    fill: #FF4B26;
-    transition: transform 0.3s ease;
-}
+    .btn-hero-primary,
+    .btn-hero-secondary {
+        width: 100%;
+        justify-content: center;
+    }
 
-.feature-badge:hover svg,
-.hero-badge:hover svg,
-.contact-badge:hover svg {
-    transform: scale(1.15) rotate(-8deg);
-}
-
-.feature-badge span,
-.hero-badge span,
-.contact-badge span {
-    display: block;
-    font-size: 16px;
-    font-weight: 700;
-    color: #1a1a1a;
-    line-height: 1.4;
+    .hero-sport-cta,
+    .hero-faq-cta {
+        flex-direction: column;
+    }
 }
 
 /* Masquer anciens éléments */
@@ -472,33 +381,7 @@
                 </div>
             </div>
 
-            <div class="hero-retours-right">
-                <div class="hero-retours-features">
-                    <div class="feature-badge">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M9 12L11 14L15 10M21 12C21 16.971 16.971 21 12 21C7.029 21 3 16.971 3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12Z" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                        <span>Garantie fabrication</span>
-                    </div>
-                    <div class="feature-badge">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M4 4V8H8M20 20V16H16M4 8H8L12 4L16 8H20M4 16H8L12 20L16 16H20" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                        <span>Refabrication gratuite</span>
-                    </div>
-                    <div class="feature-badge">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
-                        </svg>
-                        <span>Satisfaction garantie</span>
-                    </div>
-                    <div class="feature-badge">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M3 8L10.89 13.26C11.54 13.67 12.46 13.67 13.11 13.26L21 8M5 19H19C20.1 19 21 18.1 21 17V7C21 5.9 20.1 5 19 5H5C3.9 5 3 5.9 3 7V17C3 18.1 3.9 19 5 19Z" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                        <span>Support client 7j/7</span>
-                    </div>
-                </div>
+            
             </div>
         </div>
     </section>

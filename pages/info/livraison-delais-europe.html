@@ -23,75 +23,8 @@
     
 
         
-/* ===== NOUVEAU DESIGN CENTRÉ - PAGES INFO ===== */
-.hero-sport,
-.hero-faq,
-.hero-livraison,
-.hero-contact,
-.hero-budget,
-.hero-retours,
-.hero-revendeur,
-.hero-page,
-.hero-innovation-v2 {
-    position: relative;
-    min-height: 80vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 160px 5% 120px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #f1f3f5 100%);
-    overflow: hidden;
-    margin-top: 0 !important;
-}
 
-/* Formes décoratives animées */
-.hero-sport::before,
-.hero-faq::before,
-.hero-livraison::before,
-.hero-contact::before,
-.hero-budget::before,
-.hero-retours::before,
-.hero-revendeur::before,
-.hero-page::before {
-    content: '';
-    position: absolute;
-    width: 800px;
-    height: 800px;
-    background: radial-gradient(circle, rgba(255,75,38,0.12) 0%, transparent 70%);
-    border-radius: 50%;
-    top: -300px;
-    right: -200px;
-    z-index: 0;
-    animation: pulse 8s ease-in-out infinite;
-}
-
-.hero-sport::after,
-.hero-faq::after,
-.hero-livraison::after,
-.hero-contact::after,
-.hero-budget::after,
-.hero-retours::after,
-.hero-revendeur::after,
-.hero-page::after {
-    content: '';
-    position: absolute;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(0,123,255,0.08) 0%, transparent 70%);
-    border-radius: 50%;
-    bottom: -200px;
-    left: -150px;
-    z-index: 0;
-    animation: pulse 10s ease-in-out infinite reverse;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.1); opacity: 0.8; }
-}
-
-/* === CONTENU CENTRÉ === */
+/* ===== DESIGN CENTRÉ - PAGES INFO (SANS OVERRIDE) ===== */
 .hero-sport-content,
 .hero-faq-content,
 .hero-livraison-content,
@@ -102,17 +35,12 @@
 .hero-page-content {
     max-width: 1000px;
     margin: 0 auto;
+    text-align: center;
     position: relative;
     z-index: 1;
-    animation: fadeInUp 1s ease;
 }
 
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(40px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Masquer left/right si présents */
+/* Masquer left/right divisions */
 .hero-sport-left,
 .hero-faq-left,
 .hero-livraison-left,
@@ -151,6 +79,7 @@
     letter-spacing: 3px;
     font-size: 14px;
     margin-bottom: 24px;
+    font-family: 'Inter', sans-serif !important;
 }
 
 .hero-sport-title,
@@ -161,9 +90,9 @@
 .hero-retours-title,
 .hero-revendeur-title,
 .hero-page-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 72px;
-    font-weight: 700;
+    font-family: 'Bebas Neue', sans-serif !important;
+    font-size: 72px !important;
+    font-weight: 700 !important;
     letter-spacing: 2px;
     line-height: 1.1;
     margin-bottom: 28px;
@@ -185,6 +114,7 @@
     max-width: 700px;
     margin: 0 auto 48px;
     font-weight: 500;
+    font-family: 'Inter', sans-serif !important;
 }
 
 /* CTA Buttons centrés */
@@ -200,7 +130,7 @@
     gap: 16px;
     justify-content: center;
     flex-wrap: wrap;
-    margin-bottom: 64px;
+    margin-bottom: 32px;
 }
 
 .btn-hero-primary,
@@ -252,7 +182,7 @@
     transform: translateY(-4px);
 }
 
-/* Features en grille 2x2 */
+/* Masquer toutes les sections features */
 .hero-sport-features,
 .hero-faq-features,
 .hero-livraison-features,
@@ -262,59 +192,38 @@
 .hero-retours-features,
 .hero-revendeur-features,
 .hero-page-features {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    max-width: 800px;
-    margin: 0 auto;
+    display: none !important;
 }
 
-.feature-badge,
-.hero-badge,
-.contact-badge {
-    background: #fff;
-    padding: 28px 24px;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-    text-align: center;
-    border: 2px solid transparent;
+/* Responsive */
+@media (max-width: 1024px) {
+    .hero-sport-title,
+    .hero-faq-title,
+    .hero-livraison-title,
+    .hero-contact-title,
+    .hero-budget-title {
+        font-size: 56px !important;
+    }
 }
 
-.feature-badge:hover,
-.hero-badge:hover,
-.contact-badge:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 32px rgba(255,75,38,0.12);
-    border-color: rgba(255,75,38,0.2);
-}
+@media (max-width: 768px) {
+    .hero-sport-title,
+    .hero-faq-title,
+    .hero-livraison-title,
+    .hero-contact-title {
+        font-size: 42px !important;
+    }
 
-.feature-badge svg,
-.hero-badge svg,
-.contact-badge svg {
-    width: 48px;
-    height: 48px;
-    margin: 0 auto 16px;
-    display: block;
-    color: #FF4B26;
-    fill: #FF4B26;
-    transition: transform 0.3s ease;
-}
+    .btn-hero-primary,
+    .btn-hero-secondary {
+        width: 100%;
+        justify-content: center;
+    }
 
-.feature-badge:hover svg,
-.hero-badge:hover svg,
-.contact-badge:hover svg {
-    transform: scale(1.15) rotate(-8deg);
-}
-
-.feature-badge span,
-.hero-badge span,
-.contact-badge span {
-    display: block;
-    font-size: 16px;
-    font-weight: 700;
-    color: #1a1a1a;
-    line-height: 1.4;
+    .hero-sport-cta,
+    .hero-faq-cta {
+        flex-direction: column;
+    }
 }
 
 /* Masquer anciens éléments */
@@ -472,35 +381,7 @@
                 </div>
             </div>
 
-            <div class="hero-livraison-right">
-                <div class="hero-livraison-features">
-                    <div class="feature-badge">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2"/>
-                            <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                        <span>Fabrication Europe</span>
-                    </div>
-                    <div class="feature-badge">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                            <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                        <span>Délais 3-4 semaines</span>
-                    </div>
-                    <div class="feature-badge">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M9 12L11 14L15 10M21 12C21 16.971 16.971 21 12 21C7.029 21 3 16.971 3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12Z" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                        <span>Suivi de commande</span>
-                    </div>
-                    <div class="feature-badge">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M13 10V3L4 14H11V21L20 10H13Z" fill="currentColor"/>
-                        </svg>
-                        <span>Livraison rapide</span>
-                    </div>
-                </div>
+            
             </div>
         </div>
     </section>
