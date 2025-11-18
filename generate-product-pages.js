@@ -476,10 +476,10 @@ function generateProductHTML(product) {
         </div>
     </section>
 
-    <!-- ZONE DYNAMIQUE CONFIGURATEUR - Pour injection future de contenu personnalisé -->
+    <!-- ZONE D'INJECTION DYNAMIQUE POUR CONTENU PERSONNALISÉ (avant le configurateur) -->
     <div id="configurator-dynamic-content"></div>
 
-    <!-- CONFIGURATEUR DYNAMIQUE (COMMUN À TOUS LES PRODUITS) -->
+    <!-- ZONE D'INJECTION CONFIGURATEUR - Le configurateur sera injecté dynamiquement ici -->
     <div id="configurator-container"></div>
 
     <!-- PRODUCT TABS - CONTENU ADAPTÉ AU PRODUIT -->
@@ -560,7 +560,7 @@ function generateProductHTML(product) {
     <div id="dynamic-footer"></div>
 
     <script src="../../assets/js/components-loader.js"></script>
-    <script src="../../assets/js/product-configurator.js"></script>
+    <!-- Le configurateur sera injecté dynamiquement dans #configurator-container -->
 
     <script>
         // PRICING DATA POUR CE PRODUIT
