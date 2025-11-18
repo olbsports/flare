@@ -14,7 +14,6 @@
    ======================================== */
 
 .hero-sport,
-.hero-faq,
 .hero-livraison,
 .hero-budget,
 .hero-retours,
@@ -27,6 +26,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    text-align: center;
+    padding: 100px 5% 80px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #f1f3f5 100%);
+    overflow: hidden;
+}
+
+/* HERO FAQ - DISPLAY BLOCK */
+.hero-faq {
+    position: relative;
+    min-height: 60vh;
+    display: block;
     text-align: center;
     padding: 100px 5% 80px;
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #f1f3f5 100%);
@@ -143,7 +153,7 @@
 .hero-innovation-content-v2,
 .hero-adidas-content {
     max-width: 900px;
-    margin: 0 auto;
+    margin: 0 auto 2em;
     position: relative;
     z-index: 1;
     animation: fadeInUp 0.8s ease;
@@ -558,6 +568,133 @@
     }
 }
 
+/* ========================================
+   BLOG HERO - HERO BLOG
+   ======================================== */
+
+.blog-hero {
+    position: relative;
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 5% 80px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #f1f3f5 100%);
+    overflow: hidden;
+}
+
+.blog-hero::before {
+    content: '';
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255,75,38,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    top: -200px;
+    right: -100px;
+    z-index: 0;
+    animation: pulse 8s ease-in-out infinite;
+}
+
+.blog-hero::after {
+    content: '';
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(0,123,255,0.06) 0%, transparent 70%);
+    border-radius: 50%;
+    bottom: -100px;
+    left: -80px;
+    z-index: 0;
+    animation: pulse 10s ease-in-out infinite reverse;
+}
+
+.blog-hero-content {
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    animation: fadeInUp 0.8s ease;
+}
+
+.blog-hero-badge {
+    display: inline-block;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #FF4B26;
+    margin-bottom: 20px;
+}
+
+.blog-hero-content h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 64px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    color: #1a1a1a;
+}
+
+.blog-hero-content p {
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+    color: #495057;
+    max-width: 700px;
+    margin: 0 auto 40px;
+    font-weight: 400;
+}
+
+.blog-search-container {
+    position: relative;
+    max-width: 500px;
+    margin: 40px auto 0;
+}
+
+.blog-search {
+    width: 100%;
+    padding: 16px 50px 16px 24px;
+    font-size: 16px;
+    border: 2px solid #dee2e6;
+    border-radius: 50px;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.blog-search:focus {
+    outline: none;
+    border-color: #FF4B26;
+    box-shadow: 0 0 0 3px rgba(255,75,38,0.1);
+}
+
+.search-icon {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .blog-hero {
+        padding: 80px 5% 60px;
+        min-height: auto;
+    }
+
+    .blog-hero-content h1 {
+        font-size: 42px;
+    }
+
+    .blog-hero-content p {
+        font-size: 16px;
+    }
+}
+
 
 /* Masquer anciens éléments */
         .hero-sport-background,
@@ -628,6 +765,8 @@
                 justify-content: center;
             }
         }
+    
+    
     
     
     
