@@ -166,7 +166,7 @@
     line-height: 1.6;
     color: #495057;
     max-width: 700px;
-    margin: 0 auto 40px;
+    margin: 0 auto 0px !important;
     font-weight: 400;
 }
 
@@ -402,6 +402,41 @@
     }
 }
 
+/* ========================================
+   TRUST BAR - BARRE DE CONFIANCE
+   ======================================== */
+
+.trust-bar {
+    background: #1a1a1a;
+    color: #fff;
+    padding: 14px 5%;
+    border-bottom: 1px solid #333;
+    margin-top: 5em;
+}
+
+.trust-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 48px;
+    flex-wrap: wrap;
+}
+
+.trust-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.trust-item svg {
+    stroke: #FF4B26;
+    flex-shrink: 0;
+}
+
 
 /* Responsive */
 @media (max-width: 1024px) {
@@ -567,6 +602,7 @@
             }
         }
     
+    
     </style>
 </head>
 <body>
@@ -574,23 +610,18 @@
 
     <section class="hero-faq">
         <div class="hero-faq-content">
-            <div class="hero-faq-left">
-                <span class="hero-faq-eyebrow">Questions Fréquentes</span>
-                <h1 class="hero-faq-title">Comment pouvons-nous vous aider ?</h1>
-                <p class="hero-faq-subtitle">Trouvez rapidement les réponses à vos questions</p>
+            <span class="hero-faq-eyebrow">Questions Fréquentes</span>
+            <h1 class="hero-faq-title">Comment pouvons-nous vous aider ?</h1>
+            <p class="hero-faq-subtitle">Trouvez rapidement les réponses à vos questions</p>
 
-                <div class="hero-faq-cta">
-                    <a href="/pages/info/contact.html" class="btn-hero-primary">
-                        Poser une question
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                            <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                    </a>
-                    <a href="#faq-categories" class="btn-hero-secondary">Parcourir les catégories</a>
-                </div>
-            </div>
-
-            
+            <div class="hero-faq-cta">
+                <a href="/pages/info/contact.html" class="btn-hero-primary">
+                    Poser une question
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                        <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </a>
+                <a href="#faq-categories" class="btn-hero-secondary">Parcourir les catégories</a>
             </div>
         </div>
 
