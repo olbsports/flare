@@ -11,7 +11,51 @@
     <link rel="stylesheet" href="../../assets/css/livraison.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
     <style>
-        /* ===== HERO MODERNE DYNAMIQUE - DESIGN 2024 ===== */
+        @media (max-width: 1024px) {
+            .hero-sport,
+            .hero-faq,
+            .hero-livraison,
+            .hero-contact {
+                padding: 3rem 5% 2rem;
+            }
+
+            .hero-sport-content,
+            .hero-faq-content,
+            .hero-livraison-content,
+            .hero-contact-content,
+            .hero-budget-content,
+            .hero-retours-content,
+            .hero-revendeur-content,
+            .hero-page-content,
+            .hero-innovation-content-v2 {
+                grid-template-columns: 1fr;
+                gap: 50px;
+            }
+
+            .hero-sport-left,
+            .hero-faq-left,
+            .hero-livraison-left,
+            .hero-contact-left,
+            .hero-budget-left,
+            .hero-retours-left,
+            .hero-revendeur-left {
+                text-align: center;
+            }
+
+            .hero-sport-features,
+            .hero-contact-badges {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-sport-eyebrow,
+            .hero-faq-eyebrow,
+            .hero-livraison-eyebrow,
+            .hero-contact-eyebrow {
+                display: inline-block;
+            }
+        }
+    
+/* ===== HERO MODERNE - DESIGN PAGE D'ACCUEIL APPLIQUÉ ===== */
         .hero-sport,
         .hero-faq,
         .hero-livraison,
@@ -21,43 +65,57 @@
         .hero-revendeur,
         .hero-page,
         .hero-innovation-v2 {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            margin-top: 80px;
-            padding: 4rem 5% 3rem;
-            min-height: auto !important;
-            position: relative !important;
+            position: relative;
+            min-height: 70vh;
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            align-items: center;
+            padding: 140px 5% 80px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #f1f3f5 100%);
+            gap: 80px;
+            max-width: 100%;
             overflow: hidden;
+            margin-top: 0 !important;
         }
 
-        /* Formes décoratives en arrière-plan */
+        /* Formes décoratives animées */
         .hero-sport::before,
         .hero-faq::before,
         .hero-livraison::before,
-        .hero-contact::before {
+        .hero-contact::before,
+        .hero-budget::before {
             content: '';
             position: absolute;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(255,75,38,0.08) 0%, transparent 70%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(255,75,38,0.12) 0%, transparent 70%);
             border-radius: 50%;
-            top: -200px;
-            right: -100px;
+            top: -300px;
+            right: -200px;
             z-index: 0;
+            animation: pulse 8s ease-in-out infinite;
         }
 
         .hero-sport::after,
         .hero-faq::after,
         .hero-livraison::after,
-        .hero-contact::after {
+        .hero-contact::after,
+        .hero-budget::after {
             content: '';
             position: absolute;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(0,123,255,0.05) 0%, transparent 70%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0,123,255,0.08) 0%, transparent 70%);
             border-radius: 50%;
-            bottom: -150px;
-            left: -100px;
+            bottom: -200px;
+            left: -150px;
             z-index: 0;
+            animation: pulse 10s ease-in-out infinite reverse;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
         }
 
         .hero-sport-content,
@@ -69,12 +127,11 @@
         .hero-revendeur-content,
         .hero-page-content,
         .hero-innovation-content-v2 {
-            max-width: 1400px;
-            margin: 0 auto;
+            max-width: 100%;
+            margin: 0;
             display: grid;
-            grid-template-columns: 1.2fr 1fr;
-            gap: 80px;
-            align-items: center;
+            grid-template-columns: 1fr;
+            gap: 0;
             position: relative;
             z-index: 1;
         }
@@ -88,19 +145,14 @@
         .hero-revendeur-left,
         .hero-page-left,
         .hero-innovation-left {
-            text-align: left;
-            animation: fadeInLeft 0.8s ease-out;
+            animation: fadeInLeft 1s ease;
+            position: relative;
+            z-index: 1;
         }
 
         @keyframes fadeInLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+            from { opacity: 0; transform: translateX(-40px); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
         .hero-sport-right,
@@ -112,32 +164,14 @@
         .hero-revendeur-right,
         .hero-page-right,
         .hero-innovation-right {
-            background: #fff;
-            padding: 3rem;
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.05);
             position: relative;
-            animation: fadeInUp 0.8s ease-out 0.2s backwards;
-            transition: all 0.4s ease;
+            animation: fadeInRight 1s ease 0.3s backwards;
+            z-index: 1;
         }
 
-        .hero-sport-right:hover,
-        .hero-faq-right:hover,
-        .hero-livraison-right:hover,
-        .hero-contact-right:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 30px 80px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @keyframes fadeInRight {
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
         .hero-sport-eyebrow,
@@ -150,16 +184,16 @@
         .hero-page-eyebrow,
         .hero-eyebrow {
             display: inline-block;
+            padding: 10px 24px;
+            background: linear-gradient(135deg, #FF4B26 0%, #E63910 100%);
+            color: #fff;
             font-size: 12px;
             font-weight: 700;
             letter-spacing: 3px;
             text-transform: uppercase;
-            color: #fff;
-            padding: 10px 24px;
-            background: linear-gradient(135deg, #FF4B26 0%, #E63910 100%);
-            margin-bottom: 28px;
+            margin-bottom: 32px;
             border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(255,75,38,0.3);
+            box-shadow: 0 4px 20px rgba(255,75,38,0.3);
         }
 
         .hero-sport-title,
@@ -172,15 +206,12 @@
         .hero-page-title,
         .hero-title {
             font-family: 'Bebas Neue', sans-serif;
-            font-size: clamp(48px, 7vw, 72px);
-            line-height: 1;
-            letter-spacing: 1px;
-            margin-bottom: 24px;
+            font-size: clamp(64px, 8vw, 120px);
+            font-weight: 700;
+            line-height: 0.95;
+            letter-spacing: 2px;
+            margin-bottom: 28px;
             color: #1a1a1a;
-            background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
 
         .hero-sport-subtitle,
@@ -193,10 +224,11 @@
         .hero-revendeur-subtitle,
         .hero-page-subtitle,
         .hero-subtitle {
-            font-size: clamp(16px, 2.5vw, 20px);
-            line-height: 1.6;
+            font-size: clamp(16px, 2vw, 20px);
+            line-height: 1.7;
             color: #495057;
-            margin-bottom: 40px;
+            margin-bottom: 48px;
+            max-width: 600px;
             font-weight: 400;
         }
 
@@ -210,28 +242,27 @@
             display: flex;
             gap: 20px;
             flex-wrap: wrap;
-            margin-bottom: 0;
+            margin-bottom: 48px;
         }
 
         .btn-hero-primary,
         .btn-primary {
-            padding: 18px 40px;
-            font-size: 14px;
+            padding: 18px 48px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #fff;
+            text-decoration: none;
             font-weight: 700;
+            font-size: 14px;
             letter-spacing: 1px;
             text-transform: uppercase;
-            text-decoration: none;
-            background: linear-gradient(135deg, #FF4B26 0%, #E63910 100%);
-            color: #fff;
             border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            transition: all 0.3s ease;
-            border: none;
-            box-shadow: 0 4px 15px rgba(255,75,38,0.3);
-            position: relative;
-            overflow: hidden;
         }
 
         .btn-hero-primary::before,
@@ -242,7 +273,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
             transition: left 0.5s;
         }
 
@@ -253,27 +284,27 @@
 
         .btn-hero-primary:hover,
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255,75,38,0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
         }
 
         .btn-hero-secondary,
         .btn-secondary {
-            padding: 18px 40px;
-            font-size: 14px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            text-decoration: none;
+            padding: 18px 48px;
             background: transparent;
             color: #1a1a1a;
-            border: 2px solid #1a1a1a;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
             border-radius: 50px;
-            display: inline-flex;
-            align-items: center;
+            border: 2px solid #1a1a1a;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            display: inline-flex;
+            align-items: center;
         }
 
         .btn-hero-secondary::before,
@@ -300,7 +331,6 @@
         .btn-hero-secondary:hover,
         .btn-secondary:hover {
             color: #fff;
-            border-color: #1a1a1a;
         }
 
         .hero-sport-features,
@@ -314,6 +344,17 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
+            background: #fff;
+            padding: 3rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            transition: all 0.4s ease;
+        }
+
+        .hero-sport-features:hover,
+        .hero-contact-badges:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.15);
         }
 
         .feature-badge,
@@ -357,8 +398,8 @@
 
         .feature-badge svg,
         .contact-badge svg {
-            width: 32px;
-            height: 32px;
+            width: 40px;
+            height: 40px;
             color: #FF4B26;
             fill: #FF4B26;
             flex-shrink: 0;
@@ -372,7 +413,7 @@
 
         .feature-badge span,
         .contact-badge span {
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
             color: #1a1a1a;
             line-height: 1.4;
@@ -395,43 +436,55 @@
             .hero-sport,
             .hero-faq,
             .hero-livraison,
-            .hero-contact {
-                padding: 3rem 5% 2rem;
-            }
-
-            .hero-sport-content,
-            .hero-faq-content,
-            .hero-livraison-content,
-            .hero-contact-content,
-            .hero-budget-content,
-            .hero-retours-content,
-            .hero-revendeur-content,
-            .hero-page-content,
-            .hero-innovation-content-v2 {
+            .hero-contact,
+            .hero-budget {
                 grid-template-columns: 1fr;
-                gap: 50px;
+                padding: 120px 5% 80px;
+                gap: 60px;
+                min-height: auto;
             }
 
             .hero-sport-left,
             .hero-faq-left,
             .hero-livraison-left,
             .hero-contact-left,
-            .hero-budget-left,
-            .hero-retours-left,
-            .hero-revendeur-left {
+            .hero-budget-left {
                 text-align: center;
+            }
+
+            .hero-sport-subtitle,
+            .hero-faq-subtitle,
+            .hero-livraison-subtitle,
+            .hero-contact-subtitle {
+                margin: 0 auto 48px;
+            }
+
+            .hero-sport-cta,
+            .hero-faq-cta,
+            .hero-livraison-cta,
+            .hero-contact-cta {
+                justify-content: center;
             }
 
             .hero-sport-features,
             .hero-contact-badges {
                 grid-template-columns: 1fr;
             }
+        }
 
-            .hero-sport-eyebrow,
-            .hero-faq-eyebrow,
-            .hero-livraison-eyebrow,
-            .hero-contact-eyebrow {
-                display: inline-block;
+        @media (max-width: 768px) {
+            .hero-sport,
+            .hero-faq,
+            .hero-livraison,
+            .hero-contact {
+                padding: 100px 5% 60px;
+            }
+
+            .btn-hero-primary,
+            .btn-hero-secondary {
+                width: 100%;
+                text-align: center;
+                justify-content: center;
             }
         }
     </style>
