@@ -266,13 +266,18 @@ function generateProductHTML(product) {
     const lowestPrice = priceTiers[priceTiers.length - 1] || { price: parseFloat(product.QTY_1 || 0) };
     const highestPrice = priceTiers[0] || { price: parseFloat(product.QTY_1 || 0) };
 
-    const photos = [
-        product.PHOTO_1,
-        product.PHOTO_2,
-        product.PHOTO_3,
-        product.PHOTO_4,
-        product.PHOTO_5
-    ].filter(p => p && p.trim());
+    // Générer automatiquement les URLs des 5 photos basées sur la référence FLARE
+    const photos = [];
+    for (let i = 1; i <= 5; i++) {
+        // Si PHOTO_X existe dans le CSV, l'utiliser, sinon générer l'URL
+        const csvPhoto = product[`PHOTO_${i}`];
+        if (csvPhoto && csvPhoto.trim()) {
+            photos.push(csvPhoto);
+        } else {
+            // Génération automatique: https://flare-custom.com/photos/produits/FLARE-XXX-YYY-N.webp
+            photos.push(`https://flare-custom.com/photos/produits/${product.REFERENCE_FLARE}-${i}.webp`);
+        }
+    }
 
     const reviews = generateReviews(product);
 
