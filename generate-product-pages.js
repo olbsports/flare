@@ -179,6 +179,49 @@ function getSportPageUrl(sport) {
     return sportUrls[sport] || '/index.html';
 }
 
+// Générer URL de catégorie famille (Maillots, Shorts, etc.)
+function getFamilyPageUrl(famille) {
+    const familyUrls = {
+        'Maillot': '/pages/products/maillots-sport-personnalises.html',
+        'Short': '/pages/products/shorts-sport-personnalises.html',
+        'Polo': '/pages/products/polos-sport-personnalises.html',
+        'Sweat': '/pages/products/sweats-sport-personnalises.html',
+        'Veste': '/pages/products/vestes-sport-personnalisees.html',
+        'Pantalon': '/pages/products/pantalons-sport-personnalises.html',
+        'Débardeur': '/pages/products/debardeurs-sport-personnalises.html',
+        'T-shirt': '/pages/products/tshirts-sport-personnalises.html'
+    };
+    return familyUrls[famille] || '/index.html';
+}
+
+// Générer contenu optimisé pour référencement LLM
+function generateLLMContent(product) {
+    const sport = product.SPORT.charAt(0) + product.SPORT.slice(1).toLowerCase();
+    const famille = product.FAMILLE_PRODUIT;
+
+    let content = `<!-- CONTENU STRUCTURÉ POUR RÉFÉRENCEMENT LLM -->\n`;
+    content += `<div class="llm-context" style="padding: 2rem; background: #f9f9f9; border-left: 4px solid #FF4B26; margin: 2rem 0;">\n`;
+    content += `    <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">Résumé Produit</h2>\n`;
+    content += `    <div style="line-height: 1.8;">\n`;
+    content += `        <p><strong>Produit:</strong> ${product.TITRE_VENDEUR}</p>\n`;
+    content += `        <p><strong>Référence:</strong> ${product.REFERENCE_FLARE}</p>\n`;
+    content += `        <p><strong>Catégorie:</strong> ${famille} ${sport} personnalisé</p>\n`;
+    content += `        <p><strong>Technique:</strong> Sublimation intégrale textile</p>\n`;
+    content += `        <p><strong>Tissu:</strong> ${product.TISSU} - ${product.GRAMMAGE}</p>\n`;
+    content += `        <p><strong>Genre:</strong> ${product.GENRE}</p>\n`;
+    content += `        <p><strong>Fabrication:</strong> Europe - Ateliers certifiés</p>\n`;
+    content += `        <p><strong>Délai:</strong> 3-4 semaines + livraison express 3-5 jours</p>\n`;
+    content += `        <p><strong>Minimum:</strong> Aucune quantité minimum (dès 1 pièce)</p>\n`;
+    content += `        <p><strong>Prix indicatif:</strong> À partir de ${product.QTY_1}€ l'unité</p>\n`;
+    content += `        <p><strong>Personnalisation:</strong> Illimitée - logos, noms, numéros, sponsors, dégradés</p>\n`;
+    content += `        <p><strong>Cas d'usage:</strong> Clubs sportifs, écoles, entreprises, événements, équipes amateurs et professionnelles</p>\n`;
+    content += `        <p><strong>Avantages:</strong> Durabilité exceptionnelle, design unique, couleurs illimitées, fabrication européenne</p>\n`;
+    content += `    </div>\n`;
+    content += `</div>\n\n`;
+
+    return content;
+}
+
 // Générer des avis clients réalistes avec villes toujours différentes
 function generateReviews(product) {
     const cities = ['Paris', 'Lyon', 'Marseille', 'Toulouse', 'Bordeaux', 'Nantes', 'Strasbourg', 'Lille', 'Rennes', 'Montpellier'];
@@ -320,7 +363,7 @@ function generateProductHTML(product) {
     <meta property="og:image" content="${photos[0] || ''}">
     <meta property="og:url" content="${canonicalUrl}">
 
-    <!-- SCHEMA.ORG JSON-LD -->
+    <!-- SCHEMA.ORG JSON-LD - ENRICHI POUR LLM -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -328,18 +371,46 @@ function generateProductHTML(product) {
       "name": "${product.TITRE_VENDEUR.replace(/"/g, '\\"')}",
       "description": "${metaDescription.replace(/"/g, '\\"')}",
       "sku": "${product.CODE}",
+      "mpn": "${product.REFERENCE_FLARE}",
       "brand": {"@type": "Brand", "name": "FLARE CUSTOM"},
+      "category": "${product.FAMILLE_PRODUIT} ${product.SPORT.charAt(0) + product.SPORT.slice(1).toLowerCase()}",
+      "material": "${product.TISSU}",
+      "additionalProperty": [
+        {"@type": "PropertyValue", "name": "Sport", "value": "${product.SPORT.charAt(0) + product.SPORT.slice(1).toLowerCase()}"},
+        {"@type": "PropertyValue", "name": "Technique", "value": "Sublimation intégrale"},
+        {"@type": "PropertyValue", "name": "Grammage", "value": "${product.GRAMMAGE}"},
+        {"@type": "PropertyValue", "name": "Genre", "value": "${product.GENRE}"},
+        {"@type": "PropertyValue", "name": "Finition", "value": "${product.FINITION}"},
+        {"@type": "PropertyValue", "name": "Fabrication", "value": "Europe"},
+        {"@type": "PropertyValue", "name": "Délai", "value": "3-4 semaines"},
+        {"@type": "PropertyValue", "name": "Personnalisation", "value": "Illimitée"}
+      ],
       "offers": {
         "@type": "AggregateOffer",
         "priceCurrency": "EUR",
         "lowPrice": "${lowestPrice.price.toFixed(2)}",
         "highPrice": "${highestPrice.price.toFixed(2)}",
-        "availability": "https://schema.org/InStock"
+        "offerCount": "${priceTiers.length}",
+        "availability": "https://schema.org/InStock",
+        "seller": {
+          "@type": "Organization",
+          "name": "FLARE CUSTOM",
+          "url": "https://flare-custom.com"
+        }
       },
       "aggregateRating": {
         "@type": "AggregateRating",
         "ratingValue": "4.8",
         "reviewCount": "127"
+      },
+      "manufacturer": {
+        "@type": "Organization",
+        "name": "FLARE CUSTOM",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "FR",
+          "addressRegion": "Europe"
+        }
       }
     }
     </script>
@@ -507,6 +578,19 @@ function generateProductHTML(product) {
         <!-- TAB: DESCRIPTION (ADAPTÉE) -->
         <div class="tab-content active" id="tab-description">
             ${generateDescription(product)}
+
+            ${generateLLMContent(product)}
+
+            <!-- MAILLAGE INTERNE -->
+            <div style="margin: 2rem 0; padding: 1.5rem; background: #fff; border: 1px solid #e0e0e0;">
+                <h3 style="font-size: 1.25rem; margin-bottom: 1rem;">Découvrez aussi</h3>
+                <p style="margin-bottom: 1rem;">Explorez notre gamme complète d'équipements personnalisés :</p>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="margin: 0.5rem 0;"><a href="../${getFamilyPageUrl(product.FAMILLE_PRODUIT).replace('/pages/', '')}" style="color: #FF4B26; text-decoration: none; font-weight: 600;">→ Tous nos ${product.FAMILLE_PRODUIT}s personnalisés</a></li>
+                    <li style="margin: 0.5rem 0;"><a href="../${sportPageUrl.replace('/pages/', '')}" style="color: #FF4B26; text-decoration: none; font-weight: 600;">→ Équipement ${product.SPORT.charAt(0) + product.SPORT.slice(1).toLowerCase()} complet</a></li>
+                    <li style="margin: 0.5rem 0;"><a href="../info/devis.html" style="color: #FF4B26; text-decoration: none; font-weight: 600;">→ Demander un devis gratuit</a></li>
+                </ul>
+            </div>
         </div>
 
         <!-- TAB: SPECIFICATIONS (ADAPTÉES) -->
