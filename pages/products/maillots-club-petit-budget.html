@@ -107,543 +107,6 @@
             border-color: #fff;
         }
 
-        /* 🔥 BADGES HERO */
-        .hero-budget-features {
-            display: flex;
-            gap: 24px;
-            flex-wrap: wrap;
-        }
-
-        .feature-badge {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: rgba(255,255,255,0.9);
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .feature-badge:hover {
-            background: rgba(255, 75, 38, 0.1);
-            border-color: rgba(255, 75, 38, 0.3);
-        }
-
-        .feature-badge svg {
-            color: #FF4B26;
-            width: 20px;
-            height: 20px;
-        }
-
-        /* 🔥 TRUST BAR */
-        .trust-bar {
-            background: #fff;
-            padding: 48px 5%;
-            border-top: 1px solid #E5E7EB;
-            border-bottom: 1px solid #E5E7EB;
-        }
-
-        .trust-items {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 40px;
-            text-align: center;
-        }
-
-        .trust-item strong {
-            display: block;
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 48px;
-            color: #FF4B26;
-            line-height: 1;
-            margin-bottom: 8px;
-        }
-
-        .trust-item span {
-            font-size: 14px;
-            color: #6B7280;
-            font-weight: 600;
-        }
-
-        /* 🔥 SECTIONS */
-        .section-header {
-            text-align: center;
-            margin-bottom: 80px;
-        }
-
-        .section-eyebrow {
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            color: #FF4B26;
-            margin-bottom: 16px;
-        }
-
-        .section-title {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: clamp(40px, 6vw, 64px);
-            line-height: 1.1;
-            letter-spacing: 1px;
-            margin-bottom: 20px;
-        }
-
-        .section-description {
-            font-size: 18px;
-            line-height: 1.7;
-            color: #6B7280;
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        /* 🔥 SOLUTIONS - 3 COLONNES */
-        .solutions-section {
-            padding: 100px 5%;
-            background: #f9fafb;
-        }
-
-        .solutions-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 32px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .solution-card {
-            background: #fff;
-            padding: 40px 32px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-            transition: all 0.3s ease;
-        }
-
-        .solution-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 40px rgba(255, 75, 38, 0.12);
-        }
-
-        .solution-icon {
-            width: 64px;
-            height: 64px;
-            background: linear-gradient(135deg, #FF4B26, #E63910);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 24px;
-        }
-
-        .solution-title {
-            font-size: 22px;
-            font-weight: 800;
-            color: #000;
-            margin-bottom: 12px;
-        }
-
-        .solution-desc {
-            font-size: 16px;
-            line-height: 1.7;
-            color: #6B7280;
-        }
-
-        /* 🔥 TARIFS - 4 CARTES */
-        .pricing-cards {
-            padding: 100px 5%;
-            background: #fff;
-        }
-
-        .pricing-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 24px;
-            max-width: 1400px;
-            margin: 0 auto 60px;
-        }
-
-        .price-card {
-            background: #fff;
-            padding: 48px 32px;
-            text-align: center;
-            border: 2px solid #E5E7EB;
-            border-radius: 12px;
-            transition: all 0.3s;
-            position: relative;
-        }
-
-        .price-card:hover {
-            border-color: #FF4B26;
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(255, 75, 38, 0.12);
-        }
-
-        .price-card.featured {
-            border-color: #FF4B26;
-            transform: scale(1.05);
-            box-shadow: 0 12px 40px rgba(255, 75, 38, 0.15);
-        }
-
-        .price-card.premium {
-            background: #000;
-            border-color: #000;
-            color: #fff;
-        }
-
-        .price-badge {
-            position: absolute;
-            top: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #FF4B26;
-            color: #fff;
-            padding: 6px 20px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .price-volume {
-            font-size: 13px;
-            font-weight: 700;
-            color: #6B7280;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 16px;
-        }
-
-        .price-card.premium .price-volume {
-            color: rgba(255,255,255,0.7);
-        }
-
-        .price-amount {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 56px;
-            line-height: 1;
-            color: #000;
-            margin-bottom: 8px;
-        }
-
-        .price-card.premium .price-amount {
-            color: #fff;
-        }
-
-        .price-unit {
-            font-size: 20px;
-            color: #6B7280;
-        }
-
-        .price-card.premium .price-unit {
-            color: rgba(255,255,255,0.7);
-        }
-
-        .price-saving {
-            font-size: 14px;
-            color: #FF4B26;
-            font-weight: 700;
-            margin-bottom: 32px;
-        }
-
-        .price-cta {
-            display: block;
-            padding: 16px;
-            background: #000;
-            color: #fff;
-            text-decoration: none;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            transition: all 0.3s;
-            border-radius: 6px;
-        }
-
-        .price-card.featured .price-cta,
-        .price-card.premium .price-cta {
-            background: #FF4B26;
-        }
-
-        .price-cta:hover {
-            background: #FF4B26;
-            transform: translateY(-2px);
-        }
-
-        /* 🔥 SPORTS GRID - BLANC + OMBRE */
-        .sports-section {
-            padding: 100px 5%;
-            background: #f9fafb;
-        }
-
-        .sports-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .sport-card {
-            position: relative;
-            background: #fff;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.06);
-            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-            text-decoration: none;
-            display: block;
-        }
-
-        .sport-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.12);
-        }
-
-        .sport-card-content {
-            padding: 32px;
-        }
-
-        .sport-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-            display: block;
-        }
-
-        .sport-card h3 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 32px;
-            line-height: 1;
-            letter-spacing: -0.01em;
-            color: #000;
-            margin-bottom: 8px;
-        }
-
-        .sport-card p {
-            font-size: 15px;
-            color: #6B7280;
-            margin-bottom: 16px;
-        }
-
-        .sport-link {
-            font-size: 24px;
-            color: #FF4B26;
-            transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
-            display: inline-block;
-        }
-
-        .sport-card:hover .sport-link {
-            transform: translateX(8px);
-        }
-
-        /* 🔥 CONSEILS */
-        .tips-section {
-            padding: 100px 5%;
-            background: #fff;
-        }
-
-        .tips-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 32px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .tip-card {
-            background: #f9fafb;
-            padding: 40px;
-            border-left: 4px solid #FF4B26;
-            border-radius: 8px;
-        }
-
-        .tip-number {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 48px;
-            color: #FF4B26;
-            line-height: 1;
-            margin-bottom: 16px;
-        }
-
-        .tip-title {
-            font-size: 22px;
-            font-weight: 800;
-            color: #000;
-            margin-bottom: 12px;
-        }
-
-        .tip-desc {
-            font-size: 16px;
-            line-height: 1.7;
-            color: #6B7280;
-        }
-
-        /* 🔥 FAQ */
-        .faq-section {
-            padding: 100px 5%;
-            background: #f9fafb;
-        }
-
-        .faq-container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .faq-accordion {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        details {
-            background: #fff;
-            padding: 24px 32px;
-            border-left: 4px solid #E5E7EB;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        details:hover {
-            border-left-color: #FF4B26;
-        }
-
-        details[open] {
-            border-left-color: #FF4B26;
-        }
-
-        summary {
-            font-size: 18px;
-            font-weight: 700;
-            color: #000;
-            list-style: none;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        summary::-webkit-details-marker {
-            display: none;
-        }
-
-        .faq-icon {
-            color: #FF4B26;
-            font-size: 20px;
-            transition: transform 0.3s;
-        }
-
-        details[open] .faq-icon {
-            transform: rotate(45deg);
-        }
-
-        details p {
-            margin-top: 16px;
-            line-height: 1.7;
-            color: #6B7280;
-        }
-
-        /* 🔥 CTA FINAL */
-        .cta-final-section {
-            padding: 120px 5%;
-            background: linear-gradient(135deg, #000000 0%, #121212 50%, #000000 100%);
-            color: #fff;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .cta-final-overlay {
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at 50% 50%, rgba(255, 75, 38, 0.1), transparent 70%);
-        }
-
-        .cta-final-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-
-        .cta-final-title {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: clamp(48px, 8vw, 80px);
-            line-height: 1;
-            letter-spacing: 2px;
-            margin-bottom: 24px;
-        }
-
-        .cta-final-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 80px;
-        }
-
-        .btn-cta-primary, .btn-cta-secondary {
-            display: inline-block;
-            padding: 24px 56px;
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-
-        .btn-cta-primary {
-            background: #FF4B26;
-            color: #fff;
-        }
-
-        .btn-cta-primary:hover {
-            background: #E63910;
-            transform: translateY(-2px);
-        }
-
-        .btn-cta-secondary {
-            background: transparent;
-            color: #fff;
-            border: 2px solid rgba(255,255,255,0.3);
-        }
-
-        .btn-cta-secondary:hover {
-            background: rgba(255,255,255,0.1);
-            border-color: #fff;
-        }
-
-        /* 🔥 4 STATS EN LIGNE */
-        .cta-stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 40px;
-            padding-top: 60px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-number {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 48px;
-            color: #FF4B26;
-            margin-bottom: 8px;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: rgba(255,255,255,0.8);
-        }
-
-        /* 🔥 RESPONSIVE */
         @media (max-width: 1200px) {
             .pricing-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -684,267 +147,7 @@
                 gap: 16px;
             }
 
-            .feature-badge {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .trust-items {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 24px;
-            }
-
-            .pricing-grid,
-            .solutions-grid,
-            .sports-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .cta-stats {
-                grid-template-columns: 1fr;
-                gap: 24px;
-            }
-        }
-    
-        /* ===== HERO 2 COLONNES - FOND GRIS + CARDS CARRÉES ===== */
-        .hero-sport,
-        .hero-faq,
-        .hero-livraison,
-        .hero-contact,
-        .hero-budget,
-        .hero-retours,
-        .hero-revendeur,
-        .hero-page,
-        .hero-innovation-v2 {
-            background: #e8e8e8 !important;
-            margin-top: 80px;
-            padding: 2.5rem 5% 2rem;
-            min-height: auto !important;
-            position: relative !important;
-        }
-
-        .hero-sport-content,
-        .hero-faq-content,
-        .hero-livraison-content,
-        .hero-contact-content,
-        .hero-budget-content,
-        .hero-retours-content,
-        .hero-revendeur-content,
-        .hero-page-content,
-        .hero-innovation-content-v2 {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 60px;
-            align-items: center;
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero-sport-left,
-        .hero-faq-left,
-        .hero-livraison-left,
-        .hero-contact-left,
-        .hero-budget-left,
-        .hero-retours-left,
-        .hero-revendeur-left,
-        .hero-page-left,
-        .hero-innovation-left {
-            text-align: left;
-        }
-
-        .hero-sport-right,
-        .hero-faq-right,
-        .hero-livraison-right,
-        .hero-contact-right,
-        .hero-budget-right,
-        .hero-retours-right,
-        .hero-revendeur-right,
-        .hero-page-right,
-        .hero-innovation-right {
-            background: #fff;
-            padding: 2.5rem;
-            border-radius: 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .hero-sport-eyebrow,
-        .hero-faq-eyebrow,
-        .hero-livraison-eyebrow,
-        .hero-contact-eyebrow,
-        .hero-budget-eyebrow,
-        .hero-retours-eyebrow,
-        .hero-revendeur-eyebrow,
-        .hero-page-eyebrow,
-        .hero-eyebrow {
-            display: inline-block;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            color: #FF4B26;
-            padding: 10px 24px;
-            border: 2px solid #FF4B26;
-            margin-bottom: 24px;
-            background: transparent;
-            border-radius: 0;
-        }
-
-        .hero-sport-title,
-        .hero-faq-title,
-        .hero-livraison-title,
-        .hero-contact-title,
-        .hero-budget-title,
-        .hero-retours-title,
-        .hero-revendeur-title,
-        .hero-page-title,
-        .hero-title {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: clamp(42px, 6vw, 64px);
-            line-height: 1.05;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-            color: #1a1a1a;
-        }
-
-        .hero-sport-subtitle,
-        .hero-faq-subtitle,
-        .hero-livraison-subtitle,
-        .hero-contact-subtitle,
-        .hero-budget-subtitle,
-        .hero-budget-desc,
-        .hero-retours-subtitle,
-        .hero-revendeur-subtitle,
-        .hero-page-subtitle,
-        .hero-subtitle {
-            font-size: clamp(15px, 2vw, 18px);
-            line-height: 1.7;
-            color: #666;
-            margin-bottom: 32px;
-        }
-
-        .hero-sport-cta,
-        .hero-faq-cta,
-        .hero-livraison-cta,
-        .hero-contact-cta,
-        .hero-budget-cta,
-        .hero-retours-cta,
-        .hero-revendeur-cta {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-            margin-bottom: 0;
-        }
-
-        .btn-hero-primary,
-        .btn-primary {
-            padding: 16px 36px;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            text-decoration: none;
-            background: #FF4B26;
-            color: #fff;
-            border-radius: 0;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-            border: none;
-        }
-
-        .btn-hero-primary:hover,
-        .btn-primary:hover {
-            background: #E63910;
-            transform: translateY(-2px);
-        }
-
-        .btn-hero-secondary,
-        .btn-secondary {
-            padding: 16px 36px;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            text-decoration: none;
-            background: transparent;
-            color: #1a1a1a;
-            border: 2px solid #1a1a1a;
-            border-radius: 0;
-            display: inline-flex;
-            align-items: center;
-            transition: all 0.3s ease;
-        }
-
-        .btn-hero-secondary:hover,
-        .btn-secondary:hover {
-            background: #1a1a1a;
-            color: #fff;
-        }
-
-        .hero-sport-features,
-        .hero-faq-features,
-        .hero-livraison-features,
-        .hero-contact-features,
-        .hero-budget-features,
-        .hero-retours-features,
-        .hero-revendeur-features,
-        .hero-contact-badges {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        .feature-badge,
-        .contact-badge {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 18px;
-            background: #f8f8f8;
-            border-radius: 0;
-            border-left: 3px solid #FF4B26;
-            transition: all 0.3s ease;
-        }
-
-        .feature-badge:hover,
-        .contact-badge:hover {
-            background: #f0f0f0;
-            border-left-color: #000;
-        }
-
-        .feature-badge svg,
-        .contact-badge svg {
-            width: 24px;
-            height: 24px;
-            color: #FF4B26;
-            fill: #FF4B26;
-            flex-shrink: 0;
-        }
-
-        .feature-badge span,
-        .contact-badge span {
-            font-size: 14px;
-            font-weight: 600;
-            color: #1a1a1a;
-        }
-
-        /* Masquer les anciens éléments */
-        .hero-sport-background,
-        .hero-sport-overlay,
-        .hero-contact-background,
-        .hero-faq-background,
-        .hero-livraison-background,
-        .hero-budget-overlay,
-        .hero-budget-image,
-        .breadcrumb {
-            display: none !important;
-        }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
+            @media (max-width: 1024px) {
             .hero-sport-content,
             .hero-faq-content,
             .hero-livraison-content,
@@ -969,6 +172,430 @@
             .hero-sport-features,
             .hero-contact-badges {
                 grid-template-columns: 1fr;
+            }
+        }
+    
+        /* ===== HERO MODERNE DYNAMIQUE - DESIGN 2024 ===== */
+        .hero-sport,
+        .hero-faq,
+        .hero-livraison,
+        .hero-contact,
+        .hero-budget,
+        .hero-retours,
+        .hero-revendeur,
+        .hero-page,
+        .hero-innovation-v2 {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            margin-top: 80px;
+            padding: 4rem 5% 3rem;
+            min-height: auto !important;
+            position: relative !important;
+            overflow: hidden;
+        }
+
+        /* Formes décoratives en arrière-plan */
+        .hero-sport::before,
+        .hero-faq::before,
+        .hero-livraison::before,
+        .hero-contact::before {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255,75,38,0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            top: -200px;
+            right: -100px;
+            z-index: 0;
+        }
+
+        .hero-sport::after,
+        .hero-faq::after,
+        .hero-livraison::after,
+        .hero-contact::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0,123,255,0.05) 0%, transparent 70%);
+            border-radius: 50%;
+            bottom: -150px;
+            left: -100px;
+            z-index: 0;
+        }
+
+        .hero-sport-content,
+        .hero-faq-content,
+        .hero-livraison-content,
+        .hero-contact-content,
+        .hero-budget-content,
+        .hero-retours-content,
+        .hero-revendeur-content,
+        .hero-page-content,
+        .hero-innovation-content-v2 {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 80px;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-sport-left,
+        .hero-faq-left,
+        .hero-livraison-left,
+        .hero-contact-left,
+        .hero-budget-left,
+        .hero-retours-left,
+        .hero-revendeur-left,
+        .hero-page-left,
+        .hero-innovation-left {
+            text-align: left;
+            animation: fadeInLeft 0.8s ease-out;
+        }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .hero-sport-right,
+        .hero-faq-right,
+        .hero-livraison-right,
+        .hero-contact-right,
+        .hero-budget-right,
+        .hero-retours-right,
+        .hero-revendeur-right,
+        .hero-page-right,
+        .hero-innovation-right {
+            background: #fff;
+            padding: 3rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.05);
+            position: relative;
+            animation: fadeInUp 0.8s ease-out 0.2s backwards;
+            transition: all 0.4s ease;
+        }
+
+        .hero-sport-right:hover,
+        .hero-faq-right:hover,
+        .hero-livraison-right:hover,
+        .hero-contact-right:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-sport-eyebrow,
+        .hero-faq-eyebrow,
+        .hero-livraison-eyebrow,
+        .hero-contact-eyebrow,
+        .hero-budget-eyebrow,
+        .hero-retours-eyebrow,
+        .hero-revendeur-eyebrow,
+        .hero-page-eyebrow,
+        .hero-eyebrow {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #fff;
+            padding: 10px 24px;
+            background: linear-gradient(135deg, #FF4B26 0%, #E63910 100%);
+            margin-bottom: 28px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(255,75,38,0.3);
+        }
+
+        .hero-sport-title,
+        .hero-faq-title,
+        .hero-livraison-title,
+        .hero-contact-title,
+        .hero-budget-title,
+        .hero-retours-title,
+        .hero-revendeur-title,
+        .hero-page-title,
+        .hero-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(48px, 7vw, 72px);
+            line-height: 1;
+            letter-spacing: 1px;
+            margin-bottom: 24px;
+            color: #1a1a1a;
+            background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-sport-subtitle,
+        .hero-faq-subtitle,
+        .hero-livraison-subtitle,
+        .hero-contact-subtitle,
+        .hero-budget-subtitle,
+        .hero-budget-desc,
+        .hero-retours-subtitle,
+        .hero-revendeur-subtitle,
+        .hero-page-subtitle,
+        .hero-subtitle {
+            font-size: clamp(16px, 2.5vw, 20px);
+            line-height: 1.6;
+            color: #495057;
+            margin-bottom: 40px;
+            font-weight: 400;
+        }
+
+        .hero-sport-cta,
+        .hero-faq-cta,
+        .hero-livraison-cta,
+        .hero-contact-cta,
+        .hero-budget-cta,
+        .hero-retours-cta,
+        .hero-revendeur-cta {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 0;
+        }
+
+        .btn-hero-primary,
+        .btn-primary {
+            padding: 18px 40px;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-decoration: none;
+            background: linear-gradient(135deg, #FF4B26 0%, #E63910 100%);
+            color: #fff;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 15px rgba(255,75,38,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-hero-primary::before,
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-hero-primary:hover::before,
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-hero-primary:hover,
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255,75,38,0.4);
+        }
+
+        .btn-hero-secondary,
+        .btn-secondary {
+            padding: 18px 40px;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-decoration: none;
+            background: transparent;
+            color: #1a1a1a;
+            border: 2px solid #1a1a1a;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-hero-secondary::before,
+        .btn-secondary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: #1a1a1a;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s, height 0.4s;
+            z-index: -1;
+        }
+
+        .btn-hero-secondary:hover::before,
+        .btn-secondary:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-hero-secondary:hover,
+        .btn-secondary:hover {
+            color: #fff;
+            border-color: #1a1a1a;
+        }
+
+        .hero-sport-features,
+        .hero-faq-features,
+        .hero-livraison-features,
+        .hero-contact-features,
+        .hero-budget-features,
+        .hero-retours-features,
+        .hero-revendeur-features,
+        .hero-contact-badges {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .feature-badge,
+        .contact-badge {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 24px 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+            border-radius: 16px;
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-badge::before,
+        .contact-badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #FF4B26 0%, #E63910 100%);
+            transition: width 0.3s ease;
+        }
+
+        .feature-badge:hover::before,
+        .contact-badge:hover::before {
+            width: 100%;
+            opacity: 0.05;
+        }
+
+        .feature-badge:hover,
+        .contact-badge:hover {
+            background: #fff;
+            transform: translateX(5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+
+        .feature-badge svg,
+        .contact-badge svg {
+            width: 32px;
+            height: 32px;
+            color: #FF4B26;
+            fill: #FF4B26;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-badge:hover svg,
+        .contact-badge:hover svg {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .feature-badge span,
+        .contact-badge span {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a1a;
+            line-height: 1.4;
+        }
+
+        /* Masquer les anciens éléments */
+        .hero-sport-background,
+        .hero-sport-overlay,
+        .hero-contact-background,
+        .hero-faq-background,
+        .hero-livraison-background,
+        .hero-budget-overlay,
+        .hero-budget-image,
+        .breadcrumb {
+            display: none !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero-sport,
+            .hero-faq,
+            .hero-livraison,
+            .hero-contact {
+                padding: 3rem 5% 2rem;
+            }
+
+            .hero-sport-content,
+            .hero-faq-content,
+            .hero-livraison-content,
+            .hero-contact-content,
+            .hero-budget-content,
+            .hero-retours-content,
+            .hero-revendeur-content,
+            .hero-page-content,
+            .hero-innovation-content-v2 {
+                grid-template-columns: 1fr;
+                gap: 50px;
+            }
+
+            .hero-sport-left,
+            .hero-faq-left,
+            .hero-livraison-left,
+            .hero-contact-left,
+            .hero-budget-left,
+            .hero-retours-left,
+            .hero-revendeur-left {
+                text-align: center;
+            }
+
+            .hero-sport-features,
+            .hero-contact-badges {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-sport-eyebrow,
+            .hero-faq-eyebrow,
+            .hero-livraison-eyebrow,
+            .hero-contact-eyebrow {
+                display: inline-block;
             }
         }
     </style>
