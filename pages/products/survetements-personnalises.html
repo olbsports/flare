@@ -703,6 +703,296 @@
     }
 }
 
+/* ========================================
+   CTA REDESIGN - ORANGE MODERNE
+   ======================================== */
+
+.cta-redesign {
+    background: linear-gradient(135deg, #FF4B26 0%, #E63910 100%);
+    padding: 80px 5%;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-redesign::before {
+    content: '';
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    top: -200px;
+    right: -150px;
+    animation: pulse 8s ease-in-out infinite;
+}
+
+.cta-redesign-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.cta-redesign-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 56px;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    color: #fff;
+    line-height: 1.2;
+}
+
+.cta-redesign-subtitle {
+    font-size: 20px;
+    margin-bottom: 48px;
+    opacity: 0.95;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.cta-redesign-features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    margin-bottom: 48px;
+}
+
+.cta-feature {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+}
+
+.cta-feature svg {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    fill: #fff;
+}
+
+.cta-feature span {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.cta-redesign-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-cta-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 40px;
+    background: #fff;
+    color: #FF4B26;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 16px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-cta-main:hover {
+    background: #1a1a1a;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+.btn-cta-main svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+.btn-cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 40px;
+    background: transparent;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 16px;
+    border: 2px solid #fff;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-cta-secondary:hover {
+    background: #fff;
+    color: #FF4B26;
+    transform: translateY(-2px);
+}
+
+.btn-cta-secondary svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+/* ========================================
+   SEO MEGA - SECTION SEO MODERNE
+   ======================================== */
+
+.seo-mega {
+    padding: 100px 5%;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #f1f3f5 100%);
+}
+
+.seo-mega .container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.seo-hero {
+    text-align: center;
+    margin-bottom: 80px;
+}
+
+.seo-hero-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #FF4B26 0%, #E63910 100%);
+    color: #fff;
+    padding: 8px 24px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: 24px;
+    margin-bottom: 24px;
+}
+
+.seo-hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 56px;
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+    color: #1a1a1a;
+    line-height: 1.2;
+}
+
+.seo-hero-intro {
+    font-size: 18px;
+    line-height: 1.8;
+    color: #495057;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.seo-cards-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    margin-bottom: 80px;
+}
+
+.seo-card {
+    background: #fff;
+    padding: 40px 32px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.seo-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+}
+
+.seo-card-icon {
+    font-size: 48px;
+    margin-bottom: 24px;
+}
+
+.seo-card h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    color: #1a1a1a;
+}
+
+.seo-card p {
+    font-size: 15px;
+    line-height: 1.8;
+    color: #495057;
+}
+
+.seo-full-image {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    margin-bottom: 80px;
+}
+
+.seo-full-content h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 40px;
+    letter-spacing: 1px;
+    margin-bottom: 24px;
+    color: #1a1a1a;
+}
+
+.seo-full-content p {
+    font-size: 16px;
+    line-height: 1.8;
+    color: #495057;
+    margin-bottom: 20px;
+}
+
+.seo-full-image-wrapper {
+    background: #fff;
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.seo-full-image-wrapper img {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+}
+
+/* Responsive CTA & SEO */
+@media (max-width: 1024px) {
+    .cta-redesign-features {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .seo-cards-3 {
+        grid-template-columns: 1fr;
+    }
+
+    .seo-full-image {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+
+    .seo-hero-title {
+        font-size: 42px;
+    }
+
+    .cta-redesign-title {
+        font-size: 42px;
+    }
+}
+
 
 /* Masquer anciens éléments */
         .hero-sport-background,
@@ -773,6 +1063,7 @@
                 justify-content: center;
             }
         }
+    
     
     
     
