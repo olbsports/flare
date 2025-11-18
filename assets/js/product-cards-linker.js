@@ -1,20 +1,33 @@
 /**
  * Product Cards Linker
  * Ajoute automatiquement des liens cliquables aux cartes produits
- * basés sur la référence FLARE trouvée dans les images
+ * en chargeant les références FLARE depuis le CSV
  */
 
-(function() {
+(async function() {
     console.log('🔗 Product Cards Linker - Démarrage');
 
     // Attendre que le DOM soit complètement chargé
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initProductLinks);
-    } else {
-        initProductLinks();
+        await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
     }
 
-    function initProductLinks() {
+    // Charger le CSV pour obtenir le mapping photo -> référence FLARE
+    let csvProducts = [];
+    try {
+        console.log('📥 Chargement du CSV...');
+        const parser = new CSVParser();
+        const csvData = await parser.loadCSV('../../assets/data/PRICING-FLARE-2025.csv');
+        csvProducts = csvData.products;
+        console.log(`✅ CSV chargé: ${csvProducts.length} produits`);
+    } catch (error) {
+        console.error('❌ Erreur chargement CSV:', error);
+        // Continuer sans CSV (mode dégradé)
+    }
+
+    initProductLinks(csvProducts);
+
+    function initProductLinks(products) {
         console.log('🔗 Initialisation des liens produits...');
 
         const productCards = document.querySelectorAll('.product-card');
@@ -30,22 +43,43 @@
                     return;
                 }
 
-                // Extraire la référence FLARE depuis l'URL de l'image
-                // Format: https://flare-custom.com/photos/produits/FLARE-SPWPOLH-000-1.webp
                 const imageUrl = firstImage.src;
-                const match = imageUrl.match(/FLARE-[A-Z0-9]+-[0-9]+/i);
+                let productRef = null;
 
-                if (!match) {
-                    console.warn(`⚠️ Carte ${index}: Impossible d'extraire la référence depuis ${imageUrl}`);
-                    return;
+                // Méthode 1: Chercher dans le CSV par correspondance d'image
+                if (products.length > 0) {
+                    const matchingProduct = products.find(p => {
+                        // Vérifier si l'une des 5 photos correspond
+                        return [p.PHOTO_1, p.PHOTO_2, p.PHOTO_3, p.PHOTO_4, p.PHOTO_5].some(photo =>
+                            photo && imageUrl.includes(photo.split('/').pop().split('-').slice(0, -1).join('-'))
+                        );
+                    });
+
+                    if (matchingProduct) {
+                        productRef = matchingProduct.REFERENCE_FLARE;
+                        console.log(`✅ Carte ${index}: Référence trouvée dans CSV: ${productRef}`);
+                    }
                 }
 
-                // Extraire seulement la référence sans le numéro de photo
-                // FLARE-SPWPOLH-000-1 -> FLARE-SPWPOLH-000
-                const fullRef = match[0];
-                const productRef = fullRef.substring(0, fullRef.lastIndexOf('-'));
+                // Méthode 2 (fallback): Extraction depuis l'URL de l'image
+                if (!productRef) {
+                    // Format: https://flare-custom.com/photos/produits/FLARE-FTBMAIH-316-1.webp
+                    // On veut extraire: FLARE-FTBMAIH-316 (sans le -1 qui est le numéro de photo)
+                    const match = imageUrl.match(/FLARE-[A-Z]+-[0-9]+-[0-9]+\.webp/i);
+                    if (match) {
+                        // Extraire FLARE-XXX-YYY depuis FLARE-XXX-YYY-N.webp
+                        const parts = match[0].replace('.webp', '').split('-');
+                        // FLARE-FTBMAIH-316-1 -> prendre tout sauf le dernier (numéro de photo)
+                        parts.pop();
+                        productRef = parts.join('-');
+                        console.log(`⚠️ Carte ${index}: Référence extraite (fallback): ${productRef}`);
+                    }
+                }
 
-                console.log(`✅ Carte ${index}: Référence extraite: ${productRef}`);
+                if (!productRef) {
+                    console.warn(`⚠️ Carte ${index}: Impossible de déterminer la référence depuis ${imageUrl}`);
+                    return;
+                }
 
                 // Créer le lien vers la page produit
                 const productPageUrl = `../produit.html?ref=${productRef}`;
@@ -74,22 +108,6 @@
 
                     window.location.href = productPageUrl;
                 });
-
-                // Ajouter un indicateur visuel qu'on peut cliquer
-                const productInfo = card.querySelector('.product-info');
-                if (productInfo) {
-                    const clickIndicator = document.createElement('div');
-                    clickIndicator.style.cssText = `
-                        font-size: 12px;
-                        color: #FF4B26;
-                        font-weight: 600;
-                        margin-top: 12px;
-                        text-transform: uppercase;
-                        letter-spacing: 0.5px;
-                    `;
-                    clickIndicator.textContent = '👉 Cliquez pour voir les détails';
-                    productInfo.appendChild(clickIndicator);
-                }
 
             } catch (error) {
                 console.error(`❌ Erreur lors du traitement de la carte ${index}:`, error);
