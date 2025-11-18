@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO META TAGS - Will be populated dynamically -->
+    <title id="page-title">Produit Personnalisé | FLARE CUSTOM</title>
+    <meta name="description" id="page-description" content="Équipements sportifs personnalisés par sublimation. Fabrication Europe. Sans minimum.">
+    <meta name="keywords" id="page-keywords" content="équipement sportif personnalisé, sublimation, fabrication europe">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="author" content="FLARE CUSTOM - OLB SPORTS OOD">
+    <meta name="geo.region" content="EU">
+    <meta name="language" content="fr">
+    <link rel="canonical" id="page-canonical" href="https://flare-custom.com/pages/produit.html">
+
+    <!-- OPEN GRAPH -->
+    <meta property="og:type" content="product">
+    <meta property="og:title" id="og-title" content="Produit Personnalisé | FLARE CUSTOM">
+    <meta property="og:description" id="og-description" content="Équipements sportifs personnalisés par sublimation">
+    <meta property="og:image" id="og-image" content="">
+
+    <!-- SCHEMA.ORG JSON-LD - Will be populated dynamically -->
+    <script type="application/ld+json" id="product-schema">
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": "",
+      "description": "",
+      "brand": {"@type": "Brand", "name": "FLARE CUSTOM"}
+    }
+    </script>
+
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #fff;
+            color: #000;
+            line-height: 1.6;
+        }
+
+        /* LOADING STATE */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #FF4B26;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* TRUST BAR */
+        .trust-bar {
+            background: #000;
+            color: #fff;
+            padding: 12px 5%;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .trust-badges {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .trust-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* BREADCRUMB */
+        .breadcrumb {
+            padding: 20px 5%;
+            background: #fafafa;
+            font-size: 14px;
+        }
+
+        .breadcrumb a {
+            color: #666;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: #FF4B26;
+        }
+
+        .breadcrumb span {
+            margin: 0 8px;
+            color: #ccc;
+        }
+
+        /* HERO PRODUCT */
+        .hero-product {
+            padding: 60px 5%;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 80px;
+        }
+
+        /* GALLERY */
+        .product-gallery {
+            position: relative;
+            height: fit-content;
+        }
+
+        .main-image {
+            width: 100%;
+            aspect-ratio: 9 / 13;
+            background: #f5f5f5;
+            margin-bottom: 20px;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        .main-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .thumbnail-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+        }
+
+        .thumbnail {
+            aspect-ratio: 1;
+            background: #f5f5f5;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .thumbnail:hover,
+        .thumbnail.active {
+            border-color: #FF4B26;
+        }
+
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* PRODUCT INFO */
+        .product-info {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+
+        .product-ref {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .product-info h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 48px;
+            line-height: 1.1;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .stars {
+            color: #FFB800;
+            font-size: 18px;
+        }
+
+        .rating-count {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .price-box {
+            background: #fafafa;
+            padding: 32px;
+            margin-bottom: 32px;
+            border-radius: 8px;
+        }
+
+        .price-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .price-current {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 56px;
+            letter-spacing: 2px;
+            line-height: 1;
+            margin-bottom: 8px;
+            color: #FF4B26;
+        }
+
+        .price-range {
+            font-size: 15px;
+            color: #666;
+        }
+
+        .savings-badge {
+            display: inline-block;
+            background: #22c55e;
+            color: #fff;
+            padding: 6px 16px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-top: 12px;
+            border-radius: 4px;
+        }
+
+        .price-tiers {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .price-tier {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+
+        .price-tier-qty {
+            color: #666;
+        }
+
+        .price-tier-price {
+            font-weight: 700;
+            color: #000;
+        }
+
+        .product-specs-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+            padding: 24px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .spec-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .spec-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .spec-value {
+            font-size: 15px;
+            font-weight: 600;
+            color: #000;
+        }
+
+        .product-features {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .feature-icon svg {
+            width: 100%;
+            height: 100%;
+            stroke: #FF4B26;
+        }
+
+        .feature-text strong {
+            display: block;
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .feature-text span {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .cta-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .btn-primary {
+            padding: 20px;
+            background: #FF4B26;
+            color: #fff;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .btn-primary:hover {
+            background: #E63910;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            padding: 20px;
+            background: #fff;
+            color: #000;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 700;
+            text-decoration: none;
+            border: 2px solid #000;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .btn-secondary:hover {
+            background: #000;
+            color: #fff;
+        }
+
+        /* PRODUCT DESCRIPTION */
+        .product-description {
+            max-width: 1200px;
+            margin: 80px auto;
+            padding: 0 5%;
+        }
+
+        .product-description h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 42px;
+            margin-bottom: 24px;
+            letter-spacing: 1px;
+        }
+
+        .description-content {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        .description-content ul {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .description-content li {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+        }
+
+        .description-content li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #22c55e;
+            font-weight: 700;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 968px) {
+            .product-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .product-info {
+                position: static;
+            }
+
+            .product-info h1 {
+                font-size: 36px;
+            }
+
+            .price-current {
+                font-size: 42px;
+            }
+
+            .trust-badges {
+                gap: 20px;
+            }
+
+            .thumbnail-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .product-specs-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .thumbnail-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .product-info h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading State -->
+    <div id="loading" class="loading">
+        <div class="loading-spinner"></div>
+        <p style="color: #666; font-weight: 600;">Chargement du produit...</p>
+    </div>
+
+    <!-- Main Content (hidden initially) -->
+    <div id="main-content" style="display: none;">
+        <!-- Header -->
+        <div id="dynamic-header"></div>
+
+        <!-- Trust Bar -->
+        <div class="trust-bar">
+            <div class="trust-badges">
+                <div class="trust-badge">✓ Fabrication Europe</div>
+                <div class="trust-badge">✓ Sans Minimum</div>
+                <div class="trust-badge">✓ Devis Gratuit 24h</div>
+                <div class="trust-badge">✓ Personnalisation Illimitée</div>
+            </div>
+        </div>
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="../index.html">Accueil</a>
+            <span>/</span>
+            <a href="#" id="breadcrumb-sport">Sport</a>
+            <span>/</span>
+            <a href="#" id="breadcrumb-family">Famille</a>
+            <span>/</span>
+            <span id="breadcrumb-product">Produit</span>
+        </div>
+
+        <!-- Hero Product -->
+        <section class="hero-product">
+            <div class="product-grid">
+                <!-- Gallery -->
+                <div class="product-gallery">
+                    <div class="main-image">
+                        <img id="main-product-image" src="" alt="Produit">
+                    </div>
+                    <div class="thumbnail-grid" id="thumbnail-grid">
+                        <!-- Thumbnails will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Product Info -->
+                <div class="product-info">
+                    <div class="product-ref" id="product-ref">REF: </div>
+                    <h1 id="product-title">Chargement...</h1>
+
+                    <div class="product-rating">
+                        <div class="stars">★★★★★</div>
+                        <div class="rating-count">(127 avis)</div>
+                    </div>
+
+                    <!-- Specs Grid -->
+                    <div class="product-specs-grid" id="product-specs">
+                        <!-- Specs will be inserted here -->
+                    </div>
+
+                    <!-- Price Box -->
+                    <div class="price-box">
+                        <div class="price-label">À partir de</div>
+                        <div class="price-current" id="product-price">--€</div>
+                        <div class="price-range" id="price-range">Prix dégressifs selon quantité</div>
+                        <div class="savings-badge" id="savings-badge" style="display: none;">Économisez jusqu'à --€</div>
+
+                        <div class="price-tiers" id="price-tiers">
+                            <!-- Price tiers will be inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Features -->
+                    <div class="product-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                                </svg>
+                            </div>
+                            <div class="feature-text">
+                                <strong>Sublimation Intégrale</strong>
+                                <span>Couleurs illimitées, design sans limite, durabilité maximale</span>
+                            </div>
+                        </div>
+
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M9 12L11 14L15 10"/>
+                                </svg>
+                            </div>
+                            <div class="feature-text">
+                                <strong>Fabrication Europe</strong>
+                                <span>Atelier certifié, contrôle qualité strict, production éthique</span>
+                            </div>
+                        </div>
+
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M13 10V3L4 14H11V21L20 10H13Z"/>
+                                </svg>
+                            </div>
+                            <div class="feature-text">
+                                <strong>Livraison 3-4 Semaines</strong>
+                                <span>De la validation à la livraison, délai garanti</span>
+                            </div>
+                        </div>
+
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"/>
+                                    <path d="M12 6V12L16 14"/>
+                                </svg>
+                            </div>
+                            <div class="feature-text">
+                                <strong>Sans Minimum</strong>
+                                <span>Commandez dès 1 pièce, prix dégressifs jusqu'à 500+</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CTA Buttons -->
+                    <div class="cta-buttons">
+                        <a href="mailto:contact@flare-custom.com" class="btn-primary">
+                            📧 DEMANDER UN DEVIS GRATUIT
+                        </a>
+                        <a href="https://wa.me/359885813134" class="btn-secondary" target="_blank">
+                            💬 WHATSAPP : +359 885 813 134
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Product Description -->
+        <section class="product-description">
+            <h2>Description du produit</h2>
+            <div class="description-content" id="product-description-content">
+                <!-- Description will be inserted here -->
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <div id="dynamic-footer"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../assets/js/components-loader.js"></script>
+    <script src="../assets/js/csv-parser.js"></script>
+    <script src="../assets/js/product-page-loader.js"></script>
+
+    <script>
+        // Gallery functionality
+        function setupGallery() {
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            const mainImage = document.getElementById('main-product-image');
+
+            thumbnails.forEach((thumb, index) => {
+                thumb.addEventListener('click', function() {
+                    thumbnails.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    mainImage.src = this.querySelector('img').src;
+                });
+            });
+        }
+    </script>
+</body>
+</html>
