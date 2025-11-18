@@ -12,7 +12,17 @@
     <link rel="stylesheet" href="../../assets/css/livraison.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
     <style>
-/* ===== HERO MODERNE - DESIGN IDENTIQUE PAGE D'ACCUEIL ===== */
+        @media (max-width: 768px) {
+            .btn-hero-primary,
+            .btn-hero-secondary {
+                width: 100%;
+                text-align: center;
+                justify-content: center;
+            }
+        }
+    
+
+        /* ===== HERO MODERNE - DESIGN IDENTIQUE PAGE D'ACCUEIL ===== */
         .hero-sport,
         .hero-faq,
         .hero-livraison,
@@ -81,6 +91,7 @@
             50% { transform: scale(1.1); opacity: 0.8; }
         }
 
+        /* === CONTENU GAUCHE === */
         .hero-sport-content,
         .hero-faq-content,
         .hero-livraison-content,
@@ -294,6 +305,7 @@
             color: #fff;
         }
 
+        /* === CONTENU DROITE (FEATURES/STATS) === */
         .hero-sport-features,
         .hero-faq-features,
         .hero-livraison-features,
@@ -457,9 +469,52 @@
 
     <section class="hero-livraison">
         <div class="hero-livraison-content">
-            <span class="hero-livraison-eyebrow">Livraison europe</span>
-            <h1 class="hero-livraison-title">Délais & livraison en Europe</h1>
-            <p class="hero-livraison-subtitle">Fabrication européenne certifiée · Délais 3-4 semaines · Suivi de commande</p>
+            <div class="hero-livraison-left">
+                <span class="hero-livraison-eyebrow">Livraison europe</span>
+                <h1 class="hero-livraison-title">Délais & livraison en Europe</h1>
+                <p class="hero-livraison-subtitle">Fabrication européenne certifiée · Délais 3-4 semaines · Suivi de commande</p>
+
+                <div class="hero-livraison-cta">
+                    <a href="/pages/info/contact.html" class="btn-hero-primary">
+                        Demander un devis
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                            <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </a>
+                    <a href="#livraison-section" class="btn-hero-secondary">En savoir plus</a>
+                </div>
+            </div>
+
+            <div class="hero-livraison-right">
+                <div class="hero-livraison-features">
+                    <div class="feature-badge">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2"/>
+                            <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        <span>Fabrication Europe</span>
+                    </div>
+                    <div class="feature-badge">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <span>Délais 3-4 semaines</span>
+                    </div>
+                    <div class="feature-badge">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M9 12L11 14L15 10M21 12C21 16.971 16.971 21 12 21C7.029 21 3 16.971 3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12Z" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        <span>Suivi de commande</span>
+                    </div>
+                    <div class="feature-badge">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M13 10V3L4 14H11V21L20 10H13Z" fill="currentColor"/>
+                        </svg>
+                        <span>Livraison rapide</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 

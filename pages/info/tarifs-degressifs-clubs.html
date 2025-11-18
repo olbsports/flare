@@ -18,7 +18,168 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
 
     <style>
-/* ===== HERO MODERNE - DESIGN IDENTIQUE PAGE D'ACCUEIL ===== */
+
+        .hero-budget-content {
+            flex: 2;
+            padding: 4rem 5%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-budget-image {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-budget-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            position: absolute;
+            inset: 0;
+        }
+
+        .hero-budget-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(255, 75, 38, 0.15), transparent 60%);
+            z-index: 1;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 24px;
+        }
+
+        .breadcrumb a {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .breadcrumb a:hover {
+            color: #FF4B26;
+        }
+
+        .hero-budget-eyebrow {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #FF4B26;
+            margin-bottom: 16px;
+        }
+
+        .hero-budget-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(48px, 8vw, 80px);
+            line-height: 0.95;
+            letter-spacing: 1px;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        .hero-budget-subtitle {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(40px, 7vw, 72px);
+            line-height: 0.95;
+            letter-spacing: 1px;
+            color: #FF4B26;
+            margin-bottom: 32px;
+        }
+
+        .hero-budget-desc {
+            font-size: clamp(16px, 2vw, 18px);
+            line-height: 1.6;
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 40px;
+            max-width: 600px;
+        }
+
+        .hero-budget-cta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 48px;
+        }
+
+        .btn-hero-primary, .btn-hero-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 40px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-hero-primary {
+            background: #FF4B26;
+            color: #fff;
+        }
+
+        .btn-hero-primary:hover {
+            background: #E63910;
+            transform: translateY(-2px);
+        }
+
+        .btn-hero-secondary {
+            background: transparent;
+            color: #fff;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-hero-secondary:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: #fff;
+        }
+
+            .hero-budget-content {
+                padding: 60px 5%;
+            }
+
+            .hero-budget-image {
+                min-height: 300px;
+            }
+
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .advantages-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 1200px) and (min-width: 969px) {
+            .advantages-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    
+        @media (max-width: 768px) {
+            .btn-hero-primary,
+            .btn-hero-secondary {
+                width: 100%;
+                text-align: center;
+                justify-content: center;
+            }
+        }
+    
+
+        /* ===== HERO MODERNE - DESIGN IDENTIQUE PAGE D'ACCUEIL ===== */
         .hero-sport,
         .hero-faq,
         .hero-livraison,
@@ -87,6 +248,7 @@
             50% { transform: scale(1.1); opacity: 0.8; }
         }
 
+        /* === CONTENU GAUCHE === */
         .hero-sport-content,
         .hero-faq-content,
         .hero-livraison-content,
@@ -300,6 +462,7 @@
             color: #fff;
         }
 
+        /* === CONTENU DROITE (FEATURES/STATS) === */
         .hero-sport-features,
         .hero-faq-features,
         .hero-livraison-features,
@@ -482,30 +645,18 @@
     <div id="dynamic-header"></div>
 
     <section class="hero-budget">
-        <div class="hero-budget-overlay"></div>
-        
         <div class="hero-budget-content">
-            <div class="breadcrumb">
-                <a href="/">Accueil</a>
-                <span>→</span>
-                <span>Tarifs Dégressifs</span>
-            </div>
-
-            <span class="hero-budget-eyebrow">Prix Fabricant Direct</span>
-            
-            <h1 class="hero-budget-title">
-                Tarifs Dégressifs
+            <div class="hero-budget-left">
+                <span class="hero-budget-eyebrow">Prix Fabricant Direct</span>
+                <h1 class="hero-budget-title">Tarifs Dégressifs
             </h1>
-            
-            <div class="hero-budget-subtitle">
-                Jusqu'à -60%
+                <div class="hero-budget-subtitle">Jusqu'à -60%
             </div>
-            
-            <p class="hero-budget-desc">
+                <p class="hero-budget-desc">
                 Plus vous commandez, plus vous économisez ! Tarifs dégressifs automatiques pour tous les clubs et équipes sportives. fabrication européenne, qualité premium, prix imbattables.
             </p>
-            
-            <div class="hero-budget-cta">
+
+                <div class="hero-budget-cta">
                 <a href="/pages/info/contact.html" class="btn-hero-primary">
                     Calculer Mes Économies
                     <span>→</span>
@@ -514,8 +665,10 @@
                     WhatsApp Direct
                 </a>
             </div>
+            </div>
 
-            <div class="hero-budget-features">
+            <div class="hero-budget-right">
+                <div class="hero-budget-features">
                 <div class="feature-badge">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -559,6 +712,7 @@
             <div class="trust-item">
                 <strong>100%</strong>
                 <span>Made in europe</span>
+            </div>
             </div>
         </div>
     </section>

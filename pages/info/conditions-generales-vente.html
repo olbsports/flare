@@ -13,7 +13,17 @@
     <link rel="stylesheet" href="../../assets/css/livraison.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
     <style>
-/* ===== HERO MODERNE - DESIGN IDENTIQUE PAGE D'ACCUEIL ===== */
+        @media (max-width: 768px) {
+            .btn-hero-primary,
+            .btn-hero-secondary {
+                width: 100%;
+                text-align: center;
+                justify-content: center;
+            }
+        }
+    
+
+        /* ===== HERO MODERNE - DESIGN IDENTIQUE PAGE D'ACCUEIL ===== */
         .hero-sport,
         .hero-faq,
         .hero-livraison,
@@ -82,6 +92,7 @@
             50% { transform: scale(1.1); opacity: 0.8; }
         }
 
+        /* === CONTENU GAUCHE === */
         .hero-sport-content,
         .hero-faq-content,
         .hero-livraison-content,
@@ -295,6 +306,7 @@
             color: #fff;
         }
 
+        /* === CONTENU DROITE (FEATURES/STATS) === */
         .hero-sport-features,
         .hero-faq-features,
         .hero-livraison-features,
@@ -456,7 +468,7 @@
 <body>
     <div id="dynamic-header"></div>
 
-    <section class="hero-livraison">
+    <section class="hero-livraison" style="min-height: 30vh; padding: 3rem 5% 2rem;">
         <div class="hero-livraison-content">
             <span class="hero-livraison-eyebrow">Cadre Légal Européen</span>
             <h1 class="hero-livraison-title">Conditions Générales de Vente</h1>

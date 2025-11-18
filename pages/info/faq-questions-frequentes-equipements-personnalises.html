@@ -12,7 +12,17 @@
     <link rel="stylesheet" href="../../assets/css/faq.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
     <style>
-/* ===== HERO MODERNE - DESIGN IDENTIQUE PAGE D'ACCUEIL ===== */
+        @media (max-width: 768px) {
+            .btn-hero-primary,
+            .btn-hero-secondary {
+                width: 100%;
+                text-align: center;
+                justify-content: center;
+            }
+        }
+    
+
+        /* ===== HERO MODERNE - DESIGN IDENTIQUE PAGE D'ACCUEIL ===== */
         .hero-sport,
         .hero-faq,
         .hero-livraison,
@@ -81,6 +91,7 @@
             50% { transform: scale(1.1); opacity: 0.8; }
         }
 
+        /* === CONTENU GAUCHE === */
         .hero-sport-content,
         .hero-faq-content,
         .hero-livraison-content,
@@ -294,6 +305,7 @@
             color: #fff;
         }
 
+        /* === CONTENU DROITE (FEATURES/STATS) === */
         .hero-sport-features,
         .hero-faq-features,
         .hero-livraison-features,
@@ -457,17 +469,59 @@
 
     <section class="hero-faq">
         <div class="hero-faq-content">
-            <span class="hero-faq-eyebrow">Questions Fréquentes</span>
-            <h1 class="hero-faq-title">Comment pouvons-nous vous aider ?</h1>
-            <p class="hero-faq-subtitle">Trouvez rapidement les réponses à vos questions</p>
-            
-            <div class="faq-search-wrapper">
+            <div class="hero-faq-left">
+                <span class="hero-faq-eyebrow">Questions Fréquentes</span>
+                <h1 class="hero-faq-title">Comment pouvons-nous vous aider ?</h1>
+                <p class="hero-faq-subtitle">Trouvez rapidement les réponses à vos questions</p>
+
+                <div class="hero-faq-cta">
+                    <a href="/pages/info/contact.html" class="btn-hero-primary">
+                        Poser une question
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                            <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </a>
+                    <a href="#faq-categories" class="btn-hero-secondary">Parcourir les catégories</a>
+                </div>
+            </div>
+
+            <div class="hero-faq-right">
+                <div class="hero-faq-features">
+                    <div class="feature-badge">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M9 12L11 14L15 10M21 12C21 16.971 16.971 21 12 21C7.029 21 3 16.971 3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12Z" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        <span>Réponse rapide 24h</span>
+                    </div>
+                    <div class="feature-badge">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                        </svg>
+                        <span>Expertise reconnue</span>
+                    </div>
+                    <div class="feature-badge">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M13 10V3L4 14H11V21L20 10H13Z" fill="currentColor"/>
+                        </svg>
+                        <span>Support réactif</span>
+                    </div>
+                    <div class="feature-badge">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M3 8L10.89 13.26C11.54 13.67 12.46 13.67 13.11 13.26L21 8M5 19H19C20.1 19 21 18.1 21 17V7C21 5.9 20.1 5 19 5H5C3.9 5 3 5.9 3 7V17C3 18.1 3.9 19 5 19Z" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        <span>Contact multicanal</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-search-wrapper">
                 <input type="text" class="faq-search-input" placeholder="Rechercher..." id="faqSearch">
                 <svg class="faq-search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <circle cx="11" cy="11" r="8"/><path d="M21 21L16.65 16.65"/>
                 </svg>
             </div>
-        </div>
+        
     </section>
 
     <section class="faq-categories-section">
