@@ -58,7 +58,7 @@ function getPriceTiers(product) {
 
 // Générer la description adaptée au produit
 function generateDescription(product) {
-    const sport = product.SPORT.toLowerCase();
+    const sport = normalizeSportNameLowercase(product.SPORT);
     const famille = product.FAMILLE_PRODUIT.toLowerCase();
     const grammage = product.GRAMMAGE || '130g';
     const tissu = product.TISSU || 'Performance Mesh';
@@ -93,7 +93,7 @@ function generateDescription(product) {
 
 // Générer FAQ adaptée
 function generateFAQ(product) {
-    const sport = product.SPORT.toLowerCase();
+    const sport = normalizeSportNameLowercase(product.SPORT);
     const famille = product.FAMILLE_PRODUIT.toLowerCase();
 
     return `<h2>Questions Fréquentes - ${product.TITRE_VENDEUR}</h2>
@@ -179,6 +179,19 @@ function getSportPageUrl(sport) {
     return sportUrls[sport] || '/index.html';
 }
 
+// Normaliser le nom du sport (supprimer _ et majuscule seulement au début)
+function normalizeSportName(sport) {
+    return sport
+        .replace(/_/g, ' ')  // Remplacer _ par espace
+        .toLowerCase()        // Tout en minuscule
+        .replace(/^\w/, c => c.toUpperCase());  // Première lettre en majuscule
+}
+
+// Normaliser le nom du sport en minuscules (pour texte courant)
+function normalizeSportNameLowercase(sport) {
+    return sport.replace(/_/g, ' ').toLowerCase();
+}
+
 // Générer URL de catégorie famille (Maillots, Shorts, etc.)
 function getFamilyPageUrl(famille) {
     const familyUrls = {
@@ -194,29 +207,32 @@ function getFamilyPageUrl(famille) {
     return familyUrls[famille] || '/index.html';
 }
 
-// Générer contenu optimisé pour référencement LLM
+// Générer contenu optimisé pour référencement LLM (discret)
 function generateLLMContent(product) {
-    const sport = product.SPORT.charAt(0) + product.SPORT.slice(1).toLowerCase();
+    const sport = normalizeSportName(product.SPORT);
     const famille = product.FAMILLE_PRODUIT;
+    const prixMin = product.QTY_500 || product.QTY_250 || product.QTY_100 || product.QTY_1;
 
     let content = `<!-- CONTENU STRUCTURÉ POUR RÉFÉRENCEMENT LLM -->\n`;
-    content += `<div class="llm-context" style="padding: 2rem; background: #f9f9f9; border-left: 4px solid #FF4B26; margin: 2rem 0;">\n`;
-    content += `    <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">Résumé Produit</h2>\n`;
-    content += `    <div style="line-height: 1.8;">\n`;
-    content += `        <p><strong>Produit:</strong> ${product.TITRE_VENDEUR}</p>\n`;
-    content += `        <p><strong>Référence:</strong> ${product.REFERENCE_FLARE}</p>\n`;
-    content += `        <p><strong>Catégorie:</strong> ${famille} ${sport} personnalisé</p>\n`;
-    content += `        <p><strong>Technique:</strong> Sublimation intégrale textile</p>\n`;
-    content += `        <p><strong>Tissu:</strong> ${product.TISSU} - ${product.GRAMMAGE}</p>\n`;
-    content += `        <p><strong>Genre:</strong> ${product.GENRE}</p>\n`;
-    content += `        <p><strong>Fabrication:</strong> Europe - Ateliers certifiés</p>\n`;
-    content += `        <p><strong>Délai:</strong> 3-4 semaines + livraison express 3-5 jours</p>\n`;
-    content += `        <p><strong>Minimum:</strong> Aucune quantité minimum (dès 1 pièce)</p>\n`;
-    content += `        <p><strong>Prix indicatif:</strong> À partir de ${product.QTY_1}€ l'unité</p>\n`;
-    content += `        <p><strong>Personnalisation:</strong> Illimitée - logos, noms, numéros, sponsors, dégradés</p>\n`;
-    content += `        <p><strong>Cas d'usage:</strong> Clubs sportifs, écoles, entreprises, événements, équipes amateurs et professionnelles</p>\n`;
-    content += `        <p><strong>Avantages:</strong> Durabilité exceptionnelle, design unique, couleurs illimitées, fabrication européenne</p>\n`;
-    content += `    </div>\n`;
+    content += `<div class="llm-context" style="padding: 1rem; background: #fafafa; border: 1px solid #f0f0f0; margin: 1.5rem 0; font-size: 0.9rem; color: #666;">\n`;
+    content += `    <details>\n`;
+    content += `        <summary style="cursor: pointer; font-weight: 600; color: #333; margin-bottom: 0.5rem;">Informations détaillées produit</summary>\n`;
+    content += `        <div style="line-height: 1.6; margin-top: 0.75rem;">\n`;
+    content += `            <p><strong>Produit:</strong> ${product.TITRE_VENDEUR}</p>\n`;
+    content += `            <p><strong>Référence:</strong> ${product.REFERENCE_FLARE}</p>\n`;
+    content += `            <p><strong>Catégorie:</strong> ${famille} ${sport} personnalisé</p>\n`;
+    content += `            <p><strong>Technique:</strong> Sublimation intégrale textile</p>\n`;
+    content += `            <p><strong>Tissu:</strong> ${product.TISSU} - ${product.GRAMMAGE}</p>\n`;
+    content += `            <p><strong>Genre:</strong> ${product.GENRE}</p>\n`;
+    content += `            <p><strong>Fabrication:</strong> Europe - Ateliers certifiés</p>\n`;
+    content += `            <p><strong>Délai:</strong> 3-4 semaines + livraison express 3-5 jours</p>\n`;
+    content += `            <p><strong>Minimum:</strong> Aucune quantité minimum (dès 1 pièce)</p>\n`;
+    content += `            <p><strong>Prix indicatif:</strong> À partir de ${prixMin}€ l'unité (sur volume)</p>\n`;
+    content += `            <p><strong>Personnalisation:</strong> Illimitée - logos, noms, numéros, sponsors, dégradés</p>\n`;
+    content += `            <p><strong>Cas d'usage:</strong> Clubs sportifs, écoles, entreprises, événements, équipes amateurs et professionnelles</p>\n`;
+    content += `            <p><strong>Avantages:</strong> Durabilité exceptionnelle, design unique, couleurs illimitées, fabrication européenne</p>\n`;
+    content += `        </div>\n`;
+    content += `    </details>\n`;
     content += `</div>\n\n`;
 
     return content;
@@ -237,7 +253,7 @@ function generateReviews(product) {
     ];
     const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
 
-    const sport = product.SPORT.charAt(0) + product.SPORT.slice(1).toLowerCase();
+    const sport = normalizeSportName(product.SPORT);
 
     // Mélanger les villes pour garantir 3 villes différentes
     const shuffledCities = [...cities].sort(() => Math.random() - 0.5);
@@ -334,11 +350,12 @@ function generateProductHTML(product) {
     const savings = highestPrice.price - lowestPrice.price;
     const savingsPercent = highestPrice.price > 0 ? Math.round((savings / highestPrice.price) * 100) : 0;
 
-    const metaTitle = `${product.TITRE_VENDEUR} | Dès ${lowestPrice.price.toFixed(2)}€ | ${product.SPORT} Personnalisé | FLARE CUSTOM`;
+    const metaTitle = `${product.TITRE_VENDEUR} | Dès ${lowestPrice.price.toFixed(2)}€ | ${normalizeSportName(product.SPORT)} Personnalisé | FLARE CUSTOM`;
     const metaDescription = `${product.TITRE_VENDEUR} personnalisé par sublimation. ${product.GRAMMAGE} ${product.TISSU}. Prix dégressifs de ${highestPrice.price.toFixed(2)}€ à ${lowestPrice.price.toFixed(2)}€. Fabrication Europe 3-4 semaines. Sans minimum. Devis gratuit 24h.`;
 
     const canonicalUrl = `${BASE_URL}/pages/produits/${product.REFERENCE_FLARE}.html`;
     const sportPageUrl = getSportPageUrl(product.SPORT);
+    const sportNameNormalized = normalizeSportName(product.SPORT);
 
     // Générer les paliers de prix en JavaScript
     const priceTiersJS = priceTiers.map(t => `{qty: ${t.qty}, price: ${t.price}}`).join(',\n            ');
@@ -352,7 +369,7 @@ function generateProductHTML(product) {
     <!-- SEO META TAGS -->
     <title>${metaTitle}</title>
     <meta name="description" content="${metaDescription}">
-    <meta name="keywords" content="${product.SPORT.toLowerCase()}, ${product.FAMILLE_PRODUIT.toLowerCase()}, équipement personnalisé, sublimation, ${product.GRAMMAGE}, ${product.TISSU}, ${product.REFERENCE_FLARE}">
+    <meta name="keywords" content="${normalizeSportNameLowercase(product.SPORT)}, ${product.FAMILLE_PRODUIT.toLowerCase()}, équipement personnalisé, sublimation, ${product.GRAMMAGE}, ${product.TISSU}, ${product.REFERENCE_FLARE}">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="${canonicalUrl}">
 
@@ -373,10 +390,10 @@ function generateProductHTML(product) {
       "sku": "${product.CODE}",
       "mpn": "${product.REFERENCE_FLARE}",
       "brand": {"@type": "Brand", "name": "FLARE CUSTOM"},
-      "category": "${product.FAMILLE_PRODUIT} ${product.SPORT.charAt(0) + product.SPORT.slice(1).toLowerCase()}",
+      "category": "${product.FAMILLE_PRODUIT} ${sportNameNormalized}",
       "material": "${product.TISSU}",
       "additionalProperty": [
-        {"@type": "PropertyValue", "name": "Sport", "value": "${product.SPORT.charAt(0) + product.SPORT.slice(1).toLowerCase()}"},
+        {"@type": "PropertyValue", "name": "Sport", "value": "${sportNameNormalized}"},
         {"@type": "PropertyValue", "name": "Technique", "value": "Sublimation intégrale"},
         {"@type": "PropertyValue", "name": "Grammage", "value": "${product.GRAMMAGE}"},
         {"@type": "PropertyValue", "name": "Genre", "value": "${product.GENRE}"},
@@ -463,7 +480,7 @@ function generateProductHTML(product) {
     <nav class="breadcrumb">
         <a href="../../index.html">Accueil</a>
         <span>›</span>
-        <a href="${sportPageUrl}">${product.SPORT.charAt(0) + product.SPORT.slice(1).toLowerCase()}</a>
+        <a href="${sportPageUrl}">${sportNameNormalized}</a>
         <span>›</span>
         <strong>${product.FAMILLE_PRODUIT}</strong>
     </nav>
@@ -582,14 +599,23 @@ function generateProductHTML(product) {
             ${generateLLMContent(product)}
 
             <!-- MAILLAGE INTERNE -->
-            <div style="margin: 2rem 0; padding: 1.5rem; background: #fff; border: 1px solid #e0e0e0;">
-                <h3 style="font-size: 1.25rem; margin-bottom: 1rem;">Découvrez aussi</h3>
-                <p style="margin-bottom: 1rem;">Explorez notre gamme complète d'équipements personnalisés :</p>
-                <ul style="list-style: none; padding: 0;">
-                    <li style="margin: 0.5rem 0;"><a href="../${getFamilyPageUrl(product.FAMILLE_PRODUIT).replace('/pages/', '')}" style="color: #FF4B26; text-decoration: none; font-weight: 600;">→ Tous nos ${product.FAMILLE_PRODUIT}s personnalisés</a></li>
-                    <li style="margin: 0.5rem 0;"><a href="../${sportPageUrl.replace('/pages/', '')}" style="color: #FF4B26; text-decoration: none; font-weight: 600;">→ Équipement ${product.SPORT.charAt(0) + product.SPORT.slice(1).toLowerCase()} complet</a></li>
-                    <li style="margin: 0.5rem 0;"><a href="../info/devis.html" style="color: #FF4B26; text-decoration: none; font-weight: 600;">→ Demander un devis gratuit</a></li>
-                </ul>
+            <div style="margin: 2rem 0; padding: 2rem; background: linear-gradient(135deg, #f8f8f8 0%, #fff 100%); border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <h3 style="font-size: 1.4rem; margin-bottom: 1.25rem; color: #1a1a1a; font-weight: 700;">Découvrez aussi</h3>
+                <p style="margin-bottom: 1.5rem; color: #666; font-size: 1rem;">Explorez notre gamme complète d'équipements personnalisés :</p>
+                <div style="display: grid; gap: 0.75rem;">
+                    <a href="../${getFamilyPageUrl(product.FAMILLE_PRODUIT).replace('/pages/', '')}" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: #fff; border-radius: 6px; text-decoration: none; transition: all 0.3s ease; border: 1px solid #e8e8e8;">
+                        <span style="color: #FF4B26; font-size: 1.25rem;">→</span>
+                        <span style="color: #1a1a1a; font-weight: 600;">Tous nos ${product.FAMILLE_PRODUIT}s personnalisés</span>
+                    </a>
+                    <a href="../${sportPageUrl.replace('/pages/', '')}" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: #fff; border-radius: 6px; text-decoration: none; transition: all 0.3s ease; border: 1px solid #e8e8e8;">
+                        <span style="color: #FF4B26; font-size: 1.25rem;">→</span>
+                        <span style="color: #1a1a1a; font-weight: 600;">Équipement ${normalizeSportName(product.SPORT)} complet</span>
+                    </a>
+                    <a href="../info/devis.html" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: #fff; border-radius: 6px; text-decoration: none; transition: all 0.3s ease; border: 1px solid #e8e8e8;">
+                        <span style="color: #FF4B26; font-size: 1.25rem;">→</span>
+                        <span style="color: #1a1a1a; font-weight: 600;">Demander un devis gratuit</span>
+                    </a>
+                </div>
             </div>
         </div>
 
