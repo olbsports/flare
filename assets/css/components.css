@@ -4935,3 +4935,511 @@ main, .hero-section, .container:first-of-type {
         gap: 1.5rem;
     }
 }
+
+/* ========================================
+   SECTIONS SEO - STATS, ALTERNATING, TESTIMONIALS, FAQ, LONGTAIL
+   ======================================== */
+
+/* ========================================
+   SEO STATS GRID
+   ======================================== */
+
+.seo-stats {
+    padding: 80px 5%;
+    background: #fff;
+}
+
+.seo-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.seo-stat {
+    text-align: center;
+    padding: 32px 24px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 16px;
+    transition: all 0.3s ease;
+}
+
+.seo-stat:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(255, 75, 38, 0.15);
+}
+
+.seo-stat-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    font-weight: 700;
+    color: #FF4B26;
+    margin-bottom: 12px;
+    line-height: 1;
+}
+
+.seo-stat-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #495057;
+    line-height: 1.4;
+}
+
+/* ========================================
+   SEO ALTERNATING BLOCKS
+   ======================================== */
+
+.seo-alternating {
+    padding: 80px 5%;
+    background: #fff;
+}
+
+.seo-alt-block {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto 60px;
+}
+
+.seo-alt-block:last-child {
+    margin-bottom: 0;
+}
+
+.seo-alt-block:nth-child(even) {
+    direction: rtl;
+}
+
+.seo-alt-block:nth-child(even) > * {
+    direction: ltr;
+}
+
+.seo-alt-content h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    color: #1a1a1a;
+}
+
+.seo-alt-content p {
+    font-size: 16px;
+    line-height: 1.8;
+    color: #495057;
+    margin-bottom: 16px;
+}
+
+.seo-alt-content p:last-child {
+    margin-bottom: 0;
+}
+
+.seo-alt-visual {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 40px;
+    border-radius: 16px;
+}
+
+.seo-alt-visual ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.seo-alt-visual li {
+    padding: 12px 0 12px 32px;
+    position: relative;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #1a1a1a;
+    font-weight: 500;
+}
+
+.seo-alt-visual li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #FF4B26;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+/* ========================================
+   SEO TESTIMONIALS
+   ======================================== */
+
+.seo-testimonials {
+    padding: 80px 5%;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.seo-testimonials h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    letter-spacing: 2px;
+    text-align: center;
+    margin-bottom: 60px;
+    color: #1a1a1a;
+}
+
+.seo-testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.seo-testimonial {
+    background: #fff;
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.seo-testimonial:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+.testimonial-stars {
+    font-size: 20px;
+    margin-bottom: 16px;
+    color: #FFB800;
+}
+
+.testimonial-text {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #495057;
+    margin-bottom: 20px;
+    font-style: italic;
+}
+
+.testimonial-author {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+/* ========================================
+   SEO FAQ
+   ======================================== */
+
+.seo-faq {
+    padding: 80px 5%;
+    background: #fff;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.seo-faq h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    letter-spacing: 2px;
+    text-align: center;
+    margin-bottom: 60px;
+    color: #1a1a1a;
+}
+
+.faq-accordion-item {
+    margin-bottom: 16px;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.faq-accordion-item:hover {
+    border-color: #FF4B26;
+}
+
+.faq-accordion-item.active {
+    border-color: #FF4B26;
+    box-shadow: 0 4px 12px rgba(255, 75, 38, 0.15);
+}
+
+.faq-accordion-question {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    background: #fff;
+    border: none;
+    text-align: left;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1a1a;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.faq-accordion-question:hover {
+    background: #f8f9fa;
+}
+
+.faq-accordion-item.active .faq-accordion-question {
+    background: #fff5f2;
+}
+
+.faq-accordion-icon {
+    font-size: 24px;
+    font-weight: 400;
+    color: #FF4B26;
+    transition: transform 0.3s ease;
+}
+
+.faq-accordion-item.active .faq-accordion-icon {
+    transform: rotate(45deg);
+}
+
+.faq-accordion-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.4s ease;
+}
+
+.faq-accordion-item.active .faq-accordion-answer {
+    max-height: 500px;
+    padding: 0 24px 24px;
+}
+
+.faq-accordion-answer p {
+    font-size: 15px;
+    line-height: 1.8;
+    color: #495057;
+    margin: 0;
+}
+
+/* ========================================
+   SEO LONGTAIL MEGA SECTION
+   ======================================== */
+
+.seo-longtail-mega {
+    padding: 100px 5%;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.seo-longtail-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.seo-longtail-header {
+    text-align: center;
+    margin-bottom: 80px;
+}
+
+.seo-longtail-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #FF4B26 0%, #E63910 100%);
+    color: #fff;
+    padding: 8px 24px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: 24px;
+    margin-bottom: 24px;
+}
+
+.seo-longtail-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 56px;
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+    color: #1a1a1a;
+    line-height: 1.2;
+}
+
+.seo-longtail-intro {
+    font-size: 18px;
+    line-height: 1.8;
+    color: #495057;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.seo-longtail-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+}
+
+.seo-longtail-column {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.seo-longtail-block {
+    background: #fff;
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.seo-longtail-block:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+.seo-longtail-block h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    color: #1a1a1a;
+}
+
+.seo-longtail-block h4 {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-top: 20px;
+    margin-bottom: 12px;
+    color: #FF4B26;
+}
+
+.seo-longtail-block p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #495057;
+    margin-bottom: 12px;
+}
+
+.seo-longtail-block p:last-child {
+    margin-bottom: 0;
+}
+
+.seo-longtail-block ul {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0;
+}
+
+.seo-longtail-block li {
+    padding: 6px 0 6px 24px;
+    position: relative;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #495057;
+}
+
+.seo-longtail-block li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: #FF4B26;
+    font-weight: 700;
+}
+
+/* ========================================
+   RESPONSIVE - SEO SECTIONS
+   ======================================== */
+
+@media (max-width: 1024px) {
+    .seo-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+    }
+
+    .seo-alt-block {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+
+    .seo-alt-block:nth-child(even) {
+        direction: ltr;
+    }
+
+    .seo-testimonials-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .seo-longtail-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+
+    .seo-longtail-title {
+        font-size: 42px;
+    }
+}
+
+@media (max-width: 768px) {
+    .seo-stats {
+        padding: 60px 5%;
+    }
+
+    .seo-stats-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .seo-stat-number {
+        font-size: 40px;
+    }
+
+    .seo-alternating {
+        padding: 60px 5%;
+    }
+
+    .seo-alt-content h3 {
+        font-size: 28px;
+    }
+
+    .seo-alt-visual {
+        padding: 24px;
+    }
+
+    .seo-testimonials {
+        padding: 60px 5%;
+    }
+
+    .seo-testimonials h2 {
+        font-size: 36px;
+        margin-bottom: 40px;
+    }
+
+    .seo-faq {
+        padding: 60px 5%;
+    }
+
+    .seo-faq h2 {
+        font-size: 36px;
+        margin-bottom: 40px;
+    }
+
+    .faq-accordion-question {
+        padding: 20px;
+        font-size: 15px;
+    }
+
+    .seo-longtail-mega {
+        padding: 60px 5%;
+    }
+
+    .seo-longtail-header {
+        margin-bottom: 60px;
+    }
+
+    .seo-longtail-title {
+        font-size: 32px;
+    }
+
+    .seo-longtail-intro {
+        font-size: 16px;
+    }
+
+    .seo-longtail-block {
+        padding: 24px;
+    }
+}
