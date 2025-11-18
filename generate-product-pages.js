@@ -177,7 +177,7 @@ function getSportPageUrl(sport) {
     return sportUrls[sport] || '/index.html';
 }
 
-// Générer des avis clients réalistes
+// Générer des avis clients réalistes avec villes toujours différentes
 function generateReviews(product) {
     const cities = ['Paris', 'Lyon', 'Marseille', 'Toulouse', 'Bordeaux', 'Nantes', 'Strasbourg', 'Lille', 'Rennes', 'Montpellier'];
     const names = [
@@ -194,10 +194,15 @@ function generateReviews(product) {
 
     const sport = product.SPORT.charAt(0) + product.SPORT.slice(1).toLowerCase();
 
+    // Mélanger les villes pour garantir 3 villes différentes
+    const shuffledCities = [...cities].sort(() => Math.random() - 0.5);
+    // Mélanger les noms pour plus de variété
+    const shuffledNames = [...names].sort(() => Math.random() - 0.5);
+
     const reviews = [];
     for (let i = 0; i < 3; i++) {
-        const city = cities[Math.floor(Math.random() * cities.length)];
-        const person = names[Math.floor(Math.random() * names.length)];
+        const city = shuffledCities[i]; // Garantit 3 villes différentes
+        const person = shuffledNames[i]; // Garantit 3 personnes différentes
         const month = months[Math.floor(Math.random() * months.length)];
         const qty = [12, 18, 25, 30, 45, 60][Math.floor(Math.random() * 6)];
 
