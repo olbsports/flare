@@ -177,6 +177,89 @@ function getSportPageUrl(sport) {
     return sportUrls[sport] || '/index.html';
 }
 
+// Générer des avis clients réalistes
+function generateReviews(product) {
+    const cities = ['Paris', 'Lyon', 'Marseille', 'Toulouse', 'Bordeaux', 'Nantes', 'Strasbourg', 'Lille', 'Rennes', 'Montpellier'];
+    const names = [
+        {initial: 'M.', name: 'Dupont'},
+        {initial: 'J.', name: 'Martin'},
+        {initial: 'S.', name: 'Bernard'},
+        {initial: 'L.', name: 'Petit'},
+        {initial: 'A.', name: 'Robert'},
+        {initial: 'C.', name: 'Richard'},
+        {initial: 'P.', name: 'Durand'},
+        {initial: 'T.', name: 'Dubois'}
+    ];
+    const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+
+    const sport = product.SPORT.charAt(0) + product.SPORT.slice(1).toLowerCase();
+
+    const reviews = [];
+    for (let i = 0; i < 3; i++) {
+        const city = cities[Math.floor(Math.random() * cities.length)];
+        const person = names[Math.floor(Math.random() * names.length)];
+        const month = months[Math.floor(Math.random() * months.length)];
+        const qty = [12, 18, 25, 30, 45, 60][Math.floor(Math.random() * 6)];
+
+        reviews.push({
+            city: city,
+            sport: sport,
+            author: `${city} ${sport} - ${person.initial} ${person.name}`,
+            quantity: qty,
+            month: month
+        });
+    }
+
+    return reviews;
+}
+
+// Générer le guide des tailles selon le produit
+function generateSizeGuide(product) {
+    const famille = product.FAMILLE_PRODUIT.toLowerCase();
+    const genre = product.GENRE;
+
+    // Produits qui ont des guides de tailles spécifiques
+    const hasSpecificGuide = ['maillot', 'short', 'polo', 'sweat', 'veste', 'débardeur', 'combinaison'].some(type =>
+        famille.includes(type)
+    );
+
+    if (!hasSpecificGuide) {
+        return `<p>Pour consulter le guide des tailles complet de ce produit, visitez notre <a href="../../pages/guide-tailles.html" style="color: #FF4B26; font-weight: 700;">page dédiée aux guides des tailles</a>.</p>`;
+    }
+
+    if (genre === 'ENFANT') {
+        return `
+            <h3>Tableau des Tailles Enfants</h3>
+            <table class="size-table">
+                <thead><tr><th>Âge</th><th>Taille (cm)</th><th>Tour de Poitrine</th><th>Longueur</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>6 ans</strong></td><td>116 cm</td><td>60 cm</td><td>46 cm</td></tr>
+                    <tr><td><strong>8 ans</strong></td><td>128 cm</td><td>64 cm</td><td>50 cm</td></tr>
+                    <tr><td><strong>10 ans</strong></td><td>140 cm</td><td>68 cm</td><td>54 cm</td></tr>
+                    <tr><td><strong>12 ans</strong></td><td>152 cm</td><td>72 cm</td><td>58 cm</td></tr>
+                    <tr><td><strong>14 ans</strong></td><td>164 cm</td><td>76 cm</td><td>62 cm</td></tr>
+                </tbody>
+            </table>`;
+    }
+
+    // Guide adulte par défaut
+    return `
+            <h3>Tableau des Tailles Adultes</h3>
+            <table class="size-table">
+                <thead><tr><th>Taille</th><th>Tour de Poitrine</th><th>Longueur</th><th>Largeur</th><th>Manche</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>XS</strong></td><td>84-90 cm</td><td>68 cm</td><td>44 cm</td><td>20 cm</td></tr>
+                    <tr><td><strong>S</strong></td><td>90-96 cm</td><td>70 cm</td><td>46 cm</td><td>21 cm</td></tr>
+                    <tr><td><strong>M</strong></td><td>96-102 cm</td><td>72 cm</td><td>48 cm</td><td>22 cm</td></tr>
+                    <tr><td><strong>L</strong></td><td>102-108 cm</td><td>74 cm</td><td>50 cm</td><td>23 cm</td></tr>
+                    <tr><td><strong>XL</strong></td><td>108-114 cm</td><td>76 cm</td><td>52 cm</td><td>24 cm</td></tr>
+                    <tr><td><strong>2XL</strong></td><td>114-120 cm</td><td>78 cm</td><td>54 cm</td><td>25 cm</td></tr>
+                    <tr><td><strong>3XL</strong></td><td>120-126 cm</td><td>80 cm</td><td>56 cm</td><td>26 cm</td></tr>
+                    <tr><td><strong>4XL</strong></td><td>126-132 cm</td><td>82 cm</td><td>58 cm</td><td>27 cm</td></tr>
+                </tbody>
+            </table>`;
+}
+
 // Générer une page HTML complète pour un produit
 function generateProductHTML(product) {
     const priceTiers = getPriceTiers(product);
@@ -190,6 +273,8 @@ function generateProductHTML(product) {
         product.PHOTO_4,
         product.PHOTO_5
     ].filter(p => p && p.trim());
+
+    const reviews = generateReviews(product);
 
     const savings = highestPrice.price - lowestPrice.price;
     const savingsPercent = highestPrice.price > 0 ? Math.round((savings / highestPrice.price) * 100) : 0;
@@ -259,11 +344,35 @@ function generateProductHTML(product) {
 
     <!-- TRUST BAR -->
     <div class="trust-bar">
-        <div class="trust-badges">
-            <div class="trust-badge"><span>✓ Fabrication Europe Certifiée</span></div>
-            <div class="trust-badge"><span>✓ Devis Gratuit sous 24h</span></div>
-            <div class="trust-badge"><span>✓ Garantie Conformité 100%</span></div>
-            <div class="trust-badge"><span>✓ Sans Minimum de Commande</span></div>
+        <div class="trust-container">
+            <div class="trust-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 6L9 17l-5-5"/>
+                </svg>
+                <span>Fabrication Europe</span>
+            </div>
+            <div class="trust-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span>Devis 24h</span>
+            </div>
+            <div class="trust-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span>Garantie 100%</span>
+            </div>
+            <div class="trust-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+                <span>Sans Minimum</span>
+            </div>
         </div>
     </div>
 
@@ -367,6 +476,9 @@ function generateProductHTML(product) {
         </div>
     </section>
 
+    <!-- ZONE DYNAMIQUE CONFIGURATEUR - Pour injection future de contenu personnalisé -->
+    <div id="configurator-dynamic-content"></div>
+
     <!-- CONFIGURATEUR DYNAMIQUE (COMMUN À TOUS LES PRODUITS) -->
     <div id="configurator-container"></div>
 
@@ -376,6 +488,7 @@ function generateProductHTML(product) {
             <button class="tab-btn active" data-tab="description">Description Complète</button>
             <button class="tab-btn" data-tab="specifications">Caractéristiques</button>
             <button class="tab-btn" data-tab="sizes">Guide des Tailles</button>
+            <button class="tab-btn" data-tab="templates">Templates</button>
             <button class="tab-btn" data-tab="faq">Questions Fréquentes</button>
         </div>
 
@@ -393,32 +506,19 @@ function generateProductHTML(product) {
         <!-- TAB: SIZE GUIDE -->
         <div class="tab-content" id="tab-sizes">
             <h2>Guide des Tailles</h2>
-            ${product.GENRE === 'ENFANT' ? `
-            <h3>Tableau des Tailles Enfants</h3>
-            <table class="size-table">
-                <thead><tr><th>Âge</th><th>Taille (cm)</th><th>Tour de Poitrine</th><th>Longueur</th></tr></thead>
-                <tbody>
-                    <tr><td><strong>6 ans</strong></td><td>116 cm</td><td>60 cm</td><td>46 cm</td></tr>
-                    <tr><td><strong>8 ans</strong></td><td>128 cm</td><td>64 cm</td><td>50 cm</td></tr>
-                    <tr><td><strong>10 ans</strong></td><td>140 cm</td><td>68 cm</td><td>54 cm</td></tr>
-                    <tr><td><strong>12 ans</strong></td><td>152 cm</td><td>72 cm</td><td>58 cm</td></tr>
-                    <tr><td><strong>14 ans</strong></td><td>164 cm</td><td>76 cm</td><td>62 cm</td></tr>
-                </tbody>
-            </table>` : `
-            <h3>Tableau des Tailles Adultes</h3>
-            <table class="size-table">
-                <thead><tr><th>Taille</th><th>Tour de Poitrine</th><th>Longueur</th><th>Largeur</th><th>Manche</th></tr></thead>
-                <tbody>
-                    <tr><td><strong>XS</strong></td><td>84-90 cm</td><td>68 cm</td><td>44 cm</td><td>20 cm</td></tr>
-                    <tr><td><strong>S</strong></td><td>90-96 cm</td><td>70 cm</td><td>46 cm</td><td>21 cm</td></tr>
-                    <tr><td><strong>M</strong></td><td>96-102 cm</td><td>72 cm</td><td>48 cm</td><td>22 cm</td></tr>
-                    <tr><td><strong>L</strong></td><td>102-108 cm</td><td>74 cm</td><td>50 cm</td><td>23 cm</td></tr>
-                    <tr><td><strong>XL</strong></td><td>108-114 cm</td><td>76 cm</td><td>52 cm</td><td>24 cm</td></tr>
-                    <tr><td><strong>2XL</strong></td><td>114-120 cm</td><td>78 cm</td><td>54 cm</td><td>25 cm</td></tr>
-                    <tr><td><strong>3XL</strong></td><td>120-126 cm</td><td>80 cm</td><td>56 cm</td><td>26 cm</td></tr>
-                    <tr><td><strong>4XL</strong></td><td>126-132 cm</td><td>82 cm</td><td>58 cm</td><td>27 cm</td></tr>
-                </tbody>
-            </table>`}
+            ${generateSizeGuide(product)}
+        </div>
+
+        <!-- TAB: TEMPLATES (ZONE DYNAMIQUE) -->
+        <div class="tab-content" id="tab-templates">
+            <h2>Templates de Design</h2>
+            <!-- Zone dynamique pour injection future de templates -->
+            <div id="templates-dynamic-content">
+                <p style="text-align: center; padding: 60px 20px; color: #666; font-size: 16px;">
+                    Nous sommes en train de préparer une bibliothèque de templates personnalisables pour ce produit.<br>
+                    Cette section sera bientôt disponible avec de nombreux designs prêts à l'emploi.
+                </p>
+            </div>
         </div>
 
         <!-- TAB: FAQ (ADAPTÉE) -->
@@ -437,21 +537,21 @@ function generateProductHTML(product) {
             <div class="reviews-grid">
                 <div class="review-card">
                     <div class="review-stars">★★★★★</div>
-                    <div class="review-text">"Excellente qualité, les couleurs sont éclatantes même après plusieurs lavages. Notre club est très satisfait."</div>
-                    <div class="review-author">FC Montpellier Amateur</div>
-                    <div class="review-meta">Commande de 25 pièces · Septembre 2024</div>
+                    <div class="review-text">"Excellente qualité, les couleurs sont éclatantes même après plusieurs lavages. Très satisfait du résultat."</div>
+                    <div class="review-author">${reviews[0].author}</div>
+                    <div class="review-meta">Commande de ${reviews[0].quantity} pièces · ${reviews[0].month} 2024</div>
                 </div>
                 <div class="review-card">
                     <div class="review-stars">★★★★★</div>
                     <div class="review-text">"Délais respectés, design parfait, prix compétitifs. Je recommande vivement !"</div>
-                    <div class="review-author">AS Lyon Confluence</div>
-                    <div class="review-meta">Commande de 75 pièces · Octobre 2024</div>
+                    <div class="review-author">${reviews[1].author}</div>
+                    <div class="review-meta">Commande de ${reviews[1].quantity} pièces · ${reviews[1].month} 2024</div>
                 </div>
                 <div class="review-card">
                     <div class="review-stars">★★★★★</div>
-                    <div class="review-text">"L'équipe a adoré ! Le tissu est vraiment respirant et confortable. Merci FLARE CUSTOM !"</div>
-                    <div class="review-author">Toulouse FC Corporate</div>
-                    <div class="review-meta">Commande de 18 pièces · Août 2024</div>
+                    <div class="review-text">"Le tissu est vraiment respirant et confortable. Rendu professionnel. Merci FLARE CUSTOM !"</div>
+                    <div class="review-author">${reviews[2].author}</div>
+                    <div class="review-meta">Commande de ${reviews[2].quantity} pièces · ${reviews[2].month} 2024</div>
                 </div>
             </div>
         </div>

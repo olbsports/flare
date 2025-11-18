@@ -54,11 +54,35 @@
 
     <!-- TRUST BAR -->
     <div class="trust-bar">
-        <div class="trust-badges">
-            <div class="trust-badge"><span>✓ Fabrication Europe Certifiée</span></div>
-            <div class="trust-badge"><span>✓ Devis Gratuit sous 24h</span></div>
-            <div class="trust-badge"><span>✓ Garantie Conformité 100%</span></div>
-            <div class="trust-badge"><span>✓ Sans Minimum de Commande</span></div>
+        <div class="trust-container">
+            <div class="trust-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 6L9 17l-5-5"/>
+                </svg>
+                <span>Fabrication Europe</span>
+            </div>
+            <div class="trust-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span>Devis 24h</span>
+            </div>
+            <div class="trust-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span>Garantie 100%</span>
+            </div>
+            <div class="trust-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+                <span>Sans Minimum</span>
+            </div>
         </div>
     </div>
 
@@ -159,6 +183,9 @@
         </div>
     </section>
 
+    <!-- ZONE DYNAMIQUE CONFIGURATEUR - Pour injection future de contenu personnalisé -->
+    <div id="configurator-dynamic-content"></div>
+
     <!-- CONFIGURATEUR DYNAMIQUE (COMMUN À TOUS LES PRODUITS) -->
     <div id="configurator-container"></div>
 
@@ -168,6 +195,7 @@
             <button class="tab-btn active" data-tab="description">Description Complète</button>
             <button class="tab-btn" data-tab="specifications">Caractéristiques</button>
             <button class="tab-btn" data-tab="sizes">Guide des Tailles</button>
+            <button class="tab-btn" data-tab="templates">Templates</button>
             <button class="tab-btn" data-tab="faq">Questions Fréquentes</button>
         </div>
 
@@ -262,6 +290,18 @@
             </table>
         </div>
 
+        <!-- TAB: TEMPLATES (ZONE DYNAMIQUE) -->
+        <div class="tab-content" id="tab-templates">
+            <h2>Templates de Design</h2>
+            <!-- Zone dynamique pour injection future de templates -->
+            <div id="templates-dynamic-content">
+                <p style="text-align: center; padding: 60px 20px; color: #666; font-size: 16px;">
+                    Nous sommes en train de préparer une bibliothèque de templates personnalisables pour ce produit.<br>
+                    Cette section sera bientôt disponible avec de nombreux designs prêts à l'emploi.
+                </p>
+            </div>
+        </div>
+
         <!-- TAB: FAQ (ADAPTÉE) -->
         <div class="tab-content" id="tab-faq">
             <h2>Questions Fréquentes - Short Sport Noir - Performance Mesh 160 ECO Homme</h2>
@@ -293,21 +333,21 @@
             <div class="reviews-grid">
                 <div class="review-card">
                     <div class="review-stars">★★★★★</div>
-                    <div class="review-text">"Excellente qualité, les couleurs sont éclatantes même après plusieurs lavages. Notre club est très satisfait."</div>
-                    <div class="review-author">FC Montpellier Amateur</div>
-                    <div class="review-meta">Commande de 25 pièces · Septembre 2024</div>
+                    <div class="review-text">"Excellente qualité, les couleurs sont éclatantes même après plusieurs lavages. Très satisfait du résultat."</div>
+                    <div class="review-author">Montpellier Petanque - T. Dubois</div>
+                    <div class="review-meta">Commande de 45 pièces · Novembre 2024</div>
                 </div>
                 <div class="review-card">
                     <div class="review-stars">★★★★★</div>
                     <div class="review-text">"Délais respectés, design parfait, prix compétitifs. Je recommande vivement !"</div>
-                    <div class="review-author">AS Lyon Confluence</div>
-                    <div class="review-meta">Commande de 75 pièces · Octobre 2024</div>
+                    <div class="review-author">Bordeaux Petanque - M. Dupont</div>
+                    <div class="review-meta">Commande de 12 pièces · Juillet 2024</div>
                 </div>
                 <div class="review-card">
                     <div class="review-stars">★★★★★</div>
-                    <div class="review-text">"L'équipe a adoré ! Le tissu est vraiment respirant et confortable. Merci FLARE CUSTOM !"</div>
-                    <div class="review-author">Toulouse FC Corporate</div>
-                    <div class="review-meta">Commande de 18 pièces · Août 2024</div>
+                    <div class="review-text">"Le tissu est vraiment respirant et confortable. Rendu professionnel. Merci FLARE CUSTOM !"</div>
+                    <div class="review-author">Lille Petanque - C. Richard</div>
+                    <div class="review-meta">Commande de 60 pièces · Janvier 2024</div>
                 </div>
             </div>
         </div>

@@ -18,26 +18,33 @@ body {
 
 /* TRUST BAR */
 .trust-bar {
-    background: #000;
+    background: #1a1a1a;
     color: #fff;
-    padding: 12px 5%;
-    text-align: center;
+    padding: 14px 5%;
+    border-bottom: 1px solid #333;
+}
+
+.trust-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 48px;
+    flex-wrap: wrap;
+}
+
+.trust-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     font-size: 14px;
     font-weight: 600;
 }
 
-.trust-badges {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 40px;
-    flex-wrap: wrap;
-}
-
-.trust-badge {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.trust-item svg {
+    stroke: #FF4B26;
+    flex-shrink: 0;
 }
 
 /* BREADCRUMB */
