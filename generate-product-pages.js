@@ -202,9 +202,82 @@ function getFamilyPageUrl(famille) {
         'Veste': '/pages/products/vestes-sport-personnalisees.html',
         'Pantalon': '/pages/products/pantalons-sport-personnalises.html',
         'Débardeur': '/pages/products/debardeurs-sport-personnalises.html',
-        'T-shirt': '/pages/products/tshirts-sport-personnalises.html'
+        'T-shirt': '/pages/products/tshirts-sport-personnalises.html',
+        'Chaussettes': '/pages/products/chaussettes-sport-personnalisees.html'
     };
     return familyUrls[famille] || '/index.html';
+}
+
+// Générer suggestions produits complémentaires intelligentes (vente croisée)
+function getComplementaryProducts(product) {
+    const famille = product.FAMILLE_PRODUIT;
+    const sport = normalizeSportName(product.SPORT);
+    const suggestions = [];
+
+    // Logique de vente croisée selon la famille du produit
+    const complementaryMap = {
+        'Maillot': [
+            { famille: 'Short', label: 'Shorts' },
+            { famille: 'Chaussettes', label: 'Chaussettes' },
+            { famille: 'Polo', label: 'Polos' }
+        ],
+        'Short': [
+            { famille: 'Maillot', label: 'Maillots' },
+            { famille: 'Chaussettes', label: 'Chaussettes' },
+            { famille: 'T-shirt', label: 'T-shirts' }
+        ],
+        'Polo': [
+            { famille: 'Pantalon', label: 'Pantalons' },
+            { famille: 'Sweat', label: 'Sweats' },
+            { famille: 'Veste', label: 'Vestes' }
+        ],
+        'Sweat': [
+            { famille: 'Polo', label: 'Polos' },
+            { famille: 'Pantalon', label: 'Pantalons' },
+            { famille: 'Veste', label: 'Vestes' }
+        ],
+        'Veste': [
+            { famille: 'Polo', label: 'Polos' },
+            { famille: 'Sweat', label: 'Sweats' },
+            { famille: 'Pantalon', label: 'Pantalons' }
+        ],
+        'Pantalon': [
+            { famille: 'Polo', label: 'Polos' },
+            { famille: 'Sweat', label: 'Sweats' },
+            { famille: 'T-shirt', label: 'T-shirts' }
+        ],
+        'Débardeur': [
+            { famille: 'Short', label: 'Shorts' },
+            { famille: 'Chaussettes', label: 'Chaussettes' },
+            { famille: 'T-shirt', label: 'T-shirts' }
+        ],
+        'T-shirt': [
+            { famille: 'Short', label: 'Shorts' },
+            { famille: 'Pantalon', label: 'Pantalons' },
+            { famille: 'Sweat', label: 'Sweats' }
+        ],
+        'Chaussettes': [
+            { famille: 'Maillot', label: 'Maillots' },
+            { famille: 'Short', label: 'Shorts' },
+            { famille: 'T-shirt', label: 'T-shirts' }
+        ]
+    };
+
+    // Récupérer les suggestions pour cette famille (max 2)
+    const complementary = complementaryMap[famille] || [];
+
+    for (let i = 0; i < Math.min(2, complementary.length); i++) {
+        const item = complementary[i];
+        const url = getFamilyPageUrl(item.famille);
+        if (url !== '/index.html') {
+            suggestions.push({
+                url: url,
+                label: `${item.label} ${sport}`
+            });
+        }
+    }
+
+    return suggestions;
 }
 
 // Générer contenu optimisé pour référencement LLM (discret)
@@ -598,21 +671,22 @@ function generateProductHTML(product) {
 
             ${generateLLMContent(product)}
 
-            <!-- MAILLAGE INTERNE -->
+            <!-- MAILLAGE INTERNE & VENTE CROISÉE -->
             <div style="margin: 2rem 0; padding: 2rem; background: linear-gradient(135deg, #f8f8f8 0%, #fff 100%); border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                <h3 style="font-size: 1.4rem; margin-bottom: 1.25rem; color: #1a1a1a; font-weight: 700;">Découvrez aussi</h3>
-                <p style="margin-bottom: 1.5rem; color: #666; font-size: 1rem;">Explorez notre gamme complète d'équipements personnalisés :</p>
+                <h3 style="font-size: 1.4rem; margin-bottom: 1.25rem; color: #1a1a1a; font-weight: 700;">Complétez votre équipement</h3>
+                <p style="margin-bottom: 1.5rem; color: #666; font-size: 1rem;">Produits complémentaires pour votre ${product.FAMILLE_PRODUIT} ${normalizeSportName(product.SPORT)} :</p>
                 <div style="display: grid; gap: 0.75rem;">
-                    <a href="../${getFamilyPageUrl(product.FAMILLE_PRODUIT).replace('/pages/', '')}" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: #fff; border-radius: 6px; text-decoration: none; transition: all 0.3s ease; border: 1px solid #e8e8e8;">
-                        <span style="color: #FF4B26; font-size: 1.25rem;">→</span>
-                        <span style="color: #1a1a1a; font-weight: 600;">Tous nos ${product.FAMILLE_PRODUIT}s personnalisés</span>
-                    </a>
+                    ${getComplementaryProducts(product).map(suggestion => `
+                    <a href="../${suggestion.url.replace('/pages/', '')}" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: #fff; border-radius: 6px; text-decoration: none; transition: all 0.3s ease; border: 1px solid #e8e8e8;">
+                        <span style="color: #FF4B26; font-size: 1.25rem;">🎯</span>
+                        <span style="color: #1a1a1a; font-weight: 600;">${suggestion.label}</span>
+                    </a>`).join('\n                    ')}
                     <a href="../${sportPageUrl.replace('/pages/', '')}" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: #fff; border-radius: 6px; text-decoration: none; transition: all 0.3s ease; border: 1px solid #e8e8e8;">
                         <span style="color: #FF4B26; font-size: 1.25rem;">→</span>
-                        <span style="color: #1a1a1a; font-weight: 600;">Équipement ${normalizeSportName(product.SPORT)} complet</span>
+                        <span style="color: #1a1a1a; font-weight: 600;">Tout l'équipement ${normalizeSportName(product.SPORT)}</span>
                     </a>
                     <a href="../info/devis.html" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: #fff; border-radius: 6px; text-decoration: none; transition: all 0.3s ease; border: 1px solid #e8e8e8;">
-                        <span style="color: #FF4B26; font-size: 1.25rem;">→</span>
+                        <span style="color: #FF4B26; font-size: 1.25rem;">✉️</span>
                         <span style="color: #1a1a1a; font-weight: 600;">Demander un devis gratuit</span>
                     </a>
                 </div>
