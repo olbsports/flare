@@ -48,50 +48,18 @@
     
         @media (max-width: 1024px) {
             @media (max-width: 1024px) {
-            .hero-sport,
-            .hero-faq,
-            .hero-livraison,
-            .hero-contact {
-                padding: 3rem 5% 2rem;
-            }
-
-            .hero-sport-content,
-            .hero-faq-content,
-            .hero-livraison-content,
-            .hero-contact-content,
-            .hero-budget-content,
-            .hero-retours-content,
-            .hero-revendeur-content,
-            .hero-page-content,
-            .hero-innovation-content-v2 {
-                grid-template-columns: 1fr;
-                gap: 50px;
-            }
-
-            .hero-sport-left,
-            .hero-faq-left,
-            .hero-livraison-left,
-            .hero-contact-left,
-            .hero-budget-left,
-            .hero-retours-left,
-            .hero-revendeur-left {
+            @media (max-width: 1024px) {
+            @media (max-width: 768px) {
+            .btn-hero-primary,
+            .btn-hero-secondary {
+                width: 100%;
                 text-align: center;
-            }
-
-            .hero-sport-features,
-            .hero-contact-badges {
-                grid-template-columns: 1fr;
-            }
-
-            .hero-sport-eyebrow,
-            .hero-faq-eyebrow,
-            .hero-livraison-eyebrow,
-            .hero-contact-eyebrow {
-                display: inline-block;
+                justify-content: center;
             }
         }
     
-/* ===== HERO MODERNE - DESIGN PAGE D'ACCUEIL APPLIQUÉ ===== */
+
+        /* ===== HERO MODERNE - DESIGN IDENTIQUE PAGE D'ACCUEIL ===== */
         .hero-sport,
         .hero-faq,
         .hero-livraison,
@@ -106,7 +74,7 @@
             display: grid;
             grid-template-columns: 1.1fr 1fr;
             align-items: center;
-            padding: 140px 5% 80px;
+            padding: 140px 5% 100px;
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #f1f3f5 100%);
             gap: 80px;
             max-width: 100%;
@@ -119,7 +87,10 @@
         .hero-faq::before,
         .hero-livraison::before,
         .hero-contact::before,
-        .hero-budget::before {
+        .hero-budget::before,
+        .hero-retours::before,
+        .hero-revendeur::before,
+        .hero-page::before {
             content: '';
             position: absolute;
             width: 800px;
@@ -136,7 +107,10 @@
         .hero-faq::after,
         .hero-livraison::after,
         .hero-contact::after,
-        .hero-budget::after {
+        .hero-budget::after,
+        .hero-retours::after,
+        .hero-revendeur::after,
+        .hero-page::after {
             content: '';
             position: absolute;
             width: 600px;
@@ -154,6 +128,7 @@
             50% { transform: scale(1.1); opacity: 0.8; }
         }
 
+        /* === CONTENU GAUCHE === */
         .hero-sport-content,
         .hero-faq-content,
         .hero-livraison-content,
@@ -161,13 +136,11 @@
         .hero-budget-content,
         .hero-retours-content,
         .hero-revendeur-content,
-        .hero-page-content,
-        .hero-innovation-content-v2 {
-            max-width: 100%;
-            margin: 0;
+        .hero-page-content {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 0;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
             position: relative;
             z-index: 1;
         }
@@ -179,8 +152,7 @@
         .hero-budget-left,
         .hero-retours-left,
         .hero-revendeur-left,
-        .hero-page-left,
-        .hero-innovation-left {
+        .hero-page-left {
             animation: fadeInLeft 1s ease;
             position: relative;
             z-index: 1;
@@ -198,10 +170,9 @@
         .hero-budget-right,
         .hero-retours-right,
         .hero-revendeur-right,
-        .hero-page-right,
-        .hero-innovation-right {
-            position: relative;
+        .hero-page-right {
             animation: fadeInRight 1s ease 0.3s backwards;
+            position: relative;
             z-index: 1;
         }
 
@@ -218,7 +189,8 @@
         .hero-retours-eyebrow,
         .hero-revendeur-eyebrow,
         .hero-page-eyebrow,
-        .hero-eyebrow {
+        .hero-eyebrow,
+        .hero-eyebrow-v2 {
             display: inline-block;
             padding: 10px 24px;
             background: linear-gradient(135deg, #FF4B26 0%, #E63910 100%);
@@ -240,7 +212,8 @@
         .hero-retours-title,
         .hero-revendeur-title,
         .hero-page-title,
-        .hero-title {
+        .hero-title,
+        .hero-title-v2 {
             font-family: 'Bebas Neue', sans-serif;
             font-size: clamp(64px, 8vw, 120px);
             font-weight: 700;
@@ -259,7 +232,8 @@
         .hero-retours-subtitle,
         .hero-revendeur-subtitle,
         .hero-page-subtitle,
-        .hero-subtitle {
+        .hero-subtitle,
+        .hero-subtitle-v2 {
             font-size: clamp(16px, 2vw, 20px);
             line-height: 1.7;
             color: #495057;
@@ -278,7 +252,6 @@
             display: flex;
             gap: 20px;
             flex-wrap: wrap;
-            margin-bottom: 48px;
         }
 
         .btn-hero-primary,
@@ -369,6 +342,7 @@
             color: #fff;
         }
 
+        /* === CONTENU DROITE (FEATURES/STATS) === */
         .hero-sport-features,
         .hero-faq-features,
         .hero-livraison-features,
@@ -388,6 +362,7 @@
         }
 
         .hero-sport-features:hover,
+        .hero-faq-features:hover,
         .hero-contact-badges:hover {
             transform: translateY(-5px);
             box-shadow: 0 30px 80px rgba(0,0,0,0.15);
@@ -455,7 +430,7 @@
             line-height: 1.4;
         }
 
-        /* Masquer les anciens éléments */
+        /* Masquer anciens éléments */
         .hero-sport-background,
         .hero-sport-overlay,
         .hero-contact-background,
@@ -463,6 +438,7 @@
         .hero-livraison-background,
         .hero-budget-overlay,
         .hero-budget-image,
+        .hero-innovation-bg,
         .breadcrumb {
             display: none !important;
         }
@@ -480,25 +456,27 @@
                 min-height: auto;
             }
 
+            .hero-sport-content,
+            .hero-faq-content,
+            .hero-livraison-content,
+            .hero-contact-content {
+                grid-template-columns: 1fr;
+            }
+
             .hero-sport-left,
             .hero-faq-left,
             .hero-livraison-left,
-            .hero-contact-left,
-            .hero-budget-left {
+            .hero-contact-left {
                 text-align: center;
             }
 
             .hero-sport-subtitle,
-            .hero-faq-subtitle,
-            .hero-livraison-subtitle,
-            .hero-contact-subtitle {
+            .hero-faq-subtitle {
                 margin: 0 auto 48px;
             }
 
             .hero-sport-cta,
-            .hero-faq-cta,
-            .hero-livraison-cta,
-            .hero-contact-cta {
+            .hero-faq-cta {
                 justify-content: center;
             }
 
@@ -510,9 +488,7 @@
 
         @media (max-width: 768px) {
             .hero-sport,
-            .hero-faq,
-            .hero-livraison,
-            .hero-contact {
+            .hero-faq {
                 padding: 100px 5% 60px;
             }
 
