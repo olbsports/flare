@@ -24,10 +24,7 @@
         .section-eyebrow{color:#00D9FF;font-weight:700;text-transform:uppercase;letter-spacing:2px}
         .contact-badge{background:#00D9FF;color:#000}
     
-        @media (max-width: 1024px) {
-            @media (max-width: 1024px) {
-            @media (max-width: 1024px) {
-            @media (max-width: 768px) {
+        @media (max-width: 768px) {
             .btn-hero-primary,
             .btn-hero-secondary {
                 width: 100%;
@@ -1246,20 +1243,27 @@
 
     <!-- Hero Contact Compact -->
     <section class="hero-contact">
-        <div class="hero-contact-background"></div>
-        
         <div class="hero-contact-content">
-            <span class="hero-contact-eyebrow">📞 Parlons de votre projet</span>
-            
-            <h1 class="hero-contact-title">
-                Contactez-nous
+            <div class="hero-contact-left">
+                <span class="hero-contact-eyebrow">📞 Parlons de votre projet</span>
+                <h1 class="hero-contact-title">Contactez-nous
             </h1>
-            
-            <p class="hero-contact-subtitle">
-                Devis gratuit sous 24h • Conseil expert • design offert dès 10 pièces
+                <p class="hero-contact-subtitle">Devis gratuit sous 24h • Conseil expert • design offert dès 10 pièces
             </p>
-            
-            <div class="hero-contact-badges">
+
+                <div class="hero-contact-cta">
+                    <a href="/pages/info/contact.html#contact-form" class="btn-hero-primary">
+                        Demander un devis
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                            <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </a>
+                    <a href="tel:+33123456789" class="btn-hero-secondary">Appeler maintenant</a>
+                </div>
+            </div>
+
+            <div class="hero-contact-right">
+                <div class="hero-contact-badges">
                 <div class="hero-badge">
                     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path d="M9 12L11 14L15 10M21 12C21 16.971 16.971 21 12 21C7.029 21 3 16.971 3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12Z"/>
@@ -1278,6 +1282,7 @@
                     </svg>
                     <span>Support multilingue</span>
                 </div>
+            </div>
             </div>
         </div>
     </section>
