@@ -81,8 +81,8 @@
                     return;
                 }
 
-                // Créer le lien vers la page produit
-                const productPageUrl = `../produit.html?ref=${productRef}`;
+                // Créer le lien vers la page produit statique
+                const productPageUrl = `../produits/${productRef}.html`;
 
                 // Rendre toute la carte cliquable
                 card.style.cursor = 'pointer';
