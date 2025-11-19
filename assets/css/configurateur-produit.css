@@ -1012,13 +1012,8 @@
         overflow-y: auto;
         overflow-x: hidden;
         padding: 1rem;
-        padding-bottom: 0; /* Le padding-bottom sera sur le dernier élément */
+        padding-bottom: 100px; /* Espace pour le footer fixe SEULEMENT */
         -webkit-overflow-scrolling: touch;
-    }
-
-    /* Espace pour le footer fixe + sidebar */
-    .config-content > .config-step-content {
-        padding-bottom: 280px; /* Espace pour sidebar + footer */
     }
 
     .config-step-title {
@@ -1034,55 +1029,52 @@
         color: #666;
     }
 
-    /* SIDEBAR - Position fixe en bas avant le footer */
+    /* SIDEBAR - CACHÉ sur mobile (résumé dans le contenu à la place) */
     .config-sidebar {
-        position: fixed;
-        bottom: 80px; /* Hauteur du footer */
-        left: 0;
-        right: 0;
-        width: 100%;
-        max-height: 180px;
-        background: linear-gradient(180deg, #f8f9fa 0%, #fff 100%);
-        border-top: 2px solid #e0e0e0;
-        border-left: none;
-        padding: 0.75rem 1rem;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        z-index: 10;
-        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+        display: none !important;
     }
 
+    /* Résumé intégré dans le flux du contenu */
     .config-summary {
-        margin: 0;
+        background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+        border: 2px solid #FF4B26;
+        border-radius: 12px;
+        padding: 1rem;
+        margin: 1.5rem 0;
     }
 
     .config-summary h3 {
-        font-size: 1rem;
+        font-size: 1.1rem;
         margin-bottom: 0.75rem;
         font-weight: 700;
-        color: #333;
+        color: #FF4B26;
     }
 
     .config-summary-item {
-        font-size: 0.8rem;
-        padding: 0.4rem 0;
+        font-size: 0.85rem;
+        padding: 0.5rem 0;
         display: flex;
         justify-content: space-between;
         border-bottom: 1px solid #f0f0f0;
     }
 
+    .config-summary-item:last-of-type {
+        border-bottom: none;
+    }
+
     .config-summary-total {
-        font-size: 1.1rem;
-        margin-top: 0.5rem;
-        padding-top: 0.5rem;
+        font-size: 1.2rem;
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
         border-top: 2px solid #FF4B26;
         display: flex;
         justify-content: space-between;
         font-weight: 700;
+        color: #FF4B26;
     }
 
     .config-summary-unit {
-        font-size: 0.75rem;
+        font-size: 0.8rem;
         text-align: right;
         color: #666;
         margin-top: 0.25rem;
