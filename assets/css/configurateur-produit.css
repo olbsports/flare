@@ -1,0 +1,927 @@
+/**
+ * Configurateur Produit - FLARE CUSTOM
+ * Design System: #FF4B26 / #E63910
+ */
+
+/* Modal Overlay */
+.config-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.config-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.config-modal.closing {
+    opacity: 0;
+}
+
+.config-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+}
+
+/* Container */
+.config-container {
+    position: relative;
+    max-width: 1400px;
+    width: 95%;
+    max-height: 95vh;
+    margin: 2.5vh auto;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Close Button */
+.config-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.config-close:hover {
+    background: #FF4B26;
+    color: #fff;
+    transform: rotate(90deg);
+}
+
+.config-close svg {
+    stroke: currentColor;
+}
+
+/* Header */
+.config-header {
+    padding: 2rem;
+    background: linear-gradient(135deg, #FF4B26 0%, #E63910 100%);
+    color: #fff;
+}
+
+.config-product-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.config-product-thumb {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    object-fit: cover;
+    background: #fff;
+    padding: 4px;
+}
+
+.config-product-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+    margin: 0;
+}
+
+.config-product-ref {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.9rem;
+}
+
+/* Steps Indicator */
+.config-steps-indicator {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.config-step {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.config-step.active {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.config-step.completed {
+    background: rgba(76, 175, 80, 0.3);
+}
+
+.config-step-number {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.config-step.active .config-step-number {
+    background: #fff;
+    color: #FF4B26;
+}
+
+.config-step.completed .config-step-number::before {
+    content: '✓';
+    color: #4CAF50;
+}
+
+.config-step.completed .config-step-number {
+    background: #fff;
+    color: transparent;
+}
+
+.config-step-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Body */
+.config-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.config-content {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+}
+
+.config-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.config-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.config-content::-webkit-scrollbar-thumb {
+    background: #e0e0e0;
+    border-radius: 10px;
+}
+
+.config-content::-webkit-scrollbar-thumb:hover {
+    background: #c0c0c0;
+}
+
+/* Sidebar */
+.config-sidebar {
+    width: 320px;
+    background: #f8f9fa;
+    border-left: 1px solid #e0e0e0;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+.config-summary h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+    margin: 0 0 1.5rem 0;
+    color: #1a1a1a;
+}
+
+.config-summary-items {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.config-summary-item {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.config-summary-label {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.config-summary-value {
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.config-summary-detail {
+    font-size: 0.85rem;
+    color: #666;
+    padding: 0.5rem;
+    background: #fff;
+    border-radius: 8px;
+    margin-top: -0.5rem;
+}
+
+.config-summary-total {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 0;
+    border-top: 2px solid #FF4B26;
+    margin-top: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.config-summary-total strong {
+    color: #FF4B26;
+    font-size: 1.5rem;
+}
+
+.config-summary-unit {
+    text-align: right;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.config-summary-empty {
+    text-align: center;
+    color: #999;
+    padding: 2rem 0;
+}
+
+/* Footer */
+.config-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: #f8f9fa;
+    border-top: 1px solid #e0e0e0;
+}
+
+.config-step-info {
+    font-weight: 600;
+    color: #666;
+}
+
+/* Buttons */
+.btn-config-primary,
+.btn-config-secondary {
+    padding: 0.875rem 2rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    font-family: 'Inter', sans-serif;
+}
+
+.btn-config-primary {
+    background: linear-gradient(135deg, #FF4B26 0%, #E63910 100%);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(255, 75, 38, 0.3);
+}
+
+.btn-config-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 75, 38, 0.4);
+}
+
+.btn-config-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-config-secondary {
+    background: #fff;
+    color: #1a1a1a;
+    border: 2px solid #e0e0e0;
+}
+
+.btn-config-secondary:hover {
+    border-color: #FF4B26;
+    color: #FF4B26;
+}
+
+/* Step Content */
+.config-step-content {
+    max-width: 800px;
+}
+
+.config-step-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 1px;
+    margin: 0 0 0.5rem 0;
+    color: #1a1a1a;
+}
+
+.config-step-description {
+    color: #666;
+    margin: 0 0 2rem 0;
+    font-size: 1.05rem;
+}
+
+/* Design Options (Étape 1) */
+.config-design-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.config-design-card {
+    position: relative;
+    padding: 2rem 1.5rem;
+    background: #f8f9fa;
+    border: 2px solid #e0e0e0;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.config-design-card:hover {
+    border-color: #FF4B26;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(255, 75, 38, 0.15);
+}
+
+.config-design-card.selected {
+    border-color: #FF4B26;
+    background: linear-gradient(135deg, rgba(255, 75, 38, 0.05) 0%, rgba(255, 75, 38, 0.1) 100%);
+}
+
+.config-design-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.config-design-card h4 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 1px;
+    margin: 0 0 0.5rem 0;
+    color: #1a1a1a;
+}
+
+.config-design-card p {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.config-design-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #FF4B26;
+    color: #fff;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+/* Templates */
+.config-templates-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+.config-template-card {
+    position: relative;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.config-template-card:hover {
+    border-color: #FF4B26;
+    transform: translateY(-2px);
+}
+
+.config-template-card.selected {
+    border-color: #FF4B26;
+    box-shadow: 0 4px 16px rgba(255, 75, 38, 0.2);
+}
+
+.config-template-card img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+}
+
+.config-template-card span {
+    display: block;
+    padding: 0.75rem;
+    text-align: center;
+    font-weight: 600;
+    background: #fff;
+}
+
+/* Options (Étape 2) */
+.config-options-grid {
+    display: grid;
+    gap: 2rem;
+}
+
+.config-option-group {
+    /* */
+}
+
+.config-label {
+    display: block;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 0.75rem;
+}
+
+.config-option-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.config-option-btn {
+    padding: 0.75rem 1.5rem;
+    background: #f8f9fa;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.config-option-btn:hover {
+    border-color: #FF4B26;
+}
+
+.config-option-btn.selected {
+    background: #FF4B26;
+    border-color: #FF4B26;
+    color: #fff;
+}
+
+/* Genre (Étape 3) */
+.config-genre-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.config-genre-card {
+    padding: 2.5rem 1.5rem;
+    background: #f8f9fa;
+    border: 2px solid #e0e0e0;
+    border-radius: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.config-genre-card:hover {
+    border-color: #FF4B26;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(255, 75, 38, 0.15);
+}
+
+.config-genre-card.selected {
+    border-color: #FF4B26;
+    background: linear-gradient(135deg, rgba(255, 75, 38, 0.05) 0%, rgba(255, 75, 38, 0.1) 100%);
+}
+
+.config-genre-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.config-genre-card h4 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+    margin: 0 0 0.5rem 0;
+}
+
+.config-genre-card p {
+    color: #666;
+    margin: 0;
+}
+
+/* Tailles (Étape 4) */
+.config-tailles-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.config-taille-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.config-taille-label {
+    font-weight: 700;
+    color: #1a1a1a;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.config-taille-input {
+    padding: 0.75rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    text-align: center;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.config-taille-input:focus {
+    outline: none;
+    border-color: #FF4B26;
+    box-shadow: 0 0 0 3px rgba(255, 75, 38, 0.1);
+}
+
+.config-tailles-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(255, 75, 38, 0.1) 0%, rgba(255, 75, 38, 0.05) 100%);
+    border-radius: 12px;
+    margin-bottom: 2rem;
+}
+
+.config-total-label {
+    font-weight: 600;
+    color: #1a1a1a;
+    font-size: 1.1rem;
+}
+
+.config-total-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 1px;
+    color: #FF4B26;
+}
+
+.config-tailles-presets {
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+}
+
+.config-preset-buttons {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.btn-config-preset {
+    padding: 0.75rem 1.5rem;
+    background: #fff;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.btn-config-preset:hover {
+    border-color: #FF4B26;
+    color: #FF4B26;
+}
+
+/* Personnalisation (Étape 5) */
+.config-perso-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.config-perso-section {
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+}
+
+.config-perso-subtitle {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 1px;
+    margin: 0 0 1rem 0;
+    color: #1a1a1a;
+}
+
+.config-couleurs-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.config-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.config-color-input {
+    width: 100%;
+    height: 60px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.config-color-input:hover {
+    border-color: #FF4B26;
+}
+
+.config-text-input,
+.config-textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.config-text-input:focus,
+.config-textarea:focus {
+    outline: none;
+    border-color: #FF4B26;
+    box-shadow: 0 0 0 3px rgba(255, 75, 38, 0.1);
+}
+
+.config-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.config-hint {
+    font-size: 0.85rem;
+    color: #666;
+    margin: 0.5rem 0 0 0;
+}
+
+.config-checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.config-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+}
+
+.config-checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.config-checkbox span {
+    font-weight: 500;
+    color: #1a1a1a;
+}
+
+/* Contact (Étape 6) */
+.config-contact-form {
+    margin-bottom: 2rem;
+}
+
+.config-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.config-final-summary {
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 16px;
+    border: 2px solid #e0e0e0;
+}
+
+.config-final-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.config-final-item span {
+    color: #666;
+}
+
+.config-final-item strong {
+    color: #1a1a1a;
+}
+
+.config-final-total {
+    display: flex;
+    justify-content: space-between;
+    padding: 1.5rem 0;
+    margin-top: 1rem;
+    border-top: 2px solid #FF4B26;
+    font-size: 1.2rem;
+}
+
+.config-final-total strong {
+    color: #FF4B26;
+    font-size: 2rem;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 1px;
+}
+
+.config-final-note {
+    margin: 1.5rem 0 0 0;
+    padding: 1rem;
+    background: #fff3e6;
+    border-left: 4px solid #FF4B26;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Success */
+.config-success {
+    max-width: 600px;
+    margin: 4rem auto;
+    text-align: center;
+}
+
+.config-success-icon {
+    font-size: 5rem;
+    margin-bottom: 1.5rem;
+}
+
+.config-success h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 1px;
+    color: #1a1a1a;
+    margin: 0 0 1rem 0;
+}
+
+.config-success p {
+    color: #666;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    margin: 0 0 1rem 0;
+}
+
+.config-success p strong {
+    color: #FF4B26;
+}
+
+.config-success-actions {
+    margin-top: 2rem;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .config-container {
+        width: 98%;
+        margin: 1vh auto;
+        max-height: 98vh;
+    }
+
+    .config-sidebar {
+        width: 280px;
+    }
+
+    .config-steps-indicator {
+        flex-wrap: wrap;
+    }
+
+    .config-step-label {
+        display: none;
+    }
+}
+
+@media (max-width: 968px) {
+    .config-body {
+        flex-direction: column-reverse;
+    }
+
+    .config-sidebar {
+        width: 100%;
+        max-height: 200px;
+        border-left: none;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .config-design-options,
+    .config-genre-options {
+        grid-template-columns: 1fr;
+    }
+
+    .config-tailles-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .config-couleurs-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .config-form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .config-header {
+        padding: 1.5rem;
+    }
+
+    .config-content {
+        padding: 1.5rem;
+    }
+
+    .config-step-title {
+        font-size: 1.5rem;
+    }
+
+    .config-templates-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .config-footer {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .btn-config-secondary {
+        order: 2;
+    }
+
+    .config-step-info {
+        order: 1;
+    }
+
+    .btn-config-primary {
+        order: 3;
+        width: 100%;
+    }
+}
