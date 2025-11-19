@@ -504,18 +504,20 @@ class ConfigurateurProduit {
             <div class="config-templates" style="margin-top: 2rem;">
                 <h4 style="margin-bottom: 1rem; font-size: 16px; font-weight: 600;">Choisissez un template :</h4>
                 <div class="config-templates-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px;">
-                    ${templates.map(tpl => `
+                    ${templates.map((tpl, index) => {
+                        const templateNumber = String(index + 1).padStart(3, '0');
+                        return `
                         <div class="config-template-card ${this.configuration.design.templateId === tpl.id ? 'selected' : ''}"
                              onclick="configurateurProduitInstance.selectTemplate('${tpl.id}')"
                              style="cursor: pointer; border: 2px solid ${this.configuration.design.templateId === tpl.id ? '#FF4B26' : '#e0e0e0'}; border-radius: 12px; padding: 12px; transition: all 0.3s ease; background: ${this.configuration.design.templateId === tpl.id ? '#fff5f3' : '#fff'};">
                             <div style="aspect-ratio: 3/4; background: #f8f9fa; border-radius: 8px; overflow: hidden; margin-bottom: 8px;">
-                                <img src="${tpl.path}" alt="Template"
+                                <img src="${tpl.path}" alt="Template ${templateNumber}"
                                      style="width: 100%; height: 100%; object-fit: contain;"
-                                     onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;color:#999;font-size:12px;\'>Template</div>'">
+                                     onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;color:#999;font-size:12px;\'>Template ${templateNumber}</div>'">
                             </div>
-                            <span style="display: block; text-align: center; font-size: 14px; font-weight: ${this.configuration.design.templateId === tpl.id ? '700' : '500'}; color: ${this.configuration.design.templateId === tpl.id ? '#FF4B26' : '#333'};">${tpl.filename}</span>
+                            <span style="display: block; text-align: center; font-size: 14px; font-weight: ${this.configuration.design.templateId === tpl.id ? '700' : '500'}; color: ${this.configuration.design.templateId === tpl.id ? '#FF4B26' : '#333'};">Template ${templateNumber}</span>
                         </div>
-                    `).join('')}
+                    `;}).join('')}
                 </div>
             </div>
         `;
