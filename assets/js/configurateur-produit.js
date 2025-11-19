@@ -65,6 +65,101 @@ class ConfigurateurProduit {
     }
 
     /**
+     * Retourne les options disponibles selon la famille du produit
+     */
+    getAvailableOptions() {
+        const famille = this.product.famille || '';
+        const options = {
+            col: [],
+            manches: [],
+            poches: false,
+            fermeture: []
+        };
+
+        switch (famille.toLowerCase()) {
+            case 'maillot':
+                options.col = ['Col rond', 'Col V', 'Col polo'];
+                options.manches = ['Manches courtes', 'Manches longues', 'Sans manches'];
+                options.poches = false;
+                break;
+
+            case 'short':
+                options.col = [];
+                options.manches = [];
+                options.poches = true;
+                break;
+
+            case 'pantalon':
+                options.col = [];
+                options.manches = [];
+                options.poches = true;
+                options.fermeture = ['Élastique', 'Zip', 'Boutons'];
+                break;
+
+            case 'polo':
+                options.col = ['Col polo'];
+                options.manches = ['Manches courtes', 'Manches longues'];
+                options.poches = false;
+                break;
+
+            case 'sweat':
+                options.col = ['Col rond', 'Capuche'];
+                options.manches = ['Manches longues'];
+                options.poches = true;
+                options.fermeture = ['Zip', 'Sans zip'];
+                break;
+
+            case 'veste':
+                options.col = ['Col montant', 'Capuche', 'Col classique'];
+                options.manches = ['Manches longues'];
+                options.poches = true;
+                options.fermeture = ['Zip', 'Boutons'];
+                break;
+
+            case 't-shirt':
+                options.col = ['Col rond', 'Col V'];
+                options.manches = ['Manches courtes', 'Manches longues'];
+                options.poches = false;
+                break;
+
+            case 'débardeur':
+                options.col = ['Col rond', 'Dos nageur'];
+                options.manches = [];
+                options.poches = false;
+                break;
+
+            case 'cuissard':
+                options.col = [];
+                options.manches = [];
+                options.poches = true;
+                break;
+
+            case 'combinaison':
+                options.col = ['Col rond', 'Col zippé'];
+                options.manches = ['Manches courtes', 'Manches longues', 'Sans manches'];
+                options.poches = false;
+                break;
+
+            case 'gilet':
+                options.col = ['Col montant', 'Col rond'];
+                options.manches = [];
+                options.poches = true;
+                options.fermeture = ['Zip', 'Boutons'];
+                break;
+
+            default:
+                // Options par défaut pour les produits non catégorisés
+                options.col = ['Col rond', 'Col V', 'Col polo', 'Col montant'];
+                options.manches = ['Manches courtes', 'Manches longues', 'Sans manches'];
+                options.poches = true;
+                options.fermeture = ['Zip', 'Boutons', 'Élastique'];
+                break;
+        }
+
+        return options;
+    }
+
+    /**
      * Ouvre le configurateur
      */
     open() {
@@ -253,10 +348,12 @@ class ConfigurateurProduit {
      */
     renderTemplateSelector() {
         const templates = [
-            { id: 'classic', name: 'Classic', preview: '/assets/images/templates/classic.jpg' },
-            { id: 'modern', name: 'Modern', preview: '/assets/images/templates/modern.jpg' },
-            { id: 'sport', name: 'Sport', preview: '/assets/images/templates/sport.jpg' },
-            { id: 'elegant', name: 'Élégant', preview: '/assets/images/templates/elegant.jpg' }
+            { id: 'classic', name: 'Classic', preview: '/assets/templates/classic.svg' },
+            { id: 'modern', name: 'Modern', preview: '/assets/templates/modern.svg' },
+            { id: 'sport', name: 'Sport', preview: '/assets/templates/sport.svg' },
+            { id: 'elegant', name: 'Élégant', preview: '/assets/templates/elegant.svg' },
+            { id: 'geometric', name: 'Géométrique', preview: '/assets/templates/geometric.svg' },
+            { id: 'minimal', name: 'Minimal', preview: '/assets/templates/minimal.svg' }
         ];
 
         return `
@@ -279,65 +376,97 @@ class ConfigurateurProduit {
      * ÉTAPE 2 : Options produit
      */
     renderStep2Options() {
+        const availableOptions = this.getAvailableOptions();
+
+        let optionsHTML = '';
+
+        // Type de col (si disponible)
+        if (availableOptions.col && availableOptions.col.length > 0) {
+            optionsHTML += `
+                <div class="config-option-group">
+                    <label class="config-label">Type de col</label>
+                    <div class="config-option-buttons">
+                        ${availableOptions.col.map(col => `
+                            <button class="config-option-btn ${this.configuration.options.col === col ? 'selected' : ''}"
+                                    onclick="configurateurProduitInstance.selectOption('col', '${col}')">
+                                ${col}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Type de manches (si disponible)
+        if (availableOptions.manches && availableOptions.manches.length > 0) {
+            optionsHTML += `
+                <div class="config-option-group">
+                    <label class="config-label">Type de manches</label>
+                    <div class="config-option-buttons">
+                        ${availableOptions.manches.map(manche => `
+                            <button class="config-option-btn ${this.configuration.options.manches === manche ? 'selected' : ''}"
+                                    onclick="configurateurProduitInstance.selectOption('manches', '${manche}')">
+                                ${manche}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Poches (si disponible)
+        if (availableOptions.poches) {
+            optionsHTML += `
+                <div class="config-option-group">
+                    <label class="config-label">Poches</label>
+                    <div class="config-option-buttons">
+                        <button class="config-option-btn ${this.configuration.options.poches === true ? 'selected' : ''}"
+                                onclick="configurateurProduitInstance.selectOption('poches', true)">
+                            Avec poches
+                        </button>
+                        <button class="config-option-btn ${this.configuration.options.poches === false ? 'selected' : ''}"
+                                onclick="configurateurProduitInstance.selectOption('poches', false)">
+                            Sans poches
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Fermeture (si disponible)
+        if (availableOptions.fermeture && availableOptions.fermeture.length > 0) {
+            optionsHTML += `
+                <div class="config-option-group">
+                    <label class="config-label">Type de fermeture</label>
+                    <div class="config-option-buttons">
+                        ${availableOptions.fermeture.map(fermeture => `
+                            <button class="config-option-btn ${this.configuration.options.fermeture === fermeture ? 'selected' : ''}"
+                                    onclick="configurateurProduitInstance.selectOption('fermeture', '${fermeture}')">
+                                ${fermeture}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Si aucune option n'est disponible
+        if (!optionsHTML) {
+            optionsHTML = `
+                <div class="config-info-box">
+                    <p>✓ Ce produit ne nécessite pas de configuration d'options spécifiques.</p>
+                    <p>Passez à l'étape suivante pour continuer votre configuration.</p>
+                </div>
+            `;
+        }
+
         return `
             <div class="config-step-content">
                 <h3 class="config-step-title">Options du produit</h3>
                 <p class="config-step-description">Personnalisez les caractéristiques techniques de votre ${this.product.famille}</p>
 
                 <div class="config-options-grid">
-                    <!-- Type de col -->
-                    <div class="config-option-group">
-                        <label class="config-label">Type de col</label>
-                        <div class="config-option-buttons">
-                            ${['Col rond', 'Col V', 'Col polo', 'Col montant', 'Sans col'].map(col => `
-                                <button class="config-option-btn ${this.configuration.options.col === col ? 'selected' : ''}"
-                                        onclick="configurateurProduitInstance.selectOption('col', '${col}')">
-                                    ${col}
-                                </button>
-                            `).join('')}
-                        </div>
-                    </div>
-
-                    <!-- Type de manches -->
-                    <div class="config-option-group">
-                        <label class="config-label">Type de manches</label>
-                        <div class="config-option-buttons">
-                            ${['Manches courtes', 'Manches longues', 'Sans manches', 'Manches 3/4'].map(manche => `
-                                <button class="config-option-btn ${this.configuration.options.manches === manche ? 'selected' : ''}"
-                                        onclick="configurateurProduitInstance.selectOption('manches', '${manche}')">
-                                    ${manche}
-                                </button>
-                            `).join('')}
-                        </div>
-                    </div>
-
-                    <!-- Poches -->
-                    <div class="config-option-group">
-                        <label class="config-label">Poches</label>
-                        <div class="config-option-buttons">
-                            <button class="config-option-btn ${this.configuration.options.poches === true ? 'selected' : ''}"
-                                    onclick="configurateurProduitInstance.selectOption('poches', true)">
-                                Avec poches
-                            </button>
-                            <button class="config-option-btn ${this.configuration.options.poches === false ? 'selected' : ''}"
-                                    onclick="configurateurProduitInstance.selectOption('poches', false)">
-                                Sans poches
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Fermeture -->
-                    <div class="config-option-group">
-                        <label class="config-label">Type de fermeture</label>
-                        <div class="config-option-buttons">
-                            ${['Zip complet', 'Zip partiel', 'Boutons', 'Sans fermeture'].map(fermeture => `
-                                <button class="config-option-btn ${this.configuration.options.fermeture === fermeture ? 'selected' : ''}"
-                                        onclick="configurateurProduitInstance.selectOption('fermeture', '${fermeture}')">
-                                    ${fermeture}
-                                </button>
-                            `).join('')}
-                        </div>
-                    </div>
+                    ${optionsHTML}
                 </div>
             </div>
         `;
@@ -734,7 +863,7 @@ class ConfigurateurProduit {
 
         let prixUnitaire = this.product.prixBase;
 
-        // Prix dégressifs
+        // Prix dégressifs sur le prix de base
         if (totalPieces >= 500) prixUnitaire *= 0.65;
         else if (totalPieces >= 250) prixUnitaire *= 0.70;
         else if (totalPieces >= 100) prixUnitaire *= 0.75;
@@ -743,7 +872,25 @@ class ConfigurateurProduit {
         else if (totalPieces >= 10) prixUnitaire *= 0.90;
         else if (totalPieces >= 5) prixUnitaire *= 0.95;
 
-        return prixUnitaire * totalPieces;
+        // Prix de base pour toutes les pièces
+        let prixTotal = prixUnitaire * totalPieces;
+
+        // +2€/pièce pour les numéros
+        if (this.configuration.personnalisation.numeros) {
+            prixTotal += totalPieces * 2;
+        }
+
+        // +2€/pièce pour les noms
+        if (this.configuration.personnalisation.noms) {
+            prixTotal += totalPieces * 2;
+        }
+
+        // Forfait design FLARE : +50€
+        if (this.configuration.design.type === 'flare') {
+            prixTotal += 50;
+        }
+
+        return prixTotal;
     }
 
     /**
