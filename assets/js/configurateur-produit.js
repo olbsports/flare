@@ -515,7 +515,7 @@ class ConfigurateurProduit {
                          onclick="configurateurProduitInstance.selectGenre('enfants')">
                         <div class="config-genre-icon">🧒</div>
                         <h4>Enfants</h4>
-                        <p>-10% sur le prix</p>
+                        <p>Coupe enfant</p>
                     </div>
                 </div>
             </div>
@@ -986,6 +986,14 @@ class ConfigurateurProduit {
         this.updateStep();
         this.updateSummary();
         this.trackEvent('design_type_selected', { type });
+
+        // Auto-scroll vers le contenu qui vient d'apparaître
+        setTimeout(() => {
+            const contentArea = document.querySelector('.config-template-selector, .config-form-group');
+            if (contentArea) {
+                contentArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }, 100);
     }
 
     /**
