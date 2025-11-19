@@ -994,11 +994,6 @@ class ConfigurateurProduit {
         // Prix de base pour toutes les pièces
         let prixTotal = prixUnitaire * totalPieces;
 
-        // -10% pour les enfants
-        if (this.configuration.genre === 'enfants') {
-            prixTotal *= 0.90;
-        }
-
         // +2€/pièce pour les numéros SEULEMENT si spécifique
         if (this.configuration.personnalisation.numeros && this.configuration.personnalisation.numerosType === 'specifique') {
             prixTotal += totalPieces * 2;
