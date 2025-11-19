@@ -1013,9 +1013,237 @@
     }
 }
 
+/* ========================================
+   BLOG CONTAINER & FILTERS
+   ======================================== */
 
+.blog-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 80px 5%;
+}
 
-    
+.blog-filters-section {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.filters-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 1px;
+    margin-bottom: 32px;
+    color: #1a1a1a;
+}
+
+.blog-filters {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 12px 24px;
+    background: #fff;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #495057;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+    border-color: #FF4B26;
+    color: #FF4B26;
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, #FF4B26 0%, #E63910 100%);
+    border-color: #FF4B26;
+    color: #fff;
+}
+
+.articles-count {
+    text-align: center;
+    margin-bottom: 40px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    color: #6B7280;
+}
+
+.articles-count span {
+    font-weight: 700;
+    color: #FF4B26;
+    font-size: 20px;
+}
+
+/* ========================================
+   BLOG GRID & CARDS
+   ======================================== */
+
+.blog-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    margin-bottom: 60px;
+}
+
+.blog-card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.blog-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+}
+
+.blog-card-image {
+    position: relative;
+    height: 250px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+}
+
+.blog-card-category {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: linear-gradient(135deg, #FF4B26 0%, #E63910 100%);
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.blog-card-content {
+    padding: 24px;
+}
+
+.blog-card-meta {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #6B7280;
+}
+
+.blog-card-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.blog-card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    color: #1a1a1a;
+    line-height: 1.3;
+}
+
+.blog-card-description {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #495057;
+    margin-bottom: 16px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.blog-card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #FF4B26;
+    text-decoration: none;
+}
+
+.blog-card-link::after {
+    content: '→';
+    transition: transform 0.3s ease;
+}
+
+.blog-card:hover .blog-card-link::after {
+    transform: translateX(4px);
+}
+
+/* ========================================
+   NO ARTICLES STATE
+   ======================================== */
+
+.no-articles {
+    text-align: center;
+    padding: 80px 20px;
+}
+
+.no-articles-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+}
+
+.no-articles p {
+    font-size: 18px;
+    color: #6B7280;
+}
+
+/* ========================================
+   RESPONSIVE - BLOG
+   ======================================== */
+
+@media (max-width: 1024px) {
+    .blog-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .blog-container {
+        padding: 60px 5%;
+    }
+
+    .blog-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .filters-title {
+        font-size: 28px;
+    }
+
+    .blog-filters {
+        flex-direction: column;
+    }
+
+    .filter-btn {
+        width: 100%;
+    }
+
+    .blog-card-image {
+        height: 200px;
+    }
+}
+
     </style>
 </head>
 <body>
