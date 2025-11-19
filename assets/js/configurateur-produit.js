@@ -133,12 +133,9 @@ class ConfigurateurProduit {
                             qty_250: parseFloat(values[10]?.replace(',', '.')) || 0,
                             qty_500: parseFloat(values[11]?.replace(',', '.')) || 0
                         };
-
-                        console.log('Prix chargé:', reference, data[reference]);
                     }
                 }
 
-                console.log('Total produits chargés:', Object.keys(data).length);
                 ConfigurateurProduit.pricingData = data;
                 return data;
             })
@@ -994,15 +991,9 @@ class ConfigurateurProduit {
         const pricing = ConfigurateurProduit.pricingData;
         let prixUnitaire = this.product.prixBase; // Fallback
 
-        console.log('=== CALCUL PRIX ===');
-        console.log('Référence:', this.product.reference);
-        console.log('Quantité:', totalPieces);
-        console.log('Prix base fallback:', this.product.prixBase);
-
         // Si on a les données du CSV, utiliser les vrais prix
         if (pricing && pricing[this.product.reference]) {
             const productPricing = pricing[this.product.reference];
-            console.log('Pricing CSV trouvé:', productPricing);
 
             // Déterminer le prix unitaire selon la quantité
             if (totalPieces >= 500) {
@@ -1022,42 +1013,30 @@ class ConfigurateurProduit {
             } else {
                 prixUnitaire = productPricing.qty_1;
             }
-
-            console.log('Prix unitaire CSV:', prixUnitaire);
-        } else {
-            console.log('❌ Pricing CSV non trouvé, utilisation fallback');
         }
 
         // Prix de base pour toutes les pièces
         let prixTotal = prixUnitaire * totalPieces;
-        console.log('Prix base (unitaire × quantité):', prixTotal);
 
         // -10% pour les enfants
         if (this.configuration.genre === 'enfants') {
             prixTotal *= 0.90;
-            console.log('Genre enfants -10%:', prixTotal);
         }
 
         // +2€/pièce pour les numéros SEULEMENT si spécifique
         if (this.configuration.personnalisation.numeros && this.configuration.personnalisation.numerosType === 'specifique') {
             prixTotal += totalPieces * 2;
-            console.log('Numéros spécifiques +2€/pcs:', prixTotal);
         }
 
         // +2€/pièce pour les noms SEULEMENT si spécifique
         if (this.configuration.personnalisation.noms && this.configuration.personnalisation.nomsType === 'specifique') {
             prixTotal += totalPieces * 2;
-            console.log('Noms spécifiques +2€/pcs:', prixTotal);
         }
 
         // Forfait design FLARE : +50€
         if (this.configuration.design.type === 'flare') {
             prixTotal += 50;
-            console.log('Design FLARE +50€:', prixTotal);
         }
-
-        console.log('PRIX FINAL:', prixTotal);
-        console.log('==================\n');
 
         return prixTotal;
     }
