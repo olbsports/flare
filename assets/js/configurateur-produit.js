@@ -9,6 +9,10 @@ class ConfigurateurProduit {
     static pricingData = null;
     static pricingPromise = null;
 
+    // Cache statique pour les templates
+    static templatesData = null;
+    static templatesPromise = null;
+
     constructor(productData) {
         this.product = productData;
         this.currentStep = 1;
@@ -88,26 +92,50 @@ class ConfigurateurProduit {
         ConfigurateurProduit.pricingPromise = fetch('/assets/data/PRICING-FLARE-2025.csv')
             .then(response => response.text())
             .then(csvText => {
-                const lines = csvText.split('\n');
-                const headers = lines[0].split(';');
                 const data = {};
 
+                // Parser CSV en gérant les guillemets et retours à la ligne
+                const lines = [];
+                let currentLine = '';
+                let insideQuotes = false;
+
+                for (let i = 0; i < csvText.length; i++) {
+                    const char = csvText[i];
+
+                    if (char === '"') {
+                        insideQuotes = !insideQuotes;
+                    }
+
+                    if (char === '\n' && !insideQuotes) {
+                        if (currentLine.trim()) {
+                            lines.push(currentLine);
+                        }
+                        currentLine = '';
+                    } else {
+                        currentLine += char;
+                    }
+                }
+
+                // Ajouter la dernière ligne
+                if (currentLine.trim()) {
+                    lines.push(currentLine);
+                }
+
+                // Traiter chaque ligne (sauf le header)
                 for (let i = 1; i < lines.length; i++) {
-                    if (!lines[i].trim()) continue;
-
                     const values = lines[i].split(';');
-                    const reference = values[18]; // REFERENCE_FLARE est la colonne 18
+                    const reference = values[18]?.trim().replace(/"/g, ''); // REFERENCE_FLARE
 
-                    if (reference) {
+                    if (reference && reference.startsWith('FLARE-')) {
                         data[reference] = {
-                            qty_1: parseFloat(values[4]) || 0,
-                            qty_5: parseFloat(values[5]) || 0,
-                            qty_10: parseFloat(values[6]) || 0,
-                            qty_20: parseFloat(values[7]) || 0,
-                            qty_50: parseFloat(values[8]) || 0,
-                            qty_100: parseFloat(values[9]) || 0,
-                            qty_250: parseFloat(values[10]) || 0,
-                            qty_500: parseFloat(values[11]) || 0
+                            qty_1: parseFloat(values[4]?.replace(',', '.')) || 0,
+                            qty_5: parseFloat(values[5]?.replace(',', '.')) || 0,
+                            qty_10: parseFloat(values[6]?.replace(',', '.')) || 0,
+                            qty_20: parseFloat(values[7]?.replace(',', '.')) || 0,
+                            qty_50: parseFloat(values[8]?.replace(',', '.')) || 0,
+                            qty_100: parseFloat(values[9]?.replace(',', '.')) || 0,
+                            qty_250: parseFloat(values[10]?.replace(',', '.')) || 0,
+                            qty_500: parseFloat(values[11]?.replace(',', '.')) || 0
                         };
                     }
                 }
@@ -128,6 +156,35 @@ class ConfigurateurProduit {
      */
     async loadPricing() {
         await ConfigurateurProduit.loadPricingCSV();
+    }
+
+    /**
+     * Charge les templates depuis l'API
+     */
+    static async loadTemplates() {
+        if (ConfigurateurProduit.templatesData) {
+            return ConfigurateurProduit.templatesData;
+        }
+
+        if (ConfigurateurProduit.templatesPromise) {
+            return ConfigurateurProduit.templatesPromise;
+        }
+
+        ConfigurateurProduit.templatesPromise = fetch('/api/list-templates.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    ConfigurateurProduit.templatesData = data.templates || [];
+                    return ConfigurateurProduit.templatesData;
+                }
+                return [];
+            })
+            .catch(error => {
+                console.error('Erreur chargement templates:', error);
+                return [];
+            });
+
+        return ConfigurateurProduit.templatesPromise;
     }
 
     /**
@@ -413,32 +470,54 @@ class ConfigurateurProduit {
      * Render le sélecteur de templates
      */
     renderTemplateSelector() {
-        // Liste des templates SVG disponibles dans /assets/templates/
-        const templates = [
-            { id: 'classic', name: 'Classic', preview: '../../assets/templates/classic.svg' },
-            { id: 'modern', name: 'Modern', preview: '../../assets/templates/modern.svg' },
-            { id: 'sport', name: 'Sport', preview: '../../assets/templates/sport.svg' },
-            { id: 'elegant', name: 'Élégant', preview: '../../assets/templates/elegant.svg' },
-            { id: 'geometric', name: 'Géométrique', preview: '../../assets/templates/geometric.svg' },
-            { id: 'minimal', name: 'Minimal', preview: '../../assets/templates/minimal.svg' }
-        ];
+        // Charger les templates si pas déjà fait
+        if (!ConfigurateurProduit.templatesData) {
+            ConfigurateurProduit.loadTemplates().then(() => {
+                this.updateStep();
+            });
+
+            return `
+                <div class="config-templates" style="margin-top: 2rem;">
+                    <h4 style="margin-bottom: 1rem; font-size: 16px; font-weight: 600;">Choisissez un template :</h4>
+                    <div style="padding: 2rem; text-align: center; color: #666;">
+                        <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #FF4B26; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                        <p style="margin-top: 1rem;">Chargement des templates...</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        const templates = ConfigurateurProduit.templatesData;
+
+        if (!templates || templates.length === 0) {
+            return `
+                <div class="config-templates" style="margin-top: 2rem;">
+                    <h4 style="margin-bottom: 1rem; font-size: 16px; font-weight: 600;">Choisissez un template :</h4>
+                    <div style="padding: 2rem; text-align: center; color: #999;">
+                        Aucun template disponible
+                    </div>
+                </div>
+            `;
+        }
 
         return `
             <div class="config-templates" style="margin-top: 2rem;">
                 <h4 style="margin-bottom: 1rem; font-size: 16px; font-weight: 600;">Choisissez un template :</h4>
                 <div class="config-templates-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px;">
-                    ${templates.map(tpl => `
+                    ${templates.map((tpl, index) => {
+                        const templateNumber = String(index + 1).padStart(3, '0');
+                        return `
                         <div class="config-template-card ${this.configuration.design.templateId === tpl.id ? 'selected' : ''}"
                              onclick="configurateurProduitInstance.selectTemplate('${tpl.id}')"
                              style="cursor: pointer; border: 2px solid ${this.configuration.design.templateId === tpl.id ? '#FF4B26' : '#e0e0e0'}; border-radius: 12px; padding: 12px; transition: all 0.3s ease; background: ${this.configuration.design.templateId === tpl.id ? '#fff5f3' : '#fff'};">
                             <div style="aspect-ratio: 3/4; background: #f8f9fa; border-radius: 8px; overflow: hidden; margin-bottom: 8px;">
-                                <img src="${tpl.preview}" alt="${tpl.name}"
+                                <img src="${tpl.path}" alt="Template ${templateNumber}"
                                      style="width: 100%; height: 100%; object-fit: contain;"
-                                     onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;color:#999;font-size:12px;\'>Template ${tpl.name}</div>'">
+                                     onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;color:#999;font-size:12px;\'>Template ${templateNumber}</div>'">
                             </div>
-                            <span style="display: block; text-align: center; font-size: 14px; font-weight: ${this.configuration.design.templateId === tpl.id ? '700' : '500'}; color: ${this.configuration.design.templateId === tpl.id ? '#FF4B26' : '#333'};">${tpl.name}</span>
+                            <span style="display: block; text-align: center; font-size: 14px; font-weight: ${this.configuration.design.templateId === tpl.id ? '700' : '500'}; color: ${this.configuration.design.templateId === tpl.id ? '#FF4B26' : '#333'};">Template ${templateNumber}</span>
                         </div>
-                    `).join('')}
+                    `;}).join('')}
                 </div>
             </div>
         `;
