@@ -510,6 +510,13 @@ class ConfigurateurProduit {
                         <h4>Mixte</h4>
                         <p>Coupe unisexe</p>
                     </div>
+
+                    <div class="config-genre-card ${this.configuration.genre === 'enfants' ? 'selected' : ''}"
+                         onclick="configurateurProduitInstance.selectGenre('enfants')">
+                        <div class="config-genre-icon">🧒</div>
+                        <h4>Enfants</h4>
+                        <p>-10% sur le prix</p>
+                    </div>
                 </div>
             </div>
         `;
@@ -905,6 +912,11 @@ class ConfigurateurProduit {
 
         // Prix de base pour toutes les pièces
         let prixTotal = prixUnitaire * totalPieces;
+
+        // -10% pour les enfants
+        if (this.configuration.genre === 'enfants') {
+            prixTotal *= 0.90;
+        }
 
         // +2€/pièce pour les numéros SEULEMENT si spécifique
         if (this.configuration.personnalisation.numeros && this.configuration.personnalisation.numerosType === 'specifique') {
