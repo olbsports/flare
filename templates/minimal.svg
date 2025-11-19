@@ -1,0 +1,24 @@
+<svg width="300" height="400" viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Template Minimal - Design épuré -->
+
+  <!-- Corps principal blanc -->
+  <rect x="50" y="50" width="200" height="300" fill="#fff" stroke="#e0e0e0" stroke-width="2"/>
+
+  <!-- Accent minimaliste -->
+  <line x1="50" y1="120" x2="250" y2="120" stroke="#FF4B26" stroke-width="2"/>
+  <circle cx="150" cy="120" r="5" fill="#FF4B26"/>
+
+  <!-- Col simple -->
+  <ellipse cx="150" cy="50" rx="25" ry="12" fill="#f5f5f5" stroke="#ddd" stroke-width="1"/>
+
+  <!-- Petit logo position -->
+  <circle cx="85" cy="100" r="15" fill="none" stroke="#FF4B26" stroke-width="1" stroke-dasharray="2,2"/>
+  <text x="85" y="105" font-family="sans-serif" font-size="8" fill="#999" text-anchor="middle">LOGO</text>
+
+  <!-- Manches simples -->
+  <path d="M 50 80 L 35 115 L 42 140 L 50 130 Z" fill="#f5f5f5" stroke="#ddd" stroke-width="1"/>
+  <path d="M 250 80 L 265 115 L 258 140 L 250 130 Z" fill="#f5f5f5" stroke="#ddd" stroke-width="1"/>
+
+  <!-- Texte -->
+  <text x="150" y="320" font-family="Bebas Neue, sans-serif" font-size="20" fill="#333" text-anchor="middle">MINIMAL</text>
+</svg>
