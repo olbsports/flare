@@ -439,12 +439,12 @@ class ConfigurateurProduit {
     renderTemplateSelector() {
         // Liste des templates SVG disponibles dans /assets/templates/
         const templates = [
-            { id: 'classic', name: 'Classic', preview: '../../assets/templates/classic.svg' },
-            { id: 'modern', name: 'Modern', preview: '../../assets/templates/modern.svg' },
-            { id: 'sport', name: 'Sport', preview: '../../assets/templates/sport.svg' },
-            { id: 'elegant', name: 'Élégant', preview: '../../assets/templates/elegant.svg' },
-            { id: 'geometric', name: 'Géométrique', preview: '../../assets/templates/geometric.svg' },
-            { id: 'minimal', name: 'Minimal', preview: '../../assets/templates/minimal.svg' }
+            { id: 'classic', name: 'Classic', preview: '/assets/templates/classic.svg' },
+            { id: 'modern', name: 'Modern', preview: '/assets/templates/modern.svg' },
+            { id: 'sport', name: 'Sport', preview: '/assets/templates/sport.svg' },
+            { id: 'elegant', name: 'Élégant', preview: '/assets/templates/elegant.svg' },
+            { id: 'geometric', name: 'Géométrique', preview: '/assets/templates/geometric.svg' },
+            { id: 'minimal', name: 'Minimal', preview: '/assets/templates/minimal.svg' }
         ];
 
         return `
