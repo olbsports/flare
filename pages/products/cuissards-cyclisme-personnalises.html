@@ -15,6 +15,10 @@
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Bebas+Neue&display=swap"></noscript>
     <link rel="preload" href="../../assets/css/components.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="../../assets/css/components.css"></noscript>
+    <!-- Configurateur Produit -->
+    <link rel="stylesheet" href="../../assets/css/configurateur-produit.css">
+    <script src="../../assets/js/configurateur-produit.js" defer></script>
+
 
     <style>/* ========================================
    HERO UNIVERSEL - DESIGN SIMPLE ET MODERNE
@@ -1667,6 +1671,56 @@
         </div>
     </section>
 
+
+    <!-- Section Configurateur Produit -->
+    <section style="padding: 100px 5%; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+        <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+            <div style="display: inline-block; background: linear-gradient(135deg, #FF4B26 0%, #E63910 100%); color: #fff; padding: 8px 24px; font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; border-radius: 24px; margin-bottom: 24px;">
+                Configurateur en ligne
+            </div>
+            <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 56px; letter-spacing: 2px; margin-bottom: 24px; color: #1a1a1a; line-height: 1.2;">
+                Créez votre devis personnalisé
+            </h2>
+            <p style="font-size: 18px; line-height: 1.8; color: #495057; max-width: 900px; margin: 0 auto 48px;">
+                Configurez vos équipements en quelques clics : choix du design, des couleurs, des tailles, de la personnalisation. Recevez votre devis détaillé par email sous 24h.
+            </p>
+
+            <button onclick="initConfigurateurProduit({
+                reference: 'CUISSARDS_CYCLISME_PERSONNALISES',
+                nom: 'Cuissard Cyclisme Personnalisé Sublimation',
+                sport: 'Cyclisme',
+                famille: 'Cuissard',
+                photo: 'https://flare-custom.com/photos/produits/FLARE-RUNCUIH-172-1.webp',
+                tissu: 'Lycra Cyclisme 230g',
+                grammage: '230g/m²',
+                prixBase: 35.0
+            })" style="display: inline-flex; align-items: center; gap: 12px; padding: 18px 40px; background: linear-gradient(135deg, #FF4B26 0%, #E63910 100%); color: #fff; text-decoration: none; font-weight: 700; font-size: 16px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(255, 75, 38, 0.3);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                <span>Configurer mon devis</span>
+            </button>
+
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 64px; max-width: 900px; margin-left: auto; margin-right: auto;">
+                <div style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 12px;">⚡</div>
+                    <h4 style="font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 1px; margin: 0 0 8px 0; color: #1a1a1a;">Rapide</h4>
+                    <p style="color: #666; margin: 0; font-size: 0.95rem;">5 minutes pour un devis complet</p>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 12px;">🎨</div>
+                    <h4 style="font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 1px; margin: 0 0 8px 0; color: #1a1a1a;">Personnalisé</h4>
+                    <p style="color: #666; margin: 0; font-size: 0.95rem;">Design, couleurs, tailles, logos</p>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 12px;">💰</div>
+                    <h4 style="font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 1px; margin: 0 0 8px 0; color: #1a1a1a;">Prix dégressifs</h4>
+                    <p style="color: #666; margin: 0; font-size: 0.95rem;">Jusqu'à -35% dès 500 pièces</p>
+                </div>
+            </div>
+        </div>
+    </section>
     <section class="seo-mega">
         <div class="container">
             
