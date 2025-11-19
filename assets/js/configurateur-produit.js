@@ -43,8 +43,10 @@ class ConfigurateurProduit {
                 couleurTertiaire: '',
                 logos: [],
                 numeros: false,
+                numerosType: 'generique', // 'generique' ou 'specifique'
                 numerosStyle: '',
                 noms: false,
+                nomsType: 'generique', // 'generique' ou 'specifique'
                 nomsStyle: '',
                 zones: [], // Zones de personnalisation
                 remarques: ''
@@ -347,24 +349,30 @@ class ConfigurateurProduit {
      * Render le sélecteur de templates
      */
     renderTemplateSelector() {
+        // Liste des templates SVG disponibles dans /assets/templates/
         const templates = [
-            { id: 'classic', name: 'Classic', preview: '/assets/templates/classic.svg' },
-            { id: 'modern', name: 'Modern', preview: '/assets/templates/modern.svg' },
-            { id: 'sport', name: 'Sport', preview: '/assets/templates/sport.svg' },
-            { id: 'elegant', name: 'Élégant', preview: '/assets/templates/elegant.svg' },
-            { id: 'geometric', name: 'Géométrique', preview: '/assets/templates/geometric.svg' },
-            { id: 'minimal', name: 'Minimal', preview: '/assets/templates/minimal.svg' }
+            { id: 'classic', name: 'Classic', preview: '../../assets/templates/classic.svg' },
+            { id: 'modern', name: 'Modern', preview: '../../assets/templates/modern.svg' },
+            { id: 'sport', name: 'Sport', preview: '../../assets/templates/sport.svg' },
+            { id: 'elegant', name: 'Élégant', preview: '../../assets/templates/elegant.svg' },
+            { id: 'geometric', name: 'Géométrique', preview: '../../assets/templates/geometric.svg' },
+            { id: 'minimal', name: 'Minimal', preview: '../../assets/templates/minimal.svg' }
         ];
 
         return `
             <div class="config-templates" style="margin-top: 2rem;">
-                <h4 style="margin-bottom: 1rem;">Choisissez un template :</h4>
-                <div class="config-templates-grid">
+                <h4 style="margin-bottom: 1rem; font-size: 16px; font-weight: 600;">Choisissez un template :</h4>
+                <div class="config-templates-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px;">
                     ${templates.map(tpl => `
                         <div class="config-template-card ${this.configuration.design.templateId === tpl.id ? 'selected' : ''}"
-                             onclick="configurateurProduitInstance.selectTemplate('${tpl.id}')">
-                            <img src="${tpl.preview}" alt="${tpl.name}" onerror="this.src='/assets/images/placeholder.jpg'">
-                            <span>${tpl.name}</span>
+                             onclick="configurateurProduitInstance.selectTemplate('${tpl.id}')"
+                             style="cursor: pointer; border: 2px solid ${this.configuration.design.templateId === tpl.id ? '#FF4B26' : '#e0e0e0'}; border-radius: 12px; padding: 12px; transition: all 0.3s ease; background: ${this.configuration.design.templateId === tpl.id ? '#fff5f3' : '#fff'};">
+                            <div style="aspect-ratio: 3/4; background: #f8f9fa; border-radius: 8px; overflow: hidden; margin-bottom: 8px;">
+                                <img src="${tpl.preview}" alt="${tpl.name}"
+                                     style="width: 100%; height: 100%; object-fit: contain;"
+                                     onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;color:#999;font-size:12px;\'>Template ${tpl.name}</div>'">
+                            </div>
+                            <span style="display: block; text-align: center; font-size: 14px; font-weight: ${this.configuration.design.templateId === tpl.id ? '700' : '500'}; color: ${this.configuration.design.templateId === tpl.id ? '#FF4B26' : '#333'};">${tpl.name}</span>
                         </div>
                     `).join('')}
                 </div>
@@ -614,36 +622,59 @@ class ConfigurateurProduit {
                     <!-- Numéros et noms -->
                     <div class="config-perso-section">
                         <h4 class="config-perso-subtitle">🔢 Numéros et noms</h4>
+
+                        <!-- Numéros -->
                         <div class="config-checkbox-group">
                             <label class="config-checkbox">
                                 <input type="checkbox" ${this.configuration.personnalisation.numeros ? 'checked' : ''}
-                                       onchange="configurateurProduitInstance.configuration.personnalisation.numeros = this.checked; configurateurProduitInstance.updateSummary()">
-                                <span>Numéros sur les maillots</span>
+                                       onchange="configurateurProduitInstance.toggleNumeros(this.checked)">
+                                <span>Numéros sur les équipements</span>
                             </label>
 
                             ${this.configuration.personnalisation.numeros ? `
                                 <div class="config-form-group" style="margin-left: 2rem; margin-top: 0.5rem;">
-                                    <label class="config-label">Style de numérotation</label>
+                                    <label class="config-label">Type de numérotation</label>
+                                    <div class="config-option-buttons" style="gap: 8px; margin-bottom: 1rem;">
+                                        <button class="config-option-btn ${this.configuration.personnalisation.numerosType === 'generique' ? 'selected' : ''}"
+                                                onclick="configurateurProduitInstance.setNumerosType('generique')">
+                                            Générique (1-20) - Gratuit
+                                        </button>
+                                        <button class="config-option-btn ${this.configuration.personnalisation.numerosType === 'specifique' ? 'selected' : ''}"
+                                                onclick="configurateurProduitInstance.setNumerosType('specifique')">
+                                            Spécifique - +2€/pièce
+                                        </button>
+                                    </div>
                                     <input type="text" class="config-text-input"
-                                           placeholder="Ex: Numéros 1-20, style moderne, couleur blanche"
+                                           placeholder="Ex: Numéros 1-20, style moderne, couleur blanche, taille 25cm"
                                            value="${this.configuration.personnalisation.numerosStyle}"
                                            onchange="configurateurProduitInstance.configuration.personnalisation.numerosStyle = this.value">
                                 </div>
                             ` : ''}
                         </div>
 
+                        <!-- Noms -->
                         <div class="config-checkbox-group">
                             <label class="config-checkbox">
                                 <input type="checkbox" ${this.configuration.personnalisation.noms ? 'checked' : ''}
-                                       onchange="configurateurProduitInstance.configuration.personnalisation.noms = this.checked; configurateurProduitInstance.updateSummary()">
+                                       onchange="configurateurProduitInstance.toggleNoms(this.checked)">
                                 <span>Noms des joueurs</span>
                             </label>
 
                             ${this.configuration.personnalisation.noms ? `
                                 <div class="config-form-group" style="margin-left: 2rem; margin-top: 0.5rem;">
-                                    <label class="config-label">Style des noms</label>
+                                    <label class="config-label">Type de noms</label>
+                                    <div class="config-option-buttons" style="gap: 8px; margin-bottom: 1rem;">
+                                        <button class="config-option-btn ${this.configuration.personnalisation.nomsType === 'generique' ? 'selected' : ''}"
+                                                onclick="configurateurProduitInstance.setNomsType('generique')">
+                                            Générique (JOUEUR 1-20) - Gratuit
+                                        </button>
+                                        <button class="config-option-btn ${this.configuration.personnalisation.nomsType === 'specifique' ? 'selected' : ''}"
+                                                onclick="configurateurProduitInstance.setNomsType('specifique')">
+                                            Spécifique - +2€/pièce
+                                        </button>
+                                    </div>
                                     <input type="text" class="config-text-input"
-                                           placeholder="Ex: Noms en majuscules sur le dos, police moderne"
+                                           placeholder="Ex: Noms en majuscules sur le dos, police moderne, taille 8cm"
                                            value="${this.configuration.personnalisation.nomsStyle}"
                                            onchange="configurateurProduitInstance.configuration.personnalisation.nomsStyle = this.value">
                                 </div>
@@ -875,13 +906,13 @@ class ConfigurateurProduit {
         // Prix de base pour toutes les pièces
         let prixTotal = prixUnitaire * totalPieces;
 
-        // +2€/pièce pour les numéros
-        if (this.configuration.personnalisation.numeros) {
+        // +2€/pièce pour les numéros SEULEMENT si spécifique
+        if (this.configuration.personnalisation.numeros && this.configuration.personnalisation.numerosType === 'specifique') {
             prixTotal += totalPieces * 2;
         }
 
-        // +2€/pièce pour les noms
-        if (this.configuration.personnalisation.noms) {
+        // +2€/pièce pour les noms SEULEMENT si spécifique
+        if (this.configuration.personnalisation.noms && this.configuration.personnalisation.nomsType === 'specifique') {
             prixTotal += totalPieces * 2;
         }
 
@@ -891,6 +922,48 @@ class ConfigurateurProduit {
         }
 
         return prixTotal;
+    }
+
+    /**
+     * Active/désactive les numéros
+     */
+    toggleNumeros(checked) {
+        this.configuration.personnalisation.numeros = checked;
+        if (checked && !this.configuration.personnalisation.numerosType) {
+            this.configuration.personnalisation.numerosType = 'generique';
+        }
+        this.updateStep();
+        this.updateSummary();
+    }
+
+    /**
+     * Active/désactive les noms
+     */
+    toggleNoms(checked) {
+        this.configuration.personnalisation.noms = checked;
+        if (checked && !this.configuration.personnalisation.nomsType) {
+            this.configuration.personnalisation.nomsType = 'generique';
+        }
+        this.updateStep();
+        this.updateSummary();
+    }
+
+    /**
+     * Définit le type de numérotation
+     */
+    setNumerosType(type) {
+        this.configuration.personnalisation.numerosType = type;
+        this.updateStep();
+        this.updateSummary();
+    }
+
+    /**
+     * Définit le type de noms
+     */
+    setNomsType(type) {
+        this.configuration.personnalisation.nomsType = type;
+        this.updateStep();
+        this.updateSummary();
     }
 
     /**
@@ -1033,8 +1106,24 @@ class ConfigurateurProduit {
                 break;
 
             case 2:
-                if (!this.configuration.options.col || !this.configuration.options.manches) {
-                    alert('Veuillez sélectionner toutes les options obligatoires');
+                // Validation dynamique selon les options disponibles
+                const availableOptions = this.getAvailableOptions();
+
+                // Vérifier col seulement si disponible
+                if (availableOptions.col && availableOptions.col.length > 0 && !this.configuration.options.col) {
+                    alert('Veuillez sélectionner un type de col');
+                    return false;
+                }
+
+                // Vérifier manches seulement si disponible
+                if (availableOptions.manches && availableOptions.manches.length > 0 && !this.configuration.options.manches) {
+                    alert('Veuillez sélectionner un type de manches');
+                    return false;
+                }
+
+                // Vérifier fermeture seulement si disponible
+                if (availableOptions.fermeture && availableOptions.fermeture.length > 0 && !this.configuration.options.fermeture) {
+                    alert('Veuillez sélectionner un type de fermeture');
                     return false;
                 }
                 break;

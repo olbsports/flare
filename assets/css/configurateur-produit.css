@@ -891,37 +891,256 @@
 }
 
 @media (max-width: 768px) {
+    /* Container mobile optimisé */
+    .config-container {
+        width: 100%;
+        max-height: 100vh;
+        margin: 0;
+        border-radius: 0;
+    }
+
     .config-header {
-        padding: 1.5rem;
-    }
-
-    .config-content {
-        padding: 1.5rem;
-    }
-
-    .config-step-title {
-        font-size: 1.5rem;
-    }
-
-    .config-templates-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .config-footer {
+        padding: 1rem;
         flex-direction: column;
         gap: 1rem;
     }
 
+    .config-product-info {
+        flex-direction: row;
+        gap: 1rem;
+    }
+
+    .config-product-thumb {
+        width: 60px;
+        height: 60px;
+    }
+
+    .config-product-name {
+        font-size: 1.1rem;
+    }
+
+    .config-product-ref {
+        font-size: 0.75rem;
+    }
+
+    /* Steps indicator avec scroll horizontal */
+    .config-steps-indicator {
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 0.5rem;
+        gap: 0.5rem;
+    }
+
+    .config-steps-indicator::-webkit-scrollbar {
+        display: none;
+    }
+
+    .config-step {
+        flex-shrink: 0;
+        min-width: 40px;
+    }
+
+    .config-step-number {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+
+    /* Contenu avec scroll optimisé */
+    .config-content {
+        padding: 1rem;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .config-step-title {
+        font-size: 1.4rem;
+        line-height: 1.3;
+    }
+
+    .config-step-description {
+        font-size: 0.9rem;
+    }
+
+    /* Options avec scroll horizontal */
+    .config-design-options {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .config-design-card {
+        padding: 1.5rem;
+    }
+
+    .config-design-icon {
+        font-size: 2.5rem;
+    }
+
+    /* Templates avec scroll horizontal */
+    .config-templates-grid {
+        display: flex !important;
+        overflow-x: auto;
+        gap: 12px;
+        padding-bottom: 1rem;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .config-template-card {
+        flex-shrink: 0;
+        width: 120px !important;
+        min-width: 120px !important;
+    }
+
+    /* Options produit scroll horizontal */
+    .config-options-grid {
+        gap: 1.5rem;
+    }
+
+    .config-option-buttons {
+        display: flex;
+        overflow-x: auto;
+        gap: 8px;
+        padding-bottom: 0.5rem;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .config-option-btn {
+        flex-shrink: 0;
+        white-space: nowrap;
+        padding: 0.75rem 1.25rem;
+        font-size: 0.9rem;
+    }
+
+    /* Genre cards */
+    .config-genre-options {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .config-genre-card {
+        padding: 1.5rem;
+    }
+
+    /* Tailles */
+    .config-tailles-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    .config-taille-item {
+        padding: 0.75rem;
+    }
+
+    .config-taille-input {
+        width: 60px;
+        padding: 0.5rem;
+        font-size: 1rem;
+    }
+
+    /* Presets tailles avec scroll */
+    .config-tailles-presets {
+        display: flex;
+        overflow-x: auto;
+        gap: 8px;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .config-preset-btn {
+        flex-shrink: 0;
+        white-space: nowrap;
+        font-size: 0.85rem;
+        padding: 0.6rem 1rem;
+    }
+
+    /* Personnalisation */
+    .config-couleurs-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .config-perso-section {
+        margin-bottom: 1.5rem;
+    }
+
+    /* Footer mobile */
+    .config-footer {
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 1rem;
+    }
+
     .btn-config-secondary {
         order: 2;
+        width: 100%;
+        padding: 0.875rem 1.5rem;
     }
 
     .config-step-info {
         order: 1;
+        text-align: center;
+        font-size: 0.9rem;
     }
 
     .btn-config-primary {
         order: 3;
         width: 100%;
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    /* Sidebar résumé mobile */
+    .config-sidebar {
+        padding: 1rem;
+    }
+
+    .config-summary h3 {
+        font-size: 1.1rem;
+    }
+
+    .config-summary-item {
+        font-size: 0.85rem;
+        padding: 0.5rem 0;
+    }
+
+    .config-summary-total {
+        font-size: 1.1rem;
+    }
+
+    /* Close button mobile */
+    .config-close {
+        width: 36px;
+        height: 36px;
+        top: 0.75rem;
+        right: 0.75rem;
+    }
+}
+
+/* Très petits écrans */
+@media (max-width: 480px) {
+    .config-step-title {
+        font-size: 1.25rem;
+    }
+
+    .config-design-card h4,
+    .config-genre-card h4 {
+        font-size: 1.1rem;
+    }
+
+    .config-design-card p,
+    .config-genre-card p {
+        font-size: 0.85rem;
+    }
+
+    .config-tailles-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .config-template-card {
+        width: 100px !important;
+        min-width: 100px !important;
     }
 }

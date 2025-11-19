@@ -533,28 +533,87 @@
    ======================================== */
 
 @media (max-width: 768px) {
+    /* TABS RESPONSIVE - Scroll horizontal sur mobile */
     .tabs-nav {
-        flex-wrap: wrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: #FF4B26 #f5f5f5;
         gap: 4px;
+        margin-bottom: 32px;
+        position: relative;
+        scroll-behavior: smooth;
+        /* Padding pour éviter la coupure */
+        padding: 0 8px 8px 8px;
+        margin-left: -8px;
+        margin-right: -8px;
     }
 
-    .tab-btn {
-        padding: 12px 16px;
-        font-size: 14px;
-        flex: 1 1 auto;
-        min-width: calc(50% - 4px);
+    /* Scrollbar personnalisée pour Chrome/Safari */
+    .tabs-nav::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .tabs-nav::-webkit-scrollbar-track {
+        background: #f5f5f5;
+        border-radius: 2px;
+    }
+
+    .tabs-nav::-webkit-scrollbar-thumb {
+        background: #FF4B26;
+        border-radius: 2px;
+    }
+
+    .tabs-nav::-webkit-scrollbar-thumb:hover {
+        background: #E63910;
+    }
+
+    /* Effet de gradient pour indiquer qu'il y a du contenu */
+    .product-tabs::before {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 0;
+        height: 60px;
+        width: 60px;
+        background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.95) 50%, rgba(255,255,255,1) 100%);
+        pointer-events: none;
+        z-index: 1;
     }
 
     .product-tabs {
+        position: relative;
         padding: 0 3%;
         margin: 40px auto;
     }
+
+    .tab-btn {
+        padding: 12px 20px;
+        font-size: 14px;
+        white-space: nowrap;
+        flex-shrink: 0;
+        border-radius: 8px 8px 0 0;
+        transition: all 0.2s ease;
+    }
+
+    .tab-btn:active {
+        transform: scale(0.98);
+    }
 }
 
-@media (max-width: 480px) {
+/* TABLETTE - Optimisation intermédiaire */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .tabs-nav {
+        gap: 6px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
     .tab-btn {
-        min-width: 100%;
-        text-align: center;
+        padding: 14px 24px;
+        font-size: 15px;
+        white-space: nowrap;
     }
 }
 
