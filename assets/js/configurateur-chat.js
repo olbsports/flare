@@ -95,6 +95,12 @@ class ConfigurateurChat {
         this.currentStep = 'sport';
         this.updateStepsIndicator();
 
+        // Vérifier qu'il y a des sports disponibles
+        if (!this.data.sports || this.data.sports.length === 0) {
+            this.addBotMessage('Désolé, aucun sport n\'est disponible pour le moment. Veuillez nous contacter directement au +359885813134.');
+            return;
+        }
+
         const question = 'Parfait ! Pour quel sport souhaitez-vous des équipements ?';
 
         const options = this.data.sports.map(sport => ({
@@ -119,6 +125,13 @@ class ConfigurateurChat {
         this.updateStepsIndicator();
 
         const families = this.csvParser.getFamiliesBySport(this.configuration.sport);
+
+        // Vérifier qu'il y a des familles disponibles
+        if (!families || families.length === 0) {
+            this.addBotMessage(`Désolé, aucun produit n'est disponible pour le ${this.formatSportName(this.configuration.sport)} pour le moment. Veuillez nous contacter directement au +359885813134.`);
+            return;
+        }
+
         const question = `Excellent choix ! Quel type de produit recherchez-vous en ${this.formatSportName(this.configuration.sport)} ?`;
 
         const options = families.map(famille => ({
@@ -146,6 +159,12 @@ class ConfigurateurChat {
             this.configuration.sport,
             this.configuration.famille
         );
+
+        // Vérifier qu'il y a des genres disponibles
+        if (!genres || genres.length === 0) {
+            this.addBotMessage(`Désolé, aucun modèle n'est disponible pour cette famille de produits. Veuillez nous contacter directement au +359885813134.`);
+            return;
+        }
 
         const question = `Super ! Souhaitez-vous un modèle Homme ou Femme ?`;
 
@@ -175,6 +194,12 @@ class ConfigurateurChat {
             this.configuration.famille,
             this.configuration.genre
         );
+
+        // Vérifier qu'il y a des produits disponibles
+        if (!products || products.length === 0) {
+            this.addBotMessage(`Désolé, aucun produit ne correspond à votre sélection pour le moment. Veuillez nous contacter directement au +359885813134 pour une offre personnalisée.`);
+            return;
+        }
 
         const question = `Voici nos modèles de ${this.configuration.famille} ${this.configuration.genre} disponibles :`;
 
