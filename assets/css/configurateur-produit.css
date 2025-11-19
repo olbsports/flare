@@ -515,7 +515,7 @@
 /* Genre (Étape 3) */
 .config-genre-options {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 1.5rem;
 }
 
@@ -872,9 +872,13 @@
         border-top: 1px solid #e0e0e0;
     }
 
-    .config-design-options,
-    .config-genre-options {
+    .config-design-options {
         grid-template-columns: 1fr;
+    }
+
+    .config-genre-options {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
     }
 
     .config-tailles-grid {
@@ -903,64 +907,52 @@
         flex-direction: column;
     }
 
-    /* HEADER COMPACT */
+    /* HEADER ULTRA-COMPACT - Juste les étapes */
     .config-header {
-        padding: 0.75rem 1rem;
+        padding: 0.5rem 1rem;
         background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
         border-bottom: 1px solid #e0e0e0;
         flex-shrink: 0;
     }
 
+    /* Photo et nom CACHÉS sur mobile */
     .config-product-info {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 0.75rem;
+        display: none !important;
     }
 
     .config-product-thumb {
-        width: 40px;
-        height: 40px;
-        border-radius: 8px;
-        flex-shrink: 0;
+        display: none;
     }
 
     .config-product-name {
-        font-size: 0.95rem;
-        line-height: 1.2;
-        font-weight: 700;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        flex: 1;
+        display: none;
     }
 
     .config-product-ref {
-        font-size: 0.7rem;
-        opacity: 0.6;
-        display: none; /* Caché sur mobile pour gagner de la place */
+        display: none;
     }
 
-    /* STEPS INDICATOR - Ultra compact */
+    /* STEPS INDICATOR - Numéros en ligne seulement */
     .config-steps-indicator {
         display: flex;
-        justify-content: space-between;
-        gap: 0.25rem;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
         padding: 0;
     }
 
     .config-step {
-        flex: 1;
+        flex: 0 0 auto;
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
-        gap: 0.25rem;
+        gap: 0;
     }
 
     .config-step-number {
-        width: 28px;
-        height: 28px;
-        font-size: 0.85rem;
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -974,7 +966,7 @@
     .config-step.active .config-step-number {
         background: linear-gradient(135deg, #FF4B26 0%, #E63910 100%);
         color: #fff;
-        transform: scale(1.1);
+        transform: scale(1.15);
         box-shadow: 0 2px 8px rgba(255, 75, 38, 0.4);
     }
 
@@ -983,18 +975,9 @@
         color: #fff;
     }
 
+    /* Labels CACHÉS sur mobile - juste les numéros */
     .config-step-label {
-        font-size: 0.65rem;
-        text-align: center;
-        line-height: 1.1;
-        display: block;
-        color: #666;
-        font-weight: 500;
-    }
-
-    .config-step.active .config-step-label {
-        color: #FF4B26;
-        font-weight: 700;
+        display: none !important;
     }
 
     /* BODY - Scroll optimisé */
@@ -1012,7 +995,7 @@
         overflow-y: auto;
         overflow-x: hidden;
         padding: 1rem;
-        padding-bottom: 100px; /* Espace pour le footer fixe SEULEMENT */
+        padding-bottom: 140px; /* Espace pour éviter que le contenu soit caché par le footer */
         -webkit-overflow-scrolling: touch;
     }
 
@@ -1226,29 +1209,56 @@
         margin-bottom: 0.5rem;
     }
 
-    /* Tailles */
+    /* Tailles - Grid responsive */
     .config-tailles-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.75rem;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+        margin-bottom: 1rem;
     }
 
     .config-taille-item {
+        background: #f8f9fa;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
         padding: 0.75rem;
-        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .config-taille-item:has(.config-taille-input:focus) {
+        border-color: #FF4B26;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(255, 75, 38, 0.2);
     }
 
     .config-taille-label {
-        font-size: 0.9rem;
+        font-size: 0.95rem;
         font-weight: 700;
+        color: #333;
+        text-align: center;
     }
 
     .config-taille-input {
         width: 100%;
-        max-width: 60px;
-        padding: 0.5rem;
-        font-size: 1rem;
+        max-width: 70px;
+        padding: 0.6rem 0.25rem;
+        font-size: 1.1rem;
+        font-weight: 700;
         text-align: center;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background: #fff;
+        transition: all 0.3s ease;
+    }
+
+    .config-taille-input:focus {
+        outline: none;
+        border-color: #FF4B26;
+        box-shadow: 0 0 0 3px rgba(255, 75, 38, 0.1);
     }
 
     /* Presets tailles avec scroll */
