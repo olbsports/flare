@@ -1742,6 +1742,133 @@
     }
 }
 
+/* ========================================
+   SOLUTIONS SECTION
+   ======================================== */
+
+.solutions-section {
+    padding: 100px 5%;
+    background: #fff;
+}
+
+.solutions-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.solution-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 40px 32px;
+    border-radius: 16px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.solution-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 32px rgba(255, 75, 38, 0.15);
+}
+
+.solution-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 24px;
+    background: linear-gradient(135deg, #FF4B26 0%, #E63910 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+}
+
+.solution-icon svg {
+    width: 40px;
+    height: 40px;
+}
+
+.solution-card h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    color: #1a1a1a;
+}
+
+.solution-card p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #495057;
+}
+
+/* ========================================
+   TIPS SECTION
+   ======================================== */
+
+.tips-section {
+    padding: 100px 5%;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.tips-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.tip-card {
+    background: #fff;
+    padding: 40px 32px;
+    border-radius: 16px;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.tip-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+.tip-icon {
+    font-size: 48px;
+    margin-bottom: 24px;
+    display: block;
+}
+
+.tip-card h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    color: #1a1a1a;
+}
+
+.tip-card p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #495057;
+}
+
+/* Responsive solutions & tips */
+@media (max-width: 1024px) {
+    .solutions-grid,
+    .tips-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .solutions-grid,
+    .tips-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
     </style>
 </head>
 <body>
