@@ -5,6 +5,10 @@
  */
 
 class ConfigurateurProduit {
+    // Cache statique pour les prix du CSV
+    static pricingData = null;
+    static pricingPromise = null;
+
     constructor(productData) {
         this.product = productData;
         this.currentStep = 1;
@@ -64,6 +68,66 @@ class ConfigurateurProduit {
 
         this.taillesDisponibles = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL'];
         this.isOpen = false;
+
+        // Charger les prix du CSV si pas déjà fait
+        this.loadPricing();
+    }
+
+    /**
+     * Charge les données de pricing depuis le CSV
+     */
+    static async loadPricingCSV() {
+        if (ConfigurateurProduit.pricingData) {
+            return ConfigurateurProduit.pricingData;
+        }
+
+        if (ConfigurateurProduit.pricingPromise) {
+            return ConfigurateurProduit.pricingPromise;
+        }
+
+        ConfigurateurProduit.pricingPromise = fetch('/assets/data/PRICING-FLARE-2025.csv')
+            .then(response => response.text())
+            .then(csvText => {
+                const lines = csvText.split('\n');
+                const headers = lines[0].split(';');
+                const data = {};
+
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue;
+
+                    const values = lines[i].split(';');
+                    const reference = values[18]; // REFERENCE_FLARE est la colonne 18
+
+                    if (reference) {
+                        data[reference] = {
+                            qty_1: parseFloat(values[4]) || 0,
+                            qty_5: parseFloat(values[5]) || 0,
+                            qty_10: parseFloat(values[6]) || 0,
+                            qty_20: parseFloat(values[7]) || 0,
+                            qty_50: parseFloat(values[8]) || 0,
+                            qty_100: parseFloat(values[9]) || 0,
+                            qty_250: parseFloat(values[10]) || 0,
+                            qty_500: parseFloat(values[11]) || 0
+                        };
+                    }
+                }
+
+                ConfigurateurProduit.pricingData = data;
+                return data;
+            })
+            .catch(error => {
+                console.error('Erreur chargement pricing:', error);
+                return {};
+            });
+
+        return ConfigurateurProduit.pricingPromise;
+    }
+
+    /**
+     * Initialise le chargement du pricing
+     */
+    async loadPricing() {
+        await ConfigurateurProduit.loadPricingCSV();
     }
 
     /**
@@ -899,16 +963,33 @@ class ConfigurateurProduit {
         const totalPieces = this.getTotalQuantite();
         if (totalPieces === 0) return 0;
 
-        let prixUnitaire = this.product.prixBase;
+        // Récupérer les prix depuis le CSV
+        const pricing = ConfigurateurProduit.pricingData;
+        let prixUnitaire = this.product.prixBase; // Fallback
 
-        // Prix dégressifs sur le prix de base
-        if (totalPieces >= 500) prixUnitaire *= 0.65;
-        else if (totalPieces >= 250) prixUnitaire *= 0.70;
-        else if (totalPieces >= 100) prixUnitaire *= 0.75;
-        else if (totalPieces >= 50) prixUnitaire *= 0.80;
-        else if (totalPieces >= 20) prixUnitaire *= 0.85;
-        else if (totalPieces >= 10) prixUnitaire *= 0.90;
-        else if (totalPieces >= 5) prixUnitaire *= 0.95;
+        // Si on a les données du CSV, utiliser les vrais prix
+        if (pricing && pricing[this.product.reference]) {
+            const productPricing = pricing[this.product.reference];
+
+            // Déterminer le prix unitaire selon la quantité
+            if (totalPieces >= 500) {
+                prixUnitaire = productPricing.qty_500;
+            } else if (totalPieces >= 250) {
+                prixUnitaire = productPricing.qty_250;
+            } else if (totalPieces >= 100) {
+                prixUnitaire = productPricing.qty_100;
+            } else if (totalPieces >= 50) {
+                prixUnitaire = productPricing.qty_50;
+            } else if (totalPieces >= 20) {
+                prixUnitaire = productPricing.qty_20;
+            } else if (totalPieces >= 10) {
+                prixUnitaire = productPricing.qty_10;
+            } else if (totalPieces >= 5) {
+                prixUnitaire = productPricing.qty_5;
+            } else {
+                prixUnitaire = productPricing.qty_1;
+            }
+        }
 
         // Prix de base pour toutes les pièces
         let prixTotal = prixUnitaire * totalPieces;
