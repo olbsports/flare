@@ -3,10 +3,10 @@
  * FLARE CUSTOM - 2025
  */
 
-/* Variables CSS */
+/* Variables CSS - FLARE CUSTOM Design System */
 :root {
-    --chat-primary: #FF6B00;
-    --chat-primary-dark: #E56000;
+    --chat-primary: #FF4B26;
+    --chat-primary-dark: #E63910;
     --chat-secondary: #1a1a1a;
     --chat-bg: #f8f9fa;
     --chat-white: #ffffff;
@@ -15,7 +15,7 @@
     --chat-text-light: #666666;
     --chat-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
     --chat-shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.15);
-    --chat-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --chat-transition: all 0.3s ease;
 }
 
 /* Container principal */
@@ -24,6 +24,7 @@
     margin: 0 auto;
     padding: 2rem 1rem;
     min-height: calc(100vh - 200px);
+    font-family: 'Inter', sans-serif;
 }
 
 /* En-tête du configurateur */
@@ -38,9 +39,11 @@
 }
 
 .configurateur-header h1 {
+    font-family: 'Bebas Neue', sans-serif;
     font-size: 2.5rem;
     margin-bottom: 0.5rem;
     font-weight: 700;
+    letter-spacing: 2px;
 }
 
 .configurateur-header p {

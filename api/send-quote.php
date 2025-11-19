@@ -155,7 +155,7 @@ function generateClientEmailHTML($recap) {
 
                     <!-- En-tête -->
                     <tr>
-                        <td style="background: linear-gradient(135deg, #FF6B00 0%, #E56000 100%); padding: 40px 30px; text-align: center;">
+                        <td style="background: linear-gradient(135deg, #FF4B26 0%, #E63910 100%); padding: 40px 30px; text-align: center;">
                             <h1 style="color: #ffffff; margin: 0; font-size: 28px;">FLARE CUSTOM</h1>
                             <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 16px;">Confirmation de votre demande de devis</p>
                         </td>
@@ -172,7 +172,7 @@ function generateClientEmailHTML($recap) {
 
                             <!-- Récapitulatif -->
                             <div style="background-color: #f8f9fa; border-radius: 8px; padding: 25px; margin: 30px 0;">
-                                <h3 style="color: #FF6B00; margin: 0 0 20px 0; font-size: 18px;">📋 Récapitulatif de votre demande</h3>
+                                <h3 style="color: #FF4B26; margin: 0 0 20px 0; font-size: 18px;">📋 Récapitulatif de votre demande</h3>
 
                                 <table width="100%" cellpadding="8" cellspacing="0">
                                     <tr>
@@ -209,7 +209,7 @@ function generateClientEmailHTML($recap) {
                                     </tr>
                                     <tr>
                                         <td style="color: #666666; font-size: 16px; padding-top: 15px;"><strong>Prix total HT:</strong></td>
-                                        <td style="color: #FF6B00; font-size: 20px; font-weight: bold; text-align: right; padding-top: 15px;">' . $prixTotal . ' €</td>
+                                        <td style="color: #FF4B26; font-size: 20px; font-weight: bold; text-align: right; padding-top: 15px;">' . $prixTotal . ' €</td>
                                     </tr>
                                 </table>
                             </div>';
@@ -220,8 +220,8 @@ function generateClientEmailHTML($recap) {
         !empty($recap['personnalisation']['textes'])) {
 
         $html .= '
-                            <div style="background-color: #fff3e6; border-left: 4px solid #FF6B00; padding: 20px; margin: 20px 0;">
-                                <h4 style="color: #FF6B00; margin: 0 0 15px 0; font-size: 16px;">🎨 Détails de personnalisation</h4>';
+                            <div style="background-color: #fff3e6; border-left: 4px solid #FF4B26; padding: 20px; margin: 20px 0;">
+                                <h4 style="color: #FF4B26; margin: 0 0 15px 0; font-size: 16px;">🎨 Détails de personnalisation</h4>';
 
         if (!empty($recap['personnalisation']['couleurs'])) {
             $html .= '<p style="color: #333333; margin: 5px 0;"><strong>Couleurs:</strong> ' . htmlspecialchars($recap['personnalisation']['couleurs']) . '</p>';
@@ -257,8 +257,8 @@ function generateClientEmailHTML($recap) {
                                     ✅ Une question ? Contactez-nous !
                                 </p>
                                 <p style="color: #333333; margin: 10px 0 0 0; font-size: 14px;">
-                                    📧 <a href="mailto:contact@flare-custom.com" style="color: #FF6B00; text-decoration: none;">contact@flare-custom.com</a><br>
-                                    📱 <a href="https://wa.me/359885813134" style="color: #FF6B00; text-decoration: none;">+359 885 813 134</a>
+                                    📧 <a href="mailto:contact@flare-custom.com" style="color: #FF4B26; text-decoration: none;">contact@flare-custom.com</a><br>
+                                    📱 <a href="https://wa.me/359885813134" style="color: #FF4B26; text-decoration: none;">+359 885 813 134</a>
                                 </p>
                             </div>
                         </td>
@@ -270,7 +270,7 @@ function generateClientEmailHTML($recap) {
                             <p style="color: #ffffff; margin: 0 0 10px 0; font-size: 18px; font-weight: bold;">FLARE CUSTOM</p>
                             <p style="color: #999999; margin: 0; font-size: 14px;">Équipements sportifs personnalisés de qualité professionnelle</p>
                             <p style="color: #999999; margin: 15px 0 0 0; font-size: 12px;">
-                                <a href="' . SITE_URL . '" style="color: #FF6B00; text-decoration: none;">www.flare-custom.com</a>
+                                <a href="' . SITE_URL . '" style="color: #FF4B26; text-decoration: none;">www.flare-custom.com</a>
                             </p>
                         </td>
                     </tr>
@@ -306,14 +306,14 @@ function generateAdminEmailHTML($recap, $config) {
 
                     <tr>
                         <td style="background-color: #1a1a1a; padding: 30px; text-align: center;">
-                            <h1 style="color: #FF6B00; margin: 0; font-size: 24px;">🔔 Nouvelle demande de devis</h1>
+                            <h1 style="color: #FF4B26; margin: 0; font-size: 24px;">🔔 Nouvelle demande de devis</h1>
                         </td>
                     </tr>
 
                     <tr>
                         <td style="padding: 30px;">
 
-                            <h3 style="color: #FF6B00; margin: 0 0 15px 0;">👤 Informations client</h3>
+                            <h3 style="color: #FF4B26; margin: 0 0 15px 0;">👤 Informations client</h3>
                             <table width="100%" cellpadding="8" cellspacing="0" style="margin-bottom: 30px;">
                                 <tr>
                                     <td style="color: #666; font-size: 14px;"><strong>Nom:</strong></td>
@@ -339,7 +339,7 @@ function generateAdminEmailHTML($recap, $config) {
     $html .= '
                             </table>
 
-                            <h3 style="color: #FF6B00; margin: 0 0 15px 0;">📦 Détails de la commande</h3>
+                            <h3 style="color: #FF4B26; margin: 0 0 15px 0;">📦 Détails de la commande</h3>
                             <table width="100%" cellpadding="8" cellspacing="0" style="margin-bottom: 30px;">
                                 <tr>
                                     <td style="color: #666; font-size: 14px;"><strong>Référence:</strong></td>
@@ -367,7 +367,7 @@ function generateAdminEmailHTML($recap, $config) {
                                 </tr>
                                 <tr>
                                     <td style="color: #666; font-size: 16px;"><strong>Prix total HT:</strong></td>
-                                    <td style="color: #FF6B00; font-size: 18px; font-weight: bold;">' . number_format($recap['prix']['total'], 2, ',', ' ') . ' €</td>
+                                    <td style="color: #FF4B26; font-size: 18px; font-weight: bold;">' . number_format($recap['prix']['total'], 2, ',', ' ') . ' €</td>
                                 </tr>
                             </table>';
 
@@ -377,7 +377,7 @@ function generateAdminEmailHTML($recap, $config) {
         !empty($recap['personnalisation']['logos'])) {
 
         $html .= '
-                            <h3 style="color: #FF6B00; margin: 0 0 15px 0;">🎨 Personnalisation</h3>
+                            <h3 style="color: #FF4B26; margin: 0 0 15px 0;">🎨 Personnalisation</h3>
                             <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 30px;">
                                 <p style="margin: 5px 0;"><strong>Service design:</strong> ' . ($recap['personnalisation']['design'] ? 'Oui' : 'Non') . '</p>';
 
@@ -398,7 +398,7 @@ function generateAdminEmailHTML($recap, $config) {
     }
 
     $html .= '
-                            <div style="background-color: #fff3e6; padding: 20px; border-radius: 8px; border-left: 4px solid #FF6B00;">
+                            <div style="background-color: #fff3e6; padding: 20px; border-radius: 8px; border-left: 4px solid #FF4B26;">
                                 <p style="margin: 0; color: #333; font-weight: bold;">⚡ Action requise: Répondre au client sous 24h</p>
                             </div>
 
