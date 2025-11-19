@@ -1,0 +1,26 @@
+<svg width="300" height="400" viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Template Modern - Design diagonal dynamique -->
+  <defs>
+    <linearGradient id="modernGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF4B26;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1a1a;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Corps principal -->
+  <rect x="50" y="50" width="200" height="300" fill="#fff" stroke="#ddd" stroke-width="2"/>
+
+  <!-- Design diagonal -->
+  <polygon points="50,50 250,50 200,200 50,350" fill="url(#modernGrad)" opacity="0.9"/>
+  <polygon points="250,200 250,350 150,350" fill="#FF4B26" opacity="0.3"/>
+
+  <!-- Col -->
+  <ellipse cx="150" cy="50" rx="30" ry="15" fill="#1a1a1a"/>
+
+  <!-- Manches -->
+  <path d="M 50 80 L 30 120 L 40 150 L 50 140 Z" fill="#1a1a1a"/>
+  <path d="M 250 80 L 270 120 L 260 150 L 250 140 Z" fill="#1a1a1a"/>
+
+  <!-- Texte -->
+  <text x="150" y="220" font-family="Bebas Neue, sans-serif" font-size="24" fill="#fff" text-anchor="middle">MODERN</text>
+</svg>
