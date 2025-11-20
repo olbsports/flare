@@ -292,6 +292,14 @@ try {
             <span class="nav-icon">🖼️</span>
             Médias
         </a>
+        <a href="configurator-admin-complete.html" class="nav-item">
+            <span class="nav-icon">🔧</span>
+            Configurateur
+        </a>
+        <a href="gestion-produits-complete.html" class="nav-item">
+            <span class="nav-icon">✏️</span>
+            Gestion Produits
+        </a>
         <a href="settings.php" class="nav-item">
             <span class="nav-icon">⚙️</span>
             Paramètres
