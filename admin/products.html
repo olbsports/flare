@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Produits - FLARE Admin</title>
+    <link rel="stylesheet" href="assets/css/admin.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-header h1 { font-size: 24px; font-weight: 600; margin-bottom: 5px; }
+        .breadcrumb { font-size: 14px; opacity: 0.9; }
+
+        .header-actions { display: flex; gap: 10px; }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary { background: white; color: #667eea; }
+        .btn-success { background: #48bb78; color: white; }
+        .btn-danger { background: #e53e3e; color: white; }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 30px; }
+
+        .filters-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 15px;
+        }
+
+        .filters-bar input, .filters-bar select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 { font-size: 32px; color: #667eea; margin-bottom: 5px; }
+        .stat-card p { color: #666; font-size: 14px; }
+
+        .products-table {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover { background: #f8f8f8; }
+
+        td {
+            padding: 15px;
+            font-size: 14px;
+        }
+
+        .product-img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .product-ref {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .price-badge {
+            background: #e6f7ff;
+            color: #0050b3;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.active { display: flex; align-items: center; justify-content: center; }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 { font-size: 20px; }
+        .close-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .modal-body { padding: 30px; }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .price-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 20px;
+        }
+
+        .pagination button {
+            padding: 8px 16px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .pagination button.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .loading.active { display: block; }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.active { display: block; }
+        .alert-success { background: #c6f6d5; color: #22543d; border-left: 4px solid #48bb78; }
+        .alert-error { background: #fed7d7; color: #742a2a; border-left: 4px solid #e53e3e; }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <div>
+            <h1>📦 Gestion des Produits</h1>
+            <div class="breadcrumb"><a href="index.html" style="color: white;">Admin</a> > Produits</div>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-primary" onclick="location.href='index.html'">← Retour</button>
+            <button class="btn btn-success" onclick="openModal('add')">+ Nouveau produit</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="alert alert-success" id="successAlert">✅ <span id="successMessage"></span></div>
+        <div class="alert alert-error" id="errorAlert">❌ <span id="errorMessage"></span></div>
+
+        <!-- Statistiques -->
+        <div class="stats-bar">
+            <div class="stat-card">
+                <h3 id="totalProducts">-</h3>
+                <p>Total produits</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="totalSports">-</h3>
+                <p>Sports</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="totalFamilies">-</h3>
+                <p>Familles</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="avgPrice">-</h3>
+                <p>Prix moyen</p>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="filters-bar">
+            <input type="text" id="searchInput" placeholder="🔍 Rechercher par nom ou référence...">
+            <select id="sportFilter">
+                <option value="">Tous les sports</option>
+            </select>
+            <select id="familyFilter">
+                <option value="">Toutes les familles</option>
+            </select>
+            <select id="sortBy">
+                <option value="nom">Nom</option>
+                <option value="reference">Référence</option>
+                <option value="prix_1">Prix</option>
+                <option value="created_at">Date</option>
+            </select>
+            <button class="btn btn-primary" onclick="loadProducts()">Filtrer</button>
+        </div>
+
+        <!-- Tableau -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Chargement des produits...</p>
+        </div>
+
+        <div class="products-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Produit</th>
+                        <th>Sport / Famille</th>
+                        <th>Prix (qty 1)</th>
+                        <th>Prix (qty 50)</th>
+                        <th>Stock</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="productsTableBody">
+                    <!-- Rempli dynamiquement -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+    </div>
+
+    <!-- Modal Ajout/Édition -->
+    <div class="modal" id="productModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Nouveau produit</h2>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="productForm">
+                    <input type="hidden" id="productId">
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nom du produit *</label>
+                            <input type="text" id="productName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Référence *</label>
+                            <input type="text" id="productRef" required>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Sport *</label>
+                            <select id="productSport" required>
+                                <option value="">Sélectionner...</option>
+                                <option value="Basketball">Basketball</option>
+                                <option value="Football">Football</option>
+                                <option value="Rugby">Rugby</option>
+                                <option value="Running">Running</option>
+                                <option value="Volleyball">Volleyball</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Famille *</label>
+                            <select id="productFamily" required>
+                                <option value="">Sélectionner...</option>
+                                <option value="Maillot">Maillot</option>
+                                <option value="Short">Short</option>
+                                <option value="Veste">Veste</option>
+                                <option value="Pantalon">Pantalon</option>
+                                <option value="Accessoires">Accessoires</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="productDesc" rows="3"></textarea>
+                    </div>
+
+                    <h3 style="margin: 20px 0 15px; color: #667eea;">💰 Paliers de prix (€)</h3>
+                    <div class="price-grid">
+                        <div class="form-group">
+                            <label>Prix qty 1</label>
+                            <input type="number" id="price1" step="0.01" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Prix qty 5</label>
+                            <input type="number" id="price5" step="0.01" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Prix qty 10</label>
+                            <input type="number" id="price10" step="0.01" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Prix qty 20</label>
+                            <input type="number" id="price20" step="0.01" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Prix qty 50</label>
+                            <input type="number" id="price50" step="0.01" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Prix qty 100</label>
+                            <input type="number" id="price100" step="0.01" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Prix qty 250</label>
+                            <input type="number" id="price250" step="0.01" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Prix qty 500</label>
+                            <input type="number" id="price500" step="0.01" value="0">
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Tissu</label>
+                            <input type="text" id="productTissu">
+                        </div>
+                        <div class="form-group">
+                            <label>Grammage</label>
+                            <input type="text" id="productGrammage">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>URL Photo 1</label>
+                        <input type="text" id="productPhoto1">
+                    </div>
+
+                    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 30px;">
+                        <button type="button" class="btn btn-primary" onclick="closeModal()">Annuler</button>
+                        <button type="submit" class="btn btn-success">💾 Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        let totalPages = 1;
+        const perPage = 50;
+        let currentProduct = null;
+
+        // Charger les produits
+        async function loadProducts(page = 1) {
+            document.getElementById('loading').classList.add('active');
+
+            const search = document.getElementById('searchInput').value;
+            const sport = document.getElementById('sportFilter').value;
+            const family = document.getElementById('familyFilter').value;
+            const sort = document.getElementById('sortBy').value;
+
+            try {
+                let url = `/api/products.php?page=${page}&limit=${perPage}&sort=${sort}`;
+                if (search) url += `&search=${encodeURIComponent(search)}`;
+                if (sport) url += `&sport=${encodeURIComponent(sport)}`;
+                if (family) url += `&famille=${encodeURIComponent(family)}`;
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success) {
+                    displayProducts(data.products || []);
+                    updatePagination(data.total || 0, page);
+                    updateStats(data);
+                } else {
+                    showError(data.error || 'Erreur chargement');
+                }
+            } catch (error) {
+                showError('Erreur réseau: ' + error.message);
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+            }
+        }
+
+        // Afficher les produits
+        function displayProducts(products) {
+            const tbody = document.getElementById('productsTableBody');
+            tbody.innerHTML = '';
+
+            if (products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px;">Aucun produit trouvé</td></tr>';
+                return;
+            }
+
+            products.forEach(product => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><img src="${product.photo_1 || '/assets/images/placeholder.jpg'}" class="product-img" alt="${product.nom}"></td>
+                    <td>
+                        <div class="product-name">${product.nom || 'Sans nom'}</div>
+                        <div class="product-ref">${product.reference || '-'}</div>
+                    </td>
+                    <td>${product.sport || '-'} / ${product.famille || '-'}</td>
+                    <td><span class="price-badge">${parseFloat(product.prix_1 || 0).toFixed(2)}€</span></td>
+                    <td><span class="price-badge">${parseFloat(product.prix_50 || 0).toFixed(2)}€</span></td>
+                    <td>${product.stock || '-'}</td>
+                    <td class="actions">
+                        <button class="btn btn-primary btn-sm" onclick="editProduct(${product.id})">✏️ Modifier</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteProduct(${product.id}, '${product.nom}')">🗑️</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Pagination
+        function updatePagination(total, current) {
+            currentPage = current;
+            totalPages = Math.ceil(total / perPage);
+
+            const container = document.getElementById('pagination');
+            container.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            // Précédent
+            if (current > 1) {
+                const btn = document.createElement('button');
+                btn.textContent = '← Précédent';
+                btn.onclick = () => loadProducts(current - 1);
+                container.appendChild(btn);
+            }
+
+            // Pages
+            for (let i = Math.max(1, current - 2); i <= Math.min(totalPages, current + 2); i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                btn.className = i === current ? 'active' : '';
+                btn.onclick = () => loadProducts(i);
+                container.appendChild(btn);
+            }
+
+            // Suivant
+            if (current < totalPages) {
+                const btn = document.createElement('button');
+                btn.textContent = 'Suivant →';
+                btn.onclick = () => loadProducts(current + 1);
+                container.appendChild(btn);
+            }
+        }
+
+        // Statistiques
+        function updateStats(data) {
+            document.getElementById('totalProducts').textContent = data.total || 0;
+
+            // Stats supplémentaires (à calculer côté serveur idéalement)
+            if (data.products) {
+                const sports = [...new Set(data.products.map(p => p.sport))];
+                const families = [...new Set(data.products.map(p => p.famille))];
+                document.getElementById('totalSports').textContent = sports.length;
+                document.getElementById('totalFamilies').textContent = families.length;
+
+                const avgPrice = data.products.reduce((sum, p) => sum + parseFloat(p.prix_50 || 0), 0) / data.products.length;
+                document.getElementById('avgPrice').textContent = avgPrice.toFixed(2) + '€';
+            }
+        }
+
+        // Ouvrir modal
+        function openModal(mode, productId = null) {
+            document.getElementById('productModal').classList.add('active');
+            document.getElementById('modalTitle').textContent = mode === 'add' ? 'Nouveau produit' : 'Modifier le produit';
+
+            if (mode === 'edit' && productId) {
+                loadProductData(productId);
+            } else {
+                document.getElementById('productForm').reset();
+                document.getElementById('productId').value = '';
+            }
+        }
+
+        // Charger données produit
+        async function loadProductData(id) {
+            try {
+                const response = await fetch(`/api/products.php?id=${id}`);
+                const data = await response.json();
+
+                if (data.success && data.product) {
+                    const p = data.product;
+                    document.getElementById('productId').value = p.id;
+                    document.getElementById('productName').value = p.nom || '';
+                    document.getElementById('productRef').value = p.reference || '';
+                    document.getElementById('productSport').value = p.sport || '';
+                    document.getElementById('productFamily').value = p.famille || '';
+                    document.getElementById('productDesc').value = p.description || '';
+                    document.getElementById('price1').value = p.prix_1 || 0;
+                    document.getElementById('price5').value = p.prix_5 || 0;
+                    document.getElementById('price10').value = p.prix_10 || 0;
+                    document.getElementById('price20').value = p.prix_20 || 0;
+                    document.getElementById('price50').value = p.prix_50 || 0;
+                    document.getElementById('price100').value = p.prix_100 || 0;
+                    document.getElementById('price250').value = p.prix_250 || 0;
+                    document.getElementById('price500').value = p.prix_500 || 0;
+                    document.getElementById('productTissu').value = p.tissu || '';
+                    document.getElementById('productGrammage').value = p.grammage || '';
+                    document.getElementById('productPhoto1').value = p.photo_1 || '';
+                }
+            } catch (error) {
+                showError('Erreur chargement produit');
+            }
+        }
+
+        // Fermer modal
+        function closeModal() {
+            document.getElementById('productModal').classList.remove('active');
+        }
+
+        // Éditer produit
+        function editProduct(id) {
+            openModal('edit', id);
+        }
+
+        // Supprimer produit
+        async function deleteProduct(id, name) {
+            if (!confirm(`Supprimer le produit "${name}" ?\n\nCette action est irréversible.`)) return;
+
+            try {
+                const response = await fetch(`/api/products.php?id=${id}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess('Produit supprimé');
+                    loadProducts(currentPage);
+                } else {
+                    showError(data.error || 'Erreur suppression');
+                }
+            } catch (error) {
+                showError('Erreur réseau');
+            }
+        }
+
+        // Soumettre formulaire
+        document.getElementById('productForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const id = document.getElementById('productId').value;
+            const productData = {
+                nom: document.getElementById('productName').value,
+                reference: document.getElementById('productRef').value,
+                sport: document.getElementById('productSport').value,
+                famille: document.getElementById('productFamily').value,
+                description: document.getElementById('productDesc').value,
+                prix_1: document.getElementById('price1').value,
+                prix_5: document.getElementById('price5').value,
+                prix_10: document.getElementById('price10').value,
+                prix_20: document.getElementById('price20').value,
+                prix_50: document.getElementById('price50').value,
+                prix_100: document.getElementById('price100').value,
+                prix_250: document.getElementById('price250').value,
+                prix_500: document.getElementById('price500').value,
+                tissu: document.getElementById('productTissu').value,
+                grammage: document.getElementById('productGrammage').value,
+                photo_1: document.getElementById('productPhoto1').value
+            };
+
+            try {
+                const url = id ? `/api/products.php?id=${id}` : '/api/products.php';
+                const method = id ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(productData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess(id ? 'Produit modifié' : 'Produit créé');
+                    closeModal();
+                    loadProducts(currentPage);
+                } else {
+                    showError(data.error || 'Erreur sauvegarde');
+                }
+            } catch (error) {
+                showError('Erreur réseau');
+            }
+        });
+
+        // Messages
+        function showSuccess(message) {
+            document.getElementById('successMessage').textContent = message;
+            const alert = document.getElementById('successAlert');
+            alert.classList.add('active');
+            setTimeout(() => alert.classList.remove('active'), 3000);
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            const alert = document.getElementById('errorAlert');
+            alert.classList.add('active');
+            setTimeout(() => alert.classList.remove('active'), 5000);
+        }
+
+        // Charger les filtres
+        async function loadFilters() {
+            try {
+                const response = await fetch('/api/products.php?limit=10000');
+                const data = await response.json();
+
+                if (data.success && data.products) {
+                    const sports = [...new Set(data.products.map(p => p.sport))].filter(Boolean).sort();
+                    const families = [...new Set(data.products.map(p => p.famille))].filter(Boolean).sort();
+
+                    const sportSelect = document.getElementById('sportFilter');
+                    sports.forEach(sport => {
+                        const option = document.createElement('option');
+                        option.value = sport;
+                        option.textContent = sport;
+                        sportSelect.appendChild(option);
+                    });
+
+                    const familySelect = document.getElementById('familyFilter');
+                    families.forEach(family => {
+                        const option = document.createElement('option');
+                        option.value = family;
+                        option.textContent = family;
+                        familySelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Erreur chargement filtres:', error);
+            }
+        }
+
+        // Recherche au Enter
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') loadProducts();
+        });
+
+        // Init
+        loadProducts();
+        loadFilters();
+    </script>
+</body>
+</html>

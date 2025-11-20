@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Categories - FLARE Admin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-header h1 { font-size: 24px; font-weight: 600; margin-bottom: 5px; }
+        .breadcrumb { font-size: 14px; opacity: 0.9; }
+        .breadcrumb a { color: white; text-decoration: none; }
+
+        .header-actions { display: flex; gap: 10px; }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary { background: white; color: #667eea; }
+        .btn-success { background: #48bb78; color: white; }
+        .btn-danger { background: #e53e3e; color: white; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 30px; }
+
+        .filters-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 2fr 1fr auto;
+            gap: 15px;
+        }
+
+        .filters-bar input, .filters-bar select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 { font-size: 32px; color: #667eea; margin-bottom: 5px; }
+        .stat-card p { color: #666; font-size: 14px; }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .category-panel {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        .panel-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e7ff;
+        }
+
+        .category-tree {
+            list-style: none;
+            padding: 0;
+        }
+
+        .category-item {
+            padding: 12px;
+            margin: 5px 0;
+            background: #f9fafb;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+            transition: all 0.2s;
+        }
+
+        .category-item:hover {
+            background: #f3f4f6;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .category-item.child {
+            margin-left: 30px;
+            border-left-color: #a5b4fc;
+            background: #fafbff;
+        }
+
+        .category-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .category-meta {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .category-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .type-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .type-sport { background: #dbeafe; color: #1e40af; }
+        .type-famille { background: #fef3c7; color: #92400e; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.active { display: flex; align-items: center; justify-content: center; }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 { font-size: 20px; }
+        .close-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .modal-body { padding: 30px; }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .loading.active { display: block; }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.active { display: block; }
+        .alert-success { background: #c6f6d5; color: #22543d; border-left: 4px solid #48bb78; }
+        .alert-error { background: #fed7d7; color: #742a2a; border-left: 4px solid #e53e3e; }
+
+        .drag-over {
+            border-color: #667eea !important;
+            background: #e0e7ff !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <div>
+            <h1>Gestion des Categories</h1>
+            <div class="breadcrumb"><a href="index.html">Admin</a> > Categories</div>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-primary" onclick="location.href='index.html'">Retour</button>
+            <button class="btn btn-success" onclick="openModal('add', 'sport')">+ Nouveau sport</button>
+            <button class="btn btn-success" onclick="openModal('add', 'famille')">+ Nouvelle famille</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="alert alert-success" id="successAlert"><span id="successMessage"></span></div>
+        <div class="alert alert-error" id="errorAlert"><span id="errorMessage"></span></div>
+
+        <!-- Statistiques -->
+        <div class="stats-bar">
+            <div class="stat-card">
+                <h3 id="totalCategories">-</h3>
+                <p>Total categories</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="totalSports">-</h3>
+                <p>Sports</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="totalFamilies">-</h3>
+                <p>Familles</p>
+            </div>
+        </div>
+
+        <!-- Arbre des categories -->
+        <div class="content-grid">
+            <div class="category-panel">
+                <div class="panel-header">Sports</div>
+                <div class="loading" id="loadingSports">
+                    <div class="spinner"></div>
+                    <p>Chargement...</p>
+                </div>
+                <ul class="category-tree" id="sportsTree">
+                    <!-- Rempli dynamiquement -->
+                </ul>
+            </div>
+
+            <div class="category-panel">
+                <div class="panel-header">Familles</div>
+                <div class="loading" id="loadingFamilies">
+                    <div class="spinner"></div>
+                    <p>Chargement...</p>
+                </div>
+                <ul class="category-tree" id="familiesTree">
+                    <!-- Rempli dynamiquement -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ajout/Edition -->
+    <div class="modal" id="categoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Nouvelle categorie</h2>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="categoryForm">
+                    <input type="hidden" id="categoryId">
+                    <input type="hidden" id="categoryType">
+
+                    <div class="form-group">
+                        <label>Nom *</label>
+                        <input type="text" id="categoryName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Slug</label>
+                        <input type="text" id="categorySlug">
+                        <small style="color: #666;">Genere automatiquement si vide</small>
+                    </div>
+
+                    <div class="form-group" id="parentGroup" style="display: none;">
+                        <label>Categorie parente</label>
+                        <select id="categoryParent">
+                            <option value="">Aucune (racine)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="categoryDesc" rows="3"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Ordre d'affichage</label>
+                        <input type="number" id="categoryOrder" value="0" min="0">
+                    </div>
+
+                    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 30px;">
+                        <button type="button" class="btn btn-primary" onclick="closeModal()">Annuler</button>
+                        <button type="submit" class="btn btn-success">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let categories = { sports: [], families: [] };
+
+        // Charger les categories
+        async function loadCategories() {
+            document.getElementById('loadingSports').classList.add('active');
+            document.getElementById('loadingFamilies').classList.add('active');
+
+            try {
+                const response = await fetch('/api/categories.php');
+                const data = await response.json();
+
+                if (data.success) {
+                    const allCategories = data.categories || [];
+
+                    // Separer sports et familles
+                    categories.sports = allCategories.filter(c => c.type === 'sport');
+                    categories.families = allCategories.filter(c => c.type === 'famille');
+
+                    displayCategories();
+                    updateStats();
+                } else {
+                    showError(data.error || 'Erreur chargement');
+                }
+            } catch (error) {
+                showError('Erreur reseau: ' + error.message);
+            } finally {
+                document.getElementById('loadingSports').classList.remove('active');
+                document.getElementById('loadingFamilies').classList.remove('active');
+            }
+        }
+
+        // Afficher les categories
+        function displayCategories() {
+            displayCategoryTree('sportsTree', categories.sports);
+            displayCategoryTree('familiesTree', categories.families);
+        }
+
+        // Afficher un arbre de categories
+        function displayCategoryTree(containerId, items) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            if (items.length === 0) {
+                container.innerHTML = '<li style="text-align: center; padding: 20px; color: #999;">Aucune categorie</li>';
+                return;
+            }
+
+            // Trier par ordre
+            items.sort((a, b) => (a.ordre || 0) - (b.ordre || 0));
+
+            // Creer arbre hierarchique
+            const roots = items.filter(c => !c.parent_id);
+            roots.forEach(root => {
+                const li = createCategoryElement(root);
+                container.appendChild(li);
+
+                // Ajouter enfants
+                const children = items.filter(c => c.parent_id === root.id);
+                children.forEach(child => {
+                    const childLi = createCategoryElement(child, true);
+                    container.appendChild(childLi);
+                });
+            });
+        }
+
+        // Creer element categorie
+        function createCategoryElement(category, isChild = false) {
+            const li = document.createElement('li');
+            const div = document.createElement('div');
+            div.className = 'category-item' + (isChild ? ' child' : '');
+            div.draggable = true;
+            div.dataset.id = category.id;
+
+            const typeClass = `type-${category.type}`;
+            const typeText = category.type === 'sport' ? 'Sport' : 'Famille';
+
+            div.innerHTML = `
+                <div>
+                    <div class="category-name">${category.nom || 'Sans nom'}</div>
+                    <div class="category-meta">
+                        <span class="type-badge ${typeClass}">${typeText}</span>
+                        ${category.slug ? `<code style="margin-left: 8px;">${category.slug}</code>` : ''}
+                    </div>
+                </div>
+                <div class="category-actions">
+                    <button class="btn btn-primary btn-sm" onclick="editCategory(${category.id})">Modifier</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteCategory(${category.id}, '${category.nom}')">Supprimer</button>
+                </div>
+            `;
+
+            // Drag & Drop
+            div.addEventListener('dragstart', handleDragStart);
+            div.addEventListener('dragover', handleDragOver);
+            div.addEventListener('drop', handleDrop);
+            div.addEventListener('dragend', handleDragEnd);
+
+            li.appendChild(div);
+            return li;
+        }
+
+        // Drag & Drop handlers
+        let draggedElement = null;
+
+        function handleDragStart(e) {
+            draggedElement = this;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+            this.style.opacity = '0.4';
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            this.classList.add('drag-over');
+            return false;
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+
+            if (draggedElement !== this) {
+                // Echanger les ordres
+                const draggedId = draggedElement.dataset.id;
+                const targetId = this.dataset.id;
+
+                // TODO: Appeler API pour reordonner
+                console.log(`Reorder: ${draggedId} <-> ${targetId}`);
+            }
+
+            this.classList.remove('drag-over');
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            this.style.opacity = '1';
+            document.querySelectorAll('.category-item').forEach(item => {
+                item.classList.remove('drag-over');
+            });
+        }
+
+        // Ouvrir modal
+        function openModal(mode, type = 'sport', categoryId = null) {
+            document.getElementById('categoryModal').classList.add('active');
+            document.getElementById('categoryType').value = type;
+
+            const typeText = type === 'sport' ? 'sport' : 'famille';
+            document.getElementById('modalTitle').textContent =
+                mode === 'add' ? `Nouveau ${typeText}` : `Modifier ${typeText}`;
+
+            if (mode === 'edit' && categoryId) {
+                loadCategoryData(categoryId);
+            } else {
+                document.getElementById('categoryForm').reset();
+                document.getElementById('categoryId').value = '';
+                document.getElementById('categoryType').value = type;
+                document.getElementById('categoryOrder').value = '0';
+            }
+
+            // Afficher parent si famille
+            document.getElementById('parentGroup').style.display = type === 'famille' ? 'block' : 'none';
+        }
+
+        // Charger donnees categorie
+        async function loadCategoryData(id) {
+            try {
+                const response = await fetch(`/api/categories.php?id=${id}`);
+                const data = await response.json();
+
+                if (data.success && data.category) {
+                    const c = data.category;
+                    document.getElementById('categoryId').value = c.id;
+                    document.getElementById('categoryName').value = c.nom || '';
+                    document.getElementById('categorySlug').value = c.slug || '';
+                    document.getElementById('categoryDesc').value = c.description || '';
+                    document.getElementById('categoryOrder').value = c.ordre || 0;
+                    document.getElementById('categoryParent').value = c.parent_id || '';
+                    document.getElementById('categoryType').value = c.type || 'sport';
+                }
+            } catch (error) {
+                showError('Erreur chargement categorie');
+            }
+        }
+
+        // Fermer modal
+        function closeModal() {
+            document.getElementById('categoryModal').classList.remove('active');
+        }
+
+        // Editer categorie
+        function editCategory(id) {
+            // Trouver type
+            const sport = categories.sports.find(c => c.id === id);
+            const family = categories.families.find(c => c.id === id);
+            const type = sport ? 'sport' : 'famille';
+
+            openModal('edit', type, id);
+        }
+
+        // Supprimer categorie
+        async function deleteCategory(id, name) {
+            if (!confirm(`Supprimer la categorie "${name}" ?\n\nCette action est irreversible.`)) return;
+
+            try {
+                const response = await fetch(`/api/categories.php?id=${id}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess('Categorie supprimee');
+                    loadCategories();
+                } else {
+                    showError(data.error || 'Erreur suppression');
+                }
+            } catch (error) {
+                showError('Erreur reseau');
+            }
+        }
+
+        // Soumettre formulaire
+        document.getElementById('categoryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const id = document.getElementById('categoryId').value;
+            const categoryData = {
+                nom: document.getElementById('categoryName').value,
+                slug: document.getElementById('categorySlug').value,
+                type: document.getElementById('categoryType').value,
+                description: document.getElementById('categoryDesc').value,
+                ordre: document.getElementById('categoryOrder').value,
+                parent_id: document.getElementById('categoryParent').value || null
+            };
+
+            try {
+                const url = id ? `/api/categories.php?id=${id}` : '/api/categories.php';
+                const method = id ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(categoryData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess(id ? 'Categorie modifiee' : 'Categorie creee');
+                    closeModal();
+                    loadCategories();
+                } else {
+                    showError(data.error || 'Erreur sauvegarde');
+                }
+            } catch (error) {
+                showError('Erreur reseau');
+            }
+        });
+
+        // Mettre a jour statistiques
+        function updateStats() {
+            document.getElementById('totalCategories').textContent =
+                categories.sports.length + categories.families.length;
+            document.getElementById('totalSports').textContent = categories.sports.length;
+            document.getElementById('totalFamilies').textContent = categories.families.length;
+        }
+
+        // Messages
+        function showSuccess(message) {
+            document.getElementById('successMessage').textContent = message;
+            const alert = document.getElementById('successAlert');
+            alert.classList.add('active');
+            setTimeout(() => alert.classList.remove('active'), 3000);
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            const alert = document.getElementById('errorAlert');
+            alert.classList.add('active');
+            setTimeout(() => alert.classList.remove('active'), 5000);
+        }
+
+        // Auto-generer slug
+        document.getElementById('categoryName').addEventListener('input', (e) => {
+            const slugField = document.getElementById('categorySlug');
+            if (!slugField.value || !document.getElementById('categoryId').value) {
+                const slug = e.target.value
+                    .toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+                slugField.value = slug;
+            }
+        });
+
+        // Init
+        loadCategories();
+    </script>
+</body>
+</html>

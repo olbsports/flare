@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration Configurateur Produit - FLARE Admin</title>
+    <link rel="stylesheet" href="assets/css/admin.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .admin-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .breadcrumb {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .product-selector {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .product-selector h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .product-search {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .product-search input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .product-search input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #38a169;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .product-info {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .product-info.active {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .product-info img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .product-details h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .product-details p {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .config-container {
+            display: none;
+        }
+
+        .config-container.active {
+            display: block;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+
+        .config-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .config-section h3 {
+            font-size: 16px;
+            margin-bottom: 20px;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .config-section h3::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+        }
+
+        .toggle-switch label {
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 26px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #667eea;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        .color-picker-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .color-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #f5f5f5;
+            border-radius: 6px;
+        }
+
+        .color-preview {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            border: 2px solid #ddd;
+            cursor: pointer;
+        }
+
+        .color-item input[type="text"] {
+            width: 80px;
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .btn-remove {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-add {
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .size-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .size-option {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px;
+            background: #f5f5f5;
+            border-radius: 6px;
+        }
+
+        .size-option input[type="checkbox"] {
+            cursor: pointer;
+        }
+
+        .custom-options-list {
+            margin-top: 15px;
+        }
+
+        .option-item {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .option-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .option-values {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .value-tag {
+            background: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .save-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: none;
+            justify-content: center;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .save-bar.active {
+            display: flex;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.active {
+            display: block;
+        }
+
+        .alert-success {
+            background: #c6f6d5;
+            color: #22543d;
+            border-left: 4px solid #48bb78;
+        }
+
+        .alert-error {
+            background: #fed7d7;
+            color: #742a2a;
+            border-left: 4px solid #e53e3e;
+        }
+
+        .zone-canvas {
+            width: 100%;
+            height: 300px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            background: #fafafa;
+            position: relative;
+            margin-top: 10px;
+        }
+
+        .zone-marker {
+            position: absolute;
+            background: rgba(102, 126, 234, 0.2);
+            border: 2px solid #667eea;
+            border-radius: 4px;
+            cursor: move;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .price-rules-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <h1>🎨 Configuration du Configurateur Produit</h1>
+        <div class="breadcrumb">Admin > Produits > Configuration Configurateur</div>
+    </div>
+
+    <div class="container">
+        <div class="alert alert-success" id="successAlert">
+            ✅ Configuration sauvegardée avec succès !
+        </div>
+
+        <div class="alert alert-error" id="errorAlert">
+            ❌ <span id="errorMessage"></span>
+        </div>
+
+        <!-- Sélecteur de produit -->
+        <div class="product-selector">
+            <h2>🔍 Sélectionner un produit</h2>
+            <div class="product-search">
+                <input type="text"
+                       id="productSearch"
+                       placeholder="Rechercher par référence ou nom (ex: FLARE-BSKMAIH-372)">
+                <button class="btn btn-primary" onclick="searchProduct()">Rechercher</button>
+            </div>
+
+            <div class="product-info" id="productInfo">
+                <img id="productImage" src="" alt="Produit">
+                <div class="product-details">
+                    <h3 id="productName"></h3>
+                    <p><strong>Référence:</strong> <span id="productRef"></span></p>
+                    <p><strong>Sport:</strong> <span id="productSport"></span> | <strong>Famille:</strong> <span id="productFamily"></span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Chargement de la configuration...</p>
+        </div>
+
+        <!-- Configuration -->
+        <div class="config-container" id="configContainer">
+            <div class="config-grid">
+                <!-- Section: Options générales -->
+                <div class="config-section">
+                    <h3>⚙️ Options générales</h3>
+
+                    <div class="toggle-switch">
+                        <label>Permettre les couleurs personnalisées</label>
+                        <label class="switch">
+                            <input type="checkbox" id="allowColors" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-switch">
+                        <label>Permettre les logos</label>
+                        <label class="switch">
+                            <input type="checkbox" id="allowLogos" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="form-group" id="maxLogosGroup">
+                        <label>Nombre maximum de logos</label>
+                        <input type="number" id="maxLogos" value="3" min="0" max="10">
+                    </div>
+
+                    <div class="toggle-switch">
+                        <label>Permettre les textes</label>
+                        <label class="switch">
+                            <input type="checkbox" id="allowText" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-switch">
+                        <label>Permettre les numéros</label>
+                        <label class="switch">
+                            <input type="checkbox" id="allowNumbers" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Section: Couleurs -->
+                <div class="config-section">
+                    <h3>🎨 Couleurs disponibles</h3>
+                    <p class="help-text">Définissez les couleurs que les clients peuvent choisir</p>
+
+                    <div class="color-picker-group" id="colorsList">
+                        <!-- Les couleurs seront ajoutées dynamiquement -->
+                    </div>
+
+                    <button class="btn-add" onclick="addColor()">+ Ajouter une couleur</button>
+                </div>
+
+                <!-- Section: Tailles -->
+                <div class="config-section">
+                    <h3>📏 Tailles disponibles</h3>
+                    <p class="help-text">Cochez les tailles disponibles pour ce produit</p>
+
+                    <div class="size-grid" id="sizesList">
+                        <div class="size-option">
+                            <input type="checkbox" id="size_XS" value="XS">
+                            <label for="size_XS">XS</label>
+                        </div>
+                        <div class="size-option">
+                            <input type="checkbox" id="size_S" value="S" checked>
+                            <label for="size_S">S</label>
+                        </div>
+                        <div class="size-option">
+                            <input type="checkbox" id="size_M" value="M" checked>
+                            <label for="size_M">M</label>
+                        </div>
+                        <div class="size-option">
+                            <input type="checkbox" id="size_L" value="L" checked>
+                            <label for="size_L">L</label>
+                        </div>
+                        <div class="size-option">
+                            <input type="checkbox" id="size_XL" value="XL" checked>
+                            <label for="size_XL">XL</label>
+                        </div>
+                        <div class="size-option">
+                            <input type="checkbox" id="size_XXL" value="XXL">
+                            <label for="size_XXL">XXL</label>
+                        </div>
+                        <div class="size-option">
+                            <input type="checkbox" id="size_3XL" value="3XL">
+                            <label for="size_3XL">3XL</label>
+                        </div>
+                        <div class="size-option">
+                            <input type="checkbox" id="size_4XL" value="4XL">
+                            <label for="size_4XL">4XL</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Options personnalisées -->
+                <div class="config-section">
+                    <h3>🔧 Options personnalisées</h3>
+                    <p class="help-text">Options spécifiques selon la famille (col, manches, poches...)</p>
+
+                    <div class="custom-options-list" id="customOptionsList">
+                        <!-- Options ajoutées dynamiquement -->
+                    </div>
+
+                    <button class="btn-add" onclick="addCustomOption()">+ Ajouter une option</button>
+                </div>
+
+                <!-- Section: Règles de prix -->
+                <div class="config-section">
+                    <h3>💰 Règles de prix</h3>
+                    <p class="help-text">Coûts additionnels pour les options</p>
+
+                    <div class="price-rules-grid">
+                        <div class="form-group">
+                            <label>Prix extra par logo (€)</label>
+                            <input type="number" id="logoExtra" value="5.00" min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Prix extra par texte (€)</label>
+                            <input type="number" id="textExtra" value="2.00" min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Prix extra par numéro (€)</label>
+                            <input type="number" id="numberExtra" value="3.00" min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Prix extra sublimation (€)</label>
+                            <input type="number" id="sublimationExtra" value="0.00" min="0" step="0.01">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Quantités -->
+                <div class="config-section">
+                    <h3>📊 Quantités</h3>
+
+                    <div class="form-group">
+                        <label>Quantité minimum</label>
+                        <input type="number" id="minQuantity" value="1" min="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Quantité maximum</label>
+                        <input type="number" id="maxQuantity" value="1000" min="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Délai de livraison (jours)</label>
+                        <input type="number" id="leadTime" value="21" min="1">
+                    </div>
+                </div>
+
+                <!-- Section: Zones de personnalisation -->
+                <div class="config-section" style="grid-column: 1 / -1;">
+                    <h3>📍 Zones de personnalisation</h3>
+                    <p class="help-text">Définissez où les logos, textes et numéros peuvent être placés</p>
+
+                    <div id="zonesList">
+                        <!-- Zones ajoutées dynamiquement -->
+                    </div>
+
+                    <button class="btn-add" onclick="addZone()">+ Ajouter une zone</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barre de sauvegarde -->
+    <div class="save-bar" id="saveBar">
+        <button class="btn btn-secondary" onclick="cancelChanges()">Annuler</button>
+        <button class="btn btn-success" onclick="saveConfiguration()">💾 Enregistrer la configuration</button>
+    </div>
+
+    <script src="assets/js/product-configurator.js"></script>
+    <script>
+        let currentProduct = null;
+        let currentConfig = null;
+        let hasChanges = false;
+
+        // Détection des changements
+        document.addEventListener('input', () => {
+            hasChanges = true;
+            document.getElementById('saveBar').classList.add('active');
+        });
+
+        document.addEventListener('change', () => {
+            hasChanges = true;
+            document.getElementById('saveBar').classList.add('active');
+        });
+
+        // Recherche de produit
+        async function searchProduct() {
+            const query = document.getElementById('productSearch').value.trim();
+            if (!query) return;
+
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('productInfo').classList.remove('active');
+            document.getElementById('configContainer').classList.remove('active');
+
+            try {
+                const response = await fetch(`/api/products.php?search=${encodeURIComponent(query)}`);
+                const data = await response.json();
+
+                if (data.success && data.products && data.products.length > 0) {
+                    currentProduct = data.products[0];
+                    displayProduct();
+                    await loadConfiguration();
+                } else {
+                    showError('Produit non trouvé');
+                }
+            } catch (error) {
+                showError('Erreur lors de la recherche: ' + error.message);
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+            }
+        }
+
+        // Afficher le produit
+        function displayProduct() {
+            document.getElementById('productImage').src = currentProduct.photo_1 || '/assets/images/placeholder.jpg';
+            document.getElementById('productName').textContent = currentProduct.nom;
+            document.getElementById('productRef').textContent = currentProduct.reference;
+            document.getElementById('productSport').textContent = currentProduct.sport;
+            document.getElementById('productFamily').textContent = currentProduct.famille;
+            document.getElementById('productInfo').classList.add('active');
+        }
+
+        // Charger la configuration
+        async function loadConfiguration() {
+            try {
+                const response = await fetch(`/api/configurator-data.php?action=product&id=${currentProduct.id}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    currentConfig = data.data.config;
+                    populateForm(currentConfig);
+                    document.getElementById('configContainer').classList.add('active');
+                }
+            } catch (error) {
+                showError('Erreur lors du chargement de la configuration');
+            }
+        }
+
+        // Remplir le formulaire
+        function populateForm(config) {
+            document.getElementById('allowColors').checked = config.allow_colors ?? true;
+            document.getElementById('allowLogos').checked = config.allow_logos ?? true;
+            document.getElementById('maxLogos').value = config.max_logos ?? 3;
+            document.getElementById('allowText').checked = config.allow_text ?? true;
+            document.getElementById('allowNumbers').checked = config.allow_numbers ?? true;
+
+            // Couleurs
+            displayColors(config.colors || ['#FFFFFF', '#000000', '#FF0000', '#0000FF']);
+
+            // Tailles
+            const sizes = config.available_sizes || ['S', 'M', 'L', 'XL'];
+            document.querySelectorAll('.size-option input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = sizes.includes(checkbox.value);
+            });
+
+            // Options personnalisées
+            displayCustomOptions(config.custom_options || []);
+
+            // Règles de prix
+            const priceRules = config.price_rules || {};
+            document.getElementById('logoExtra').value = priceRules.logo_extra || 5.00;
+            document.getElementById('textExtra').value = priceRules.text_extra || 2.00;
+            document.getElementById('numberExtra').value = priceRules.number_extra || 3.00;
+            document.getElementById('sublimationExtra').value = priceRules.sublimation_extra || 0.00;
+
+            // Quantités
+            document.getElementById('minQuantity').value = config.min_quantity || 1;
+            document.getElementById('maxQuantity').value = config.max_quantity || 1000;
+            document.getElementById('leadTime').value = config.lead_time_days || 21;
+
+            // Zones
+            displayZones(config.customization_zones || []);
+
+            hasChanges = false;
+            document.getElementById('saveBar').classList.remove('active');
+        }
+
+        // Afficher les couleurs
+        function displayColors(colors) {
+            const container = document.getElementById('colorsList');
+            container.innerHTML = '';
+
+            colors.forEach((color, index) => {
+                const colorItem = document.createElement('div');
+                colorItem.className = 'color-item';
+                colorItem.innerHTML = `
+                    <input type="color" class="color-preview" value="${color}" onchange="updateColor(${index}, this.value)">
+                    <input type="text" value="${color}" onchange="updateColorHex(${index}, this.value)">
+                    <button class="btn-remove" onclick="removeColor(${index})">×</button>
+                `;
+                container.appendChild(colorItem);
+            });
+        }
+
+        function addColor() {
+            const container = document.getElementById('colorsList');
+            const colors = Array.from(container.querySelectorAll('input[type="text"]')).map(input => input.value);
+            colors.push('#000000');
+            displayColors(colors);
+            hasChanges = true;
+            document.getElementById('saveBar').classList.add('active');
+        }
+
+        function removeColor(index) {
+            const container = document.getElementById('colorsList');
+            const colors = Array.from(container.querySelectorAll('input[type="text"]')).map(input => input.value);
+            colors.splice(index, 1);
+            displayColors(colors);
+            hasChanges = true;
+            document.getElementById('saveBar').classList.add('active');
+        }
+
+        function updateColor(index, value) {
+            const inputs = document.querySelectorAll('#colorsList input[type="text"]');
+            inputs[index].value = value;
+        }
+
+        function updateColorHex(index, value) {
+            const inputs = document.querySelectorAll('#colorsList input[type="color"]');
+            inputs[index].value = value;
+        }
+
+        // Options personnalisées
+        function displayCustomOptions(options) {
+            const container = document.getElementById('customOptionsList');
+            container.innerHTML = '';
+
+            options.forEach((option, index) => {
+                const optionItem = document.createElement('div');
+                optionItem.className = 'option-item';
+                optionItem.innerHTML = `
+                    <div class="option-header">
+                        <input type="text" value="${option.label}" placeholder="Nom de l'option (ex: Col)" style="flex: 1; margin-right: 10px;" onchange="updateOptionLabel(${index}, this.value)">
+                        <button class="btn-remove" onclick="removeCustomOption(${index})">Supprimer</button>
+                    </div>
+                    <input type="text" placeholder="Valeurs séparées par des virgules (ex: Rond, V, Polo)" value="${option.values ? option.values.join(', ') : ''}" onchange="updateOptionValues(${index}, this.value)">
+                    <div class="option-values">
+                        ${option.values ? option.values.map(v => `<span class="value-tag">${v}</span>`).join('') : ''}
+                    </div>
+                `;
+                container.appendChild(optionItem);
+            });
+        }
+
+        function addCustomOption() {
+            const container = document.getElementById('customOptionsList');
+            const options = getCurrentCustomOptions();
+            options.push({ label: '', values: [] });
+            displayCustomOptions(options);
+            hasChanges = true;
+            document.getElementById('saveBar').classList.add('active');
+        }
+
+        function removeCustomOption(index) {
+            const options = getCurrentCustomOptions();
+            options.splice(index, 1);
+            displayCustomOptions(options);
+            hasChanges = true;
+            document.getElementById('saveBar').classList.add('active');
+        }
+
+        function updateOptionLabel(index, value) {
+            hasChanges = true;
+            document.getElementById('saveBar').classList.add('active');
+        }
+
+        function updateOptionValues(index, value) {
+            const container = document.getElementById('customOptionsList').children[index];
+            const valuesContainer = container.querySelector('.option-values');
+            const values = value.split(',').map(v => v.trim()).filter(v => v);
+            valuesContainer.innerHTML = values.map(v => `<span class="value-tag">${v}</span>`).join('');
+            hasChanges = true;
+            document.getElementById('saveBar').classList.add('active');
+        }
+
+        function getCurrentCustomOptions() {
+            const container = document.getElementById('customOptionsList');
+            const options = [];
+            Array.from(container.children).forEach(item => {
+                const label = item.querySelector('input[type="text"]').value;
+                const valuesInput = item.querySelectorAll('input[type="text"]')[1].value;
+                const values = valuesInput.split(',').map(v => v.trim()).filter(v => v);
+                if (label || values.length > 0) {
+                    options.push({ label, values });
+                }
+            });
+            return options;
+        }
+
+        // Zones de personnalisation
+        function displayZones(zones) {
+            const container = document.getElementById('zonesList');
+            container.innerHTML = zones.length ? zones.map((zone, i) => `
+                <div class="option-item">
+                    <strong>${zone.zone}</strong> - Types: ${Array.isArray(zone.type) ? zone.type.join(', ') : zone.type}
+                    <button class="btn-remove" onclick="removeZone(${i})">Supprimer</button>
+                </div>
+            `).join('') : '<p class="help-text">Aucune zone définie</p>';
+        }
+
+        function addZone() {
+            const zoneName = prompt('Nom de la zone (ex: poitrine_gauche, dos_centre):');
+            if (!zoneName) return;
+
+            const zoneType = prompt('Types autorisés séparés par des virgules (logo, text, numero):');
+            if (!zoneType) return;
+
+            const zones = currentConfig.customization_zones || [];
+            zones.push({
+                zone: zoneName,
+                type: zoneType.split(',').map(t => t.trim()),
+                x: 50,
+                y: 50,
+                max_width: 20,
+                max_height: 20
+            });
+
+            displayZones(zones);
+            currentConfig.customization_zones = zones;
+            hasChanges = true;
+            document.getElementById('saveBar').classList.add('active');
+        }
+
+        function removeZone(index) {
+            const zones = currentConfig.customization_zones || [];
+            zones.splice(index, 1);
+            displayZones(zones);
+            currentConfig.customization_zones = zones;
+            hasChanges = true;
+            document.getElementById('saveBar').classList.add('active');
+        }
+
+        // Sauvegarder
+        async function saveConfiguration() {
+            if (!currentProduct) return;
+
+            const config = {
+                allow_colors: document.getElementById('allowColors').checked,
+                colors: Array.from(document.querySelectorAll('#colorsList input[type="text"]')).map(input => input.value),
+                allow_logos: document.getElementById('allowLogos').checked,
+                max_logos: parseInt(document.getElementById('maxLogos').value),
+                allow_text: document.getElementById('allowText').checked,
+                allow_numbers: document.getElementById('allowNumbers').checked,
+                available_sizes: Array.from(document.querySelectorAll('.size-option input:checked')).map(cb => cb.value),
+                custom_options: getCurrentCustomOptions(),
+                customization_zones: currentConfig.customization_zones || [],
+                price_rules: {
+                    logo_extra: parseFloat(document.getElementById('logoExtra').value),
+                    text_extra: parseFloat(document.getElementById('textExtra').value),
+                    number_extra: parseFloat(document.getElementById('numberExtra').value),
+                    sublimation_extra: parseFloat(document.getElementById('sublimationExtra').value)
+                },
+                min_quantity: parseInt(document.getElementById('minQuantity').value),
+                max_quantity: parseInt(document.getElementById('maxQuantity').value),
+                lead_time_days: parseInt(document.getElementById('leadTime').value)
+            };
+
+            try {
+                const response = await fetch(`/api/product-config.php?product_id=${currentProduct.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess();
+                    hasChanges = false;
+                    document.getElementById('saveBar').classList.remove('active');
+                    currentConfig = config;
+                } else {
+                    showError(data.error || 'Erreur lors de la sauvegarde');
+                }
+            } catch (error) {
+                showError('Erreur réseau: ' + error.message);
+            }
+        }
+
+        function cancelChanges() {
+            if (currentConfig) {
+                populateForm(currentConfig);
+            }
+            hasChanges = false;
+            document.getElementById('saveBar').classList.remove('active');
+        }
+
+        function showSuccess() {
+            const alert = document.getElementById('successAlert');
+            alert.classList.add('active');
+            setTimeout(() => alert.classList.remove('active'), 3000);
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            const alert = document.getElementById('errorAlert');
+            alert.classList.add('active');
+            setTimeout(() => alert.classList.remove('active'), 5000);
+        }
+
+        // Recherche au Enter
+        document.getElementById('productSearch').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchProduct();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parametres - FLARE Admin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-header h1 { font-size: 24px; font-weight: 600; margin-bottom: 5px; }
+        .breadcrumb { font-size: 14px; opacity: 0.9; }
+        .breadcrumb a { color: white; text-decoration: none; }
+
+        .header-actions { display: flex; gap: 10px; }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary { background: white; color: #667eea; }
+        .btn-success { background: #48bb78; color: white; }
+        .btn-danger { background: #e53e3e; color: white; }
+        .btn-warning { background: #ed8936; color: white; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 30px; }
+
+        .tabs {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            text-align: center;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .tab:hover {
+            background: #f9fafb;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: #fafbff;
+        }
+
+        .settings-panel {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 30px;
+            display: none;
+        }
+
+        .settings-panel.active {
+            display: block;
+        }
+
+        .panel-header {
+            font-size: 20px;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e7ff;
+        }
+
+        .setting-group {
+            margin-bottom: 30px;
+        }
+
+        .setting-item {
+            display: grid;
+            grid-template-columns: 250px 1fr 100px;
+            gap: 20px;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .setting-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .setting-description {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .setting-input {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .setting-input input, .setting-input select, .setting-input textarea {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .setting-input textarea {
+            min-height: 60px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .setting-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .key-badge {
+            background: #f3f4f6;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #4b5563;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .loading.active { display: block; }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.active { display: block; }
+        .alert-success { background: #c6f6d5; color: #22543d; border-left: 4px solid #48bb78; }
+        .alert-error { background: #fed7d7; color: #742a2a; border-left: 4px solid #e53e3e; }
+        .alert-warning { background: #fef3c7; color: #78350f; border-left: 4px solid #f59e0b; }
+
+        .action-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.active { display: flex; align-items: center; justify-content: center; }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 { font-size: 20px; }
+        .close-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .modal-body { padding: 30px; }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <div>
+            <h1>Parametres du site</h1>
+            <div class="breadcrumb"><a href="index.html">Admin</a> > Parametres</div>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-primary" onclick="location.href='index.html'">Retour</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="alert alert-success" id="successAlert"><span id="successMessage"></span></div>
+        <div class="alert alert-error" id="errorAlert"><span id="errorMessage"></span></div>
+        <div class="alert alert-warning" id="warningAlert"><span id="warningMessage"></span></div>
+
+        <!-- Actions -->
+        <div class="action-bar">
+            <button class="btn btn-success" onclick="openModal('add')">+ Nouveau parametre</button>
+            <button class="btn btn-warning" onclick="exportSettings()">Exporter JSON</button>
+            <button class="btn btn-warning" onclick="document.getElementById('importFile').click()">Importer JSON</button>
+            <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importSettings(event)">
+            <button class="btn btn-primary" onclick="saveAllSettings()">Enregistrer tout</button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('general')">General</div>
+            <div class="tab" onclick="switchTab('company')">Entreprise</div>
+            <div class="tab" onclick="switchTab('email')">Emails</div>
+            <div class="tab" onclick="switchTab('prices')">Prix par defaut</div>
+            <div class="tab" onclick="switchTab('other')">Autres</div>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Chargement des parametres...</p>
+        </div>
+
+        <!-- Panels -->
+        <div class="settings-panel active" id="panel-general">
+            <div class="panel-header">Parametres generaux</div>
+            <div class="setting-group" id="settings-general"></div>
+        </div>
+
+        <div class="settings-panel" id="panel-company">
+            <div class="panel-header">Informations entreprise</div>
+            <div class="setting-group" id="settings-company"></div>
+        </div>
+
+        <div class="settings-panel" id="panel-email">
+            <div class="panel-header">Configuration emails</div>
+            <div class="setting-group" id="settings-email"></div>
+        </div>
+
+        <div class="settings-panel" id="panel-prices">
+            <div class="panel-header">Prix par defaut</div>
+            <div class="setting-group" id="settings-prices"></div>
+        </div>
+
+        <div class="settings-panel" id="panel-other">
+            <div class="panel-header">Autres parametres</div>
+            <div class="setting-group" id="settings-other"></div>
+        </div>
+    </div>
+
+    <!-- Modal Ajout -->
+    <div class="modal" id="settingModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Nouveau parametre</h2>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="settingForm">
+                    <div class="form-group">
+                        <label>Cle *</label>
+                        <input type="text" id="settingKey" required>
+                        <small style="color: #666;">Ex: site_name, admin_email, default_price</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Valeur *</label>
+                        <input type="text" id="settingValue" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select id="settingType">
+                            <option value="string">Texte</option>
+                            <option value="text">Texte long</option>
+                            <option value="number">Nombre</option>
+                            <option value="boolean">Boolean</option>
+                            <option value="json">JSON</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Categorie</label>
+                        <select id="settingCategory">
+                            <option value="general">General</option>
+                            <option value="company">Entreprise</option>
+                            <option value="email">Email</option>
+                            <option value="prices">Prix</option>
+                            <option value="other">Autres</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="settingDescription" rows="2"></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 30px;">
+                        <button type="button" class="btn btn-primary" onclick="closeModal()">Annuler</button>
+                        <button type="submit" class="btn btn-success">Creer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let settings = {};
+        let originalSettings = {};
+
+        // Categories mapping
+        const categoryMap = {
+            'general': 'general',
+            'company': 'company',
+            'email': 'email',
+            'prices': 'prices',
+            'other': 'other'
+        };
+
+        // Charger les parametres
+        async function loadSettings() {
+            document.getElementById('loading').classList.add('active');
+
+            try {
+                const response = await fetch('/api/settings.php');
+                const data = await response.json();
+
+                if (data.success) {
+                    settings = data.settings || {};
+                    originalSettings = JSON.parse(JSON.stringify(settings));
+                    displaySettings();
+                } else {
+                    showError(data.error || 'Erreur chargement');
+                }
+            } catch (error) {
+                showError('Erreur reseau: ' + error.message);
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+            }
+        }
+
+        // Afficher les parametres
+        function displaySettings() {
+            // Vider tous les panels
+            Object.keys(categoryMap).forEach(cat => {
+                document.getElementById(`settings-${cat}`).innerHTML = '';
+            });
+
+            // Remplir par categorie
+            Object.keys(settings).forEach(category => {
+                const settingsList = settings[category] || [];
+                const targetPanel = document.getElementById(`settings-${category}`);
+
+                if (!targetPanel) return;
+
+                settingsList.forEach(setting => {
+                    const item = createSettingElement(setting);
+                    targetPanel.appendChild(item);
+                });
+            });
+        }
+
+        // Creer element parametre
+        function createSettingElement(setting) {
+            const div = document.createElement('div');
+            div.className = 'setting-item';
+            div.dataset.key = setting.setting_key;
+
+            const inputType = setting.setting_type === 'text' ? 'textarea' :
+                            setting.setting_type === 'number' ? 'number' :
+                            setting.setting_type === 'boolean' ? 'checkbox' :
+                            'text';
+
+            let inputElement = '';
+            if (inputType === 'textarea') {
+                inputElement = `<textarea class="setting-value" data-key="${setting.setting_key}">${setting.setting_value || ''}</textarea>`;
+            } else if (inputType === 'checkbox') {
+                const checked = setting.setting_value === 'true' || setting.setting_value === '1' ? 'checked' : '';
+                inputElement = `<input type="checkbox" class="setting-value" data-key="${setting.setting_key}" ${checked}>`;
+            } else {
+                inputElement = `<input type="${inputType}" class="setting-value" data-key="${setting.setting_key}" value="${setting.setting_value || ''}">`;
+            }
+
+            div.innerHTML = `
+                <div>
+                    <div class="setting-label">${setting.setting_key}</div>
+                    <div class="setting-description">${setting.description || ''}</div>
+                    <span class="key-badge">${setting.setting_type}</span>
+                </div>
+                <div class="setting-input">
+                    ${inputElement}
+                </div>
+                <div class="setting-actions">
+                    <button class="btn btn-danger btn-sm" onclick="deleteSetting('${setting.setting_key}')">Supprimer</button>
+                </div>
+            `;
+
+            return div;
+        }
+
+        // Changer d'onglet
+        function switchTab(category) {
+            // Desactiver tous les tabs et panels
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.settings-panel').forEach(panel => panel.classList.remove('active'));
+
+            // Activer le bon tab et panel
+            event.target.classList.add('active');
+            document.getElementById(`panel-${category}`).classList.add('active');
+        }
+
+        // Sauvegarder tous les parametres
+        async function saveAllSettings() {
+            const updates = [];
+
+            document.querySelectorAll('.setting-value').forEach(input => {
+                const key = input.dataset.key;
+                let value;
+
+                if (input.type === 'checkbox') {
+                    value = input.checked ? 'true' : 'false';
+                } else {
+                    value = input.value;
+                }
+
+                updates.push({ key, value });
+            });
+
+            try {
+                const response = await fetch('/api/settings.php', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updates)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess(`${data.updated || 0} parametres mis a jour`);
+                    loadSettings();
+                } else {
+                    showError(data.error || 'Erreur sauvegarde');
+                }
+            } catch (error) {
+                showError('Erreur reseau');
+            }
+        }
+
+        // Ouvrir modal
+        function openModal(mode) {
+            document.getElementById('settingModal').classList.add('active');
+            document.getElementById('settingForm').reset();
+        }
+
+        // Fermer modal
+        function closeModal() {
+            document.getElementById('settingModal').classList.remove('active');
+        }
+
+        // Supprimer parametre
+        async function deleteSetting(key) {
+            if (!confirm(`Supprimer le parametre "${key}" ?`)) return;
+
+            try {
+                const response = await fetch(`/api/settings.php?key=${encodeURIComponent(key)}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess('Parametre supprime');
+                    loadSettings();
+                } else {
+                    showError(data.error || 'Erreur suppression');
+                }
+            } catch (error) {
+                showError('Erreur reseau');
+            }
+        }
+
+        // Soumettre formulaire
+        document.getElementById('settingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const settingData = {
+                key: document.getElementById('settingKey').value,
+                value: document.getElementById('settingValue').value,
+                type: document.getElementById('settingType').value,
+                category: document.getElementById('settingCategory').value,
+                description: document.getElementById('settingDescription').value
+            };
+
+            try {
+                const response = await fetch('/api/settings.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(settingData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess('Parametre cree');
+                    closeModal();
+                    loadSettings();
+                } else {
+                    showError(data.error || 'Erreur creation');
+                }
+            } catch (error) {
+                showError('Erreur reseau');
+            }
+        });
+
+        // Exporter parametres
+        async function exportSettings() {
+            try {
+                const response = await fetch('/api/settings.php?export=1');
+                const data = await response.json();
+
+                if (data.success) {
+                    const blob = new Blob([JSON.stringify(data.settings, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `settings-${new Date().toISOString().split('T')[0]}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+
+                    showSuccess('Parametres exportes');
+                } else {
+                    showError('Erreur export');
+                }
+            } catch (error) {
+                showError('Erreur reseau');
+            }
+        }
+
+        // Importer parametres
+        async function importSettings(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const importData = JSON.parse(e.target.result);
+
+                    if (!confirm(`Importer ${Object.keys(importData).length} parametres ?\n\nCeci va ecraser les parametres existants.`)) {
+                        return;
+                    }
+
+                    const response = await fetch('/api/settings.php?import=1', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(importData)
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        showSuccess(`${data.updated || 0} parametres importes`);
+                        loadSettings();
+                    } else {
+                        showError(data.error || 'Erreur import');
+                    }
+                } catch (error) {
+                    showError('Fichier JSON invalide');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Messages
+        function showSuccess(message) {
+            document.getElementById('successMessage').textContent = message;
+            const alert = document.getElementById('successAlert');
+            alert.classList.add('active');
+            setTimeout(() => alert.classList.remove('active'), 3000);
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            const alert = document.getElementById('errorAlert');
+            alert.classList.add('active');
+            setTimeout(() => alert.classList.remove('active'), 5000);
+        }
+
+        function showWarning(message) {
+            document.getElementById('warningMessage').textContent = message;
+            const alert = document.getElementById('warningAlert');
+            alert.classList.add('active');
+            setTimeout(() => alert.classList.remove('active'), 5000);
+        }
+
+        // Init
+        loadSettings();
+    </script>
+</body>
+</html>

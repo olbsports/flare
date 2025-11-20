@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Devis - FLARE Admin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-header h1 { font-size: 24px; font-weight: 600; margin-bottom: 5px; }
+        .breadcrumb { font-size: 14px; opacity: 0.9; }
+        .breadcrumb a { color: white; text-decoration: none; }
+
+        .header-actions { display: flex; gap: 10px; }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary { background: white; color: #667eea; }
+        .btn-success { background: #48bb78; color: white; }
+        .btn-danger { background: #e53e3e; color: white; }
+        .btn-warning { background: #ed8936; color: white; }
+        .btn-info { background: #4299e1; color: white; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 30px; }
+
+        .filters-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 15px;
+        }
+
+        .filters-bar input, .filters-bar select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 { font-size: 32px; color: #667eea; margin-bottom: 5px; }
+        .stat-card p { color: #666; font-size: 14px; }
+
+        .quotes-table {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover { background: #f8f8f8; }
+
+        td {
+            padding: 15px;
+            font-size: 14px;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-pending { background: #fef5e7; color: #d97706; }
+        .status-sent { background: #dbeafe; color: #1e40af; }
+        .status-accepted { background: #d1fae5; color: #065f46; }
+        .status-rejected { background: #fee2e2; color: #991b1b; }
+
+        .actions { display: flex; gap: 8px; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.active { display: flex; align-items: center; justify-content: center; }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 { font-size: 20px; }
+        .close-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .modal-body { padding: 30px; }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            border-left: 3px solid #667eea;
+            padding-left: 15px;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .loading.active { display: block; }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.active { display: block; }
+        .alert-success { background: #c6f6d5; color: #22543d; border-left: 4px solid #48bb78; }
+        .alert-error { background: #fed7d7; color: #742a2a; border-left: 4px solid #e53e3e; }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 20px;
+        }
+
+        .pagination button {
+            padding: 8px 16px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .pagination button.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .price-badge {
+            background: #e6f7ff;
+            color: #0050b3;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <div>
+            <h1>Gestion des Devis</h1>
+            <div class="breadcrumb"><a href="index.html">Admin</a> > Devis</div>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-primary" onclick="location.href='index.html'">Retour</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="alert alert-success" id="successAlert"><span id="successMessage"></span></div>
+        <div class="alert alert-error" id="errorAlert"><span id="errorMessage"></span></div>
+
+        <!-- Statistiques -->
+        <div class="stats-bar">
+            <div class="stat-card">
+                <h3 id="totalQuotes">-</h3>
+                <p>Total devis</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="pendingQuotes">-</h3>
+                <p>En attente</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="sentQuotes">-</h3>
+                <p>Envoyes</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="acceptedQuotes">-</h3>
+                <p>Acceptes</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="totalRevenue">-</h3>
+                <p>Chiffre d'affaires</p>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="filters-bar">
+            <input type="text" id="searchInput" placeholder="Rechercher par client, email, reference...">
+            <select id="statusFilter">
+                <option value="">Tous les statuts</option>
+                <option value="pending">En attente</option>
+                <option value="sent">Envoye</option>
+                <option value="accepted">Accepte</option>
+                <option value="rejected">Refuse</option>
+            </select>
+            <input type="date" id="dateFrom" placeholder="Date debut">
+            <input type="date" id="dateTo" placeholder="Date fin">
+            <button class="btn btn-primary" onclick="loadQuotes()">Filtrer</button>
+        </div>
+
+        <!-- Tableau -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Chargement des devis...</p>
+        </div>
+
+        <div class="quotes-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Reference</th>
+                        <th>Client</th>
+                        <th>Produit</th>
+                        <th>Quantite</th>
+                        <th>Montant</th>
+                        <th>Statut</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="quotesTableBody">
+                    <!-- Rempli dynamiquement -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+    </div>
+
+    <!-- Modal Details -->
+    <div class="modal" id="quoteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Details du devis</h2>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">Reference</div>
+                        <div class="detail-value" id="detailRef">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Statut</div>
+                        <div class="detail-value" id="detailStatus">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Client</div>
+                        <div class="detail-value" id="detailClient">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Email</div>
+                        <div class="detail-value" id="detailEmail">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Telephone</div>
+                        <div class="detail-value" id="detailPhone">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Club / Entreprise</div>
+                        <div class="detail-value" id="detailClub">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Produit</div>
+                        <div class="detail-value" id="detailProduct">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Quantite totale</div>
+                        <div class="detail-value" id="detailQty">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Design choisi</div>
+                        <div class="detail-value" id="detailDesign">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Personnalisation</div>
+                        <div class="detail-value" id="detailPerso">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Montant total</div>
+                        <div class="detail-value" id="detailTotal" style="font-size: 24px; color: #667eea;">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Date de creation</div>
+                        <div class="detail-value" id="detailDate">-</div>
+                    </div>
+                </div>
+
+                <div class="detail-item" style="margin-top: 20px;">
+                    <div class="detail-label">Notes / Commentaires</div>
+                    <div class="detail-value" id="detailNotes">-</div>
+                </div>
+
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 30px; border-top: 2px solid #f0f0f0; padding-top: 20px;">
+                    <select id="statusChange" class="btn" style="width: 200px;">
+                        <option value="">Changer le statut...</option>
+                        <option value="pending">En attente</option>
+                        <option value="sent">Envoye</option>
+                        <option value="accepted">Accepte</option>
+                        <option value="rejected">Refuse</option>
+                    </select>
+                    <button class="btn btn-success" onclick="updateStatus()">Mettre a jour</button>
+                    <button class="btn btn-info" onclick="exportPDF()">Exporter PDF</button>
+                    <button class="btn btn-primary" onclick="closeModal()">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        let totalPages = 1;
+        const perPage = 20;
+        let currentQuote = null;
+
+        // Charger les devis
+        async function loadQuotes(page = 1) {
+            document.getElementById('loading').classList.add('active');
+
+            const search = document.getElementById('searchInput').value;
+            const status = document.getElementById('statusFilter').value;
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+
+            try {
+                let url = `/api/quotes.php?page=${page}&limit=${perPage}`;
+                if (search) url += `&search=${encodeURIComponent(search)}`;
+                if (status) url += `&status=${status}`;
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success) {
+                    displayQuotes(data.quotes || []);
+                    if (data.pagination) {
+                        updatePagination(data.pagination.total, page);
+                    }
+                    loadStats();
+                } else {
+                    showError(data.error || 'Erreur chargement');
+                }
+            } catch (error) {
+                showError('Erreur reseau: ' + error.message);
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+            }
+        }
+
+        // Afficher les devis
+        function displayQuotes(quotes) {
+            const tbody = document.getElementById('quotesTableBody');
+            tbody.innerHTML = '';
+
+            if (quotes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px;">Aucun devis trouve</td></tr>';
+                return;
+            }
+
+            quotes.forEach(quote => {
+                const row = document.createElement('tr');
+                const statusClass = `status-${quote.status || 'pending'}`;
+                const statusText = {
+                    'pending': 'En attente',
+                    'sent': 'Envoye',
+                    'accepted': 'Accepte',
+                    'rejected': 'Refuse'
+                }[quote.status] || quote.status;
+
+                row.innerHTML = `
+                    <td><strong>${quote.reference || '-'}</strong></td>
+                    <td>
+                        <div><strong>${quote.client_nom || '-'}</strong></div>
+                        <div style="font-size: 12px; color: #666;">${quote.client_email || '-'}</div>
+                    </td>
+                    <td>${quote.product_reference || '-'}</td>
+                    <td>${quote.total_pieces || '-'}</td>
+                    <td><span class="price-badge">${parseFloat(quote.total_amount || 0).toFixed(2)} EUR</span></td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>${quote.created_at ? new Date(quote.created_at).toLocaleDateString('fr-FR') : '-'}</td>
+                    <td class="actions">
+                        <button class="btn btn-primary btn-sm" onclick="viewQuote(${quote.id})">Voir</button>
+                        <button class="btn btn-info btn-sm" onclick="exportPDF(${quote.id})">PDF</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Voir details devis
+        async function viewQuote(id) {
+            try {
+                const response = await fetch(`/api/quotes.php?id=${id}`);
+                const data = await response.json();
+
+                if (data.success && data.quote) {
+                    currentQuote = data.quote;
+                    showQuoteDetails(data.quote);
+                } else {
+                    showError('Erreur chargement devis');
+                }
+            } catch (error) {
+                showError('Erreur reseau');
+            }
+        }
+
+        // Afficher details
+        function showQuoteDetails(quote) {
+            document.getElementById('detailRef').textContent = quote.reference || '-';
+            document.getElementById('detailStatus').innerHTML = `<span class="status-badge status-${quote.status}">${quote.status}</span>`;
+            document.getElementById('detailClient').textContent = quote.client_nom || '-';
+            document.getElementById('detailEmail').textContent = quote.client_email || '-';
+            document.getElementById('detailPhone').textContent = quote.client_phone || '-';
+            document.getElementById('detailClub').textContent = quote.client_club || '-';
+            document.getElementById('detailProduct').textContent = quote.product_reference || '-';
+            document.getElementById('detailQty').textContent = quote.total_pieces || '-';
+            document.getElementById('detailDesign').textContent = quote.design_choice || '-';
+            document.getElementById('detailPerso').textContent = quote.personalization_needs || '-';
+            document.getElementById('detailTotal').textContent = parseFloat(quote.total_amount || 0).toFixed(2) + ' EUR';
+            document.getElementById('detailDate').textContent = quote.created_at ? new Date(quote.created_at).toLocaleString('fr-FR') : '-';
+            document.getElementById('detailNotes').textContent = quote.notes || 'Aucune note';
+            document.getElementById('statusChange').value = quote.status || '';
+
+            document.getElementById('quoteModal').classList.add('active');
+        }
+
+        // Mettre a jour statut
+        async function updateStatus() {
+            if (!currentQuote) return;
+
+            const newStatus = document.getElementById('statusChange').value;
+            if (!newStatus) {
+                showError('Veuillez selectionner un statut');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/quotes.php?id=${currentQuote.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showSuccess('Statut mis a jour');
+                    closeModal();
+                    loadQuotes(currentPage);
+                } else {
+                    showError(data.error || 'Erreur mise a jour');
+                }
+            } catch (error) {
+                showError('Erreur reseau');
+            }
+        }
+
+        // Exporter PDF
+        function exportPDF(id = null) {
+            const quoteId = id || (currentQuote ? currentQuote.id : null);
+            if (!quoteId) return;
+
+            // TODO: Implementer export PDF
+            showSuccess('Export PDF en cours...');
+            window.open(`/api/quotes.php?id=${quoteId}&export=pdf`, '_blank');
+        }
+
+        // Charger statistiques
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/quotes.php?stats=1');
+                const data = await response.json();
+
+                if (data.success && data.stats) {
+                    const stats = data.stats;
+                    document.getElementById('totalQuotes').textContent = stats.total || 0;
+                    document.getElementById('pendingQuotes').textContent = stats.by_status?.pending || 0;
+                    document.getElementById('sentQuotes').textContent = stats.by_status?.sent || 0;
+                    document.getElementById('acceptedQuotes').textContent = stats.by_status?.accepted || 0;
+                    document.getElementById('totalRevenue').textContent = (stats.total_revenue || 0).toFixed(0) + ' EUR';
+                }
+            } catch (error) {
+                console.error('Erreur stats:', error);
+            }
+        }
+
+        // Pagination
+        function updatePagination(total, current) {
+            currentPage = current;
+            totalPages = Math.ceil(total / perPage);
+
+            const container = document.getElementById('pagination');
+            container.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            if (current > 1) {
+                const btn = document.createElement('button');
+                btn.textContent = 'Precedent';
+                btn.onclick = () => loadQuotes(current - 1);
+                container.appendChild(btn);
+            }
+
+            for (let i = Math.max(1, current - 2); i <= Math.min(totalPages, current + 2); i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                btn.className = i === current ? 'active' : '';
+                btn.onclick = () => loadQuotes(i);
+                container.appendChild(btn);
+            }
+
+            if (current < totalPages) {
+                const btn = document.createElement('button');
+                btn.textContent = 'Suivant';
+                btn.onclick = () => loadQuotes(current + 1);
+                container.appendChild(btn);
+            }
+        }
+
+        // Fermer modal
+        function closeModal() {
+            document.getElementById('quoteModal').classList.remove('active');
+            currentQuote = null;
+        }
+
+        // Messages
+        function showSuccess(message) {
+            document.getElementById('successMessage').textContent = message;
+            const alert = document.getElementById('successAlert');
+            alert.classList.add('active');
+            setTimeout(() => alert.classList.remove('active'), 3000);
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            const alert = document.getElementById('errorAlert');
+            alert.classList.add('active');
+            setTimeout(() => alert.classList.remove('active'), 5000);
+        }
+
+        // Recherche au Enter
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') loadQuotes();
+        });
+
+        // Init
+        loadQuotes();
+    </script>
+</body>
+</html>
