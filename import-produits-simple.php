@@ -76,20 +76,20 @@ if (!$handle) {
 }
 
 // Sauter l'en-tête
-$header = fgetcsv($handle, 0, ',');
+$header = fgetcsv($handle, 0, ';', '"'); // Point-virgule + guillemets pour protéger les descriptions !
 echo "<p class='success'>✅ En-tête : " . count($header) . " colonnes</p>";
 echo "<pre>" . implode(', ', $header) . "</pre>";
 
 // Compter les lignes
 $totalLines = 0;
-while (fgetcsv($handle, 0, ',') !== false) {
+while (fgetcsv($handle, 0, ';', '"') !== false) {
     $totalLines++;
 }
 echo "<p class='info'>📊 Nombre de produits à importer : <strong>$totalLines</strong></p>";
 
 // Revenir au début
 fseek($handle, 0);
-fgetcsv($handle, 0, ','); // Sauter l'en-tête à nouveau
+fgetcsv($handle, 0, ';', '"'); // Sauter l'en-tête à nouveau
 
 // Import
 echo "<h2>5️⃣ Import en cours...</h2>";
@@ -103,31 +103,36 @@ $line = 1;
 
 flush();
 
-while (($data = fgetcsv($handle, 0, ',')) !== false) {
+while (($data = fgetcsv($handle, 0, ';', '"')) !== false) { // Point-virgule + guillemets !
     $line++;
 
     try {
-        // Mapping des colonnes (ajuste selon ton CSV)
+        // Mapping des colonnes selon l'en-tête CSV :
+        // 0:SPORT, 1:FAMILLE_PRODUIT, 2:CODE, 3:DESCRIPTION, 4-11:PRIX, 12:GRAMMAGE, 13:TISSU,
+        // 14:GENRE, 15:TITRE_VENDEUR, 18:REFERENCE_FLARE, 19:DESCRIPTION_SEO, 20-24:PHOTOS, 25:URL
         $productData = [
             'sport' => $data[0] ?? '',
             'famille' => $data[1] ?? '',
-            'code' => $data[2] ?? '',
-            'nom' => $data[3] ?? '',
-            'description' => $data[3] ?? '', // Utiliser le nom comme description si pas d'autre
-            'reference' => $data[8] ?? '',
-            'prix_1' => floatval($data[4] ?? 0),
-            'prix_5' => floatval($data[4] ?? 0), // Si tu n'as qu'un seul prix, le dupliquer
-            'prix_10' => floatval($data[4] ?? 0),
-            'prix_20' => floatval($data[4] ?? 0),
-            'prix_50' => floatval($data[4] ?? 0),
-            'prix_100' => floatval($data[4] ?? 0),
-            'prix_250' => floatval($data[4] ?? 0),
-            'prix_500' => floatval($data[4] ?? 0),
-            'tissu' => $data[6] ?? '',
-            'grammage' => $data[5] ?? '',
-            'genre' => $data[7] ?? '',
-            'photo_1' => $data[9] ?? '',
-            'url' => $data[14] ?? ''
+            'nom' => $data[15] ?? $data[3] ?? '', // TITRE_VENDEUR ou DESCRIPTION
+            'description' => $data[19] ?? $data[3] ?? '', // DESCRIPTION_SEO ou DESCRIPTION
+            'reference' => $data[18] ?? '', // REFERENCE_FLARE
+            'prix_1' => floatval(str_replace(',', '.', $data[4] ?? 0)),
+            'prix_5' => floatval(str_replace(',', '.', $data[5] ?? 0)),
+            'prix_10' => floatval(str_replace(',', '.', $data[6] ?? 0)),
+            'prix_20' => floatval(str_replace(',', '.', $data[7] ?? 0)),
+            'prix_50' => floatval(str_replace(',', '.', $data[8] ?? 0)),
+            'prix_100' => floatval(str_replace(',', '.', $data[9] ?? 0)),
+            'prix_250' => floatval(str_replace(',', '.', $data[10] ?? 0)),
+            'prix_500' => floatval(str_replace(',', '.', $data[11] ?? 0)),
+            'grammage' => $data[12] ?? '',
+            'tissu' => $data[13] ?? '',
+            'genre' => $data[14] ?? '',
+            'photo_1' => $data[20] ?? '',
+            'photo_2' => $data[21] ?? '',
+            'photo_3' => $data[22] ?? '',
+            'photo_4' => $data[23] ?? '',
+            'photo_5' => $data[24] ?? '',
+            'url' => $data[25] ?? ''
         ];
 
         // Vérifier si le produit existe déjà
