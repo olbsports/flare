@@ -11,7 +11,7 @@
 // ⚠️ METS TES IDENTIFIANTS ICI :
 $host = 'localhost';                        // o2switch = localhost
 $dbname = 'sc1ispy2055_flare_custom';      // Ton nom de BDD
-$user = 'sc1ispy2055_flare';               // Ton user MySQL
+$user = 'sc1ispy2055_flare_adm';           // ⚠️ CORRIGÉ : L'user c'est _adm !
 $password = 'TON_MOT_DE_PASSE_ICI';        // ⚠️ CHANGE ICI avec ton VRAI mot de passe !
 
 echo "<h1>🔍 TEST DIRECT CONNEXION BDD</h1>";
@@ -131,8 +131,8 @@ try {
         echo "<h4>🔑 Problème : Accès refusé</h4>";
         echo "<p><strong>Causes possibles :</strong></p>";
         echo "<ol>";
-        echo "<li><strong>Mot de passe incorrect</strong><br>→ Vérifie ton mot de passe dans cPanel > MySQL Databases<br>→ Si besoin, change le mot de passe de l'utilisateur 'sc1ispy2055_flare'</li>";
-        echo "<li><strong>Utilisateur n'a pas les droits</strong><br>→ Dans cPanel > MySQL Databases > Current Databases<br>→ Vérifie que 'sc1ispy2055_flare' est bien associé à 'sc1ispy2055_flare_custom'<br>→ Si non, ajoute-le avec TOUS les privilèges</li>";
+        echo "<li><strong>Mot de passe incorrect</strong><br>→ Vérifie ton mot de passe dans cPanel > MySQL Databases<br>→ Si besoin, change le mot de passe de l'utilisateur 'sc1ispy2055_flare_adm'</li>";
+        echo "<li><strong>Utilisateur n'a pas les droits</strong><br>→ Dans cPanel > MySQL Databases > Current Databases<br>→ Vérifie que 'sc1ispy2055_flare_adm' est bien associé à 'sc1ispy2055_flare_custom'<br>→ Si non, ajoute-le avec TOUS les privilèges</li>";
         echo "</ol>";
         echo "</div>";
     } elseif (strpos($errorMsg, 'Unknown database') !== false) {
@@ -152,7 +152,7 @@ try {
         echo "<p>Vérifie ces points :</p>";
         echo "<ol>";
         echo "<li>La base 'sc1ispy2055_flare_custom' existe dans cPanel > MySQL Databases</li>";
-        echo "<li>L'utilisateur 'sc1ispy2055_flare' existe</li>";
+        echo "<li>L'utilisateur 'sc1ispy2055_flare_adm' existe</li>";
         echo "<li>L'utilisateur a les droits sur cette base</li>";
         echo "<li>Le mot de passe est correct</li>";
         echo "</ol>";

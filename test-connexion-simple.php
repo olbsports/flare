@@ -19,7 +19,7 @@ echo "<h2>📋 Configuration actuelle :</h2>";
 echo "<ul>";
 echo "<li>Host : <strong>" . DB_HOST . "</strong></li>";
 echo "<li>Database : <strong>" . DB_NAME . "</strong></li>";
-echo "<li>User : <strong>" . DB_USER . "</strong></li>";
+echo "<li>User : <strong>" . DB_USER . "</strong> (devrait être sc1ispy2055_flare_adm)</li>";
 echo "<li>Password : <strong>" . (DB_PASS ? '****** (défini)' : '⚠️ VIDE - IL FAUT LE REMPLIR !') . "</strong></li>";
 echo "</ul>";
 
