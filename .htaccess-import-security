@@ -1,0 +1,12 @@
+# Protection des scripts d'import
+# Copier ce contenu dans votre .htaccess après l'import
+
+<Files "import-*.php">
+    Require all denied
+</Files>
+
+<Files "import-all.php">
+    Require all denied
+</Files>
+
+# Permet de garder les scripts sur le serveur sans risque

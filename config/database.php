@@ -21,14 +21,14 @@ if ($env === 'development') {
 } else {
     // Environnement de production
     define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-    define('DB_NAME', getenv('DB_NAME') ?: 'flare_custom');
-    define('DB_USER', getenv('DB_USER') ?: 'flare_user');
-    define('DB_PASS', getenv('DB_PASS') ?: 'flare_password');
+    define('DB_NAME', getenv('DB_NAME') ?: 'sc1ispy2055_flare_custom');
+    define('DB_USER', getenv('DB_USER') ?: 'sc1ispy2055_flare');
+    define('DB_PASS', getenv('DB_PASS') ?: '');
     define('DB_CHARSET', 'utf8mb4');
 
-    // Désactiver les erreurs en production
-    error_reporting(0);
-    ini_set('display_errors', 0);
+    // Activer les erreurs temporairement pour l'import
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
 }
 
 /**
