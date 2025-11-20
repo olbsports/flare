@@ -284,6 +284,10 @@ try {
             <span class="nav-icon">💰</span>
             Devis
         </a>
+        <a href="content-editor.php" class="nav-item">
+            <span class="nav-icon">📝</span>
+            Éditeur de Contenu
+        </a>
         <a href="pages.php" class="nav-item">
             <span class="nav-icon">📄</span>
             Pages
