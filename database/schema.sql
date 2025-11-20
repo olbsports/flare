@@ -2,13 +2,8 @@
 -- FLARE CUSTOM - Database Schema
 -- Système de gestion complet pour produits, pages, contenus
 -- ============================================
-
--- Base de données
-CREATE DATABASE IF NOT EXISTS flare_custom
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
-
-USE flare_custom;
+-- NOTE: La base de données doit être créée et sélectionnée avant d'exécuter ce script
+-- ============================================
 
 -- ============================================
 -- TABLE: users (Utilisateurs admin)
