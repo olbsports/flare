@@ -40,11 +40,15 @@ if ($action) {
             case 'import_blog':
                 $results = importBlog($pdo);
                 break;
+            case 'import_tabs':
+                $results = importTabsFromHTML($pdo);
+                break;
             case 'import_all':
                 $results['tables'] = initTables($pdo);
                 $results['categories'] = importCategories($pdo);
                 $results['products'] = importProducts($pdo);
                 $results['products_html'] = importProductsFromHTML($pdo);
+                $results['tabs'] = importTabsFromHTML($pdo);
                 $results['pages'] = importPages($pdo);
                 $results['blog'] = importBlog($pdo);
                 break;
@@ -753,6 +757,113 @@ function importBlog($pdo) {
     return ['imported' => $count, 'source' => $blogDir];
 }
 
+/**
+ * Import du contenu des onglets depuis les fichiers HTML produits
+ */
+function importTabsFromHTML($pdo) {
+    $produitsDir = __DIR__ . '/../pages/produits';
+    if (!is_dir($produitsDir)) {
+        return ['error' => 'Dossier /pages/produits/ non trouvé', 'imported' => 0];
+    }
+
+    $files = glob($produitsDir . '/*.html');
+    if (empty($files)) {
+        return ['error' => 'Aucun fichier HTML trouvé', 'imported' => 0];
+    }
+
+    $stmt = $pdo->prepare("UPDATE products SET
+        tab_description = ?,
+        tab_specifications = ?,
+        tab_sizes = ?,
+        tab_faq = ?
+        WHERE reference = ?");
+
+    $count = 0;
+    $errors = [];
+
+    foreach ($files as $file) {
+        $ref = basename($file, '.html');
+        $html = file_get_contents($file);
+
+        // Extraire le contenu de chaque onglet
+        $tabDescription = extractTabContent($html, 'tab-description');
+        $tabSpecifications = extractTabContent($html, 'tab-specifications');
+        $tabSizes = extractTabContent($html, 'tab-sizes');
+        $tabFaq = extractTabContent($html, 'tab-faq');
+
+        // Ne mettre à jour que si on a du contenu
+        if ($tabDescription || $tabSpecifications || $tabSizes || $tabFaq) {
+            try {
+                $stmt->execute([
+                    $tabDescription,
+                    $tabSpecifications,
+                    $tabSizes,
+                    $tabFaq,
+                    $ref
+                ]);
+                if ($stmt->rowCount() > 0) {
+                    $count++;
+                }
+            } catch (Exception $e) {
+                if (count($errors) < 5) {
+                    $errors[] = "$ref: " . $e->getMessage();
+                }
+            }
+        }
+    }
+
+    return ['imported' => $count, 'total_files' => count($files), 'errors' => $errors];
+}
+
+/**
+ * Extraire le contenu d'un onglet depuis le HTML
+ */
+function extractTabContent($html, $tabId) {
+    // Pattern pour extraire le contenu entre <div class="tab-content" id="tab-xxx"> et </div> correspondant
+    $pattern = '/<div[^>]*id=["\']' . preg_quote($tabId, '/') . '["\'][^>]*>(.*?)<\/div>\s*(?=<div class="tab-content"|<\/section>|<!-- TAB:)/s';
+
+    if (preg_match($pattern, $html, $match)) {
+        $content = trim($match[1]);
+        // Nettoyer le contenu
+        $content = preg_replace('/^\s*\n/m', '', $content);
+        return $content;
+    }
+
+    // Méthode alternative: chercher entre les balises
+    $startPattern = '/<div[^>]*class="tab-content[^"]*"[^>]*id=["\']' . preg_quote($tabId, '/') . '["\'][^>]*>/s';
+    $endPattern = '/<\/div>\s*(?=<div class="tab-content"|<\/section>|<!-- TAB)/s';
+
+    if (preg_match($startPattern, $html, $startMatch, PREG_OFFSET_CAPTURE)) {
+        $startPos = $startMatch[0][1] + strlen($startMatch[0][0]);
+        $remaining = substr($html, $startPos);
+
+        // Trouver la fin du div (en comptant les niveaux)
+        $depth = 1;
+        $pos = 0;
+        $len = strlen($remaining);
+
+        while ($depth > 0 && $pos < $len) {
+            $nextOpen = strpos($remaining, '<div', $pos);
+            $nextClose = strpos($remaining, '</div>', $pos);
+
+            if ($nextClose === false) break;
+
+            if ($nextOpen !== false && $nextOpen < $nextClose) {
+                $depth++;
+                $pos = $nextOpen + 4;
+            } else {
+                $depth--;
+                if ($depth === 0) {
+                    return trim(substr($remaining, 0, $nextClose));
+                }
+                $pos = $nextClose + 6;
+            }
+        }
+    }
+
+    return '';
+}
+
 // Compter les éléments existants
 function getCounts($pdo) {
     $counts = [];
@@ -983,6 +1094,18 @@ try {
             </div>
             <?php endif; ?>
             <?php endif; ?>
+            <?php if (isset($results['tabs'])): ?>
+            <div class="result-item">
+                <span>📑 Contenu Onglets</span>
+                <span class="result-value"><?php echo $results['tabs']['imported'] ?? 0; ?> / <?php echo $results['tabs']['total_files'] ?? 0; ?> importés</span>
+            </div>
+            <?php if (!empty($results['tabs']['errors'])): ?>
+            <div class="result-item" style="color: var(--warning);">
+                <span>⚠️ Erreurs onglets</span>
+                <span style="font-size:11px"><?php echo implode('<br>', array_slice($results['tabs']['errors'], 0, 3)); ?></span>
+            </div>
+            <?php endif; ?>
+            <?php endif; ?>
             <?php if (isset($results['pages'])): ?>
             <div class="result-item">
                 <span>📄 Pages</span>
@@ -1082,15 +1205,21 @@ try {
                         <div class="desc">395 fiches HTML complètes</div>
                     </button>
 
+                    <button type="submit" name="action" value="import_tabs" class="import-btn">
+                        <div class="icon">📑</div>
+                        <div class="title">5. Contenu Onglets</div>
+                        <div class="desc">Description, specs, tailles, FAQ</div>
+                    </button>
+
                     <button type="submit" name="action" value="import_pages" class="import-btn">
                         <div class="icon">📄</div>
-                        <div class="title">5. Pages</div>
+                        <div class="title">6. Pages</div>
                         <div class="desc">Pages info (CGV, FAQ, etc.)</div>
                     </button>
 
                     <button type="submit" name="action" value="import_blog" class="import-btn">
                         <div class="icon">📝</div>
-                        <div class="title">6. Blog</div>
+                        <div class="title">7. Blog</div>
                         <div class="desc">Articles de blog</div>
                     </button>
                 </div>

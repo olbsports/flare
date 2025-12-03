@@ -1,9 +1,7 @@
 <?php
 /**
  * PAGE PRODUIT DYNAMIQUE - FLARE CUSTOM
- *
- * Cette page charge les données produit depuis la base de données.
- * Quand tu modifies un produit dans l'admin, ça se met à jour automatiquement ici.
+ * Structure IDENTIQUE aux pages HTML statiques, données depuis BDD
  */
 
 require_once __DIR__ . '/config/database.php';
@@ -26,7 +24,7 @@ try {
 
     if (!$product) {
         http_response_code(404);
-        die("Produit non trouvé");
+        die("Produit non trouvé: " . htmlspecialchars($reference));
     }
 
     // Charger le guide des tailles si défini
@@ -37,67 +35,70 @@ try {
         $sizeChart = $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Charger les photos supplémentaires
-    $photos = [];
-    try {
-        $stmt = $pdo->prepare("SELECT * FROM product_photos WHERE product_id = ? ORDER BY ordre ASC");
-        $stmt->execute([$product['id']]);
-        $photos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch (Exception $e) {
-        // Table n'existe peut-être pas encore
-    }
-
-    // Si pas de photos en BDD, utiliser photo_1 à photo_5
-    if (empty($photos)) {
-        for ($i = 1; $i <= 5; $i++) {
-            if (!empty($product["photo_$i"])) {
-                $photos[] = ['url' => $product["photo_$i"], 'is_main' => ($i === 1)];
-            }
-        }
-    }
-
     // Charger les paramètres du site
     $siteName = getSetting('site_name', 'FLARE CUSTOM');
     $siteUrl = getSetting('site_url', 'https://flare-custom.com');
 
-    // Configuration du configurateur
-    $configuratorConfig = [];
-    if (!empty($product['configurator_config'])) {
-        $configuratorConfig = json_decode($product['configurator_config'], true) ?? [];
-    }
-
 } catch (Exception $e) {
     http_response_code(500);
-    // Afficher l'erreur en mode debug, sinon message générique
     if (isset($_GET['debug'])) {
         die("Erreur: " . $e->getMessage());
     }
-    // Vérifier si c'est un problème de table manquante
     if (strpos($e->getMessage(), "doesn't exist") !== false) {
         die("<h2>Base de données non initialisée</h2><p>Allez sur <a href='/admin/import-content.php'>/admin/import-content.php</a> et cliquez 'TOUT IMPORTER D'UN COUP'</p>");
     }
     die("Erreur de chargement - <a href='?ref=" . htmlspecialchars($reference) . "&debug=1'>Voir détails</a>");
 }
 
-// Calculer les prix min/max
-$priceColumns = ['prix_1', 'prix_5', 'prix_10', 'prix_20', 'prix_50', 'prix_100', 'prix_250', 'prix_500'];
-$prices = [];
-foreach ($priceColumns as $col) {
-    if (!empty($product[$col]) && floatval($product[$col]) > 0) {
-        $prices[] = floatval($product[$col]);
+// Construire les URLs des photos
+$photos = [];
+for ($i = 1; $i <= 5; $i++) {
+    if (!empty($product["photo_$i"])) {
+        $photos[] = $product["photo_$i"];
     }
 }
-$priceHigh = !empty($prices) ? max($prices) : 0;
-$priceLow = !empty($prices) ? min($prices) : 0;
+// Si pas de photos, utiliser le pattern par défaut
+if (empty($photos)) {
+    for ($i = 1; $i <= 5; $i++) {
+        $photos[] = "https://flare-custom.com/photos/produits/{$reference}-{$i}.webp";
+    }
+}
 
-// Générer le tableau de prix
-$priceTable = [];
-$quantities = [1 => 'prix_1', 5 => 'prix_5', 10 => 'prix_10', 20 => 'prix_20', 50 => 'prix_50', 100 => 'prix_100', 250 => 'prix_250', 500 => 'prix_500'];
-foreach ($quantities as $qty => $col) {
+// Calculer les prix
+$priceData = [];
+$quantities = [1, 5, 10, 20, 50, 100, 250, 500];
+$priceColumns = ['prix_1', 'prix_5', 'prix_10', 'prix_20', 'prix_50', 'prix_100', 'prix_250', 'prix_500'];
+
+foreach ($quantities as $i => $qty) {
+    $col = $priceColumns[$i];
     if (!empty($product[$col]) && floatval($product[$col]) > 0) {
-        $priceTable[$qty] = floatval($product[$col]);
+        $priceData[] = ['qty' => $qty, 'price' => floatval($product[$col])];
     }
 }
+
+$priceLow = !empty($priceData) ? min(array_column($priceData, 'price')) : 0;
+$priceHigh = !empty($priceData) ? max(array_column($priceData, 'price')) : 0;
+
+// Variables pour le template
+$nom = $product['nom'] ?? '';
+$nomUpper = strtoupper($nom);
+$sport = $product['sport'] ?? '';
+$sportLower = strtolower($sport);
+$famille = $product['famille'] ?? '';
+$tissu = $product['tissu'] ?? '';
+$grammage = $product['grammage'] ?? '';
+$genre = $product['genre'] ?? 'Mixte';
+$finition = $product['finition'] ?? '';
+$description = $product['description'] ?? '';
+$descriptionSeo = $product['description_seo'] ?? $description;
+$metaTitle = $product['meta_title'] ?? $nom;
+$metaDescription = $product['meta_description'] ?? $descriptionSeo;
+
+// Contenu des onglets (depuis BDD ou génération par défaut)
+$tabDescription = $product['tab_description'] ?? '';
+$tabSpecifications = $product['tab_specifications'] ?? '';
+$tabSizes = $product['tab_sizes'] ?? '';
+$tabFaq = $product['tab_faq'] ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -106,75 +107,58 @@ foreach ($quantities as $qty => $col) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- SEO META TAGS -->
-    <title><?php echo htmlspecialchars($product['meta_title'] ?: $product['nom']); ?> | Dès <?php echo number_format($priceLow, 2); ?>€ | <?php echo htmlspecialchars($siteName); ?></title>
-    <meta name="description" content="<?php echo htmlspecialchars($product['meta_description'] ?: $product['description_seo'] ?: $product['description']); ?>">
-    <meta name="keywords" content="<?php echo htmlspecialchars($product['sport']); ?>, <?php echo htmlspecialchars($product['famille']); ?>, équipement personnalisé, sublimation, <?php echo htmlspecialchars($reference); ?>">
+    <title><?php echo htmlspecialchars($metaTitle); ?> | Dès <?php echo number_format($priceLow, 2, ',', ' '); ?>€ | <?php echo htmlspecialchars($sport); ?> Personnalisé | <?php echo htmlspecialchars($siteName); ?></title>
+    <meta name="description" content="<?php echo htmlspecialchars($metaDescription); ?>">
+    <meta name="keywords" content="<?php echo htmlspecialchars($sportLower); ?>, <?php echo htmlspecialchars(strtolower($famille)); ?>, équipement personnalisé, sublimation, <?php echo htmlspecialchars($tissu); ?>, <?php echo htmlspecialchars($reference); ?>">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="<?php echo $siteUrl; ?>/produit/<?php echo $reference; ?>">
 
     <!-- OPEN GRAPH -->
     <meta property="og:type" content="product">
-    <meta property="og:site_name" content="<?php echo htmlspecialchars($siteName); ?>">
-    <meta property="og:title" content="<?php echo htmlspecialchars($product['nom']); ?> | Dès <?php echo number_format($priceLow, 2); ?>€">
-    <meta property="og:description" content="<?php echo htmlspecialchars($product['description_seo'] ?: $product['description']); ?>">
-    <meta property="og:image" content="<?php echo htmlspecialchars($photos[0]['url'] ?? ''); ?>">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
+    <meta property="og:title" content="<?php echo htmlspecialchars($nom); ?> | Dès <?php echo number_format($priceLow, 2, ',', ' '); ?>€">
+    <meta property="og:description" content="<?php echo htmlspecialchars($descriptionSeo); ?>">
+    <meta property="og:image" content="<?php echo htmlspecialchars($photos[0]); ?>">
     <meta property="og:url" content="<?php echo $siteUrl; ?>/produit/<?php echo $reference; ?>">
-    <meta property="og:locale" content="fr_FR">
-    <meta property="product:price:amount" content="<?php echo $priceLow; ?>">
-    <meta property="product:price:currency" content="EUR">
 
-    <!-- TWITTER CARDS -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="<?php echo htmlspecialchars($product['nom']); ?> | Dès <?php echo number_format($priceLow, 2); ?>€">
-    <meta name="twitter:description" content="<?php echo htmlspecialchars($product['description_seo'] ?: $product['description']); ?>">
-    <meta name="twitter:image" content="<?php echo htmlspecialchars($photos[0]['url'] ?? ''); ?>">
-
-    <!-- SCHEMA.ORG JSON-LD - ENRICHI POUR SEO -->
+    <!-- SCHEMA.ORG JSON-LD - ENRICHI POUR LLM -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Product",
-      "name": "<?php echo addslashes($product['nom']); ?>",
-      "description": "<?php echo addslashes($product['description_seo'] ?: $product['description']); ?>",
+      "name": "<?php echo addslashes($nom); ?>",
+      "description": "<?php echo addslashes($descriptionSeo); ?>",
       "sku": "<?php echo $reference; ?>",
       "mpn": "<?php echo $reference; ?>",
       "brand": {"@type": "Brand", "name": "<?php echo addslashes($siteName); ?>"},
-      "category": "<?php echo addslashes($product['famille'] . ' ' . $product['sport']); ?>",
-      "url": "<?php echo $siteUrl; ?>/produit/<?php echo $reference; ?>",
-      "image": [<?php echo implode(',', array_map(function($p) { return '"' . addslashes($p['url']) . '"'; }, array_slice($photos, 0, 5))); ?>],
-      "material": "<?php echo addslashes($product['tissu']); ?>",
+      "category": "<?php echo addslashes($famille . ' ' . $sport); ?>",
+      "material": "<?php echo addslashes($tissu); ?>",
       "additionalProperty": [
-        {"@type": "PropertyValue", "name": "Sport", "value": "<?php echo addslashes($product['sport']); ?>"},
+        {"@type": "PropertyValue", "name": "Sport", "value": "<?php echo addslashes($sport); ?>"},
         {"@type": "PropertyValue", "name": "Technique", "value": "Sublimation intégrale"},
-        {"@type": "PropertyValue", "name": "Grammage", "value": "<?php echo addslashes($product['grammage']); ?>"},
-        {"@type": "PropertyValue", "name": "Genre", "value": "<?php echo addslashes($product['genre']); ?>"},
-        {"@type": "PropertyValue", "name": "Finition", "value": "<?php echo addslashes($product['finition']); ?>"},
+        {"@type": "PropertyValue", "name": "Grammage", "value": "<?php echo addslashes($grammage); ?>"},
+        {"@type": "PropertyValue", "name": "Genre", "value": "<?php echo addslashes($genre); ?>"},
+        {"@type": "PropertyValue", "name": "Finition", "value": "<?php echo addslashes($finition); ?>"},
         {"@type": "PropertyValue", "name": "Fabrication", "value": "Europe"},
-        {"@type": "PropertyValue", "name": "Délai", "value": "3-4 semaines"}
+        {"@type": "PropertyValue", "name": "Délai", "value": "3-4 semaines"},
+        {"@type": "PropertyValue", "name": "Personnalisation", "value": "Illimitée"}
       ],
       "offers": {
         "@type": "AggregateOffer",
         "priceCurrency": "EUR",
         "lowPrice": "<?php echo $priceLow; ?>",
         "highPrice": "<?php echo $priceHigh; ?>",
-        "offerCount": "<?php echo count($priceTable); ?>",
+        "offerCount": "<?php echo count($priceData); ?>",
         "availability": "https://schema.org/InStock",
         "seller": {
           "@type": "Organization",
           "name": "<?php echo addslashes($siteName); ?>",
           "url": "<?php echo $siteUrl; ?>"
-        },
-        "priceValidUntil": "<?php echo date('Y-12-31'); ?>",
-        "itemCondition": "https://schema.org/NewCondition"
+        }
       },
       "aggregateRating": {
         "@type": "AggregateRating",
         "ratingValue": "4.8",
-        "reviewCount": "127",
-        "bestRating": "5",
-        "worstRating": "1"
+        "reviewCount": "127"
       },
       "manufacturer": {
         "@type": "Organization",
@@ -188,25 +172,16 @@ foreach ($quantities as $qty => $col) {
     }
     </script>
 
-    <!-- BREADCRUMB SCHEMA -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {"@type": "ListItem", "position": 1, "name": "Accueil", "item": "<?php echo $siteUrl; ?>"},
-        {"@type": "ListItem", "position": 2, "name": "<?php echo addslashes($product['sport']); ?>", "item": "<?php echo $siteUrl; ?>/pages/products/equipement-<?php echo strtolower($product['sport']); ?>-personnalise-sublimation.html"},
-        {"@type": "ListItem", "position": 3, "name": "<?php echo addslashes($product['nom']); ?>", "item": "<?php echo $siteUrl; ?>/produit/<?php echo $reference; ?>"}
-      ]
-    }
-    </script>
-
     <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="/assets/css/components.css">
-    <link rel="stylesheet" href="/assets/css/product-page.css">
-    <link rel="stylesheet" href="/assets/css/configurateur-produit.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+
+    <!-- STYLE INLINE (copié de produit.html) -->
+    <link rel="stylesheet" href="/assets/css/product-page.css">
+    <!-- Configurateur Produit -->
+    <link rel="stylesheet" href="/assets/css/configurateur-produit.css">
     <script src="/assets/js/configurateur-produit.js" defer></script>
+
     <script src="/assets/js/templates-display.js" defer></script>
 </head>
 <body>
@@ -248,11 +223,11 @@ foreach ($quantities as $qty => $col) {
 
     <!-- BREADCRUMB -->
     <nav class="breadcrumb">
-        <a href="/">Accueil</a>
+        <a href="/index.html">Accueil</a>
         <span>›</span>
-        <a href="/pages/products/equipement-<?php echo strtolower($product['sport']); ?>-personnalise-sublimation.html"><?php echo htmlspecialchars($product['sport']); ?></a>
+        <a href="/pages/products/equipement-<?php echo $sportLower; ?>-personnalise-sublimation.html"><?php echo htmlspecialchars($sport); ?></a>
         <span>›</span>
-        <strong><?php echo htmlspecialchars($product['famille']); ?></strong>
+        <strong><?php echo htmlspecialchars($famille); ?></strong>
     </nav>
 
     <!-- HERO PRODUCT -->
@@ -261,12 +236,12 @@ foreach ($quantities as $qty => $col) {
             <!-- GALLERY -->
             <div class="product-gallery">
                 <div class="main-image" id="mainImage">
-                    <img src="<?php echo htmlspecialchars($photos[0]['url'] ?? '/assets/images/placeholder.webp'); ?>" alt="<?php echo htmlspecialchars($product['nom']); ?>">
+                    <img src="<?php echo htmlspecialchars($photos[0]); ?>" alt="<?php echo htmlspecialchars($nom); ?>">
                 </div>
                 <div class="thumbnail-grid">
                     <?php foreach ($photos as $i => $photo): ?>
                     <div class="thumbnail<?php echo $i === 0 ? ' active' : ''; ?>">
-                        <img src="<?php echo htmlspecialchars($photo['url']); ?>" alt="<?php echo htmlspecialchars($product['nom']); ?> - Photo <?php echo $i + 1; ?>">
+                        <img src="<?php echo htmlspecialchars($photo); ?>" alt="<?php echo htmlspecialchars($nom); ?> - Photo <?php echo $i + 1; ?>">
                     </div>
                     <?php endforeach; ?>
                 </div>
@@ -274,202 +249,350 @@ foreach ($quantities as $qty => $col) {
 
             <!-- PRODUCT INFO -->
             <div class="product-info">
-                <div class="product-badges">
-                    <span class="badge badge-sport"><?php echo htmlspecialchars($product['sport']); ?></span>
-                    <span class="badge badge-new">Personnalisable</span>
+                <h1><?php echo htmlspecialchars($nomUpper); ?></h1>
+
+                <div class="product-rating">
+                    <div class="stars">★★★★★</div>
+                    <span class="rating-count">4.8/5 · 127 avis clients</span>
                 </div>
 
-                <h1 class="product-title"><?php echo htmlspecialchars($product['nom']); ?></h1>
-                <p class="product-ref">Réf: <?php echo htmlspecialchars($reference); ?></p>
-
-                <!-- PRIX -->
-                <div class="price-section">
-                    <div class="price-range">
-                        <span class="price-from">À partir de</span>
-                        <span class="price-value"><?php echo number_format($priceLow, 2); ?>€</span>
-                        <span class="price-unit">/ pièce</span>
-                    </div>
-                    <p class="price-info">Prix dégressifs selon quantité</p>
+                <div class="price-box">
+                    <div style="font-size: 14px; color: #666; margin-bottom: 8px;">À partir de</div>
+                    <div class="price-current"><?php echo number_format($priceLow, 2, ',', ' '); ?> €</div>
+                    <div class="price-range">Prix dégressifs de <?php echo number_format($priceHigh, 2, ',', ' '); ?> € à <?php echo number_format($priceLow, 2, ',', ' '); ?> € / pièce TTC</div>
+                    <div class="savings-badge">ÉCONOMISEZ JUSQU'À 60% SUR GRANDES QUANTITÉS</div>
                 </div>
 
-                <!-- TABLEAU PRIX -->
-                <div class="price-table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Quantité</th>
-                                <?php foreach ($priceTable as $qty => $price): ?>
-                                <th><?php echo $qty; ?>+</th>
-                                <?php endforeach; ?>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Prix unitaire</td>
-                                <?php foreach ($priceTable as $qty => $price): ?>
-                                <td><?php echo number_format($price, 2); ?>€</td>
-                                <?php endforeach; ?>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="product-features">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/>
+                            </svg>
+                        </div>
+                        <div class="feature-text">
+                            <strong><?php echo htmlspecialchars($tissu ?: 'Tissu Premium'); ?></strong>
+                            <span>Ultra-respirant</span>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+                                <line x1="4" y1="22" x2="4" y2="15"/>
+                            </svg>
+                        </div>
+                        <div class="feature-text">
+                            <strong>Sublimation Intégrale</strong>
+                            <span>Couleurs illimitées</span>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                            </svg>
+                        </div>
+                        <div class="feature-text">
+                            <strong>Délai 3-4 Semaines</strong>
+                            <span>Livraison Europe express</span>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                            </svg>
+                        </div>
+                        <div class="feature-text">
+                            <strong>Fabrication Europe</strong>
+                            <span>Ateliers certifiés</span>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- CARACTÉRISTIQUES -->
-                <div class="product-specs">
-                    <?php if (!empty($product['tissu'])): ?>
-                    <div class="spec-item">
-                        <span class="spec-label">Tissu</span>
-                        <span class="spec-value"><?php echo htmlspecialchars($product['tissu']); ?></span>
-                    </div>
-                    <?php endif; ?>
-                    <?php if (!empty($product['grammage'])): ?>
-                    <div class="spec-item">
-                        <span class="spec-label">Grammage</span>
-                        <span class="spec-value"><?php echo htmlspecialchars($product['grammage']); ?></span>
-                    </div>
-                    <?php endif; ?>
-                    <?php if (!empty($product['genre'])): ?>
-                    <div class="spec-item">
-                        <span class="spec-label">Genre</span>
-                        <span class="spec-value"><?php echo htmlspecialchars($product['genre']); ?></span>
-                    </div>
-                    <?php endif; ?>
-                    <?php if (!empty($product['finition'])): ?>
-                    <div class="spec-item">
-                        <span class="spec-label">Finition</span>
-                        <span class="spec-value"><?php echo htmlspecialchars($product['finition']); ?></span>
-                    </div>
-                    <?php endif; ?>
-                </div>
-
-                <!-- CONFIGURATEUR -->
-                <div id="configurateur-produit"
-                     data-product-ref="<?php echo htmlspecialchars($reference); ?>"
-                     data-product-name="<?php echo htmlspecialchars($product['nom']); ?>"
-                     data-product-sport="<?php echo htmlspecialchars($product['sport']); ?>"
-                     data-prices='<?php echo json_encode($priceTable); ?>'>
-                </div>
-
-                <!-- CTA -->
-                <div class="cta-section">
-                    <button class="btn-primary btn-quote" onclick="openQuoteForm()">
-                        Demander un devis gratuit
-                    </button>
-                    <p class="cta-info">Réponse sous 24h - Sans engagement</p>
+                <div class="cta-buttons">
+                    <button class="btn-primary" onclick='initConfigurateurProduit(<?php echo json_encode([
+                        "reference" => $reference,
+                        "nom" => $nom,
+                        "sport" => $sport,
+                        "famille" => $famille,
+                        "photo" => $photos[0],
+                        "tissu" => $tissu,
+                        "grammage" => $grammage,
+                        "prixBase" => $priceLow
+                    ]); ?>)'>CONFIGURER MON DEVIS</button>
+                    <a href="#description" class="btn-secondary">EN SAVOIR PLUS</a>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ONGLETS PRODUIT -->
-    <section class="product-tabs">
+    <!-- ZONE D'INJECTION DYNAMIQUE POUR CONTENU PERSONNALISÉ (avant le configurateur) -->
+    <div id="configurator-dynamic-content"></div>
+
+    <!-- ZONE D'INJECTION CONFIGURATEUR - Le configurateur sera injecté dynamiquement ici -->
+    <div id="configurator-container"></div>
+
+    <!-- PRODUCT TABS - CONTENU ADAPTÉ AU PRODUIT -->
+    <section id="description" class="product-tabs">
         <div class="tabs-nav">
-            <button class="tab-btn active" data-tab="description">Description</button>
-            <button class="tab-btn" data-tab="specifications">Spécifications</button>
-            <button class="tab-btn" data-tab="sizes">Guide des tailles</button>
+            <button class="tab-btn active" data-tab="description">Description Complète</button>
+            <button class="tab-btn" data-tab="specifications">Caractéristiques</button>
+            <button class="tab-btn" data-tab="sizes">Guide des Tailles</button>
             <button class="tab-btn" data-tab="templates">Templates</button>
-            <button class="tab-btn" data-tab="faq">FAQ</button>
+            <button class="tab-btn" data-tab="faq">Questions Fréquentes</button>
         </div>
 
-        <div class="tabs-content">
-            <!-- DESCRIPTION -->
-            <div class="tab-panel active" id="tab-description">
-                <?php if (!empty($product['tab_description'])): ?>
-                    <?php echo $product['tab_description']; ?>
-                <?php else: ?>
-                    <p><?php echo nl2br(htmlspecialchars($product['description'] ?: $product['description_seo'])); ?></p>
-                <?php endif; ?>
-            </div>
+        <!-- TAB: DESCRIPTION -->
+        <div class="tab-content active" id="tab-description">
+            <?php if (!empty($tabDescription)): ?>
+                <?php echo $tabDescription; ?>
+            <?php else: ?>
+            <h2><?php echo htmlspecialchars($nom); ?> - Équipement <?php echo htmlspecialchars($sportLower); ?> personnalisé</h2>
 
-            <!-- SPÉCIFICATIONS -->
-            <div class="tab-panel" id="tab-specifications">
-                <?php if (!empty($product['tab_specifications'])): ?>
-                    <?php echo $product['tab_specifications']; ?>
-                <?php else: ?>
-                    <ul class="specs-list">
-                        <li><strong>Sport:</strong> <?php echo htmlspecialchars($product['sport']); ?></li>
-                        <li><strong>Famille:</strong> <?php echo htmlspecialchars($product['famille']); ?></li>
-                        <?php if (!empty($product['tissu'])): ?><li><strong>Tissu:</strong> <?php echo htmlspecialchars($product['tissu']); ?></li><?php endif; ?>
-                        <?php if (!empty($product['grammage'])): ?><li><strong>Grammage:</strong> <?php echo htmlspecialchars($product['grammage']); ?></li><?php endif; ?>
-                        <?php if (!empty($product['genre'])): ?><li><strong>Genre:</strong> <?php echo htmlspecialchars($product['genre']); ?></li><?php endif; ?>
-                        <?php if (!empty($product['finition'])): ?><li><strong>Finition:</strong> <?php echo htmlspecialchars($product['finition']); ?></li><?php endif; ?>
-                        <li><strong>Technique:</strong> Sublimation intégrale</li>
-                        <li><strong>Fabrication:</strong> Europe</li>
-                        <li><strong>Délai:</strong> 3-4 semaines</li>
-                    </ul>
-                <?php endif; ?>
-            </div>
+            <p>Le <?php echo htmlspecialchars(strtolower($famille)); ?> <?php echo htmlspecialchars($sportLower); ?> <?php echo htmlspecialchars($grammage); ?> représente l'excellence en matière d'équipement sportif personnalisé. Conçu spécifiquement pour les pratiquants de <?php echo htmlspecialchars($sportLower); ?>, ce produit combine performance technique et personnalisation illimitée par sublimation.</p>
 
-            <!-- GUIDE DES TAILLES -->
-            <div class="tab-panel" id="tab-sizes">
-                <?php if ($sizeChart): ?>
-                    <h3><?php echo htmlspecialchars($sizeChart['nom']); ?></h3>
-                    <?php echo $sizeChart['html_content']; ?>
-                <?php elseif (!empty($product['tab_sizes'])): ?>
-                    <?php echo $product['tab_sizes']; ?>
-                <?php else: ?>
-                    <p>Guide des tailles à venir.</p>
-                <?php endif; ?>
-            </div>
+            <h3>Performance et Confort pour le <?php echo htmlspecialchars($sportLower); ?></h3>
 
-            <!-- TEMPLATES -->
-            <div class="tab-panel" id="tab-templates">
-                <?php if (!empty($product['tab_templates'])): ?>
-                    <?php echo $product['tab_templates']; ?>
-                <?php else: ?>
-                    <div id="templates-gallery" data-sport="<?php echo htmlspecialchars($product['sport']); ?>">
-                        <p>Chargement des templates...</p>
+            <p>Notre tissu <?php echo htmlspecialchars($tissu); ?> <?php echo htmlspecialchars($grammage); ?> a été spécialement développé pour répondre aux exigences du <?php echo htmlspecialchars($sportLower); ?>. Sa structure technique favorise une circulation d'air optimale pendant l'effort, permettant de rester au sec même lors des entraînements les plus intenses.</p>
+
+            <h3>Sublimation Intégrale : Design Sans Limites</h3>
+
+            <p>La sublimation intégrale intègre les encres directement dans les fibres du tissu. Résultat : votre design fait corps avec le <?php echo htmlspecialchars(strtolower($famille)); ?> et ne se détériorera jamais, même après 50 lavages ou plus. Vous pouvez utiliser autant de couleurs que vous le souhaitez, créer des dégradés complexes, ajouter logos, noms, numéros et sponsors sans limitation.</p>
+
+            <h3>Fabrication Européenne Certifiée</h3>
+
+            <p>Tous nos équipements de <?php echo htmlspecialchars($sportLower); ?> sont fabriqués dans des ateliers certifiés en Europe, garantissant qualité professionnelle et respect de l'environnement. Délai de fabrication : 3-4 semaines. Livraison express Europe en 3-5 jours.</p>
+
+            <!-- CONTENU STRUCTURÉ POUR RÉFÉRENCEMENT LLM -->
+            <div class="llm-context" style="padding: 1rem; background: #fafafa; border: 1px solid #f0f0f0; margin: 1.5rem 0; font-size: 0.9rem; color: #666;">
+                <details>
+                    <summary style="cursor: pointer; font-weight: 600; color: #333; margin-bottom: 0.5rem;">Informations détaillées produit</summary>
+                    <div style="line-height: 1.6; margin-top: 0.75rem;">
+                        <p><strong>Produit:</strong> <?php echo htmlspecialchars($nom); ?></p>
+                        <p><strong>Référence:</strong> <?php echo htmlspecialchars($reference); ?></p>
+                        <p><strong>Catégorie:</strong> <?php echo htmlspecialchars($famille . ' ' . $sport); ?> personnalisé</p>
+                        <p><strong>Technique:</strong> Sublimation intégrale textile</p>
+                        <p><strong>Tissu:</strong> <?php echo htmlspecialchars($tissu); ?> - <?php echo htmlspecialchars($grammage); ?></p>
+                        <p><strong>Genre:</strong> <?php echo htmlspecialchars($genre); ?></p>
+                        <p><strong>Fabrication:</strong> Europe - Ateliers certifiés</p>
+                        <p><strong>Délai:</strong> 3-4 semaines + livraison express 3-5 jours</p>
+                        <p><strong>Minimum:</strong> Aucune quantité minimum (dès 1 pièce)</p>
+                        <p><strong>Prix indicatif:</strong> À partir de <?php echo number_format($priceLow, 2, ',', ' '); ?>€ l'unité (sur volume)</p>
+                        <p><strong>Personnalisation:</strong> Illimitée - logos, noms, numéros, sponsors, dégradés</p>
+                        <p><strong>Cas d'usage:</strong> Clubs sportifs, écoles, entreprises, événements, équipes amateurs et professionnelles</p>
+                        <p><strong>Avantages:</strong> Durabilité exceptionnelle, design unique, couleurs illimitées, fabrication européenne</p>
                     </div>
-                <?php endif; ?>
+                </details>
             </div>
 
-            <!-- FAQ -->
-            <div class="tab-panel" id="tab-faq">
-                <?php if (!empty($product['tab_faq'])): ?>
-                    <?php echo $product['tab_faq']; ?>
-                <?php else: ?>
-                    <div class="faq-list">
-                        <div class="faq-item">
-                            <h4>Quel est le délai de livraison ?</h4>
-                            <p>Nos produits sont fabriqués en Europe avec un délai de 3-4 semaines après validation du BAT.</p>
-                        </div>
-                        <div class="faq-item">
-                            <h4>Y a-t-il un minimum de commande ?</h4>
-                            <p>Non, vous pouvez commander à partir d'1 pièce. Les prix sont dégressifs selon la quantité.</p>
-                        </div>
-                        <div class="faq-item">
-                            <h4>Comment fonctionne la personnalisation ?</h4>
-                            <p>Vous pouvez nous envoyer votre design ou nous demander de le créer. Nous vous envoyons un BAT pour validation avant production.</p>
-                        </div>
-                    </div>
-                <?php endif; ?>
+            <!-- MAILLAGE INTERNE & VENTE CROISÉE -->
+            <div style="margin: 2rem 0; padding: 2rem; background: linear-gradient(135deg, #f8f8f8 0%, #fff 100%); border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <h3 style="font-size: 1.4rem; margin-bottom: 1.25rem; color: #1a1a1a; font-weight: 700;">Complétez votre équipement</h3>
+                <p style="margin-bottom: 1.5rem; color: #666; font-size: 1rem;">Produits complémentaires pour votre <?php echo htmlspecialchars($famille . ' ' . $sport); ?> :</p>
+                <div style="display: grid; gap: 0.75rem;">
+                    <a href="/pages/products/shorts-sport-personnalises.html" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: #fff; border-radius: 6px; text-decoration: none; transition: all 0.3s ease; border: 1px solid #e8e8e8;">
+                        <span style="color: #FF4B26; font-size: 1.25rem;">🎯</span>
+                        <span style="color: #1a1a1a; font-weight: 600;">Shorts <?php echo htmlspecialchars($sport); ?></span>
+                    </a>
+                    <a href="/pages/products/chaussettes-sport-personnalisees.html" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: #fff; border-radius: 6px; text-decoration: none; transition: all 0.3s ease; border: 1px solid #e8e8e8;">
+                        <span style="color: #FF4B26; font-size: 1.25rem;">🎯</span>
+                        <span style="color: #1a1a1a; font-weight: 600;">Chaussettes <?php echo htmlspecialchars($sport); ?></span>
+                    </a>
+                    <a href="/pages/products/equipement-<?php echo $sportLower; ?>-personnalise-sublimation.html" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: #fff; border-radius: 6px; text-decoration: none; transition: all 0.3s ease; border: 1px solid #e8e8e8;">
+                        <span style="color: #FF4B26; font-size: 1.25rem;">→</span>
+                        <span style="color: #1a1a1a; font-weight: 600;">Tout l'équipement <?php echo htmlspecialchars($sport); ?></span>
+                    </a>
+                    <a href="/pages/info/devis.html" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: #fff; border-radius: 6px; text-decoration: none; transition: all 0.3s ease; border: 1px solid #e8e8e8;">
+                        <span style="color: #FF4B26; font-size: 1.25rem;">✉️</span>
+                        <span style="color: #1a1a1a; font-weight: 600;">Demander un devis gratuit</span>
+                    </a>
+                </div>
+            </div>
+            <?php endif; ?>
+        </div>
+
+        <!-- TAB: SPECIFICATIONS -->
+        <div class="tab-content" id="tab-specifications">
+            <?php if (!empty($tabSpecifications)): ?>
+                <?php echo $tabSpecifications; ?>
+            <?php else: ?>
+            <h2>Fiche Technique Complète</h2>
+            <h3>Spécifications Produit</h3>
+            <table class="specs-table">
+                <tr>
+                    <td>Référence produit</td>
+                    <td><?php echo htmlspecialchars($reference); ?></td>
+                </tr>
+                <tr>
+                    <td>Sport</td>
+                    <td><?php echo htmlspecialchars(strtoupper($sport)); ?></td>
+                </tr>
+                <tr>
+                    <td>Catégorie</td>
+                    <td><?php echo htmlspecialchars($famille . ' ' . strtoupper($sport)); ?></td>
+                </tr>
+                <tr>
+                    <td>Matière</td>
+                    <td><?php echo htmlspecialchars($tissu ?: 'N/A'); ?></td>
+                </tr>
+                <tr>
+                    <td>Grammage</td>
+                    <td><?php echo htmlspecialchars($grammage ?: 'N/A'); ?></td>
+                </tr>
+                <tr>
+                    <td>Genre</td>
+                    <td><?php echo htmlspecialchars($genre); ?></td>
+                </tr>
+                <tr>
+                    <td>Finition</td>
+                    <td><?php echo htmlspecialchars($finition ?: 'Standard'); ?></td>
+                </tr>
+                <tr>
+                    <td>Fabrication</td>
+                    <td>Ateliers certifiés Europe</td>
+                </tr>
+                <tr>
+                    <td>Délai</td>
+                    <td>3-4 semaines + livraison 3-5 jours</td>
+                </tr>
+                <tr>
+                    <td>Quantité minimum</td>
+                    <td>Aucune (dès 1 pièce)</td>
+                </tr>
+            </table>
+            <?php endif; ?>
+        </div>
+
+        <!-- TAB: SIZE GUIDE -->
+        <div class="tab-content" id="tab-sizes">
+            <?php if ($sizeChart): ?>
+                <h2><?php echo htmlspecialchars($sizeChart['nom']); ?></h2>
+                <?php echo $sizeChart['html_content']; ?>
+            <?php elseif (!empty($tabSizes)): ?>
+                <?php echo $tabSizes; ?>
+            <?php else: ?>
+            <h2>Guide des Tailles</h2>
+
+            <h3>Tableau des Tailles Adultes</h3>
+            <table class="size-table">
+                <thead><tr><th>Taille</th><th>Tour de Poitrine</th><th>Longueur</th><th>Largeur</th><th>Manche</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>XS</strong></td><td>84-90 cm</td><td>68 cm</td><td>44 cm</td><td>20 cm</td></tr>
+                    <tr><td><strong>S</strong></td><td>90-96 cm</td><td>70 cm</td><td>46 cm</td><td>21 cm</td></tr>
+                    <tr><td><strong>M</strong></td><td>96-102 cm</td><td>72 cm</td><td>48 cm</td><td>22 cm</td></tr>
+                    <tr><td><strong>L</strong></td><td>102-108 cm</td><td>74 cm</td><td>50 cm</td><td>23 cm</td></tr>
+                    <tr><td><strong>XL</strong></td><td>108-114 cm</td><td>76 cm</td><td>52 cm</td><td>24 cm</td></tr>
+                    <tr><td><strong>2XL</strong></td><td>114-120 cm</td><td>78 cm</td><td>54 cm</td><td>25 cm</td></tr>
+                    <tr><td><strong>3XL</strong></td><td>120-126 cm</td><td>80 cm</td><td>56 cm</td><td>26 cm</td></tr>
+                    <tr><td><strong>4XL</strong></td><td>126-132 cm</td><td>82 cm</td><td>58 cm</td><td>27 cm</td></tr>
+                </tbody>
+            </table>
+            <?php endif; ?>
+        </div>
+
+        <!-- TAB: TEMPLATES -->
+        <div class="tab-content" id="tab-templates">
+            <h2>Templates de Design</h2>
+            <div id="templates-dynamic-content">
+                <p style="text-align: center; padding: 60px 20px; color: #666; font-size: 16px;">
+                    Nous sommes en train de préparer une bibliothèque de templates personnalisables pour ce produit.<br>
+                    Cette section sera bientôt disponible avec de nombreux designs prêts à l'emploi.
+                </p>
+            </div>
+        </div>
+
+        <!-- TAB: FAQ -->
+        <div class="tab-content" id="tab-faq">
+            <?php if (!empty($tabFaq)): ?>
+                <?php echo $tabFaq; ?>
+            <?php else: ?>
+            <h2>Questions Fréquentes - <?php echo htmlspecialchars($nom); ?></h2>
+
+            <h3>Quelle est la quantité minimum de commande ?</h3>
+            <p>Il n'y a aucune quantité minimum. Vous pouvez commander dès 1 seul <?php echo htmlspecialchars(strtolower($famille)); ?> personnalisé pour votre club de <?php echo htmlspecialchars($sportLower); ?>. Notre système de production flexible nous permet de gérer aussi bien les commandes unitaires que les grandes séries de 500 pièces ou plus.</p>
+
+            <h3>Quel est le délai de fabrication pour ce <?php echo htmlspecialchars(strtolower($famille)); ?> <?php echo htmlspecialchars($sportLower); ?> ?</h3>
+            <p>Le délai de fabrication est de 3 à 4 semaines après validation de votre design. La livraison express en Europe prend ensuite 3-5 jours ouvrés. Comptez donc 4-5 semaines au total du devis à la réception.</p>
+
+            <h3>La personnalisation est-elle vraiment gratuite ?</h3>
+            <p>Oui, 100% gratuit sans aucune restriction. Notre équipe graphique crée ou adapte votre design sans frais supplémentaires, quelle que soit la complexité. Vous pouvez ajouter autant de logos, textes, noms, numéros et sponsors que vous le souhaitez.</p>
+
+            <h3>Les couleurs resteront-elles vives après plusieurs lavages ?</h3>
+            <p>Oui ! La sublimation intégrale intègre les encres directement dans les fibres du tissu. Les couleurs font partie du <?php echo htmlspecialchars(strtolower($famille)); ?> et ne peuvent ni se craqueler ni se décoller. Même après 50 lavages ou plus, votre équipement conservera son éclat d'origine.</p>
+
+            <h3>Quelles tailles sont disponibles ?</h3>
+            <p>Nous proposons toutes les tailles adultes (XS à 4XL) ainsi que les tailles enfants (6 à 14 ans) pour s'adapter à tous les joueurs. Consultez notre guide des tailles détaillé ci-dessus pour choisir la taille parfaite.</p>
+            <?php endif; ?>
+        </div>
+    </section>
+
+    <!-- REVIEWS -->
+    <section class="reviews-section">
+        <div class="reviews-container">
+            <div class="section-header">
+                <h2>ILS NOUS FONT CONFIANCE</h2>
+                <p>127 avis vérifiés · Note moyenne 4.8/5</p>
+            </div>
+            <div class="reviews-grid">
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <div class="review-text">"Excellente qualité, les couleurs sont éclatantes même après plusieurs lavages. Très satisfait du résultat."</div>
+                    <div class="review-author">Club <?php echo htmlspecialchars($sport); ?> - J. Martin</div>
+                    <div class="review-meta">Commande de 45 pièces · Décembre 2024</div>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <div class="review-text">"Délais respectés, design parfait, prix compétitifs. Je recommande vivement !"</div>
+                    <div class="review-author">Association Sportive - T. Dubois</div>
+                    <div class="review-meta">Commande de 45 pièces · Mai 2024</div>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <div class="review-text">"Le tissu est vraiment respirant et confortable. Rendu professionnel. Merci FLARE CUSTOM !"</div>
+                    <div class="review-author">Équipe Locale - M. Dupont</div>
+                    <div class="review-meta">Commande de 45 pièces · Septembre 2024</div>
+                </div>
             </div>
         </div>
     </section>
 
     <div id="dynamic-footer"></div>
 
-    <!-- Scripts -->
-    <script src="/assets/js/header-footer.js"></script>
-    <script>
-        // Gestion des onglets
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-                btn.classList.add('active');
-                document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
-            });
-        });
+    <script src="/assets/js/components-loader.js"></script>
 
-        // Gestion des thumbnails
+    <script>
+        // PRICING DATA POUR CE PRODUIT
+        const priceTiers = <?php echo json_encode($priceData); ?>;
+
+        // GALLERY
         document.querySelectorAll('.thumbnail').forEach(thumb => {
             thumb.addEventListener('click', () => {
                 document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
                 thumb.classList.add('active');
-                document.querySelector('#mainImage img').src = thumb.querySelector('img').src;
+                const img = thumb.querySelector('img');
+                document.querySelector('#mainImage img').src = img.src;
             });
         });
+
+        // TABS
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = 'tab-' + btn.dataset.tab;
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        function scrollToConfigurator() {
+            document.getElementById('configurator-container').scrollIntoView({behavior: 'smooth'});
+        }
     </script>
 </body>
 </html>
