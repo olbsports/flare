@@ -967,9 +967,8 @@ $user = $_SESSION['admin_user'] ?? null;
         <?php // ============ PRODUCT EDIT ============ ?>
         <?php elseif ($page === 'product' && $id): ?>
         <?php $p = $data['item'] ?? []; ?>
-        <form method="POST">
+        <form method="POST" action="?page=product&id=<?= $id ?>">
             <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
-            <?php // form continues... ? action="?page=product&id=<?= $id ?>">
             <input type="hidden" name="action" value="save_product">
 
             <div class="card">
@@ -1533,9 +1532,8 @@ $user = $_SESSION['admin_user'] ?? null;
         <?php // ============ SETTINGS ============ ?>
         <?php elseif ($page === 'settings'): ?>
         <?php $s = $data['settings'] ?? []; ?>
-        <form method="POST">
+        <form method="POST" action="?page=settings" id="settings-form">
             <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
-            <?php // form continues... ? action="?page=settings" id="settings-form">
             <input type="hidden" name="action" value="save_settings">
 
             <div class="card">
@@ -1863,9 +1861,8 @@ $user = $_SESSION['admin_user'] ?? null;
 
                         <h4 style="margin-bottom: 20px;">Changer le mot de passe admin</h4>
                         </form>
-                        <form method="POST">
-            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
-            <?php // form continues... ? action="?page=settings">
+                        <form method="POST" action="?page=settings">
+                            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
                             <input type="hidden" name="action" value="change_password">
                             <div class="form-row">
                                 <div class="form-group">
@@ -1908,9 +1905,8 @@ $user = $_SESSION['admin_user'] ?? null;
                 <div class="card-header">
                     <span class="card-title">Import CSV Produits</span>
                 </div>
-                <form method="POST">
-            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
-            <?php // form continues... ? action="?page=import" enctype="multipart/form-data">
+                <form method="POST" action="?page=import" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
                     <input type="hidden" name="action" value="import_csv">
                     <div class="card-body">
                         <div class="alert alert-success" style="background: rgba(80,205,137,0.1); border: 1px solid rgba(80,205,137,0.2); color: var(--success);">
