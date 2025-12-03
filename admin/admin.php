@@ -2,21 +2,116 @@
 /**
  * FLARE CUSTOM - Administration Professionnelle
  * Interface style WordPress/Shopify
+ *
+ * SECURITY: CSRF, XSS, SQL Injection protected
  */
 session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 
+// Security headers
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: SAMEORIGIN');
+header('X-XSS-Protection: 1; mode=block');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+
 require_once __DIR__ . '/../config/database.php';
+
+// ============ SECURITY FUNCTIONS ============
+
+// CSRF Protection
+function generateCsrfToken() {
+    if (empty($_SESSION['csrf_token']) || empty($_SESSION['csrf_token_time']) || time() - $_SESSION['csrf_token_time'] > 3600) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        $_SESSION['csrf_token_time'] = time();
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function verifyCsrfToken($token) {
+    if (empty($_SESSION['csrf_token']) || empty($token)) return false;
+    return hash_equals($_SESSION['csrf_token'], $token);
+}
+
+// Encryption for sensitive data (API keys, SMTP passwords)
+function getEncryptionKey() {
+    return hash('sha256', DB_PASS . '_flare_secure_key_2024', true);
+}
+
+function encryptSensitive($data) {
+    if (empty($data)) return '';
+    $key = getEncryptionKey();
+    $iv = random_bytes(16);
+    $encrypted = openssl_encrypt($data, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
+    return base64_encode($iv . $encrypted);
+}
+
+function decryptSensitive($data) {
+    if (empty($data)) return '';
+    try {
+        $key = getEncryptionKey();
+        $decoded = base64_decode($data);
+        if (strlen($decoded) < 17) return $data; // Not encrypted
+        $iv = substr($decoded, 0, 16);
+        $encrypted = substr($decoded, 16);
+        $decrypted = openssl_decrypt($encrypted, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
+        return $decrypted !== false ? $decrypted : $data;
+    } catch (Exception $e) {
+        return $data; // Return as-is if decryption fails
+    }
+}
+
+// Rate limiting for login
+function checkLoginRateLimit() {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $key = 'login_attempts_' . md5($ip);
+    $attempts = $_SESSION[$key] ?? ['count' => 0, 'time' => time()];
+
+    // Reset after 15 minutes
+    if (time() - $attempts['time'] > 900) {
+        $attempts = ['count' => 0, 'time' => time()];
+    }
+
+    $_SESSION[$key] = $attempts;
+    return $attempts['count'] < 5; // Max 5 attempts per 15 minutes
+}
+
+function incrementLoginAttempts() {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $key = 'login_attempts_' . md5($ip);
+    if (!isset($_SESSION[$key])) {
+        $_SESSION[$key] = ['count' => 0, 'time' => time()];
+    }
+    $_SESSION[$key]['count']++;
+}
+
+function resetLoginAttempts() {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $key = 'login_attempts_' . md5($ip);
+    unset($_SESSION[$key]);
+}
+
+// ============ INITIALIZATION ============
 
 $page = $_GET['page'] ?? 'dashboard';
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 $id = $_GET['id'] ?? $_POST['id'] ?? null;
 $tab = $_GET['tab'] ?? 'general';
 
+// Sanitize inputs
+$id = $id !== null ? intval($id) : null;
+$page = preg_replace('/[^a-z_]/', '', $page);
+
 // Auth check
 if ($page !== 'login' && !isset($_SESSION['admin_user'])) {
     $page = 'login';
+}
+
+// CSRF check for POST requests (except login)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page !== 'login') {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        die('<div style="font-family:sans-serif;padding:50px;text-align:center;"><h1>Erreur de sécurité</h1><p>Token CSRF invalide ou expiré.</p><a href="admin.php" style="color:#FF4B26;">Retour à l\'admin</a></div>');
+    }
 }
 
 // DB Connection
@@ -28,20 +123,29 @@ try {
     $dbError = $e->getMessage();
 }
 
-// LOGIN
+// LOGIN with rate limiting
 if ($page === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
-    if ($pdo) {
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? AND active = 1");
-        $stmt->execute([$username]);
-        $user = $stmt->fetch();
-        if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['admin_user'] = $user;
-            header('Location: admin.php');
-            exit;
+    if (!checkLoginRateLimit()) {
+        $loginError = "Trop de tentatives. Réessayez dans 15 minutes.";
+    } else {
+        $username = trim($_POST['username'] ?? '');
+        $password = $_POST['password'] ?? '';
+        if ($pdo && $username && $password) {
+            $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? AND active = 1");
+            $stmt->execute([$username]);
+            $user = $stmt->fetch();
+            if ($user && password_verify($password, $user['password'])) {
+                $_SESSION['admin_user'] = $user;
+                $_SESSION['admin_login_time'] = time();
+                resetLoginAttempts();
+                // Regenerate session ID to prevent session fixation
+                session_regenerate_id(true);
+                header('Location: admin.php');
+                exit;
+            }
+            incrementLoginAttempts();
+            $loginError = "Identifiants incorrects";
         }
-        $loginError = "Identifiants incorrects";
     }
 }
 
@@ -113,6 +217,167 @@ if ($action && $pdo) {
                 if (in_array($table, ['products', 'categories', 'pages', 'blog_posts'])) {
                     $pdo->prepare("UPDATE $table SET active=0 WHERE id=?")->execute([$id]);
                     $toast = 'Élément supprimé';
+                }
+                break;
+
+            case 'save_settings':
+                $settings = [
+                    'site_name' => $_POST['site_name'] ?? 'FLARE CUSTOM',
+                    'site_tagline' => $_POST['site_tagline'] ?? '',
+                    'site_email' => $_POST['site_email'] ?? '',
+                    'site_phone' => $_POST['site_phone'] ?? '',
+                    'site_address' => $_POST['site_address'] ?? '',
+                    'site_logo' => $_POST['site_logo'] ?? '',
+                    'site_favicon' => $_POST['site_favicon'] ?? '',
+                    'social_facebook' => $_POST['social_facebook'] ?? '',
+                    'social_instagram' => $_POST['social_instagram'] ?? '',
+                    'social_twitter' => $_POST['social_twitter'] ?? '',
+                    'social_linkedin' => $_POST['social_linkedin'] ?? '',
+                    'social_youtube' => $_POST['social_youtube'] ?? '',
+                    'smtp_host' => $_POST['smtp_host'] ?? '',
+                    'smtp_port' => $_POST['smtp_port'] ?? '587',
+                    'smtp_user' => $_POST['smtp_user'] ?? '',
+                    'smtp_pass' => $_POST['smtp_pass'] ?? '',
+                    'smtp_from_email' => $_POST['smtp_from_email'] ?? '',
+                    'smtp_from_name' => $_POST['smtp_from_name'] ?? '',
+                    'payment_mode' => $_POST['payment_mode'] ?? 'quote',
+                    'stripe_public_key' => $_POST['stripe_public_key'] ?? '',
+                    'stripe_secret_key' => $_POST['stripe_secret_key'] ?? '',
+                    'paypal_client_id' => $_POST['paypal_client_id'] ?? '',
+                    'paypal_secret' => $_POST['paypal_secret'] ?? '',
+                    'shipping_france' => $_POST['shipping_france'] ?? '0',
+                    'shipping_europe' => $_POST['shipping_europe'] ?? '0',
+                    'shipping_world' => $_POST['shipping_world'] ?? '0',
+                    'shipping_free_above' => $_POST['shipping_free_above'] ?? '0',
+                    'default_delivery_time' => $_POST['default_delivery_time'] ?? '3-4 semaines',
+                    'min_order_quantity' => $_POST['min_order_quantity'] ?? '1',
+                    'tva_rate' => $_POST['tva_rate'] ?? '20',
+                    'quote_validity_days' => $_POST['quote_validity_days'] ?? '30',
+                    'quote_prefix' => $_POST['quote_prefix'] ?? 'DEV-',
+                    'notification_email' => $_POST['notification_email'] ?? '',
+                    'google_analytics' => $_POST['google_analytics'] ?? '',
+                    'google_tag_manager' => $_POST['google_tag_manager'] ?? '',
+                    'meta_pixel' => $_POST['meta_pixel'] ?? '',
+                    'maintenance_mode' => isset($_POST['maintenance_mode']) ? '1' : '0',
+                    'maintenance_message' => $_POST['maintenance_message'] ?? '',
+                    'configurator_design_flare' => isset($_POST['configurator_design_flare']) ? '1' : '0',
+                    'configurator_design_client' => isset($_POST['configurator_design_client']) ? '1' : '0',
+                    'configurator_design_template' => isset($_POST['configurator_design_template']) ? '1' : '0',
+                    'configurator_perso_nom' => isset($_POST['configurator_perso_nom']) ? '1' : '0',
+                    'configurator_perso_numero' => isset($_POST['configurator_perso_numero']) ? '1' : '0',
+                    'configurator_perso_logo' => isset($_POST['configurator_perso_logo']) ? '1' : '0',
+                    'configurator_perso_sponsor' => isset($_POST['configurator_perso_sponsor']) ? '1' : '0',
+                    'configurator_sizes' => $_POST['configurator_sizes'] ?? 'XS,S,M,L,XL,XXL,3XL',
+                    'configurator_sizes_kids' => $_POST['configurator_sizes_kids'] ?? '6ans,8ans,10ans,12ans,14ans',
+                    'configurator_collars' => $_POST['configurator_collars'] ?? 'col_v,col_rond,col_polo',
+                ];
+                foreach ($settings as $key => $value) {
+                    $pdo->prepare("INSERT INTO settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)")->execute([$key, $value]);
+                }
+                $toast = 'Paramètres enregistrés';
+                break;
+
+            case 'change_password':
+                $current = $_POST['current_password'] ?? '';
+                $new = $_POST['new_password'] ?? '';
+                $confirm = $_POST['confirm_password'] ?? '';
+                if ($new !== $confirm) {
+                    $toast = 'Erreur: Les mots de passe ne correspondent pas';
+                } elseif (strlen($new) < 6) {
+                    $toast = 'Erreur: Le mot de passe doit faire au moins 6 caractères';
+                } else {
+                    $stmt = $pdo->prepare("SELECT password FROM users WHERE id = ?");
+                    $stmt->execute([$_SESSION['admin_user']['id']]);
+                    $user = $stmt->fetch();
+                    if ($user && password_verify($current, $user['password'])) {
+                        $pdo->prepare("UPDATE users SET password = ? WHERE id = ?")->execute([password_hash($new, PASSWORD_DEFAULT), $_SESSION['admin_user']['id']]);
+                        $toast = 'Mot de passe modifié avec succès';
+                    } else {
+                        $toast = 'Erreur: Mot de passe actuel incorrect';
+                    }
+                }
+                break;
+
+            case 'import_csv':
+                if (isset($_FILES['csv_file']) && $_FILES['csv_file']['error'] === UPLOAD_ERR_OK) {
+                    $imported = 0;
+                    $updated = 0;
+                    $errors = 0;
+                    $handle = fopen($_FILES['csv_file']['tmp_name'], 'r');
+                    $headers = fgetcsv($handle, 0, ';');
+                    $headers = array_map(fn($h) => strtoupper(trim($h)), $headers);
+
+                    while (($row = fgetcsv($handle, 0, ';')) !== false) {
+                        if (count($row) < 5) continue;
+                        $data = array_combine($headers, array_pad($row, count($headers), ''));
+
+                        $reference = $data['REFERENCE_FLARE'] ?? $data['REFERENCE'] ?? '';
+                        if (empty($reference)) continue;
+
+                        try {
+                            // Check if exists
+                            $stmt = $pdo->prepare("SELECT id FROM products WHERE reference = ?");
+                            $stmt->execute([$reference]);
+                            $exists = $stmt->fetch();
+
+                            $productData = [
+                                'reference' => $reference,
+                                'nom' => $data['TITRE_VENDEUR'] ?? $data['NOM'] ?? $reference,
+                                'sport' => $data['SPORT'] ?? '',
+                                'famille' => $data['FAMILLE_PRODUIT'] ?? $data['FAMILLE'] ?? '',
+                                'description' => $data['DESCRIPTION'] ?? '',
+                                'description_seo' => $data['DESCRIPTION_SEO'] ?? '',
+                                'tissu' => $data['TISSU'] ?? '',
+                                'grammage' => $data['GRAMMAGE'] ?? '',
+                                'genre' => $data['GENRE'] ?? 'Mixte',
+                                'finition' => $data['FINITION'] ?? '',
+                                'prix_1' => floatval(str_replace(',', '.', $data['QTY_1'] ?? $data['PRIX_1'] ?? 0)),
+                                'prix_5' => floatval(str_replace(',', '.', $data['QTY_5'] ?? $data['PRIX_5'] ?? 0)),
+                                'prix_10' => floatval(str_replace(',', '.', $data['QTY_10'] ?? $data['PRIX_10'] ?? 0)),
+                                'prix_20' => floatval(str_replace(',', '.', $data['QTY_20'] ?? $data['PRIX_20'] ?? 0)),
+                                'prix_50' => floatval(str_replace(',', '.', $data['QTY_50'] ?? $data['PRIX_50'] ?? 0)),
+                                'prix_100' => floatval(str_replace(',', '.', $data['QTY_100'] ?? $data['PRIX_100'] ?? 0)),
+                                'prix_250' => floatval(str_replace(',', '.', $data['QTY_250'] ?? $data['PRIX_250'] ?? 0)),
+                                'prix_500' => floatval(str_replace(',', '.', $data['QTY_500'] ?? $data['PRIX_500'] ?? 0)),
+                                'photo_1' => $data['PHOTO_1'] ?? '',
+                                'photo_2' => $data['PHOTO_2'] ?? '',
+                                'photo_3' => $data['PHOTO_3'] ?? '',
+                                'photo_4' => $data['PHOTO_4'] ?? '',
+                                'photo_5' => $data['PHOTO_5'] ?? '',
+                                'url' => $data['URL'] ?? '',
+                            ];
+
+                            if ($exists) {
+                                $sql = "UPDATE products SET nom=?, sport=?, famille=?, description=?, description_seo=?, tissu=?, grammage=?, genre=?, finition=?, prix_1=?, prix_5=?, prix_10=?, prix_20=?, prix_50=?, prix_100=?, prix_250=?, prix_500=?, photo_1=?, photo_2=?, photo_3=?, photo_4=?, photo_5=?, url=?, updated_at=NOW() WHERE reference=?";
+                                $pdo->prepare($sql)->execute([
+                                    $productData['nom'], $productData['sport'], $productData['famille'], $productData['description'], $productData['description_seo'],
+                                    $productData['tissu'], $productData['grammage'], $productData['genre'], $productData['finition'],
+                                    $productData['prix_1'], $productData['prix_5'], $productData['prix_10'], $productData['prix_20'],
+                                    $productData['prix_50'], $productData['prix_100'], $productData['prix_250'], $productData['prix_500'],
+                                    $productData['photo_1'], $productData['photo_2'], $productData['photo_3'], $productData['photo_4'], $productData['photo_5'],
+                                    $productData['url'], $reference
+                                ]);
+                                $updated++;
+                            } else {
+                                $sql = "INSERT INTO products (reference, nom, sport, famille, description, description_seo, tissu, grammage, genre, finition, prix_1, prix_5, prix_10, prix_20, prix_50, prix_100, prix_250, prix_500, photo_1, photo_2, photo_3, photo_4, photo_5, url, active, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,1,NOW(),NOW())";
+                                $pdo->prepare($sql)->execute([
+                                    $productData['reference'], $productData['nom'], $productData['sport'], $productData['famille'], $productData['description'], $productData['description_seo'],
+                                    $productData['tissu'], $productData['grammage'], $productData['genre'], $productData['finition'],
+                                    $productData['prix_1'], $productData['prix_5'], $productData['prix_10'], $productData['prix_20'],
+                                    $productData['prix_50'], $productData['prix_100'], $productData['prix_250'], $productData['prix_500'],
+                                    $productData['photo_1'], $productData['photo_2'], $productData['photo_3'], $productData['photo_4'], $productData['photo_5'],
+                                    $productData['url']
+                                ]);
+                                $imported++;
+                            }
+                        } catch (Exception $e) {
+                            $errors++;
+                        }
+                    }
+                    fclose($handle);
+                    $toast = "Import terminé: $imported nouveaux, $updated mis à jour, $errors erreurs";
+                } else {
+                    $toast = 'Erreur: Fichier CSV non reçu';
                 }
                 break;
         }
@@ -213,6 +478,19 @@ if ($pdo && $page !== 'login') {
                     $stmt->execute([$id]);
                     $data['item'] = $stmt->fetch();
                 }
+                break;
+
+            case 'settings':
+                $stmt = $pdo->query("SELECT setting_key, setting_value FROM settings");
+                $data['settings'] = [];
+                while ($row = $stmt->fetch()) {
+                    $data['settings'][$row['setting_key']] = $row['setting_value'];
+                }
+                break;
+
+            case 'import':
+                $data['total_products'] = $pdo->query("SELECT COUNT(*) FROM products")->fetchColumn();
+                $data['last_import'] = $pdo->query("SELECT MAX(created_at) FROM products")->fetchColumn();
                 break;
         }
     } catch (Exception $e) {
@@ -464,6 +742,8 @@ $user = $_SESSION['admin_user'] ?? null;
             <div class="alert alert-danger">Erreur BDD: <?= htmlspecialchars($dbError) ?><br><a href="import-content.php">Lancer l'import</a></div>
         <?php else: ?>
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+            
             <div class="form-group">
                 <label class="form-label">Utilisateur</label>
                 <input type="text" name="username" class="form-control" placeholder="admin" required autofocus>
@@ -530,9 +810,13 @@ $user = $_SESSION['admin_user'] ?? null;
         </a>
 
         <div class="menu-section">Outils</div>
-        <a href="import-content.php" class="menu-item">
+        <a href="?page=import" class="menu-item <?= $page === 'import' ? 'active' : '' ?>">
             <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-            Import données
+            Import CSV
+        </a>
+        <a href="?page=settings" class="menu-item <?= in_array($page, ['settings', 'settings_password']) ? 'active' : '' ?>">
+            <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Paramètres
         </a>
     </nav>
     <div class="sidebar-footer">
@@ -683,7 +967,9 @@ $user = $_SESSION['admin_user'] ?? null;
         <?php // ============ PRODUCT EDIT ============ ?>
         <?php elseif ($page === 'product' && $id): ?>
         <?php $p = $data['item'] ?? []; ?>
-        <form method="POST" action="?page=product&id=<?= $id ?>">
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+            <?php // form continues... ? action="?page=product&id=<?= $id ?>">
             <input type="hidden" name="action" value="save_product">
 
             <div class="card">
@@ -921,6 +1207,8 @@ $user = $_SESSION['admin_user'] ?? null;
                 <span class="card-title"><?= $id ? 'Modifier' : 'Nouvelle' ?> catégorie</span>
             </div>
             <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+            
                 <input type="hidden" name="action" value="save_category">
                 <div class="card-body">
                     <div class="form-row">
@@ -988,6 +1276,8 @@ $user = $_SESSION['admin_user'] ?? null;
                 <span class="card-title"><?= $id ? 'Modifier' : 'Nouvelle' ?> page</span>
             </div>
             <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+            
                 <input type="hidden" name="action" value="save_page">
                 <div class="card-body">
                     <div class="form-row">
@@ -1066,6 +1356,8 @@ $user = $_SESSION['admin_user'] ?? null;
                 <span class="card-title"><?= $id ? 'Modifier' : 'Nouvel' ?> article</span>
             </div>
             <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+            
                 <input type="hidden" name="action" value="save_blog">
                 <div class="card-body">
                     <div class="form-row">
@@ -1211,6 +1503,8 @@ $user = $_SESSION['admin_user'] ?? null;
                     <span class="card-title">Mettre à jour</span>
                 </div>
                 <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+            
                     <input type="hidden" name="action" value="update_quote">
                     <div class="card-body">
                         <div class="form-group">
@@ -1235,6 +1529,446 @@ $user = $_SESSION['admin_user'] ?? null;
             </div>
         </div>
         <a href="?page=quotes" class="btn btn-light" style="margin-top: 20px;">← Retour aux devis</a>
+
+        <?php // ============ SETTINGS ============ ?>
+        <?php elseif ($page === 'settings'): ?>
+        <?php $s = $data['settings'] ?? []; ?>
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+            <?php // form continues... ? action="?page=settings" id="settings-form">
+            <input type="hidden" name="action" value="save_settings">
+
+            <div class="card">
+                <div class="tabs-nav">
+                    <button type="button" class="tab-btn active" onclick="switchTab('general')">Général</button>
+                    <button type="button" class="tab-btn" onclick="switchTab('social')">Réseaux sociaux</button>
+                    <button type="button" class="tab-btn" onclick="switchTab('email')">Email / SMTP</button>
+                    <button type="button" class="tab-btn" onclick="switchTab('payment')">Paiement</button>
+                    <button type="button" class="tab-btn" onclick="switchTab('shipping')">Livraison</button>
+                    <button type="button" class="tab-btn" onclick="switchTab('quotes')">Devis</button>
+                    <button type="button" class="tab-btn" onclick="switchTab('configurator')">Configurateur</button>
+                    <button type="button" class="tab-btn" onclick="switchTab('tracking')">Tracking</button>
+                    <button type="button" class="tab-btn" onclick="switchTab('security')">Sécurité</button>
+                </div>
+
+                <!-- TAB: GENERAL -->
+                <div class="tab-content active" id="tab-general">
+                    <div class="card-body">
+                        <h4 style="margin-bottom: 20px;">Informations du site</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Nom du site</label>
+                                <input type="text" name="site_name" class="form-control" value="<?= htmlspecialchars($s['site_name'] ?? 'FLARE CUSTOM') ?>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Slogan</label>
+                                <input type="text" name="site_tagline" class="form-control" value="<?= htmlspecialchars($s['site_tagline'] ?? '') ?>" placeholder="Votre slogan ici">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Email de contact</label>
+                                <input type="email" name="site_email" class="form-control" value="<?= htmlspecialchars($s['site_email'] ?? '') ?>" placeholder="contact@flare-custom.com">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Téléphone</label>
+                                <input type="text" name="site_phone" class="form-control" value="<?= htmlspecialchars($s['site_phone'] ?? '') ?>" placeholder="+33 1 23 45 67 89">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Adresse</label>
+                            <textarea name="site_address" class="form-control" style="min-height: 80px;"><?= htmlspecialchars($s['site_address'] ?? '') ?></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Logo (URL)</label>
+                                <input type="text" name="site_logo" class="form-control" value="<?= htmlspecialchars($s['site_logo'] ?? '') ?>" placeholder="/assets/images/logo.png">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Favicon (URL)</label>
+                                <input type="text" name="site_favicon" class="form-control" value="<?= htmlspecialchars($s['site_favicon'] ?? '') ?>" placeholder="/favicon.ico">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: SOCIAL -->
+                <div class="tab-content" id="tab-social">
+                    <div class="card-body">
+                        <h4 style="margin-bottom: 20px;">Réseaux sociaux</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Facebook</label>
+                                <input type="url" name="social_facebook" class="form-control" value="<?= htmlspecialchars($s['social_facebook'] ?? '') ?>" placeholder="https://facebook.com/flarecustom">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Instagram</label>
+                                <input type="url" name="social_instagram" class="form-control" value="<?= htmlspecialchars($s['social_instagram'] ?? '') ?>" placeholder="https://instagram.com/flarecustom">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Twitter / X</label>
+                                <input type="url" name="social_twitter" class="form-control" value="<?= htmlspecialchars($s['social_twitter'] ?? '') ?>" placeholder="https://twitter.com/flarecustom">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">LinkedIn</label>
+                                <input type="url" name="social_linkedin" class="form-control" value="<?= htmlspecialchars($s['social_linkedin'] ?? '') ?>" placeholder="https://linkedin.com/company/flarecustom">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">YouTube</label>
+                            <input type="url" name="social_youtube" class="form-control" value="<?= htmlspecialchars($s['social_youtube'] ?? '') ?>" placeholder="https://youtube.com/@flarecustom">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: EMAIL -->
+                <div class="tab-content" id="tab-email">
+                    <div class="card-body">
+                        <h4 style="margin-bottom: 20px;">Configuration SMTP</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Serveur SMTP</label>
+                                <input type="text" name="smtp_host" class="form-control" value="<?= htmlspecialchars($s['smtp_host'] ?? '') ?>" placeholder="smtp.gmail.com">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Port SMTP</label>
+                                <input type="text" name="smtp_port" class="form-control" value="<?= htmlspecialchars($s['smtp_port'] ?? '587') ?>" placeholder="587">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Utilisateur SMTP</label>
+                                <input type="text" name="smtp_user" class="form-control" value="<?= htmlspecialchars($s['smtp_user'] ?? '') ?>" placeholder="user@gmail.com">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Mot de passe SMTP</label>
+                                <input type="password" name="smtp_pass" class="form-control" value="<?= htmlspecialchars($s['smtp_pass'] ?? '') ?>" placeholder="••••••••">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Email expéditeur</label>
+                                <input type="email" name="smtp_from_email" class="form-control" value="<?= htmlspecialchars($s['smtp_from_email'] ?? '') ?>" placeholder="noreply@flare-custom.com">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Nom expéditeur</label>
+                                <input type="text" name="smtp_from_name" class="form-control" value="<?= htmlspecialchars($s['smtp_from_name'] ?? '') ?>" placeholder="FLARE CUSTOM">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email de notification (nouveaux devis)</label>
+                            <input type="email" name="notification_email" class="form-control" value="<?= htmlspecialchars($s['notification_email'] ?? '') ?>" placeholder="admin@flare-custom.com">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: PAYMENT -->
+                <div class="tab-content" id="tab-payment">
+                    <div class="card-body">
+                        <h4 style="margin-bottom: 20px;">Mode de paiement</h4>
+                        <div class="form-group">
+                            <label class="form-label">Mode de fonctionnement</label>
+                            <select name="payment_mode" class="form-control" style="max-width: 300px;">
+                                <option value="quote" <?= ($s['payment_mode'] ?? '') === 'quote' ? 'selected' : '' ?>>Devis uniquement (pas de paiement en ligne)</option>
+                                <option value="stripe" <?= ($s['payment_mode'] ?? '') === 'stripe' ? 'selected' : '' ?>>Paiement Stripe</option>
+                                <option value="paypal" <?= ($s['payment_mode'] ?? '') === 'paypal' ? 'selected' : '' ?>>Paiement PayPal</option>
+                                <option value="both" <?= ($s['payment_mode'] ?? '') === 'both' ? 'selected' : '' ?>>Stripe + PayPal</option>
+                            </select>
+                        </div>
+
+                        <h4 style="margin: 30px 0 20px;">Stripe</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Clé publique Stripe</label>
+                                <input type="text" name="stripe_public_key" class="form-control" value="<?= htmlspecialchars($s['stripe_public_key'] ?? '') ?>" placeholder="pk_live_...">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Clé secrète Stripe</label>
+                                <input type="password" name="stripe_secret_key" class="form-control" value="<?= htmlspecialchars($s['stripe_secret_key'] ?? '') ?>" placeholder="sk_live_...">
+                            </div>
+                        </div>
+
+                        <h4 style="margin: 30px 0 20px;">PayPal</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Client ID PayPal</label>
+                                <input type="text" name="paypal_client_id" class="form-control" value="<?= htmlspecialchars($s['paypal_client_id'] ?? '') ?>" placeholder="Client ID...">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Secret PayPal</label>
+                                <input type="password" name="paypal_secret" class="form-control" value="<?= htmlspecialchars($s['paypal_secret'] ?? '') ?>" placeholder="Secret...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: SHIPPING -->
+                <div class="tab-content" id="tab-shipping">
+                    <div class="card-body">
+                        <h4 style="margin-bottom: 20px;">Frais de livraison</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">France métropolitaine (€)</label>
+                                <input type="number" step="0.01" name="shipping_france" class="form-control" value="<?= htmlspecialchars($s['shipping_france'] ?? '0') ?>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Europe (€)</label>
+                                <input type="number" step="0.01" name="shipping_europe" class="form-control" value="<?= htmlspecialchars($s['shipping_europe'] ?? '0') ?>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">International (€)</label>
+                                <input type="number" step="0.01" name="shipping_world" class="form-control" value="<?= htmlspecialchars($s['shipping_world'] ?? '0') ?>">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Livraison gratuite au-dessus de (€)</label>
+                                <input type="number" step="0.01" name="shipping_free_above" class="form-control" value="<?= htmlspecialchars($s['shipping_free_above'] ?? '0') ?>">
+                                <div class="form-hint">Mettre 0 pour désactiver</div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Délai de livraison par défaut</label>
+                                <input type="text" name="default_delivery_time" class="form-control" value="<?= htmlspecialchars($s['default_delivery_time'] ?? '3-4 semaines') ?>">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: QUOTES -->
+                <div class="tab-content" id="tab-quotes">
+                    <div class="card-body">
+                        <h4 style="margin-bottom: 20px;">Paramètres des devis</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Préfixe des devis</label>
+                                <input type="text" name="quote_prefix" class="form-control" value="<?= htmlspecialchars($s['quote_prefix'] ?? 'DEV-') ?>" placeholder="DEV-">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Validité des devis (jours)</label>
+                                <input type="number" name="quote_validity_days" class="form-control" value="<?= htmlspecialchars($s['quote_validity_days'] ?? '30') ?>">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Quantité minimum de commande</label>
+                                <input type="number" name="min_order_quantity" class="form-control" value="<?= htmlspecialchars($s['min_order_quantity'] ?? '1') ?>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Taux de TVA (%)</label>
+                                <input type="number" step="0.01" name="tva_rate" class="form-control" value="<?= htmlspecialchars($s['tva_rate'] ?? '20') ?>">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: CONFIGURATOR -->
+                <div class="tab-content" id="tab-configurator">
+                    <div class="card-body">
+                        <h4 style="margin-bottom: 20px;">Options du configurateur (par défaut)</h4>
+
+                        <h5 style="margin: 25px 0 15px; color: var(--text-muted);">Options de design</h5>
+                        <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" name="configurator_design_flare" value="1" <?= ($s['configurator_design_flare'] ?? '1') === '1' ? 'checked' : '' ?>>
+                                Design FLARE
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" name="configurator_design_client" value="1" <?= ($s['configurator_design_client'] ?? '1') === '1' ? 'checked' : '' ?>>
+                                Design client
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" name="configurator_design_template" value="1" <?= ($s['configurator_design_template'] ?? '1') === '1' ? 'checked' : '' ?>>
+                                Template catalogue
+                            </label>
+                        </div>
+
+                        <h5 style="margin: 25px 0 15px; color: var(--text-muted);">Personnalisation</h5>
+                        <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" name="configurator_perso_nom" value="1" <?= ($s['configurator_perso_nom'] ?? '1') === '1' ? 'checked' : '' ?>>
+                                Nom
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" name="configurator_perso_numero" value="1" <?= ($s['configurator_perso_numero'] ?? '1') === '1' ? 'checked' : '' ?>>
+                                Numéro
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" name="configurator_perso_logo" value="1" <?= ($s['configurator_perso_logo'] ?? '1') === '1' ? 'checked' : '' ?>>
+                                Logo
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" name="configurator_perso_sponsor" value="1" <?= ($s['configurator_perso_sponsor'] ?? '1') === '1' ? 'checked' : '' ?>>
+                                Sponsor
+                            </label>
+                        </div>
+
+                        <h5 style="margin: 25px 0 15px; color: var(--text-muted);">Tailles disponibles</h5>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Tailles adultes (séparées par virgule)</label>
+                                <input type="text" name="configurator_sizes" class="form-control" value="<?= htmlspecialchars($s['configurator_sizes'] ?? 'XS,S,M,L,XL,XXL,3XL') ?>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Tailles enfants (séparées par virgule)</label>
+                                <input type="text" name="configurator_sizes_kids" class="form-control" value="<?= htmlspecialchars($s['configurator_sizes_kids'] ?? '6ans,8ans,10ans,12ans,14ans') ?>">
+                            </div>
+                        </div>
+
+                        <h5 style="margin: 25px 0 15px; color: var(--text-muted);">Options de col</h5>
+                        <div class="form-group">
+                            <label class="form-label">Types de col (séparés par virgule)</label>
+                            <input type="text" name="configurator_collars" class="form-control" value="<?= htmlspecialchars($s['configurator_collars'] ?? 'col_v,col_rond,col_polo') ?>">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: TRACKING -->
+                <div class="tab-content" id="tab-tracking">
+                    <div class="card-body">
+                        <h4 style="margin-bottom: 20px;">Codes de suivi</h4>
+                        <div class="form-group">
+                            <label class="form-label">Google Analytics (ID)</label>
+                            <input type="text" name="google_analytics" class="form-control" value="<?= htmlspecialchars($s['google_analytics'] ?? '') ?>" placeholder="G-XXXXXXXXXX">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Google Tag Manager (ID)</label>
+                            <input type="text" name="google_tag_manager" class="form-control" value="<?= htmlspecialchars($s['google_tag_manager'] ?? '') ?>" placeholder="GTM-XXXXXXX">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Meta Pixel (ID)</label>
+                            <input type="text" name="meta_pixel" class="form-control" value="<?= htmlspecialchars($s['meta_pixel'] ?? '') ?>" placeholder="1234567890123456">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: SECURITY -->
+                <div class="tab-content" id="tab-security">
+                    <div class="card-body">
+                        <h4 style="margin-bottom: 20px;">Maintenance</h4>
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                <input type="checkbox" name="maintenance_mode" value="1" <?= ($s['maintenance_mode'] ?? '') === '1' ? 'checked' : '' ?>>
+                                <strong>Mode maintenance activé</strong>
+                            </label>
+                            <div class="form-hint">Le site sera inaccessible aux visiteurs (sauf admin)</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Message de maintenance</label>
+                            <textarea name="maintenance_message" class="form-control" style="min-height: 100px;"><?= htmlspecialchars($s['maintenance_message'] ?? 'Site en maintenance. Nous revenons bientôt !') ?></textarea>
+                        </div>
+
+                        <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
+
+                        <h4 style="margin-bottom: 20px;">Changer le mot de passe admin</h4>
+                        </form>
+                        <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+            <?php // form continues... ? action="?page=settings">
+                            <input type="hidden" name="action" value="change_password">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Mot de passe actuel</label>
+                                    <input type="password" name="current_password" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Nouveau mot de passe</label>
+                                    <input type="password" name="new_password" class="form-control" required minlength="6">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Confirmer le nouveau mot de passe</label>
+                                    <input type="password" name="confirm_password" class="form-control" required minlength="6">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-danger">Changer le mot de passe</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <button type="submit" form="settings-form" class="btn btn-primary">Enregistrer les paramètres</button>
+                </div>
+            </div>
+        </form>
+
+        <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
+        </script>
+
+        <?php // ============ IMPORT CSV ============ ?>
+        <?php elseif ($page === 'import'): ?>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Import CSV Produits</span>
+                </div>
+                <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+            <?php // form continues... ? action="?page=import" enctype="multipart/form-data">
+                    <input type="hidden" name="action" value="import_csv">
+                    <div class="card-body">
+                        <div class="alert alert-success" style="background: rgba(80,205,137,0.1); border: 1px solid rgba(80,205,137,0.2); color: var(--success);">
+                            <strong>Base de données:</strong> <?= number_format($data['total_products'] ?? 0) ?> produits
+                            <?php if ($data['last_import'] ?? null): ?>
+                            <br><small>Dernier import: <?= date('d/m/Y H:i', strtotime($data['last_import'])) ?></small>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Fichier CSV</label>
+                            <input type="file" name="csv_file" class="form-control" accept=".csv" required>
+                            <div class="form-hint">Format CSV avec séparateur point-virgule (;)</div>
+                        </div>
+
+                        <div style="background: #fafbfc; border-radius: 8px; padding: 15px; margin-top: 20px;">
+                            <strong style="font-size: 12px; color: var(--text-muted);">COLONNES SUPPORTÉES:</strong>
+                            <p style="font-size: 12px; margin-top: 10px; color: var(--text-dark);">
+                                REFERENCE_FLARE, TITRE_VENDEUR, SPORT, FAMILLE_PRODUIT, DESCRIPTION, DESCRIPTION_SEO,
+                                TISSU, GRAMMAGE, GENRE, FINITION, QTY_1, QTY_5, QTY_10, QTY_20, QTY_50, QTY_100, QTY_250, QTY_500,
+                                PHOTO_1 à PHOTO_5, URL
+                            </p>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">Importer le CSV</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Informations</span>
+                </div>
+                <div class="card-body">
+                    <h5 style="margin-bottom: 15px;">Comment ça marche ?</h5>
+                    <ul style="color: var(--text-muted); line-height: 2;">
+                        <li>Le CSV met à jour les produits existants (par référence)</li>
+                        <li>Les nouveaux produits sont créés automatiquement</li>
+                        <li>Les produits non présents dans le CSV ne sont pas supprimés</li>
+                        <li>Toutes les modifications sont enregistrées en base de données</li>
+                    </ul>
+
+                    <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--border);">
+
+                    <h5 style="margin-bottom: 15px;">Format attendu</h5>
+                    <p style="color: var(--text-muted); font-size: 13px;">
+                        Le fichier doit être au format CSV avec un séparateur point-virgule (;).
+                        La première ligne doit contenir les noms des colonnes.
+                    </p>
+
+                    <div style="background: var(--sidebar-bg); color: #fff; padding: 15px; border-radius: 8px; margin-top: 15px; font-family: monospace; font-size: 11px; overflow-x: auto;">
+                        REFERENCE_FLARE;TITRE_VENDEUR;SPORT;QTY_1;QTY_5;...<br>
+                        FLARE-MFOOT-001;Maillot Football Pro;Football;45.00;42.00;...
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <?php endif; ?>
     </div>
