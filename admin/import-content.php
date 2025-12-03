@@ -276,18 +276,73 @@ function initTables($pdo) {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
     $created[] = 'tab_templates';
 
-    // Insérer les guides de tailles par défaut
-    $pdo->exec("INSERT INTO size_charts (nom, slug, sport, type, html_content, description, ordre) VALUES
-        ('Maillots Football Adulte', 'maillots-football-adulte', 'Football', 'adulte', '<table class=\"size-chart\"><thead><tr><th>Taille</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>XXL</th><th>3XL</th></tr></thead><tbody><tr><td>Tour de poitrine (cm)</td><td>86-90</td><td>90-96</td><td>96-102</td><td>102-108</td><td>108-114</td><td>114-120</td><td>120-126</td></tr><tr><td>Longueur dos (cm)</td><td>68</td><td>70</td><td>72</td><td>74</td><td>76</td><td>78</td><td>80</td></tr></tbody></table>', 'Guide des tailles standard pour maillots football adulte', 1),
-        ('Maillots Football Enfant', 'maillots-football-enfant', 'Football', 'enfant', '<table class=\"size-chart\"><thead><tr><th>Taille</th><th>6 ans</th><th>8 ans</th><th>10 ans</th><th>12 ans</th><th>14 ans</th></tr></thead><tbody><tr><td>Tour de poitrine (cm)</td><td>58-62</td><td>62-68</td><td>68-74</td><td>74-80</td><td>80-86</td></tr><tr><td>Longueur dos (cm)</td><td>48</td><td>52</td><td>56</td><td>60</td><td>64</td></tr></tbody></table>', 'Guide des tailles pour maillots football enfant', 2),
-        ('Shorts Football Adulte', 'shorts-football-adulte', 'Football', 'adulte', '<table class=\"size-chart\"><thead><tr><th>Taille</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>XXL</th><th>3XL</th></tr></thead><tbody><tr><td>Tour de taille (cm)</td><td>70-76</td><td>76-82</td><td>82-88</td><td>88-94</td><td>94-100</td><td>100-106</td><td>106-112</td></tr><tr><td>Longueur (cm)</td><td>40</td><td>42</td><td>44</td><td>46</td><td>48</td><td>50</td><td>52</td></tr></tbody></table>', 'Guide des tailles pour shorts football adulte', 3),
-        ('Maillots Rugby Adulte', 'maillots-rugby-adulte', 'Rugby', 'adulte', '<table class=\"size-chart\"><thead><tr><th>Taille</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>XXL</th><th>3XL</th></tr></thead><tbody><tr><td>Tour de poitrine (cm)</td><td>88-94</td><td>94-100</td><td>100-106</td><td>106-112</td><td>112-118</td><td>118-124</td><td>124-130</td></tr><tr><td>Longueur dos (cm)</td><td>70</td><td>72</td><td>74</td><td>76</td><td>78</td><td>80</td><td>82</td></tr></tbody></table>', 'Guide des tailles pour maillots rugby adulte', 4),
-        ('Maillots Cyclisme Adulte', 'maillots-cyclisme-adulte', 'Cyclisme', 'adulte', '<table class=\"size-chart\"><thead><tr><th>Taille</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>XXL</th></tr></thead><tbody><tr><td>Tour de poitrine (cm)</td><td>84-88</td><td>88-94</td><td>94-100</td><td>100-106</td><td>106-112</td><td>112-118</td></tr><tr><td>Tour de taille (cm)</td><td>70-76</td><td>76-82</td><td>82-88</td><td>88-94</td><td>94-100</td><td>100-106</td></tr></tbody></table>', 'Guide des tailles pour maillots cyclisme adulte', 5),
-        ('Maillots Basket Adulte', 'maillots-basket-adulte', 'Basket', 'adulte', '<table class=\"size-chart\"><thead><tr><th>Taille</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>XXL</th></tr></thead><tbody><tr><td>Tour de poitrine (cm)</td><td>86-92</td><td>92-98</td><td>98-104</td><td>104-110</td><td>110-116</td><td>116-122</td></tr><tr><td>Longueur dos (cm)</td><td>70</td><td>72</td><td>74</td><td>76</td><td>78</td><td>80</td></tr></tbody></table>', 'Guide des tailles pour maillots basket adulte', 6),
-        ('Maillots Handball Adulte', 'maillots-handball-adulte', 'Handball', 'adulte', '<table class=\"size-chart\"><thead><tr><th>Taille</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>XXL</th></tr></thead><tbody><tr><td>Tour de poitrine (cm)</td><td>86-92</td><td>92-98</td><td>98-104</td><td>104-110</td><td>110-116</td><td>116-122</td></tr><tr><td>Longueur dos (cm)</td><td>68</td><td>70</td><td>72</td><td>74</td><td>76</td><td>78</td></tr></tbody></table>', 'Guide des tailles pour maillots handball adulte', 7),
-        ('Maillots Running Adulte', 'maillots-running-adulte', 'Running', 'adulte', '<table class=\"size-chart\"><thead><tr><th>Taille</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>XXL</th></tr></thead><tbody><tr><td>Tour de poitrine (cm)</td><td>84-88</td><td>88-94</td><td>94-100</td><td>100-106</td><td>106-112</td><td>112-118</td></tr><tr><td>Tour de taille (cm)</td><td>68-74</td><td>74-80</td><td>80-86</td><td>86-92</td><td>92-98</td><td>98-104</td></tr></tbody></table>', 'Guide des tailles pour maillots running adulte', 8)
-    ");
-    $created[] = 'size_charts_data';
+    // Importer les guides de tailles depuis le fichier JSON existant
+    $jsonPath = __DIR__ . '/../assets/data/tableaux-tailles-complet.json';
+    $sizeChartsImported = 0;
+
+    if (file_exists($jsonPath)) {
+        $sizeData = json_decode(file_get_contents($jsonPath), true);
+
+        if ($sizeData) {
+            $stmtSize = $pdo->prepare("INSERT INTO size_charts (nom, slug, sport, type, html_content, description, ordre) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $ordre = 1;
+
+            foreach ($sizeData as $sport => $produits) {
+                foreach ($produits as $nomProduit => $data) {
+                    if (!isset($data['tailles']) || !isset($data['mesures'])) continue;
+
+                    // Générer le HTML du tableau
+                    $html = '<table class="size-chart"><thead><tr><th>Taille</th>';
+                    foreach ($data['tailles'] as $taille) {
+                        $html .= '<th>' . htmlspecialchars($taille) . '</th>';
+                    }
+                    $html .= '</tr></thead><tbody>';
+
+                    foreach ($data['mesures'] as $mesure) {
+                        $html .= '<tr><td>' . htmlspecialchars($mesure['label']) . '</td>';
+                        foreach ($mesure['values'] as $val) {
+                            $html .= '<td>' . htmlspecialchars($val) . '</td>';
+                        }
+                        $html .= '</tr>';
+                    }
+                    $html .= '</tbody></table>';
+
+                    // Créer le slug
+                    $slug = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '-', $nomProduit . '-' . $sport));
+                    $slug = trim($slug, '-');
+
+                    // Déterminer le type (adulte/enfant/unisex)
+                    $type = 'unisex';
+                    if (stripos($nomProduit, 'enfant') !== false || stripos($nomProduit, 'junior') !== false) {
+                        $type = 'enfant';
+                    } elseif (stripos($nomProduit, 'femme') !== false) {
+                        $type = 'adulte';
+                    } elseif (stripos($nomProduit, 'homme') !== false) {
+                        $type = 'adulte';
+                    }
+
+                    // Formater le nom du sport
+                    $sportFormatted = ucfirst(strtolower($sport));
+
+                    try {
+                        $stmtSize->execute([
+                            $nomProduit,
+                            $slug,
+                            $sportFormatted,
+                            $type,
+                            $html,
+                            "Guide des tailles pour " . $nomProduit . " - " . $sportFormatted,
+                            $ordre++
+                        ]);
+                        $sizeChartsImported++;
+                    } catch (Exception $e) {
+                        // Ignorer les doublons (clé unique sur slug)
+                    }
+                }
+            }
+        }
+    }
+    $created[] = 'size_charts_data (' . $sizeChartsImported . ' guides)';
 
     // Créer admin par défaut avec prepared statement
     $adminPass = password_hash('admin123', PASSWORD_DEFAULT);
