@@ -121,6 +121,8 @@ function initTables($pdo) {
         url VARCHAR(500),
         finition VARCHAR(100),
         etiquettes VARCHAR(255),
+        tabs_config JSON,
+        configurator_config JSON,
         active BOOLEAN DEFAULT TRUE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
