@@ -70,3 +70,11 @@ class Database {
         throw new Exception("Cannot unserialize singleton");
     }
 }
+
+/**
+ * Fonction helper pour obtenir la connexion PDO
+ * Compatible avec les anciens fichiers
+ */
+function getConnection() {
+    return Database::getInstance()->getConnection();
+}
