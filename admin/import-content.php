@@ -51,10 +51,27 @@ if ($action) {
 }
 
 /**
- * Créer les tables si elles n'existent pas + admin
+ * Créer les tables (DROP + CREATE pour avoir le bon schéma) + admin
  */
 function initTables($pdo) {
     $created = [];
+    $errors = [];
+
+    // SUPPRIMER les tables existantes pour repartir proprement
+    // (ordre important à cause des clés étrangères)
+    try {
+        $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
+        $pdo->exec("DROP TABLE IF EXISTS settings");
+        $pdo->exec("DROP TABLE IF EXISTS quotes");
+        $pdo->exec("DROP TABLE IF EXISTS blog_posts");
+        $pdo->exec("DROP TABLE IF EXISTS pages");
+        $pdo->exec("DROP TABLE IF EXISTS categories");
+        $pdo->exec("DROP TABLE IF EXISTS products");
+        $pdo->exec("DROP TABLE IF EXISTS users");
+        $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
+    } catch (Exception $e) {
+        $errors[] = "Drop tables: " . $e->getMessage();
+    }
 
     // Table users
     $pdo->exec("CREATE TABLE IF NOT EXISTS users (
@@ -195,20 +212,29 @@ function initTables($pdo) {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
     $created[] = 'settings';
 
-    // Créer admin par défaut
+    // Créer admin par défaut avec prepared statement
     $adminPass = password_hash('admin123', PASSWORD_DEFAULT);
-    $pdo->exec("INSERT IGNORE INTO users (username, email, password, role, active)
-                VALUES ('admin', 'admin@flare-custom.com', '$adminPass', 'admin', 1)");
+    try {
+        $stmt = $pdo->prepare("INSERT INTO users (username, email, password, role, active) VALUES (?, ?, ?, 'admin', 1)");
+        $stmt->execute(['admin', 'admin@flare-custom.com', $adminPass]);
+        $created[] = 'admin_user';
+    } catch (Exception $e) {
+        $errors[] = "Admin user: " . $e->getMessage();
+    }
 
     // Paramètres par défaut
-    $pdo->exec("INSERT IGNORE INTO settings (setting_key, setting_value, setting_type, category, description) VALUES
-        ('site_name', 'FLARE CUSTOM', 'string', 'general', 'Nom du site'),
-        ('site_url', 'https://flare-custom.com', 'string', 'general', 'URL du site'),
-        ('contact_email', 'contact@flare-custom.com', 'string', 'general', 'Email de contact'),
-        ('contact_phone', '+33 1 23 45 67 89', 'string', 'general', 'Téléphone')
-    ");
+    try {
+        $pdo->exec("INSERT INTO settings (setting_key, setting_value, setting_type, category, description) VALUES
+            ('site_name', 'FLARE CUSTOM', 'string', 'general', 'Nom du site'),
+            ('site_url', 'https://flare-custom.com', 'string', 'general', 'URL du site'),
+            ('contact_email', 'contact@flare-custom.com', 'string', 'general', 'Email de contact'),
+            ('contact_phone', '+33 1 23 45 67 89', 'string', 'general', 'Téléphone')
+        ");
+    } catch (Exception $e) {
+        $errors[] = "Settings: " . $e->getMessage();
+    }
 
-    return ['created' => $created, 'admin' => 'admin / admin123'];
+    return ['created' => $created, 'admin' => 'admin / admin123', 'errors' => $errors];
 }
 
 /**
@@ -377,10 +403,12 @@ function importPages($pdo) {
         try {
             $stmt->execute([$title, $slug, $content, $excerpt, $title, $metaDesc]);
             $count++;
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+            $errors[] = "$slug: " . $e->getMessage();
+        }
     }
 
-    return ['imported' => $count, 'source' => $infoDir];
+    return ['imported' => $count, 'source' => $infoDir, 'errors' => $errors ?? []];
 }
 
 /**
@@ -618,13 +646,19 @@ try {
         <?php endif; ?>
 
         <?php if ($results && !$error): ?>
-        <div class="alert alert-success">✅ Import terminé avec succès !</div>
+        <div class="alert alert-success">✅ Import terminé !</div>
         <div class="results">
             <?php if (isset($results['tables'])): ?>
             <div class="result-item">
                 <span>📋 Tables créées</span>
                 <span class="result-value"><?php echo implode(', ', $results['tables']['created'] ?? []); ?></span>
             </div>
+            <?php if (!empty($results['tables']['errors'])): ?>
+            <div class="result-item" style="color: var(--danger);">
+                <span>⚠️ Erreurs</span>
+                <span><?php echo implode('<br>', $results['tables']['errors']); ?></span>
+            </div>
+            <?php endif; ?>
             <?php endif; ?>
             <?php if (isset($results['categories'])): ?>
             <div class="result-item">
@@ -643,6 +677,12 @@ try {
                 <span>📄 Pages</span>
                 <span class="result-value"><?php echo $results['pages']['imported'] ?? 0; ?> importées</span>
             </div>
+            <?php if (!empty($results['pages']['errors'])): ?>
+            <div class="result-item" style="color: var(--danger);">
+                <span>⚠️ Erreurs pages</span>
+                <span style="font-size:11px"><?php echo implode('<br>', array_slice($results['pages']['errors'], 0, 3)); ?></span>
+            </div>
+            <?php endif; ?>
             <?php endif; ?>
             <?php if (isset($results['blog'])): ?>
             <div class="result-item">
