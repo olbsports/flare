@@ -12,7 +12,7 @@
 define('DB_HOST', 'localhost');                              // o2switch utilise 'localhost'
 define('DB_NAME', 'sc1ispy2055_flare_custom');              // Ton nom de BDD
 define('DB_USER', 'sc1ispy2055_flare_adm');                 // ⚠️ CORRIGÉ : L'user c'est _adm !
-define('DB_PASS', 'TON_MOT_DE_PASSE_ICI');                  // ⚠️ REMPLACE ICI PAR TON VRAI MOT DE PASSE !
+define('DB_PASS', '[DF%&c@xahF4');                           // Mot de passe configuré
 define('DB_CHARSET', 'utf8mb4');
 
 // Activer les erreurs pour déboguer
