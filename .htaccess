@@ -39,18 +39,18 @@
 </IfModule>
 
 # ============================================
-# 5. ROUTING PRODUITS DYNAMIQUES
+# 5. ROUTING PRODUITS DYNAMIQUES (SEO OPTIMIZED)
 # ============================================
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /
 
-    # URL propre: /produit/FLARE-XXX → produit.php?ref=FLARE-XXX
+    # URL canonique: /produit/FLARE-XXX → produit.php?ref=FLARE-XXX
     RewriteRule ^produit/([A-Za-z0-9_-]+)/?$ produit.php?ref=$1 [L,QSA]
 
-    # Compatibilité anciennes URLs: /pages/produits/FLARE-XXX.html → produit.php
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^pages/produits/([A-Za-z0-9_-]+)\.html$ produit.php?ref=$1 [L,QSA]
+    # REDIRECTION 301 SEO: anciennes URLs HTML → nouvelles URLs propres
+    # Ceci indique à Google de mettre à jour son index
+    RewriteRule ^pages/produits/([A-Za-z0-9_-]+)\.html$ /produit/$1 [R=301,L]
 </IfModule>
 
 # ============================================

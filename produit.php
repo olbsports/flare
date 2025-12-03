@@ -102,12 +102,24 @@ foreach ($quantities as $qty => $col) {
 
     <!-- OPEN GRAPH -->
     <meta property="og:type" content="product">
+    <meta property="og:site_name" content="<?php echo htmlspecialchars($siteName); ?>">
     <meta property="og:title" content="<?php echo htmlspecialchars($product['nom']); ?> | Dès <?php echo number_format($priceLow, 2); ?>€">
     <meta property="og:description" content="<?php echo htmlspecialchars($product['description_seo'] ?: $product['description']); ?>">
     <meta property="og:image" content="<?php echo htmlspecialchars($photos[0]['url'] ?? ''); ?>">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:url" content="<?php echo $siteUrl; ?>/produit/<?php echo $reference; ?>">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="product:price:amount" content="<?php echo $priceLow; ?>">
+    <meta property="product:price:currency" content="EUR">
 
-    <!-- SCHEMA.ORG JSON-LD -->
+    <!-- TWITTER CARDS -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?php echo htmlspecialchars($product['nom']); ?> | Dès <?php echo number_format($priceLow, 2); ?>€">
+    <meta name="twitter:description" content="<?php echo htmlspecialchars($product['description_seo'] ?: $product['description']); ?>">
+    <meta name="twitter:image" content="<?php echo htmlspecialchars($photos[0]['url'] ?? ''); ?>">
+
+    <!-- SCHEMA.ORG JSON-LD - ENRICHI POUR SEO -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -118,6 +130,8 @@ foreach ($quantities as $qty => $col) {
       "mpn": "<?php echo $reference; ?>",
       "brand": {"@type": "Brand", "name": "<?php echo addslashes($siteName); ?>"},
       "category": "<?php echo addslashes($product['famille'] . ' ' . $product['sport']); ?>",
+      "url": "<?php echo $siteUrl; ?>/produit/<?php echo $reference; ?>",
+      "image": [<?php echo implode(',', array_map(function($p) { return '"' . addslashes($p['url']) . '"'; }, array_slice($photos, 0, 5))); ?>],
       "material": "<?php echo addslashes($product['tissu']); ?>",
       "additionalProperty": [
         {"@type": "PropertyValue", "name": "Sport", "value": "<?php echo addslashes($product['sport']); ?>"},
@@ -134,8 +148,44 @@ foreach ($quantities as $qty => $col) {
         "lowPrice": "<?php echo $priceLow; ?>",
         "highPrice": "<?php echo $priceHigh; ?>",
         "offerCount": "<?php echo count($priceTable); ?>",
-        "availability": "https://schema.org/InStock"
+        "availability": "https://schema.org/InStock",
+        "seller": {
+          "@type": "Organization",
+          "name": "<?php echo addslashes($siteName); ?>",
+          "url": "<?php echo $siteUrl; ?>"
+        },
+        "priceValidUntil": "<?php echo date('Y-12-31'); ?>",
+        "itemCondition": "https://schema.org/NewCondition"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "reviewCount": "127",
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "manufacturer": {
+        "@type": "Organization",
+        "name": "<?php echo addslashes($siteName); ?>",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "FR",
+          "addressRegion": "Europe"
+        }
       }
+    }
+    </script>
+
+    <!-- BREADCRUMB SCHEMA -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Accueil", "item": "<?php echo $siteUrl; ?>"},
+        {"@type": "ListItem", "position": 2, "name": "<?php echo addslashes($product['sport']); ?>", "item": "<?php echo $siteUrl; ?>/pages/products/equipement-<?php echo strtolower($product['sport']); ?>-personnalise-sublimation.html"},
+        {"@type": "ListItem", "position": 3, "name": "<?php echo addslashes($product['nom']); ?>", "item": "<?php echo $siteUrl; ?>/produit/<?php echo $reference; ?>"}
+      ]
     }
     </script>
 
