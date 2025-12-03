@@ -39,9 +39,13 @@ try {
 
     // Charger les photos supplémentaires
     $photos = [];
-    $stmt = $pdo->prepare("SELECT * FROM product_photos WHERE product_id = ? ORDER BY is_main DESC, ordre ASC");
-    $stmt->execute([$product['id']]);
-    $photos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM product_photos WHERE product_id = ? ORDER BY ordre ASC");
+        $stmt->execute([$product['id']]);
+        $photos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        // Table n'existe peut-être pas encore
+    }
 
     // Si pas de photos en BDD, utiliser photo_1 à photo_5
     if (empty($photos)) {
