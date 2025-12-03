@@ -39,6 +39,21 @@
 </IfModule>
 
 # ============================================
-# 5. CHARSET UTF-8
+# 5. ROUTING PRODUITS DYNAMIQUES
+# ============================================
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # URL propre: /produit/FLARE-XXX → produit.php?ref=FLARE-XXX
+    RewriteRule ^produit/([A-Za-z0-9_-]+)/?$ produit.php?ref=$1 [L,QSA]
+
+    # Compatibilité anciennes URLs: /pages/produits/FLARE-XXX.html → produit.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^pages/produits/([A-Za-z0-9_-]+)\.html$ produit.php?ref=$1 [L,QSA]
+</IfModule>
+
+# ============================================
+# 6. CHARSET UTF-8
 # ============================================
 AddDefaultCharset UTF-8
