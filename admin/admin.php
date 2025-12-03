@@ -1,25 +1,25 @@
 <?php
 /**
- * FLARE CUSTOM - ADMIN TOUT-EN-UN
- * Un seul fichier pour tout gérer
+ * FLARE CUSTOM - Administration Professionnelle
+ * Interface style WordPress/Shopify
  */
 session_start();
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
 
 require_once __DIR__ . '/../config/database.php';
 
-// Page actuelle
 $page = $_GET['page'] ?? 'dashboard';
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 $id = $_GET['id'] ?? $_POST['id'] ?? null;
+$tab = $_GET['tab'] ?? 'general';
 
-// Vérifier login (sauf pour login)
+// Auth check
 if ($page !== 'login' && !isset($_SESSION['admin_user'])) {
     $page = 'login';
 }
 
-// Connexion BDD
+// DB Connection
 $pdo = null;
 $dbError = null;
 try {
@@ -28,222 +28,190 @@ try {
     $dbError = $e->getMessage();
 }
 
-// Traitement LOGIN
+// LOGIN
 if ($page === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
-
     if ($pdo) {
         $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? AND active = 1");
         $stmt->execute([$username]);
         $user = $stmt->fetch();
-
         if ($user && password_verify($password, $user['password'])) {
             $_SESSION['admin_user'] = $user;
-            header('Location: admin.php?page=dashboard');
+            header('Location: admin.php');
             exit;
-        } else {
-            $loginError = "Identifiants incorrects";
         }
+        $loginError = "Identifiants incorrects";
     }
 }
 
-// Traitement LOGOUT
+// LOGOUT
 if ($page === 'logout') {
     session_destroy();
     header('Location: admin.php?page=login');
     exit;
 }
 
-// Traitement des actions
-$message = '';
-$messageType = '';
-
+// ACTIONS
+$toast = '';
 if ($action && $pdo) {
-    switch ($action) {
-        // === PRODUITS ===
-        case 'save_product':
-            $data = $_POST;
-            if ($id) {
-                $sql = "UPDATE products SET nom=?, sport=?, famille=?, description=?, description_seo=?,
-                        tissu=?, grammage=?, prix_1=?, prix_5=?, prix_10=?, prix_20=?, prix_50=?, prix_100=?,
-                        photo_1=?, genre=?, finition=?, meta_title=?, meta_description=?,
-                        tabs_config=?, configurator_config=?
-                        WHERE id=?";
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute([
-                    $data['nom'], $data['sport'], $data['famille'], $data['description'], $data['description_seo'],
-                    $data['tissu'], $data['grammage'], $data['prix_1'], $data['prix_5'], $data['prix_10'],
-                    $data['prix_20'], $data['prix_50'], $data['prix_100'], $data['photo_1'], $data['genre'],
-                    $data['finition'], $data['meta_title'], $data['meta_description'],
-                    $data['tabs_config'] ?? '{}', $data['configurator_config'] ?? '{}', $id
-                ]);
-                $message = "Produit mis à jour";
-            }
-            $messageType = 'success';
-            break;
+    try {
+        switch ($action) {
+            case 'save_product':
+                $fields = ['nom', 'sport', 'famille', 'description', 'description_seo', 'tissu', 'grammage',
+                    'prix_1', 'prix_5', 'prix_10', 'prix_20', 'prix_50', 'prix_100', 'prix_250', 'prix_500',
+                    'photo_1', 'photo_2', 'photo_3', 'photo_4', 'photo_5', 'genre', 'finition',
+                    'meta_title', 'meta_description', 'tab_description', 'tab_specifications',
+                    'tab_sizes', 'tab_templates', 'tab_faq', 'configurator_config'];
+                $set = implode('=?, ', $fields) . '=?';
+                $values = array_map(fn($f) => $_POST[$f] ?? null, $fields);
+                $values[] = $id;
+                $pdo->prepare("UPDATE products SET $set WHERE id=?")->execute($values);
+                $toast = 'Produit enregistré';
+                break;
 
-        case 'delete_product':
-            $pdo->prepare("UPDATE products SET active=0 WHERE id=?")->execute([$id]);
-            $message = "Produit supprimé";
-            $messageType = 'success';
-            break;
+            case 'save_category':
+                if ($id) {
+                    $pdo->prepare("UPDATE categories SET nom=?, slug=?, type=?, description=?, image=? WHERE id=?")
+                        ->execute([$_POST['nom'], $_POST['slug'], $_POST['type'], $_POST['description'], $_POST['image'], $id]);
+                } else {
+                    $pdo->prepare("INSERT INTO categories (nom, slug, type, description, image, active) VALUES (?,?,?,?,?,1)")
+                        ->execute([$_POST['nom'], $_POST['slug'], $_POST['type'], $_POST['description'], $_POST['image']]);
+                }
+                $toast = 'Catégorie enregistrée';
+                break;
 
-        // === CATEGORIES ===
-        case 'save_category':
-            $data = $_POST;
-            if ($id) {
-                $stmt = $pdo->prepare("UPDATE categories SET nom=?, slug=?, type=?, description=?, image=? WHERE id=?");
-                $stmt->execute([$data['nom'], $data['slug'], $data['type'], $data['description'], $data['image'], $id]);
-            } else {
-                $stmt = $pdo->prepare("INSERT INTO categories (nom, slug, type, description, image, active) VALUES (?,?,?,?,?,1)");
-                $stmt->execute([$data['nom'], $data['slug'], $data['type'], $data['description'], $data['image']]);
-            }
-            $message = "Catégorie sauvegardée";
-            $messageType = 'success';
-            break;
+            case 'save_page':
+                if ($id) {
+                    $pdo->prepare("UPDATE pages SET title=?, slug=?, content=?, excerpt=?, meta_title=?, meta_description=?, status=? WHERE id=?")
+                        ->execute([$_POST['title'], $_POST['slug'], $_POST['content'], $_POST['excerpt'], $_POST['meta_title'], $_POST['meta_description'], $_POST['status'], $id]);
+                } else {
+                    $pdo->prepare("INSERT INTO pages (title, slug, content, excerpt, meta_title, meta_description, status, type) VALUES (?,?,?,?,?,?,?,'page')")
+                        ->execute([$_POST['title'], $_POST['slug'], $_POST['content'], $_POST['excerpt'], $_POST['meta_title'], $_POST['meta_description'], $_POST['status']]);
+                }
+                $toast = 'Page enregistrée';
+                break;
 
-        case 'delete_category':
-            $pdo->prepare("UPDATE categories SET active=0 WHERE id=?")->execute([$id]);
-            $message = "Catégorie supprimée";
-            $messageType = 'success';
-            break;
+            case 'save_blog':
+                if ($id) {
+                    $pdo->prepare("UPDATE blog_posts SET title=?, slug=?, content=?, excerpt=?, featured_image=?, category=?, meta_title=?, meta_description=?, status=? WHERE id=?")
+                        ->execute([$_POST['title'], $_POST['slug'], $_POST['content'], $_POST['excerpt'], $_POST['featured_image'], $_POST['category'], $_POST['meta_title'], $_POST['meta_description'], $_POST['status'], $id]);
+                } else {
+                    $pdo->prepare("INSERT INTO blog_posts (title, slug, content, excerpt, featured_image, category, meta_title, meta_description, status, published_at) VALUES (?,?,?,?,?,?,?,?,?,NOW())")
+                        ->execute([$_POST['title'], $_POST['slug'], $_POST['content'], $_POST['excerpt'], $_POST['featured_image'], $_POST['category'], $_POST['meta_title'], $_POST['meta_description'], $_POST['status']]);
+                }
+                $toast = 'Article enregistré';
+                break;
 
-        // === PAGES ===
-        case 'save_page':
-            $data = $_POST;
-            if ($id) {
-                $stmt = $pdo->prepare("UPDATE pages SET title=?, slug=?, content=?, meta_title=?, meta_description=?, status=? WHERE id=?");
-                $stmt->execute([$data['title'], $data['slug'], $data['content'], $data['meta_title'], $data['meta_description'], $data['status'], $id]);
-            } else {
-                $stmt = $pdo->prepare("INSERT INTO pages (title, slug, content, meta_title, meta_description, status, type) VALUES (?,?,?,?,?,?,'page')");
-                $stmt->execute([$data['title'], $data['slug'], $data['content'], $data['meta_title'], $data['meta_description'], $data['status']]);
-            }
-            $message = "Page sauvegardée";
-            $messageType = 'success';
-            break;
+            case 'update_quote':
+                $pdo->prepare("UPDATE quotes SET status=?, notes=? WHERE id=?")->execute([$_POST['status'], $_POST['notes'], $id]);
+                $toast = 'Devis mis à jour';
+                break;
 
-        // === BLOG ===
-        case 'save_blog':
-            $data = $_POST;
-            if ($id) {
-                $stmt = $pdo->prepare("UPDATE blog_posts SET title=?, slug=?, content=?, excerpt=?, category=?, meta_title=?, meta_description=?, status=? WHERE id=?");
-                $stmt->execute([$data['title'], $data['slug'], $data['content'], $data['excerpt'], $data['category'], $data['meta_title'], $data['meta_description'], $data['status'], $id]);
-            } else {
-                $stmt = $pdo->prepare("INSERT INTO blog_posts (title, slug, content, excerpt, category, meta_title, meta_description, status, published_at) VALUES (?,?,?,?,?,?,?,?,NOW())");
-                $stmt->execute([$data['title'], $data['slug'], $data['content'], $data['excerpt'], $data['category'], $data['meta_title'], $data['meta_description'], $data['status']]);
-            }
-            $message = "Article sauvegardé";
-            $messageType = 'success';
-            break;
-
-        // === DEVIS ===
-        case 'update_quote_status':
-            $stmt = $pdo->prepare("UPDATE quotes SET status=?, notes=? WHERE id=?");
-            $stmt->execute([$_POST['status'], $_POST['notes'], $id]);
-            $message = "Devis mis à jour";
-            $messageType = 'success';
-            break;
+            case 'delete':
+                $table = $_POST['table'] ?? '';
+                if (in_array($table, ['products', 'categories', 'pages', 'blog_posts'])) {
+                    $pdo->prepare("UPDATE $table SET active=0 WHERE id=?")->execute([$id]);
+                    $toast = 'Élément supprimé';
+                }
+                break;
+        }
+    } catch (Exception $e) {
+        $toast = 'Erreur: ' . $e->getMessage();
     }
 }
 
-// Récupérer les données selon la page
+// FETCH DATA
 $data = [];
-if ($pdo) {
+if ($pdo && $page !== 'login') {
     try {
         switch ($page) {
             case 'dashboard':
-                $data['stats'] = [
-                    'products' => $pdo->query("SELECT COUNT(*) FROM products WHERE active=1")->fetchColumn(),
-                    'categories' => $pdo->query("SELECT COUNT(*) FROM categories WHERE active=1")->fetchColumn(),
-                    'pages' => $pdo->query("SELECT COUNT(*) FROM pages")->fetchColumn(),
-                    'blog' => $pdo->query("SELECT COUNT(*) FROM blog_posts")->fetchColumn(),
-                    'quotes' => $pdo->query("SELECT COUNT(*) FROM quotes")->fetchColumn(),
-                ];
+                $data['products'] = $pdo->query("SELECT COUNT(*) FROM products WHERE active=1")->fetchColumn();
+                $data['categories'] = $pdo->query("SELECT COUNT(*) FROM categories WHERE active=1")->fetchColumn();
+                $data['pages'] = $pdo->query("SELECT COUNT(*) FROM pages WHERE status='published'")->fetchColumn();
+                $data['blog'] = $pdo->query("SELECT COUNT(*) FROM blog_posts WHERE status='published'")->fetchColumn();
+                $data['quotes_pending'] = $pdo->query("SELECT COUNT(*) FROM quotes WHERE status='pending'")->fetchColumn();
+                $data['quotes_total'] = $pdo->query("SELECT COUNT(*) FROM quotes")->fetchColumn();
+                $data['recent_quotes'] = $pdo->query("SELECT * FROM quotes ORDER BY created_at DESC LIMIT 5")->fetchAll();
+                $data['recent_products'] = $pdo->query("SELECT * FROM products WHERE active=1 ORDER BY updated_at DESC LIMIT 5")->fetchAll();
                 break;
 
             case 'products':
-                $search = $_GET['search'] ?? '';
-                $sport = $_GET['sport'] ?? '';
-                $sql = "SELECT * FROM products WHERE active=1";
+                $where = "WHERE active=1";
                 $params = [];
-                if ($search) {
-                    $sql .= " AND (nom LIKE ? OR reference LIKE ?)";
-                    $params[] = "%$search%";
-                    $params[] = "%$search%";
+                if (!empty($_GET['search'])) {
+                    $where .= " AND (nom LIKE ? OR reference LIKE ?)";
+                    $params[] = '%'.$_GET['search'].'%';
+                    $params[] = '%'.$_GET['search'].'%';
                 }
-                if ($sport) {
-                    $sql .= " AND sport = ?";
-                    $params[] = $sport;
+                if (!empty($_GET['sport'])) {
+                    $where .= " AND sport=?";
+                    $params[] = $_GET['sport'];
                 }
-                $sql .= " ORDER BY id DESC LIMIT 50";
-                $stmt = $pdo->prepare($sql);
+                $stmt = $pdo->prepare("SELECT * FROM products $where ORDER BY updated_at DESC LIMIT 100");
                 $stmt->execute($params);
-                $data['products'] = $stmt->fetchAll();
-                $data['sports'] = $pdo->query("SELECT DISTINCT sport FROM products WHERE sport != '' ORDER BY sport")->fetchAll(PDO::FETCH_COLUMN);
+                $data['items'] = $stmt->fetchAll();
+                $data['sports'] = $pdo->query("SELECT DISTINCT sport FROM products WHERE sport!='' AND active=1 ORDER BY sport")->fetchAll(PDO::FETCH_COLUMN);
                 break;
 
-            case 'product_edit':
+            case 'product':
                 if ($id) {
                     $stmt = $pdo->prepare("SELECT * FROM products WHERE id=?");
                     $stmt->execute([$id]);
-                    $data['product'] = $stmt->fetch();
+                    $data['item'] = $stmt->fetch();
                 }
-                $data['sports'] = $pdo->query("SELECT DISTINCT sport FROM products WHERE sport != ''")->fetchAll(PDO::FETCH_COLUMN);
-                $data['familles'] = $pdo->query("SELECT DISTINCT famille FROM products WHERE famille != ''")->fetchAll(PDO::FETCH_COLUMN);
+                $data['sports'] = $pdo->query("SELECT DISTINCT sport FROM products WHERE sport!='' ORDER BY sport")->fetchAll(PDO::FETCH_COLUMN);
+                $data['familles'] = $pdo->query("SELECT DISTINCT famille FROM products WHERE famille!='' ORDER BY famille")->fetchAll(PDO::FETCH_COLUMN);
                 break;
 
             case 'categories':
-                $data['categories'] = $pdo->query("SELECT * FROM categories WHERE active=1 ORDER BY type, ordre")->fetchAll();
+                $data['items'] = $pdo->query("SELECT * FROM categories WHERE active=1 ORDER BY type, ordre, nom")->fetchAll();
                 break;
 
-            case 'category_edit':
+            case 'category':
                 if ($id) {
                     $stmt = $pdo->prepare("SELECT * FROM categories WHERE id=?");
                     $stmt->execute([$id]);
-                    $data['category'] = $stmt->fetch();
+                    $data['item'] = $stmt->fetch();
                 }
                 break;
 
             case 'pages':
-                $data['pages'] = $pdo->query("SELECT * FROM pages ORDER BY id DESC")->fetchAll();
+                $data['items'] = $pdo->query("SELECT * FROM pages ORDER BY title")->fetchAll();
                 break;
 
-            case 'page_edit':
+            case 'page':
                 if ($id) {
                     $stmt = $pdo->prepare("SELECT * FROM pages WHERE id=?");
                     $stmt->execute([$id]);
-                    $data['page'] = $stmt->fetch();
+                    $data['item'] = $stmt->fetch();
                 }
                 break;
 
             case 'blog':
-                $data['posts'] = $pdo->query("SELECT * FROM blog_posts ORDER BY id DESC")->fetchAll();
+                $data['items'] = $pdo->query("SELECT * FROM blog_posts ORDER BY created_at DESC")->fetchAll();
                 break;
 
             case 'blog_edit':
                 if ($id) {
                     $stmt = $pdo->prepare("SELECT * FROM blog_posts WHERE id=?");
                     $stmt->execute([$id]);
-                    $data['post'] = $stmt->fetch();
+                    $data['item'] = $stmt->fetch();
                 }
                 break;
 
             case 'quotes':
-                $status = $_GET['status'] ?? '';
-                $sql = "SELECT * FROM quotes";
-                if ($status) {
-                    $sql .= " WHERE status = '$status'";
-                }
-                $sql .= " ORDER BY created_at DESC LIMIT 100";
-                $data['quotes'] = $pdo->query($sql)->fetchAll();
+                $where = "1=1";
+                if (!empty($_GET['status'])) $where = "status='".$_GET['status']."'";
+                $data['items'] = $pdo->query("SELECT * FROM quotes WHERE $where ORDER BY created_at DESC")->fetchAll();
                 break;
 
-            case 'quote_view':
+            case 'quote':
                 if ($id) {
                     $stmt = $pdo->prepare("SELECT * FROM quotes WHERE id=?");
                     $stmt->execute([$id]);
-                    $data['quote'] = $stmt->fetch();
+                    $data['item'] = $stmt->fetch();
                 }
                 break;
         }
@@ -251,6 +219,8 @@ if ($pdo) {
         $dbError = $e->getMessage();
     }
 }
+
+$user = $_SESSION['admin_user'] ?? null;
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -262,788 +232,1012 @@ if ($pdo) {
     <style>
         :root {
             --primary: #FF4B26;
-            --primary-dark: #E63910;
-            --dark: #1a1a1c;
-            --gray-100: #f5f5f7;
-            --gray-200: #e5e5e7;
-            --gray-500: #86868b;
-            --success: #34c759;
-            --warning: #ff9500;
-            --danger: #ff3b30;
+            --primary-hover: #E6401F;
+            --sidebar-bg: #1e1e2d;
+            --sidebar-hover: #2a2a3c;
+            --body-bg: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-dark: #1e1e2d;
+            --text-muted: #7e8299;
+            --border: #e4e6ef;
+            --success: #50cd89;
+            --warning: #ffc700;
+            --danger: #f1416c;
+            --info: #7239ea;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: var(--gray-100); min-height: 100vh; }
+        body { font-family: 'Inter', sans-serif; background: var(--body-bg); color: var(--text-dark); font-size: 13px; }
 
-        /* Login */
-        .login-container {
-            min-height: 100vh; display: flex; align-items: center; justify-content: center;
-            background: linear-gradient(135deg, var(--dark) 0%, #2d2d30 100%);
-        }
-        .login-box {
-            background: #fff; padding: 40px; border-radius: 16px; width: 100%; max-width: 400px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        .login-box h1 { color: var(--primary); font-size: 28px; margin-bottom: 8px; }
-        .login-box p { color: var(--gray-500); margin-bottom: 24px; }
-
-        /* Layout */
+        /* SIDEBAR */
         .sidebar {
-            position: fixed; left: 0; top: 0; bottom: 0; width: 260px;
-            background: var(--dark); color: #fff; padding: 24px 0; overflow-y: auto;
+            position: fixed; left: 0; top: 0; bottom: 0; width: 265px;
+            background: var(--sidebar-bg); z-index: 100; display: flex; flex-direction: column;
         }
-        .sidebar .logo { padding: 0 24px 24px; font-size: 22px; font-weight: 700; color: var(--primary); }
-        .nav-item {
-            display: flex; align-items: center; gap: 12px; padding: 12px 24px;
-            color: rgba(255,255,255,0.7); text-decoration: none; transition: all 0.2s;
+        .sidebar-header {
+            padding: 20px 25px; border-bottom: 1px solid rgba(255,255,255,0.07);
         }
-        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: #fff; }
-        .nav-item.active { border-left: 3px solid var(--primary); }
+        .sidebar-logo {
+            color: #fff; font-size: 22px; font-weight: 700; text-decoration: none;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .sidebar-logo span { color: var(--primary); }
+        .sidebar-menu { padding: 15px 0; flex: 1; overflow-y: auto; }
+        .menu-section { padding: 10px 25px 5px; color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .menu-item {
+            display: flex; align-items: center; gap: 12px; padding: 11px 25px;
+            color: #9d9da6; text-decoration: none; transition: all 0.2s;
+        }
+        .menu-item:hover { background: var(--sidebar-hover); color: #fff; }
+        .menu-item.active { background: var(--sidebar-hover); color: #fff; }
+        .menu-item.active::before {
+            content: ''; position: absolute; left: 0; width: 3px; height: 100%;
+            background: var(--primary);
+        }
+        .menu-item { position: relative; }
+        .menu-icon { width: 20px; height: 20px; opacity: 0.7; }
+        .menu-badge {
+            margin-left: auto; background: var(--primary); color: #fff;
+            padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;
+        }
+        .sidebar-footer {
+            padding: 20px 25px; border-top: 1px solid rgba(255,255,255,0.07);
+        }
+        .user-box {
+            display: flex; align-items: center; gap: 12px; color: #fff;
+        }
+        .user-avatar {
+            width: 40px; height: 40px; border-radius: 8px; background: var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 16px;
+        }
+        .user-info { flex: 1; }
+        .user-name { font-weight: 600; font-size: 14px; }
+        .user-role { color: var(--text-muted); font-size: 12px; }
 
-        .main { margin-left: 260px; padding: 24px; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-        .header h1 { font-size: 24px; }
+        /* MAIN */
+        .main { margin-left: 265px; min-height: 100vh; }
+        .topbar {
+            background: var(--card-bg); padding: 15px 30px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 50;
+        }
+        .breadcrumb { display: flex; align-items: center; gap: 8px; color: var(--text-muted); }
+        .breadcrumb a { color: var(--text-muted); text-decoration: none; }
+        .breadcrumb a:hover { color: var(--primary); }
+        .topbar-actions { display: flex; gap: 10px; }
 
-        /* Components */
-        .card { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-        .card h2 { font-size: 18px; margin-bottom: 16px; }
+        .content { padding: 30px; }
 
+        /* CARDS */
+        .card {
+            background: var(--card-bg); border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.03); margin-bottom: 25px;
+        }
+        .card-header {
+            padding: 20px 25px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .card-title { font-size: 16px; font-weight: 600; }
+        .card-body { padding: 25px; }
+        .card-footer { padding: 15px 25px; border-top: 1px solid var(--border); background: #fafbfc; border-radius: 0 0 12px 12px; }
+
+        /* STATS */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .stat-card {
+            background: var(--card-bg); border-radius: 12px; padding: 25px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.03);
+        }
+        .stat-card.primary { background: linear-gradient(135deg, var(--primary) 0%, #ff6b4a 100%); color: #fff; }
+        .stat-icon { width: 50px; height: 50px; border-radius: 10px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 15px; font-size: 24px; }
+        .stat-card:not(.primary) .stat-icon { background: rgba(255,75,38,0.1); }
+        .stat-value { font-size: 28px; font-weight: 700; margin-bottom: 5px; }
+        .stat-label { color: var(--text-muted); font-size: 13px; }
+        .stat-card.primary .stat-label { color: rgba(255,255,255,0.8); }
+
+        /* TABLE */
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 12px 15px; background: #fafbfc; font-weight: 600; color: var(--text-muted); font-size: 12px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        td { padding: 15px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        tr:hover td { background: #fafbfc; }
+        .table-img { width: 45px; height: 45px; border-radius: 8px; object-fit: cover; background: var(--body-bg); }
+
+        /* BUTTONS */
         .btn {
-            display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px;
-            border-radius: 8px; font-weight: 600; text-decoration: none; cursor: pointer;
-            border: none; font-size: 14px; transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px;
+            border-radius: 8px; font-weight: 500; font-size: 13px; cursor: pointer;
+            border: none; text-decoration: none; transition: all 0.2s;
         }
         .btn-primary { background: var(--primary); color: #fff; }
-        .btn-primary:hover { background: var(--primary-dark); }
-        .btn-secondary { background: var(--gray-200); color: var(--dark); }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-light { background: #f4f6f9; color: var(--text-dark); }
+        .btn-light:hover { background: #e9ecef; }
+        .btn-success { background: var(--success); color: #fff; }
         .btn-danger { background: var(--danger); color: #fff; }
-        .btn-sm { padding: 6px 12px; font-size: 13px; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        .btn-icon { padding: 8px; }
 
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; color: var(--dark); }
+        /* FORMS */
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-dark); }
         .form-control {
-            width: 100%; padding: 10px 14px; border: 2px solid var(--gray-200);
-            border-radius: 8px; font-size: 14px; transition: border-color 0.2s;
+            width: 100%; padding: 10px 15px; border: 1px solid var(--border);
+            border-radius: 8px; font-size: 13px; transition: all 0.2s;
+            font-family: inherit;
         }
-        .form-control:focus { outline: none; border-color: var(--primary); }
-        textarea.form-control { min-height: 120px; resize: vertical; }
+        .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255,75,38,0.1); }
+        textarea.form-control { min-height: 150px; resize: vertical; }
         select.form-control { cursor: pointer; }
+        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .form-hint { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
 
-        .table { width: 100%; border-collapse: collapse; }
-        .table th, .table td { padding: 12px; text-align: left; border-bottom: 1px solid var(--gray-200); }
-        .table th { background: var(--gray-100); font-weight: 600; font-size: 13px; }
-        .table tr:hover { background: var(--gray-100); }
-
-        .badge {
-            display: inline-block; padding: 4px 10px; border-radius: 20px;
-            font-size: 12px; font-weight: 600;
+        /* TABS */
+        .tabs-nav {
+            display: flex; gap: 5px; border-bottom: 1px solid var(--border);
+            padding: 0 25px; background: #fafbfc; border-radius: 12px 12px 0 0;
         }
-        .badge-success { background: rgba(52,199,89,0.15); color: var(--success); }
-        .badge-warning { background: rgba(255,149,0,0.15); color: var(--warning); }
-        .badge-danger { background: rgba(255,59,48,0.15); color: var(--danger); }
-        .badge-info { background: rgba(0,122,255,0.15); color: #007AFF; }
+        .tab-btn {
+            padding: 15px 20px; background: none; border: none; cursor: pointer;
+            font-weight: 500; color: var(--text-muted); position: relative;
+            font-size: 13px; transition: all 0.2s;
+        }
+        .tab-btn:hover { color: var(--text-dark); }
+        .tab-btn.active { color: var(--primary); }
+        .tab-btn.active::after {
+            content: ''; position: absolute; bottom: -1px; left: 0; right: 0;
+            height: 2px; background: var(--primary);
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
-        .alert { padding: 14px 18px; border-radius: 8px; margin-bottom: 20px; }
-        .alert-success { background: rgba(52,199,89,0.15); color: var(--success); }
-        .alert-danger { background: rgba(255,59,48,0.15); color: var(--danger); }
-        .alert-warning { background: rgba(255,149,0,0.15); color: var(--warning); }
+        /* BADGES */
+        .badge {
+            display: inline-flex; align-items: center; padding: 5px 10px;
+            border-radius: 6px; font-size: 11px; font-weight: 600;
+        }
+        .badge-success { background: rgba(80,205,137,0.1); color: var(--success); }
+        .badge-warning { background: rgba(255,199,0,0.1); color: #b58b00; }
+        .badge-danger { background: rgba(241,65,108,0.1); color: var(--danger); }
+        .badge-info { background: rgba(114,57,234,0.1); color: var(--info); }
+        .badge-primary { background: rgba(255,75,38,0.1); color: var(--primary); }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
-        .stat-card { background: #fff; padding: 20px; border-radius: 12px; text-align: center; }
-        .stat-value { font-size: 32px; font-weight: 700; color: var(--primary); }
-        .stat-label { font-size: 13px; color: var(--gray-500); margin-top: 4px; }
+        /* TOAST */
+        .toast {
+            position: fixed; top: 20px; right: 20px; background: var(--success); color: #fff;
+            padding: 15px 25px; border-radius: 8px; font-weight: 500; z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } }
 
-        .tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 2px solid var(--gray-200); }
-        .tab { padding: 12px 20px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
-        .tab.active { border-bottom-color: var(--primary); color: var(--primary); font-weight: 600; }
+        /* LOGIN */
+        .login-page {
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, var(--sidebar-bg) 0%, #2d2d42 100%);
+        }
+        .login-box {
+            background: var(--card-bg); padding: 40px; border-radius: 16px; width: 100%; max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .login-logo { text-align: center; margin-bottom: 30px; }
+        .login-logo h1 { font-size: 28px; }
+        .login-logo span { color: var(--primary); }
 
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        /* ALERTS */
+        .alert { padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; }
+        .alert-danger { background: rgba(241,65,108,0.1); color: var(--danger); border: 1px solid rgba(241,65,108,0.2); }
+        .alert-success { background: rgba(80,205,137,0.1); color: var(--success); border: 1px solid rgba(80,205,137,0.2); }
 
-        .product-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; background: var(--gray-100); }
+        /* EDITOR */
+        .editor-toolbar {
+            display: flex; gap: 5px; padding: 10px; background: #fafbfc;
+            border: 1px solid var(--border); border-bottom: none; border-radius: 8px 8px 0 0;
+        }
+        .editor-toolbar button {
+            padding: 8px 12px; background: none; border: 1px solid var(--border);
+            border-radius: 4px; cursor: pointer; font-size: 12px;
+        }
+        .editor-toolbar button:hover { background: #fff; }
 
-        .filters { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
-        .filters .form-control { width: auto; min-width: 200px; }
+        /* FILTERS */
+        .filters { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
 
-        /* Configurateur */
-        .config-section { border: 2px solid var(--gray-200); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
-        .config-section h3 { font-size: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-        .config-item { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--gray-100); }
-        .config-item:last-child { border-bottom: none; }
-        .config-item input[type="checkbox"] { width: 18px; height: 18px; }
-
-        @media (max-width: 768px) {
-            .sidebar { width: 100%; position: relative; }
+        /* RESPONSIVE */
+        @media (max-width: 991px) {
+            .sidebar { transform: translateX(-100%); }
             .main { margin-left: 0; }
-            .grid-2, .grid-3 { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
 <?php if ($page === 'login'): ?>
-<!-- LOGIN -->
-<div class="login-container">
+<div class="login-page">
     <div class="login-box">
-        <h1>FLARE CUSTOM</h1>
-        <p>Panneau d'administration</p>
-
+        <div class="login-logo">
+            <h1>FLARE <span>CUSTOM</span></h1>
+            <p style="color: var(--text-muted); margin-top: 5px;">Administration</p>
+        </div>
         <?php if (isset($loginError)): ?>
-        <div class="alert alert-danger"><?php echo $loginError; ?></div>
+            <div class="alert alert-danger"><?= $loginError ?></div>
         <?php endif; ?>
-
         <?php if ($dbError): ?>
-        <div class="alert alert-danger">Erreur BDD: <?php echo htmlspecialchars($dbError); ?></div>
-        <p style="margin-top:12px"><a href="import-content.php" class="btn btn-primary">Lancer l'import</a></p>
+            <div class="alert alert-danger">Erreur BDD: <?= htmlspecialchars($dbError) ?><br><a href="import-content.php">Lancer l'import</a></div>
         <?php else: ?>
         <form method="POST">
             <div class="form-group">
-                <label>Utilisateur</label>
-                <input type="text" name="username" class="form-control" required>
+                <label class="form-label">Utilisateur</label>
+                <input type="text" name="username" class="form-control" placeholder="admin" required autofocus>
             </div>
             <div class="form-group">
-                <label>Mot de passe</label>
-                <input type="password" name="password" class="form-control" required>
+                <label class="form-label">Mot de passe</label>
+                <input type="password" name="password" class="form-control" placeholder="••••••••" required>
             </div>
-            <button type="submit" class="btn btn-primary" style="width:100%">Connexion</button>
+            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Se connecter</button>
         </form>
+        <p style="text-align: center; margin-top: 20px; color: var(--text-muted); font-size: 12px;">
+            Identifiants par défaut: admin / admin123
+        </p>
         <?php endif; ?>
     </div>
 </div>
 
 <?php else: ?>
-<!-- ADMIN LAYOUT -->
-<nav class="sidebar">
-    <div class="logo">FLARE ADMIN</div>
-    <a href="?page=dashboard" class="nav-item <?php echo $page === 'dashboard' ? 'active' : ''; ?>">📊 Dashboard</a>
-    <a href="?page=products" class="nav-item <?php echo in_array($page, ['products', 'product_edit']) ? 'active' : ''; ?>">📦 Produits</a>
-    <a href="?page=categories" class="nav-item <?php echo in_array($page, ['categories', 'category_edit']) ? 'active' : ''; ?>">📁 Catégories</a>
-    <a href="?page=pages" class="nav-item <?php echo in_array($page, ['pages', 'page_edit']) ? 'active' : ''; ?>">📄 Pages</a>
-    <a href="?page=blog" class="nav-item <?php echo in_array($page, ['blog', 'blog_edit']) ? 'active' : ''; ?>">📝 Blog</a>
-    <a href="?page=quotes" class="nav-item <?php echo in_array($page, ['quotes', 'quote_view']) ? 'active' : ''; ?>">💰 Devis</a>
-    <a href="import-content.php" class="nav-item">📥 Import</a>
-    <a href="?page=logout" class="nav-item">🚪 Déconnexion</a>
-</nav>
 
-<main class="main">
-    <?php if ($message): ?>
-    <div class="alert alert-<?php echo $messageType; ?>"><?php echo $message; ?></div>
-    <?php endif; ?>
+<?php if ($toast): ?>
+<div class="toast"><?= htmlspecialchars($toast) ?></div>
+<script>setTimeout(() => document.querySelector('.toast').remove(), 3000);</script>
+<?php endif; ?>
 
-    <?php if ($dbError): ?>
-    <div class="alert alert-danger">Erreur BDD: <?php echo htmlspecialchars($dbError); ?> <a href="import-content.php">Lancer l'import</a></div>
-    <?php endif; ?>
-
-    <?php if ($page === 'dashboard'): ?>
-    <!-- DASHBOARD -->
-    <div class="header"><h1>📊 Dashboard</h1></div>
-    <div class="stats-grid">
-        <div class="stat-card"><div class="stat-value"><?php echo $data['stats']['products'] ?? 0; ?></div><div class="stat-label">Produits</div></div>
-        <div class="stat-card"><div class="stat-value"><?php echo $data['stats']['categories'] ?? 0; ?></div><div class="stat-label">Catégories</div></div>
-        <div class="stat-card"><div class="stat-value"><?php echo $data['stats']['pages'] ?? 0; ?></div><div class="stat-label">Pages</div></div>
-        <div class="stat-card"><div class="stat-value"><?php echo $data['stats']['blog'] ?? 0; ?></div><div class="stat-label">Articles</div></div>
-        <div class="stat-card"><div class="stat-value"><?php echo $data['stats']['quotes'] ?? 0; ?></div><div class="stat-label">Devis</div></div>
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <a href="admin.php" class="sidebar-logo">FLARE <span>CUSTOM</span></a>
     </div>
+    <nav class="sidebar-menu">
+        <div class="menu-section">Principal</div>
+        <a href="?page=dashboard" class="menu-item <?= $page === 'dashboard' ? 'active' : '' ?>">
+            <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            Tableau de bord
+        </a>
 
-    <div class="card">
-        <h2>Accès rapide</h2>
-        <div class="grid-3">
-            <a href="?page=products" class="btn btn-secondary">📦 Gérer les produits</a>
-            <a href="?page=quotes" class="btn btn-secondary">💰 Voir les devis</a>
-            <a href="import-content.php" class="btn btn-primary">📥 Importer du contenu</a>
+        <div class="menu-section">Catalogue</div>
+        <a href="?page=products" class="menu-item <?= in_array($page, ['products', 'product']) ? 'active' : '' ?>">
+            <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            Produits
+        </a>
+        <a href="?page=categories" class="menu-item <?= in_array($page, ['categories', 'category']) ? 'active' : '' ?>">
+            <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+            Catégories
+        </a>
+
+        <div class="menu-section">Contenu</div>
+        <a href="?page=pages" class="menu-item <?= in_array($page, ['pages', 'page']) ? 'active' : '' ?>">
+            <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Pages
+        </a>
+        <a href="?page=blog" class="menu-item <?= in_array($page, ['blog', 'blog_edit']) ? 'active' : '' ?>">
+            <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+            Blog
+        </a>
+
+        <div class="menu-section">Ventes</div>
+        <a href="?page=quotes" class="menu-item <?= in_array($page, ['quotes', 'quote']) ? 'active' : '' ?>">
+            <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+            Devis
+            <?php if (($data['quotes_pending'] ?? 0) > 0): ?>
+            <span class="menu-badge"><?= $data['quotes_pending'] ?? 0 ?></span>
+            <?php endif; ?>
+        </a>
+
+        <div class="menu-section">Outils</div>
+        <a href="import-content.php" class="menu-item">
+            <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+            Import données
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-box">
+            <div class="user-avatar"><?= strtoupper(substr($user['username'] ?? 'A', 0, 1)) ?></div>
+            <div class="user-info">
+                <div class="user-name"><?= htmlspecialchars($user['username'] ?? 'Admin') ?></div>
+                <div class="user-role"><?= ucfirst($user['role'] ?? 'admin') ?></div>
+            </div>
+            <a href="?page=logout" style="color: var(--text-muted);" title="Déconnexion">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            </a>
+        </div>
+    </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+    <div class="topbar">
+        <div class="breadcrumb">
+            <a href="admin.php">Admin</a>
+            <span>/</span>
+            <span><?= ucfirst($page) ?></span>
         </div>
     </div>
 
-    <?php elseif ($page === 'products'): ?>
-    <!-- LISTE PRODUITS -->
-    <div class="header">
-        <h1>📦 Produits</h1>
-    </div>
+    <div class="content">
+        <?php if ($dbError): ?>
+        <div class="alert alert-danger">Erreur BDD: <?= htmlspecialchars($dbError) ?> — <a href="import-content.php">Lancer l'import</a></div>
+        <?php endif; ?>
 
-    <form class="filters" method="GET">
-        <input type="hidden" name="page" value="products">
-        <input type="text" name="search" class="form-control" placeholder="Rechercher..." value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>">
-        <select name="sport" class="form-control">
-            <option value="">Tous les sports</option>
-            <?php foreach ($data['sports'] ?? [] as $s): ?>
-            <option value="<?php echo htmlspecialchars($s); ?>" <?php echo ($s === ($_GET['sport'] ?? '')) ? 'selected' : ''; ?>><?php echo htmlspecialchars($s); ?></option>
-            <?php endforeach; ?>
-        </select>
-        <button type="submit" class="btn btn-secondary">Filtrer</button>
-    </form>
+        <?php // ============ DASHBOARD ============ ?>
+        <?php if ($page === 'dashboard'): ?>
+        <div class="stats-grid">
+            <div class="stat-card primary">
+                <div class="stat-icon">📦</div>
+                <div class="stat-value"><?= number_format($data['products'] ?? 0) ?></div>
+                <div class="stat-label">Produits actifs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-value"><?= number_format($data['quotes_pending'] ?? 0) ?></div>
+                <div class="stat-label">Devis en attente</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📁</div>
+                <div class="stat-value"><?= number_format($data['categories'] ?? 0) ?></div>
+                <div class="stat-label">Catégories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📄</div>
+                <div class="stat-value"><?= number_format($data['pages'] ?? 0) ?></div>
+                <div class="stat-label">Pages publiées</div>
+            </div>
+        </div>
 
-    <div class="card">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Image</th>
-                    <th>Référence</th>
-                    <th>Nom</th>
-                    <th>Sport</th>
-                    <th>Prix</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($data['products'] ?? [] as $p): ?>
-                <tr>
-                    <td><img src="<?php echo htmlspecialchars($p['photo_1'] ?: '/photos/placeholder.webp'); ?>" class="product-thumb"></td>
-                    <td><strong><?php echo htmlspecialchars($p['reference']); ?></strong></td>
-                    <td><?php echo htmlspecialchars(substr($p['nom'], 0, 50)); ?></td>
-                    <td><span class="badge badge-info"><?php echo htmlspecialchars($p['sport']); ?></span></td>
-                    <td><?php echo $p['prix_1'] ? number_format($p['prix_1'], 2) . '€' : '-'; ?></td>
-                    <td>
-                        <a href="?page=product_edit&id=<?php echo $p['id']; ?>" class="btn btn-sm btn-secondary">Modifier</a>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-
-    <?php elseif ($page === 'product_edit'): ?>
-    <!-- EDIT PRODUIT -->
-    <?php $p = $data['product'] ?? []; ?>
-    <div class="header">
-        <h1>📦 <?php echo $id ? 'Modifier' : 'Nouveau'; ?> Produit</h1>
-        <a href="?page=products" class="btn btn-secondary">← Retour</a>
-    </div>
-
-    <form method="POST" action="?page=product_edit&id=<?php echo $id; ?>">
-        <input type="hidden" name="action" value="save_product">
-        <input type="hidden" name="id" value="<?php echo $id; ?>">
-
-        <div class="grid-2">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
             <div class="card">
-                <h2>Informations générales</h2>
-                <div class="form-group">
-                    <label>Référence</label>
-                    <input type="text" class="form-control" value="<?php echo htmlspecialchars($p['reference'] ?? ''); ?>" readonly>
+                <div class="card-header">
+                    <span class="card-title">Derniers devis</span>
+                    <a href="?page=quotes" class="btn btn-sm btn-light">Voir tout</a>
                 </div>
-                <div class="form-group">
-                    <label>Nom du produit</label>
-                    <input type="text" name="nom" class="form-control" value="<?php echo htmlspecialchars($p['nom'] ?? ''); ?>" required>
-                </div>
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>Sport</label>
-                        <select name="sport" class="form-control">
-                            <?php foreach ($data['sports'] ?? [] as $s): ?>
-                            <option value="<?php echo $s; ?>" <?php echo ($p['sport'] ?? '') === $s ? 'selected' : ''; ?>><?php echo $s; ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Famille</label>
-                        <select name="famille" class="form-control">
-                            <?php foreach ($data['familles'] ?? [] as $f): ?>
-                            <option value="<?php echo $f; ?>" <?php echo ($p['famille'] ?? '') === $f ? 'selected' : ''; ?>><?php echo $f; ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea name="description" class="form-control"><?php echo htmlspecialchars($p['description'] ?? ''); ?></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Description SEO</label>
-                    <textarea name="description_seo" class="form-control"><?php echo htmlspecialchars($p['description_seo'] ?? ''); ?></textarea>
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Référence</th><th>Client</th><th>Statut</th><th>Date</th></tr></thead>
+                        <tbody>
+                        <?php foreach ($data['recent_quotes'] ?? [] as $q): ?>
+                            <tr>
+                                <td><a href="?page=quote&id=<?= $q['id'] ?>"><?= htmlspecialchars($q['reference']) ?></a></td>
+                                <td><?= htmlspecialchars($q['client_prenom'].' '.$q['client_nom']) ?></td>
+                                <td><span class="badge badge-<?= $q['status'] === 'pending' ? 'warning' : ($q['status'] === 'accepted' ? 'success' : 'info') ?>"><?= $q['status'] ?></span></td>
+                                <td><?= date('d/m/Y', strtotime($q['created_at'])) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <div>
-                <div class="card">
-                    <h2>Caractéristiques</h2>
-                    <div class="grid-2">
-                        <div class="form-group">
-                            <label>Tissu</label>
-                            <input type="text" name="tissu" class="form-control" value="<?php echo htmlspecialchars($p['tissu'] ?? ''); ?>">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Produits récemment modifiés</span>
+                    <a href="?page=products" class="btn btn-sm btn-light">Voir tout</a>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Produit</th><th>Sport</th><th>Modifié</th></tr></thead>
+                        <tbody>
+                        <?php foreach ($data['recent_products'] ?? [] as $p): ?>
+                            <tr>
+                                <td>
+                                    <a href="?page=product&id=<?= $p['id'] ?>" style="display: flex; align-items: center; gap: 10px;">
+                                        <img src="<?= htmlspecialchars($p['photo_1'] ?: '/photos/placeholder.webp') ?>" class="table-img">
+                                        <?= htmlspecialchars(mb_substr($p['nom'], 0, 40)) ?>
+                                    </a>
+                                </td>
+                                <td><span class="badge badge-primary"><?= htmlspecialchars($p['sport']) ?></span></td>
+                                <td><?= date('d/m H:i', strtotime($p['updated_at'])) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <?php // ============ PRODUCTS LIST ============ ?>
+        <?php elseif ($page === 'products'): ?>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Produits (<?= count($data['items'] ?? []) ?>)</span>
+            </div>
+            <div class="card-body">
+                <form class="filters" method="GET">
+                    <input type="hidden" name="page" value="products">
+                    <input type="text" name="search" class="form-control" style="width: 250px;" placeholder="Rechercher..." value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
+                    <select name="sport" class="form-control" style="width: 180px;">
+                        <option value="">Tous les sports</option>
+                        <?php foreach ($data['sports'] ?? [] as $s): ?>
+                        <option value="<?= $s ?>" <?= ($_GET['sport'] ?? '') === $s ? 'selected' : '' ?>><?= $s ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <button type="submit" class="btn btn-light">Filtrer</button>
+                </form>
+
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th style="width:60px"></th><th>Référence</th><th>Nom</th><th>Sport</th><th>Prix</th><th style="width:100px">Actions</th></tr></thead>
+                        <tbody>
+                        <?php foreach ($data['items'] ?? [] as $p): ?>
+                            <tr>
+                                <td><img src="<?= htmlspecialchars($p['photo_1'] ?: '/photos/placeholder.webp') ?>" class="table-img"></td>
+                                <td><strong><?= htmlspecialchars($p['reference']) ?></strong></td>
+                                <td><a href="?page=product&id=<?= $p['id'] ?>"><?= htmlspecialchars(mb_substr($p['nom'], 0, 50)) ?></a></td>
+                                <td><span class="badge badge-primary"><?= htmlspecialchars($p['sport']) ?></span></td>
+                                <td><?= $p['prix_500'] ? number_format($p['prix_500'], 2).'€' : '-' ?></td>
+                                <td>
+                                    <a href="?page=product&id=<?= $p['id'] ?>" class="btn btn-sm btn-light">Modifier</a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <?php // ============ PRODUCT EDIT ============ ?>
+        <?php elseif ($page === 'product' && $id): ?>
+        <?php $p = $data['item'] ?? []; ?>
+        <form method="POST" action="?page=product&id=<?= $id ?>">
+            <input type="hidden" name="action" value="save_product">
+
+            <div class="card">
+                <div class="tabs-nav">
+                    <button type="button" class="tab-btn <?= $tab === 'general' ? 'active' : '' ?>" onclick="switchTab('general')">Général</button>
+                    <button type="button" class="tab-btn <?= $tab === 'prices' ? 'active' : '' ?>" onclick="switchTab('prices')">Prix</button>
+                    <button type="button" class="tab-btn <?= $tab === 'photos' ? 'active' : '' ?>" onclick="switchTab('photos')">Photos</button>
+                    <button type="button" class="tab-btn <?= $tab === 'tabs' ? 'active' : '' ?>" onclick="switchTab('tabs')">Contenu onglets</button>
+                    <button type="button" class="tab-btn <?= $tab === 'configurator' ? 'active' : '' ?>" onclick="switchTab('configurator')">Configurateur</button>
+                    <button type="button" class="tab-btn <?= $tab === 'seo' ? 'active' : '' ?>" onclick="switchTab('seo')">SEO</button>
+                </div>
+
+                <!-- TAB: GENERAL -->
+                <div class="tab-content <?= $tab === 'general' ? 'active' : '' ?>" id="tab-general">
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Référence</label>
+                                <input type="text" class="form-control" value="<?= htmlspecialchars($p['reference'] ?? '') ?>" readonly style="background: #f4f6f9;">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Sport</label>
+                                <select name="sport" class="form-control">
+                                    <?php foreach ($data['sports'] ?? [] as $s): ?>
+                                    <option value="<?= $s ?>" <?= ($p['sport'] ?? '') === $s ? 'selected' : '' ?>><?= $s ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Famille</label>
+                                <select name="famille" class="form-control">
+                                    <?php foreach ($data['familles'] ?? [] as $f): ?>
+                                    <option value="<?= $f ?>" <?= ($p['famille'] ?? '') === $f ? 'selected' : '' ?>><?= $f ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
                         </div>
                         <div class="form-group">
-                            <label>Grammage</label>
-                            <input type="text" name="grammage" class="form-control" value="<?php echo htmlspecialchars($p['grammage'] ?? ''); ?>">
+                            <label class="form-label">Nom du produit</label>
+                            <input type="text" name="nom" class="form-control" value="<?= htmlspecialchars($p['nom'] ?? '') ?>">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Tissu</label>
+                                <input type="text" name="tissu" class="form-control" value="<?= htmlspecialchars($p['tissu'] ?? '') ?>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Grammage</label>
+                                <input type="text" name="grammage" class="form-control" value="<?= htmlspecialchars($p['grammage'] ?? '') ?>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Genre</label>
+                                <select name="genre" class="form-control">
+                                    <option value="Mixte" <?= ($p['genre'] ?? '') === 'Mixte' ? 'selected' : '' ?>>Mixte</option>
+                                    <option value="Homme" <?= ($p['genre'] ?? '') === 'Homme' ? 'selected' : '' ?>>Homme</option>
+                                    <option value="Femme" <?= ($p['genre'] ?? '') === 'Femme' ? 'selected' : '' ?>>Femme</option>
+                                    <option value="Enfant" <?= ($p['genre'] ?? '') === 'Enfant' ? 'selected' : '' ?>>Enfant</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Finition</label>
+                                <input type="text" name="finition" class="form-control" value="<?= htmlspecialchars($p['finition'] ?? '') ?>">
+                            </div>
                         </div>
                         <div class="form-group">
-                            <label>Genre</label>
-                            <select name="genre" class="form-control">
-                                <option value="Mixte" <?php echo ($p['genre'] ?? '') === 'Mixte' ? 'selected' : ''; ?>>Mixte</option>
-                                <option value="Homme" <?php echo ($p['genre'] ?? '') === 'Homme' ? 'selected' : ''; ?>>Homme</option>
-                                <option value="Femme" <?php echo ($p['genre'] ?? '') === 'Femme' ? 'selected' : ''; ?>>Femme</option>
-                                <option value="Enfant" <?php echo ($p['genre'] ?? '') === 'Enfant' ? 'selected' : ''; ?>>Enfant</option>
+                            <label class="form-label">Description courte</label>
+                            <textarea name="description" class="form-control" style="min-height: 100px;"><?= htmlspecialchars($p['description'] ?? '') ?></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description SEO</label>
+                            <textarea name="description_seo" class="form-control" style="min-height: 100px;"><?= htmlspecialchars($p['description_seo'] ?? '') ?></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: PRICES -->
+                <div class="tab-content <?= $tab === 'prices' ? 'active' : '' ?>" id="tab-prices">
+                    <div class="card-body">
+                        <p style="color: var(--text-muted); margin-bottom: 20px;">Prix unitaire TTC par quantité</p>
+                        <div class="form-row">
+                            <?php foreach ([1, 5, 10, 20, 50, 100, 250, 500] as $qty): ?>
+                            <div class="form-group">
+                                <label class="form-label"><?= $qty ?> pièce<?= $qty > 1 ? 's' : '' ?></label>
+                                <input type="number" step="0.01" name="prix_<?= $qty ?>" class="form-control" value="<?= $p['prix_'.$qty] ?? '' ?>" placeholder="0.00">
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: PHOTOS -->
+                <div class="tab-content <?= $tab === 'photos' ? 'active' : '' ?>" id="tab-photos">
+                    <div class="card-body">
+                        <div class="form-row">
+                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                            <div class="form-group">
+                                <label class="form-label">Photo <?= $i ?></label>
+                                <input type="text" name="photo_<?= $i ?>" class="form-control" value="<?= htmlspecialchars($p['photo_'.$i] ?? '') ?>" placeholder="URL de l'image">
+                                <?php if (!empty($p['photo_'.$i])): ?>
+                                <img src="<?= htmlspecialchars($p['photo_'.$i]) ?>" style="max-width: 150px; margin-top: 10px; border-radius: 8px;">
+                                <?php endif; ?>
+                            </div>
+                            <?php endfor; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: TABS CONTENT -->
+                <div class="tab-content <?= $tab === 'tabs' ? 'active' : '' ?>" id="tab-tabs">
+                    <div class="card-body">
+                        <p style="color: var(--text-muted); margin-bottom: 20px;">Contenu des onglets affichés sur la fiche produit. Laissez vide pour utiliser le contenu par défaut.</p>
+
+                        <div class="form-group">
+                            <label class="form-label">📝 Onglet Description</label>
+                            <textarea name="tab_description" class="form-control" style="min-height: 200px; font-family: monospace;"><?= htmlspecialchars($p['tab_description'] ?? '') ?></textarea>
+                            <div class="form-hint">HTML autorisé. Contenu principal de la fiche produit.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">📋 Onglet Caractéristiques</label>
+                            <textarea name="tab_specifications" class="form-control" style="min-height: 200px; font-family: monospace;"><?= htmlspecialchars($p['tab_specifications'] ?? '') ?></textarea>
+                            <div class="form-hint">HTML autorisé. Tableau des spécifications techniques.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">📏 Onglet Guide des Tailles</label>
+                            <textarea name="tab_sizes" class="form-control" style="min-height: 200px; font-family: monospace;"><?= htmlspecialchars($p['tab_sizes'] ?? '') ?></textarea>
+                            <div class="form-hint">HTML autorisé. Tableau des tailles.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">🎨 Onglet Templates</label>
+                            <textarea name="tab_templates" class="form-control" style="min-height: 200px; font-family: monospace;"><?= htmlspecialchars($p['tab_templates'] ?? '') ?></textarea>
+                            <div class="form-hint">HTML autorisé. Galerie de templates disponibles.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">❓ Onglet FAQ</label>
+                            <textarea name="tab_faq" class="form-control" style="min-height: 200px; font-family: monospace;"><?= htmlspecialchars($p['tab_faq'] ?? '') ?></textarea>
+                            <div class="form-hint">HTML autorisé. Questions fréquentes sur ce produit.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: CONFIGURATOR -->
+                <div class="tab-content <?= $tab === 'configurator' ? 'active' : '' ?>" id="tab-configurator">
+                    <div class="card-body">
+                        <p style="color: var(--text-muted); margin-bottom: 20px;">Configuration du configurateur produit (JSON). Définissez les options disponibles pour ce produit.</p>
+
+                        <?php
+                        $defaultConfig = [
+                            'design_options' => ['flare' => true, 'client' => true, 'template' => true],
+                            'personalization' => ['nom' => true, 'numero' => true, 'logo' => true, 'sponsor' => true],
+                            'sizes' => ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'],
+                            'sizes_kids' => ['6ans', '8ans', '10ans', '12ans', '14ans'],
+                            'colors_available' => true,
+                            'collar_options' => ['col_v', 'col_rond', 'col_polo'],
+                            'min_quantity' => 1,
+                            'delivery_time' => '3-4 semaines'
+                        ];
+                        $config = json_decode($p['configurator_config'] ?? '', true) ?: $defaultConfig;
+                        ?>
+
+                        <div class="form-group">
+                            <label class="form-label">Configuration JSON</label>
+                            <textarea name="configurator_config" class="form-control" style="min-height: 350px; font-family: monospace;"><?= htmlspecialchars(json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) ?></textarea>
+                            <div class="form-hint">
+                                Options disponibles: design_options (flare, client, template), personalization (nom, numero, logo, sponsor), sizes, sizes_kids, colors_available, collar_options, min_quantity, delivery_time
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: SEO -->
+                <div class="tab-content <?= $tab === 'seo' ? 'active' : '' ?>" id="tab-seo">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Meta Title</label>
+                            <input type="text" name="meta_title" class="form-control" value="<?= htmlspecialchars($p['meta_title'] ?? '') ?>">
+                            <div class="form-hint">Recommandé: 50-60 caractères</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Meta Description</label>
+                            <textarea name="meta_description" class="form-control" style="min-height: 100px;"><?= htmlspecialchars($p['meta_description'] ?? '') ?></textarea>
+                            <div class="form-hint">Recommandé: 150-160 caractères</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer" style="display: flex; justify-content: space-between;">
+                    <a href="?page=products" class="btn btn-light">← Retour aux produits</a>
+                    <button type="submit" class="btn btn-primary">💾 Enregistrer les modifications</button>
+                </div>
+            </div>
+        </form>
+
+        <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelector(`[onclick="switchTab('${tabId}')"]`).classList.add('active');
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
+        </script>
+
+        <?php // ============ CATEGORIES ============ ?>
+        <?php elseif ($page === 'categories'): ?>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Catégories</span>
+                <a href="?page=category" class="btn btn-primary">+ Nouvelle catégorie</a>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Nom</th><th>Type</th><th>Slug</th><th>Actions</th></tr></thead>
+                    <tbody>
+                    <?php foreach ($data['items'] ?? [] as $c): ?>
+                        <tr>
+                            <td><strong><?= htmlspecialchars($c['nom']) ?></strong></td>
+                            <td><span class="badge badge-<?= $c['type'] === 'sport' ? 'info' : 'success' ?>"><?= $c['type'] ?></span></td>
+                            <td><?= htmlspecialchars($c['slug']) ?></td>
+                            <td><a href="?page=category&id=<?= $c['id'] ?>" class="btn btn-sm btn-light">Modifier</a></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <?php // ============ CATEGORY EDIT ============ ?>
+        <?php elseif ($page === 'category'): ?>
+        <?php $c = $data['item'] ?? []; ?>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><?= $id ? 'Modifier' : 'Nouvelle' ?> catégorie</span>
+            </div>
+            <form method="POST">
+                <input type="hidden" name="action" value="save_category">
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Nom</label>
+                            <input type="text" name="nom" class="form-control" value="<?= htmlspecialchars($c['nom'] ?? '') ?>" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Slug</label>
+                            <input type="text" name="slug" class="form-control" value="<?= htmlspecialchars($c['slug'] ?? '') ?>" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Type</label>
+                            <select name="type" class="form-control">
+                                <option value="sport" <?= ($c['type'] ?? '') === 'sport' ? 'selected' : '' ?>>Sport</option>
+                                <option value="famille" <?= ($c['type'] ?? '') === 'famille' ? 'selected' : '' ?>>Famille produit</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Image (URL)</label>
+                        <input type="text" name="image" class="form-control" value="<?= htmlspecialchars($c['image'] ?? '') ?>">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control"><?= htmlspecialchars($c['description'] ?? '') ?></textarea>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="?page=categories" class="btn btn-light">← Retour</a>
+                    <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+                </div>
+            </form>
+        </div>
+
+        <?php // ============ PAGES ============ ?>
+        <?php elseif ($page === 'pages'): ?>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Pages</span>
+                <a href="?page=page" class="btn btn-primary">+ Nouvelle page</a>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Titre</th><th>Slug</th><th>Statut</th><th>Actions</th></tr></thead>
+                    <tbody>
+                    <?php foreach ($data['items'] ?? [] as $pg): ?>
+                        <tr>
+                            <td><strong><?= htmlspecialchars($pg['title']) ?></strong></td>
+                            <td><?= htmlspecialchars($pg['slug']) ?></td>
+                            <td><span class="badge badge-<?= $pg['status'] === 'published' ? 'success' : 'warning' ?>"><?= $pg['status'] ?></span></td>
+                            <td><a href="?page=page&id=<?= $pg['id'] ?>" class="btn btn-sm btn-light">Modifier</a></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <?php // ============ PAGE EDIT ============ ?>
+        <?php elseif ($page === 'page'): ?>
+        <?php $pg = $data['item'] ?? []; ?>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><?= $id ? 'Modifier' : 'Nouvelle' ?> page</span>
+            </div>
+            <form method="POST">
+                <input type="hidden" name="action" value="save_page">
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Titre</label>
+                            <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($pg['title'] ?? '') ?>" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Slug</label>
+                            <input type="text" name="slug" class="form-control" value="<?= htmlspecialchars($pg['slug'] ?? '') ?>" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Statut</label>
+                            <select name="status" class="form-control">
+                                <option value="published" <?= ($pg['status'] ?? '') === 'published' ? 'selected' : '' ?>>Publié</option>
+                                <option value="draft" <?= ($pg['status'] ?? '') === 'draft' ? 'selected' : '' ?>>Brouillon</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Extrait</label>
+                        <textarea name="excerpt" class="form-control" style="min-height: 80px;"><?= htmlspecialchars($pg['excerpt'] ?? '') ?></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contenu (HTML)</label>
+                        <textarea name="content" class="form-control" style="min-height: 300px; font-family: monospace;"><?= htmlspecialchars($pg['content'] ?? '') ?></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Meta Title</label>
+                            <input type="text" name="meta_title" class="form-control" value="<?= htmlspecialchars($pg['meta_title'] ?? '') ?>">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Meta Description</label>
+                            <textarea name="meta_description" class="form-control"><?= htmlspecialchars($pg['meta_description'] ?? '') ?></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="?page=pages" class="btn btn-light">← Retour</a>
+                    <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+                </div>
+            </form>
+        </div>
+
+        <?php // ============ BLOG ============ ?>
+        <?php elseif ($page === 'blog'): ?>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Articles de blog</span>
+                <a href="?page=blog_edit" class="btn btn-primary">+ Nouvel article</a>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Titre</th><th>Catégorie</th><th>Statut</th><th>Date</th><th>Actions</th></tr></thead>
+                    <tbody>
+                    <?php foreach ($data['items'] ?? [] as $post): ?>
+                        <tr>
+                            <td><strong><?= htmlspecialchars($post['title']) ?></strong></td>
+                            <td><span class="badge badge-info"><?= htmlspecialchars($post['category'] ?? '-') ?></span></td>
+                            <td><span class="badge badge-<?= $post['status'] === 'published' ? 'success' : 'warning' ?>"><?= $post['status'] ?></span></td>
+                            <td><?= date('d/m/Y', strtotime($post['created_at'])) ?></td>
+                            <td><a href="?page=blog_edit&id=<?= $post['id'] ?>" class="btn btn-sm btn-light">Modifier</a></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <?php // ============ BLOG EDIT ============ ?>
+        <?php elseif ($page === 'blog_edit'): ?>
+        <?php $post = $data['item'] ?? []; ?>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><?= $id ? 'Modifier' : 'Nouvel' ?> article</span>
+            </div>
+            <form method="POST">
+                <input type="hidden" name="action" value="save_blog">
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Titre</label>
+                            <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($post['title'] ?? '') ?>" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Slug</label>
+                            <input type="text" name="slug" class="form-control" value="<?= htmlspecialchars($post['slug'] ?? '') ?>" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Catégorie</label>
+                            <select name="category" class="form-control">
+                                <option value="conseils" <?= ($post['category'] ?? '') === 'conseils' ? 'selected' : '' ?>>Conseils</option>
+                                <option value="tutoriels" <?= ($post['category'] ?? '') === 'tutoriels' ? 'selected' : '' ?>>Tutoriels</option>
+                                <option value="nouveautes" <?= ($post['category'] ?? '') === 'nouveautes' ? 'selected' : '' ?>>Nouveautés</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Finition</label>
-                            <input type="text" name="finition" class="form-control" value="<?php echo htmlspecialchars($p['finition'] ?? ''); ?>">
+                            <label class="form-label">Statut</label>
+                            <select name="status" class="form-control">
+                                <option value="published" <?= ($post['status'] ?? '') === 'published' ? 'selected' : '' ?>>Publié</option>
+                                <option value="draft" <?= ($post['status'] ?? '') === 'draft' ? 'selected' : '' ?>>Brouillon</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Image mise en avant</label>
+                            <input type="text" name="featured_image" class="form-control" value="<?= htmlspecialchars($post['featured_image'] ?? '') ?>">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Extrait</label>
+                        <textarea name="excerpt" class="form-control" style="min-height: 80px;"><?= htmlspecialchars($post['excerpt'] ?? '') ?></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contenu (HTML)</label>
+                        <textarea name="content" class="form-control" style="min-height: 300px; font-family: monospace;"><?= htmlspecialchars($post['content'] ?? '') ?></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Meta Title</label>
+                            <input type="text" name="meta_title" class="form-control" value="<?= htmlspecialchars($post['meta_title'] ?? '') ?>">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Meta Description</label>
+                            <textarea name="meta_description" class="form-control"><?= htmlspecialchars($post['meta_description'] ?? '') ?></textarea>
                         </div>
                     </div>
                 </div>
+                <div class="card-footer">
+                    <a href="?page=blog" class="btn btn-light">← Retour</a>
+                    <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+                </div>
+            </form>
+        </div>
 
+        <?php // ============ QUOTES ============ ?>
+        <?php elseif ($page === 'quotes'): ?>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Devis</span>
+                <div class="filters" style="margin: 0;">
+                    <a href="?page=quotes" class="btn btn-sm <?= empty($_GET['status']) ? 'btn-primary' : 'btn-light' ?>">Tous</a>
+                    <a href="?page=quotes&status=pending" class="btn btn-sm <?= ($_GET['status'] ?? '') === 'pending' ? 'btn-primary' : 'btn-light' ?>">En attente</a>
+                    <a href="?page=quotes&status=sent" class="btn btn-sm <?= ($_GET['status'] ?? '') === 'sent' ? 'btn-primary' : 'btn-light' ?>">Envoyés</a>
+                    <a href="?page=quotes&status=accepted" class="btn btn-sm <?= ($_GET['status'] ?? '') === 'accepted' ? 'btn-primary' : 'btn-light' ?>">Acceptés</a>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Réf</th><th>Client</th><th>Produit</th><th>Qté</th><th>Total</th><th>Statut</th><th>Date</th><th></th></tr></thead>
+                    <tbody>
+                    <?php foreach ($data['items'] ?? [] as $q): ?>
+                        <tr>
+                            <td><strong><?= htmlspecialchars($q['reference']) ?></strong></td>
+                            <td><?= htmlspecialchars($q['client_prenom'].' '.$q['client_nom']) ?></td>
+                            <td><?= htmlspecialchars(mb_substr($q['product_nom'] ?? '', 0, 30)) ?></td>
+                            <td><?= $q['total_pieces'] ?></td>
+                            <td><strong><?= number_format($q['prix_total'] ?? 0, 2) ?>€</strong></td>
+                            <td>
+                                <?php $colors = ['pending' => 'warning', 'sent' => 'info', 'accepted' => 'success', 'rejected' => 'danger']; ?>
+                                <span class="badge badge-<?= $colors[$q['status']] ?? 'info' ?>"><?= $q['status'] ?></span>
+                            </td>
+                            <td><?= date('d/m/Y', strtotime($q['created_at'])) ?></td>
+                            <td><a href="?page=quote&id=<?= $q['id'] ?>" class="btn btn-sm btn-light">Voir</a></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <?php // ============ QUOTE VIEW ============ ?>
+        <?php elseif ($page === 'quote' && $id): ?>
+        <?php $q = $data['item'] ?? []; ?>
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 25px;">
+            <div>
                 <div class="card">
-                    <h2>Prix (€)</h2>
-                    <div class="grid-3">
-                        <div class="form-group"><label>1 pièce</label><input type="number" step="0.01" name="prix_1" class="form-control" value="<?php echo $p['prix_1'] ?? ''; ?>"></div>
-                        <div class="form-group"><label>5 pièces</label><input type="number" step="0.01" name="prix_5" class="form-control" value="<?php echo $p['prix_5'] ?? ''; ?>"></div>
-                        <div class="form-group"><label>10 pièces</label><input type="number" step="0.01" name="prix_10" class="form-control" value="<?php echo $p['prix_10'] ?? ''; ?>"></div>
-                        <div class="form-group"><label>20 pièces</label><input type="number" step="0.01" name="prix_20" class="form-control" value="<?php echo $p['prix_20'] ?? ''; ?>"></div>
-                        <div class="form-group"><label>50 pièces</label><input type="number" step="0.01" name="prix_50" class="form-control" value="<?php echo $p['prix_50'] ?? ''; ?>"></div>
-                        <div class="form-group"><label>100 pièces</label><input type="number" step="0.01" name="prix_100" class="form-control" value="<?php echo $p['prix_100'] ?? ''; ?>"></div>
+                    <div class="card-header">
+                        <span class="card-title">Devis <?= htmlspecialchars($q['reference']) ?></span>
+                        <span class="badge badge-<?= ['pending' => 'warning', 'sent' => 'info', 'accepted' => 'success'][$q['status']] ?? 'info' ?>"><?= $q['status'] ?></span>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                            <div>
+                                <h4 style="margin-bottom: 15px; color: var(--text-muted); font-size: 12px; text-transform: uppercase;">Client</h4>
+                                <p><strong><?= htmlspecialchars($q['client_prenom'].' '.$q['client_nom']) ?></strong></p>
+                                <p><?= htmlspecialchars($q['client_email']) ?></p>
+                                <p><?= htmlspecialchars($q['client_telephone']) ?></p>
+                                <p><?= htmlspecialchars($q['client_club']) ?></p>
+                            </div>
+                            <div>
+                                <h4 style="margin-bottom: 15px; color: var(--text-muted); font-size: 12px; text-transform: uppercase;">Produit</h4>
+                                <p><strong><?= htmlspecialchars($q['product_nom']) ?></strong></p>
+                                <p>Réf: <?= htmlspecialchars($q['product_reference']) ?></p>
+                                <p>Sport: <?= htmlspecialchars($q['sport']) ?></p>
+                            </div>
+                        </div>
+                        <hr style="margin: 25px 0; border: none; border-top: 1px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <span style="color: var(--text-muted);">Quantité:</span>
+                                <strong style="font-size: 18px; margin-left: 10px;"><?= $q['total_pieces'] ?> pièces</strong>
+                            </div>
+                            <div>
+                                <span style="color: var(--text-muted);">Prix unitaire:</span>
+                                <strong style="margin-left: 10px;"><?= number_format($q['prix_unitaire'] ?? 0, 2) ?>€</strong>
+                            </div>
+                            <div>
+                                <span style="color: var(--text-muted);">Total TTC:</span>
+                                <strong style="font-size: 24px; color: var(--primary); margin-left: 10px;"><?= number_format($q['prix_total'] ?? 0, 2) ?>€</strong>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Mettre à jour</span>
+                </div>
+                <form method="POST">
+                    <input type="hidden" name="action" value="update_quote">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Statut</label>
+                            <select name="status" class="form-control">
+                                <option value="pending" <?= $q['status'] === 'pending' ? 'selected' : '' ?>>En attente</option>
+                                <option value="sent" <?= $q['status'] === 'sent' ? 'selected' : '' ?>>Envoyé</option>
+                                <option value="accepted" <?= $q['status'] === 'accepted' ? 'selected' : '' ?>>Accepté</option>
+                                <option value="rejected" <?= $q['status'] === 'rejected' ? 'selected' : '' ?>>Refusé</option>
+                                <option value="completed" <?= $q['status'] === 'completed' ? 'selected' : '' ?>>Terminé</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Notes internes</label>
+                            <textarea name="notes" class="form-control"><?= htmlspecialchars($q['notes'] ?? '') ?></textarea>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Mettre à jour</button>
+                    </div>
+                </form>
             </div>
         </div>
+        <a href="?page=quotes" class="btn btn-light" style="margin-top: 20px;">← Retour aux devis</a>
 
-        <div class="card">
-            <h2>📸 Image principale</h2>
-            <div class="form-group">
-                <label>URL de l'image</label>
-                <input type="text" name="photo_1" class="form-control" value="<?php echo htmlspecialchars($p['photo_1'] ?? ''); ?>">
-            </div>
-            <?php if (!empty($p['photo_1'])): ?>
-            <img src="<?php echo htmlspecialchars($p['photo_1']); ?>" style="max-width:200px; border-radius:8px;">
-            <?php endif; ?>
-        </div>
-
-        <div class="card">
-            <h2>🔧 Configuration Onglets Page Produit</h2>
-            <p style="color:var(--gray-500);margin-bottom:16px;">Configurez les onglets qui s'affichent sur la fiche produit</p>
-            <?php
-            $tabsConfig = json_decode($p['tabs_config'] ?? '{}', true) ?: [];
-            $defaultTabs = [
-                'description' => ['label' => 'Description', 'enabled' => true],
-                'specifications' => ['label' => 'Caractéristiques', 'enabled' => true],
-                'sizes' => ['label' => 'Guide des tailles', 'enabled' => true],
-                'delivery' => ['label' => 'Livraison', 'enabled' => true],
-                'customization' => ['label' => 'Personnalisation', 'enabled' => true],
-            ];
-            $tabs = array_merge($defaultTabs, $tabsConfig);
-            ?>
-            <div class="config-section">
-                <?php foreach ($tabs as $key => $tab): ?>
-                <div class="config-item">
-                    <input type="checkbox" name="tabs[<?php echo $key; ?>][enabled]" value="1" <?php echo ($tab['enabled'] ?? true) ? 'checked' : ''; ?>>
-                    <input type="text" name="tabs[<?php echo $key; ?>][label]" class="form-control" value="<?php echo htmlspecialchars($tab['label'] ?? ucfirst($key)); ?>" style="width:200px;">
-                    <span style="color:var(--gray-500)"><?php echo $key; ?></span>
-                </div>
-                <?php endforeach; ?>
-            </div>
-            <input type="hidden" name="tabs_config" id="tabs_config" value='<?php echo htmlspecialchars(json_encode($tabs)); ?>'>
-        </div>
-
-        <div class="card">
-            <h2>⚙️ Configuration Configurateur Produit</h2>
-            <p style="color:var(--gray-500);margin-bottom:16px;">Définissez les options disponibles dans le configurateur pour ce produit</p>
-            <?php
-            $configConfig = json_decode($p['configurator_config'] ?? '{}', true) ?: [];
-            ?>
-            <div class="grid-2">
-                <div class="config-section">
-                    <h3>🎨 Design</h3>
-                    <div class="config-item">
-                        <input type="checkbox" name="config[design_flare]" value="1" <?php echo ($configConfig['design_flare'] ?? true) ? 'checked' : ''; ?>>
-                        <span>Design par FLARE</span>
-                    </div>
-                    <div class="config-item">
-                        <input type="checkbox" name="config[design_client]" value="1" <?php echo ($configConfig['design_client'] ?? true) ? 'checked' : ''; ?>>
-                        <span>Design du client</span>
-                    </div>
-                    <div class="config-item">
-                        <input type="checkbox" name="config[design_template]" value="1" <?php echo ($configConfig['design_template'] ?? true) ? 'checked' : ''; ?>>
-                        <span>Templates prédéfinis</span>
-                    </div>
-                </div>
-
-                <div class="config-section">
-                    <h3>✨ Options de personnalisation</h3>
-                    <div class="config-item">
-                        <input type="checkbox" name="config[option_nom]" value="1" <?php echo ($configConfig['option_nom'] ?? true) ? 'checked' : ''; ?>>
-                        <span>Nom joueur</span>
-                    </div>
-                    <div class="config-item">
-                        <input type="checkbox" name="config[option_numero]" value="1" <?php echo ($configConfig['option_numero'] ?? true) ? 'checked' : ''; ?>>
-                        <span>Numéro</span>
-                    </div>
-                    <div class="config-item">
-                        <input type="checkbox" name="config[option_logo]" value="1" <?php echo ($configConfig['option_logo'] ?? true) ? 'checked' : ''; ?>>
-                        <span>Logo club/sponsor</span>
-                    </div>
-                    <div class="config-item">
-                        <input type="checkbox" name="config[option_col]" value="1" <?php echo ($configConfig['option_col'] ?? false) ? 'checked' : ''; ?>>
-                        <span>Type de col</span>
-                    </div>
-                </div>
-
-                <div class="config-section">
-                    <h3>📏 Tailles disponibles</h3>
-                    <div class="form-group">
-                        <label>Tailles (séparées par virgule)</label>
-                        <input type="text" name="config[sizes]" class="form-control" value="<?php echo htmlspecialchars($configConfig['sizes'] ?? 'XS,S,M,L,XL,XXL,3XL'); ?>">
-                    </div>
-                    <div class="config-item">
-                        <input type="checkbox" name="config[sizes_enfant]" value="1" <?php echo ($configConfig['sizes_enfant'] ?? false) ? 'checked' : ''; ?>>
-                        <span>Inclure tailles enfant</span>
-                    </div>
-                </div>
-
-                <div class="config-section">
-                    <h3>💰 Options de prix</h3>
-                    <div class="form-group">
-                        <label>Quantité minimum</label>
-                        <input type="number" name="config[qty_min]" class="form-control" value="<?php echo $configConfig['qty_min'] ?? 1; ?>">
-                    </div>
-                    <div class="form-group">
-                        <label>Supplément personnalisation (€)</label>
-                        <input type="number" step="0.01" name="config[supplement]" class="form-control" value="<?php echo $configConfig['supplement'] ?? 0; ?>">
-                    </div>
-                </div>
-            </div>
-            <input type="hidden" name="configurator_config" id="configurator_config" value='<?php echo htmlspecialchars(json_encode($configConfig)); ?>'>
-        </div>
-
-        <div class="card">
-            <h2>🔍 SEO</h2>
-            <div class="form-group">
-                <label>Meta Title</label>
-                <input type="text" name="meta_title" class="form-control" value="<?php echo htmlspecialchars($p['meta_title'] ?? ''); ?>">
-            </div>
-            <div class="form-group">
-                <label>Meta Description</label>
-                <textarea name="meta_description" class="form-control"><?php echo htmlspecialchars($p['meta_description'] ?? ''); ?></textarea>
-            </div>
-        </div>
-
-        <div style="display:flex;gap:12px;">
-            <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
-            <a href="?page=products" class="btn btn-secondary">Annuler</a>
-        </div>
-    </form>
-
-    <script>
-    // Sérialiser les configs avant submit
-    document.querySelector('form').addEventListener('submit', function(e) {
-        // Tabs config
-        const tabs = {};
-        document.querySelectorAll('[name^="tabs["]').forEach(input => {
-            const match = input.name.match(/tabs\[(\w+)\]\[(\w+)\]/);
-            if (match) {
-                if (!tabs[match[1]]) tabs[match[1]] = {};
-                tabs[match[1]][match[2]] = input.type === 'checkbox' ? input.checked : input.value;
-            }
-        });
-        document.getElementById('tabs_config').value = JSON.stringify(tabs);
-
-        // Configurator config
-        const config = {};
-        document.querySelectorAll('[name^="config["]').forEach(input => {
-            const key = input.name.match(/config\[(\w+)\]/)[1];
-            config[key] = input.type === 'checkbox' ? input.checked : input.value;
-        });
-        document.getElementById('configurator_config').value = JSON.stringify(config);
-    });
-    </script>
-
-    <?php elseif ($page === 'categories'): ?>
-    <!-- CATEGORIES -->
-    <div class="header">
-        <h1>📁 Catégories</h1>
-        <a href="?page=category_edit" class="btn btn-primary">+ Nouvelle catégorie</a>
+        <?php endif; ?>
     </div>
-    <div class="card">
-        <table class="table">
-            <thead><tr><th>Nom</th><th>Type</th><th>Slug</th><th>Actions</th></tr></thead>
-            <tbody>
-                <?php foreach ($data['categories'] ?? [] as $c): ?>
-                <tr>
-                    <td><strong><?php echo htmlspecialchars($c['nom']); ?></strong></td>
-                    <td><span class="badge badge-<?php echo $c['type'] === 'sport' ? 'info' : 'success'; ?>"><?php echo $c['type']; ?></span></td>
-                    <td><?php echo htmlspecialchars($c['slug']); ?></td>
-                    <td>
-                        <a href="?page=category_edit&id=<?php echo $c['id']; ?>" class="btn btn-sm btn-secondary">Modifier</a>
-                        <a href="?page=categories&action=delete_category&id=<?php echo $c['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Supprimer?')">×</a>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-
-    <?php elseif ($page === 'category_edit'): ?>
-    <!-- EDIT CATEGORIE -->
-    <?php $c = $data['category'] ?? []; ?>
-    <div class="header">
-        <h1>📁 <?php echo $id ? 'Modifier' : 'Nouvelle'; ?> Catégorie</h1>
-        <a href="?page=categories" class="btn btn-secondary">← Retour</a>
-    </div>
-    <div class="card">
-        <form method="POST">
-            <input type="hidden" name="action" value="save_category">
-            <input type="hidden" name="id" value="<?php echo $id; ?>">
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>Nom</label>
-                    <input type="text" name="nom" class="form-control" value="<?php echo htmlspecialchars($c['nom'] ?? ''); ?>" required>
-                </div>
-                <div class="form-group">
-                    <label>Slug</label>
-                    <input type="text" name="slug" class="form-control" value="<?php echo htmlspecialchars($c['slug'] ?? ''); ?>" required>
-                </div>
-                <div class="form-group">
-                    <label>Type</label>
-                    <select name="type" class="form-control">
-                        <option value="sport" <?php echo ($c['type'] ?? '') === 'sport' ? 'selected' : ''; ?>>Sport</option>
-                        <option value="famille" <?php echo ($c['type'] ?? '') === 'famille' ? 'selected' : ''; ?>>Famille produit</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Image (URL)</label>
-                    <input type="text" name="image" class="form-control" value="<?php echo htmlspecialchars($c['image'] ?? ''); ?>">
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Description</label>
-                <textarea name="description" class="form-control"><?php echo htmlspecialchars($c['description'] ?? ''); ?></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
-        </form>
-    </div>
-
-    <?php elseif ($page === 'pages'): ?>
-    <!-- PAGES -->
-    <div class="header">
-        <h1>📄 Pages</h1>
-        <a href="?page=page_edit" class="btn btn-primary">+ Nouvelle page</a>
-    </div>
-    <div class="card">
-        <table class="table">
-            <thead><tr><th>Titre</th><th>Slug</th><th>Statut</th><th>Actions</th></tr></thead>
-            <tbody>
-                <?php foreach ($data['pages'] ?? [] as $pg): ?>
-                <tr>
-                    <td><strong><?php echo htmlspecialchars($pg['title']); ?></strong></td>
-                    <td><?php echo htmlspecialchars($pg['slug']); ?></td>
-                    <td><span class="badge badge-<?php echo $pg['status'] === 'published' ? 'success' : 'warning'; ?>"><?php echo $pg['status']; ?></span></td>
-                    <td><a href="?page=page_edit&id=<?php echo $pg['id']; ?>" class="btn btn-sm btn-secondary">Modifier</a></td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-
-    <?php elseif ($page === 'page_edit'): ?>
-    <!-- EDIT PAGE -->
-    <?php $pg = $data['page'] ?? []; ?>
-    <div class="header">
-        <h1>📄 <?php echo $id ? 'Modifier' : 'Nouvelle'; ?> Page</h1>
-        <a href="?page=pages" class="btn btn-secondary">← Retour</a>
-    </div>
-    <div class="card">
-        <form method="POST">
-            <input type="hidden" name="action" value="save_page">
-            <input type="hidden" name="id" value="<?php echo $id; ?>">
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>Titre</label>
-                    <input type="text" name="title" class="form-control" value="<?php echo htmlspecialchars($pg['title'] ?? ''); ?>" required>
-                </div>
-                <div class="form-group">
-                    <label>Slug</label>
-                    <input type="text" name="slug" class="form-control" value="<?php echo htmlspecialchars($pg['slug'] ?? ''); ?>" required>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Contenu (HTML)</label>
-                <textarea name="content" class="form-control" style="min-height:300px;font-family:monospace;"><?php echo htmlspecialchars($pg['content'] ?? ''); ?></textarea>
-            </div>
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>Meta Title</label>
-                    <input type="text" name="meta_title" class="form-control" value="<?php echo htmlspecialchars($pg['meta_title'] ?? ''); ?>">
-                </div>
-                <div class="form-group">
-                    <label>Statut</label>
-                    <select name="status" class="form-control">
-                        <option value="published" <?php echo ($pg['status'] ?? '') === 'published' ? 'selected' : ''; ?>>Publié</option>
-                        <option value="draft" <?php echo ($pg['status'] ?? '') === 'draft' ? 'selected' : ''; ?>>Brouillon</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Meta Description</label>
-                <textarea name="meta_description" class="form-control"><?php echo htmlspecialchars($pg['meta_description'] ?? ''); ?></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
-        </form>
-    </div>
-
-    <?php elseif ($page === 'blog'): ?>
-    <!-- BLOG -->
-    <div class="header">
-        <h1>📝 Blog</h1>
-        <a href="?page=blog_edit" class="btn btn-primary">+ Nouvel article</a>
-    </div>
-    <div class="card">
-        <table class="table">
-            <thead><tr><th>Titre</th><th>Catégorie</th><th>Statut</th><th>Actions</th></tr></thead>
-            <tbody>
-                <?php foreach ($data['posts'] ?? [] as $post): ?>
-                <tr>
-                    <td><strong><?php echo htmlspecialchars($post['title']); ?></strong></td>
-                    <td><span class="badge badge-info"><?php echo htmlspecialchars($post['category'] ?? '-'); ?></span></td>
-                    <td><span class="badge badge-<?php echo $post['status'] === 'published' ? 'success' : 'warning'; ?>"><?php echo $post['status']; ?></span></td>
-                    <td><a href="?page=blog_edit&id=<?php echo $post['id']; ?>" class="btn btn-sm btn-secondary">Modifier</a></td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-
-    <?php elseif ($page === 'blog_edit'): ?>
-    <!-- EDIT BLOG -->
-    <?php $post = $data['post'] ?? []; ?>
-    <div class="header">
-        <h1>📝 <?php echo $id ? 'Modifier' : 'Nouvel'; ?> Article</h1>
-        <a href="?page=blog" class="btn btn-secondary">← Retour</a>
-    </div>
-    <div class="card">
-        <form method="POST">
-            <input type="hidden" name="action" value="save_blog">
-            <input type="hidden" name="id" value="<?php echo $id; ?>">
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>Titre</label>
-                    <input type="text" name="title" class="form-control" value="<?php echo htmlspecialchars($post['title'] ?? ''); ?>" required>
-                </div>
-                <div class="form-group">
-                    <label>Slug</label>
-                    <input type="text" name="slug" class="form-control" value="<?php echo htmlspecialchars($post['slug'] ?? ''); ?>" required>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Extrait</label>
-                <textarea name="excerpt" class="form-control" style="min-height:80px;"><?php echo htmlspecialchars($post['excerpt'] ?? ''); ?></textarea>
-            </div>
-            <div class="form-group">
-                <label>Contenu (HTML)</label>
-                <textarea name="content" class="form-control" style="min-height:300px;font-family:monospace;"><?php echo htmlspecialchars($post['content'] ?? ''); ?></textarea>
-            </div>
-            <div class="grid-3">
-                <div class="form-group">
-                    <label>Catégorie</label>
-                    <select name="category" class="form-control">
-                        <option value="conseils" <?php echo ($post['category'] ?? '') === 'conseils' ? 'selected' : ''; ?>>Conseils</option>
-                        <option value="tutoriels" <?php echo ($post['category'] ?? '') === 'tutoriels' ? 'selected' : ''; ?>>Tutoriels</option>
-                        <option value="nouveautes" <?php echo ($post['category'] ?? '') === 'nouveautes' ? 'selected' : ''; ?>>Nouveautés</option>
-                        <option value="sports" <?php echo ($post['category'] ?? '') === 'sports' ? 'selected' : ''; ?>>Sports</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Statut</label>
-                    <select name="status" class="form-control">
-                        <option value="published" <?php echo ($post['status'] ?? '') === 'published' ? 'selected' : ''; ?>>Publié</option>
-                        <option value="draft" <?php echo ($post['status'] ?? '') === 'draft' ? 'selected' : ''; ?>>Brouillon</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Meta Title</label>
-                    <input type="text" name="meta_title" class="form-control" value="<?php echo htmlspecialchars($post['meta_title'] ?? ''); ?>">
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Meta Description</label>
-                <textarea name="meta_description" class="form-control"><?php echo htmlspecialchars($post['meta_description'] ?? ''); ?></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
-        </form>
-    </div>
-
-    <?php elseif ($page === 'quotes'): ?>
-    <!-- DEVIS -->
-    <div class="header">
-        <h1>💰 Devis</h1>
-    </div>
-    <div class="filters">
-        <a href="?page=quotes" class="btn btn-<?php echo empty($_GET['status']) ? 'primary' : 'secondary'; ?>">Tous</a>
-        <a href="?page=quotes&status=pending" class="btn btn-<?php echo ($_GET['status'] ?? '') === 'pending' ? 'primary' : 'secondary'; ?>">En attente</a>
-        <a href="?page=quotes&status=sent" class="btn btn-<?php echo ($_GET['status'] ?? '') === 'sent' ? 'primary' : 'secondary'; ?>">Envoyés</a>
-        <a href="?page=quotes&status=accepted" class="btn btn-<?php echo ($_GET['status'] ?? '') === 'accepted' ? 'primary' : 'secondary'; ?>">Acceptés</a>
-    </div>
-    <div class="card">
-        <table class="table">
-            <thead><tr><th>Réf</th><th>Client</th><th>Produit</th><th>Qté</th><th>Total</th><th>Statut</th><th>Date</th><th>Actions</th></tr></thead>
-            <tbody>
-                <?php foreach ($data['quotes'] ?? [] as $q): ?>
-                <tr>
-                    <td><strong><?php echo htmlspecialchars($q['reference']); ?></strong></td>
-                    <td><?php echo htmlspecialchars($q['client_prenom'] . ' ' . $q['client_nom']); ?></td>
-                    <td><?php echo htmlspecialchars(substr($q['product_nom'] ?? '', 0, 30)); ?></td>
-                    <td><?php echo $q['total_pieces']; ?></td>
-                    <td><strong><?php echo number_format($q['prix_total'] ?? 0, 2); ?>€</strong></td>
-                    <td>
-                        <?php
-                        $statusColors = ['pending' => 'warning', 'sent' => 'info', 'accepted' => 'success', 'rejected' => 'danger', 'completed' => 'success'];
-                        ?>
-                        <span class="badge badge-<?php echo $statusColors[$q['status']] ?? 'info'; ?>"><?php echo $q['status']; ?></span>
-                    </td>
-                    <td><?php echo date('d/m/Y', strtotime($q['created_at'])); ?></td>
-                    <td><a href="?page=quote_view&id=<?php echo $q['id']; ?>" class="btn btn-sm btn-secondary">Voir</a></td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-
-    <?php elseif ($page === 'quote_view'): ?>
-    <!-- VIEW DEVIS -->
-    <?php $q = $data['quote'] ?? []; ?>
-    <div class="header">
-        <h1>💰 Devis <?php echo htmlspecialchars($q['reference'] ?? ''); ?></h1>
-        <a href="?page=quotes" class="btn btn-secondary">← Retour</a>
-    </div>
-    <div class="grid-2">
-        <div class="card">
-            <h2>👤 Client</h2>
-            <p><strong>Nom:</strong> <?php echo htmlspecialchars($q['client_prenom'] . ' ' . $q['client_nom']); ?></p>
-            <p><strong>Email:</strong> <?php echo htmlspecialchars($q['client_email']); ?></p>
-            <p><strong>Tél:</strong> <?php echo htmlspecialchars($q['client_telephone']); ?></p>
-            <p><strong>Club:</strong> <?php echo htmlspecialchars($q['client_club']); ?></p>
-        </div>
-        <div class="card">
-            <h2>📦 Produit</h2>
-            <p><strong>Réf:</strong> <?php echo htmlspecialchars($q['product_reference']); ?></p>
-            <p><strong>Nom:</strong> <?php echo htmlspecialchars($q['product_nom']); ?></p>
-            <p><strong>Sport:</strong> <?php echo htmlspecialchars($q['sport']); ?></p>
-            <p><strong>Quantité:</strong> <?php echo $q['total_pieces']; ?> pièces</p>
-            <p><strong>Prix unitaire:</strong> <?php echo number_format($q['prix_unitaire'] ?? 0, 2); ?>€</p>
-            <p><strong>Total:</strong> <span style="font-size:20px;color:var(--primary);font-weight:700;"><?php echo number_format($q['prix_total'] ?? 0, 2); ?>€</span></p>
-        </div>
-    </div>
-    <div class="card">
-        <h2>📋 Mettre à jour le statut</h2>
-        <form method="POST">
-            <input type="hidden" name="action" value="update_quote_status">
-            <input type="hidden" name="id" value="<?php echo $q['id']; ?>">
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>Statut</label>
-                    <select name="status" class="form-control">
-                        <option value="pending" <?php echo $q['status'] === 'pending' ? 'selected' : ''; ?>>En attente</option>
-                        <option value="sent" <?php echo $q['status'] === 'sent' ? 'selected' : ''; ?>>Envoyé</option>
-                        <option value="accepted" <?php echo $q['status'] === 'accepted' ? 'selected' : ''; ?>>Accepté</option>
-                        <option value="rejected" <?php echo $q['status'] === 'rejected' ? 'selected' : ''; ?>>Refusé</option>
-                        <option value="completed" <?php echo $q['status'] === 'completed' ? 'selected' : ''; ?>>Terminé</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Notes internes</label>
-                    <textarea name="notes" class="form-control"><?php echo htmlspecialchars($q['notes'] ?? ''); ?></textarea>
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary">💾 Mettre à jour</button>
-        </form>
-    </div>
-
-    <?php endif; ?>
-
 </main>
 <?php endif; ?>
 
