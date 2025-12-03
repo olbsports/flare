@@ -2,21 +2,116 @@
 /**
  * FLARE CUSTOM - Administration Professionnelle
  * Interface style WordPress/Shopify
+ *
+ * SECURITY: CSRF, XSS, SQL Injection protected
  */
 session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 
+// Security headers
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: SAMEORIGIN');
+header('X-XSS-Protection: 1; mode=block');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+
 require_once __DIR__ . '/../config/database.php';
+
+// ============ SECURITY FUNCTIONS ============
+
+// CSRF Protection
+function generateCsrfToken() {
+    if (empty($_SESSION['csrf_token']) || empty($_SESSION['csrf_token_time']) || time() - $_SESSION['csrf_token_time'] > 3600) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        $_SESSION['csrf_token_time'] = time();
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function verifyCsrfToken($token) {
+    if (empty($_SESSION['csrf_token']) || empty($token)) return false;
+    return hash_equals($_SESSION['csrf_token'], $token);
+}
+
+// Encryption for sensitive data (API keys, SMTP passwords)
+function getEncryptionKey() {
+    return hash('sha256', DB_PASS . '_flare_secure_key_2024', true);
+}
+
+function encryptSensitive($data) {
+    if (empty($data)) return '';
+    $key = getEncryptionKey();
+    $iv = random_bytes(16);
+    $encrypted = openssl_encrypt($data, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
+    return base64_encode($iv . $encrypted);
+}
+
+function decryptSensitive($data) {
+    if (empty($data)) return '';
+    try {
+        $key = getEncryptionKey();
+        $decoded = base64_decode($data);
+        if (strlen($decoded) < 17) return $data; // Not encrypted
+        $iv = substr($decoded, 0, 16);
+        $encrypted = substr($decoded, 16);
+        $decrypted = openssl_decrypt($encrypted, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
+        return $decrypted !== false ? $decrypted : $data;
+    } catch (Exception $e) {
+        return $data; // Return as-is if decryption fails
+    }
+}
+
+// Rate limiting for login
+function checkLoginRateLimit() {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $key = 'login_attempts_' . md5($ip);
+    $attempts = $_SESSION[$key] ?? ['count' => 0, 'time' => time()];
+
+    // Reset after 15 minutes
+    if (time() - $attempts['time'] > 900) {
+        $attempts = ['count' => 0, 'time' => time()];
+    }
+
+    $_SESSION[$key] = $attempts;
+    return $attempts['count'] < 5; // Max 5 attempts per 15 minutes
+}
+
+function incrementLoginAttempts() {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $key = 'login_attempts_' . md5($ip);
+    if (!isset($_SESSION[$key])) {
+        $_SESSION[$key] = ['count' => 0, 'time' => time()];
+    }
+    $_SESSION[$key]['count']++;
+}
+
+function resetLoginAttempts() {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $key = 'login_attempts_' . md5($ip);
+    unset($_SESSION[$key]);
+}
+
+// ============ INITIALIZATION ============
 
 $page = $_GET['page'] ?? 'dashboard';
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 $id = $_GET['id'] ?? $_POST['id'] ?? null;
 $tab = $_GET['tab'] ?? 'general';
 
+// Sanitize inputs
+$id = $id !== null ? intval($id) : null;
+$page = preg_replace('/[^a-z_]/', '', $page);
+
 // Auth check
 if ($page !== 'login' && !isset($_SESSION['admin_user'])) {
     $page = 'login';
+}
+
+// CSRF check for POST requests (except login)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $page !== 'login') {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        die('<div style="font-family:sans-serif;padding:50px;text-align:center;"><h1>Erreur de sécurité</h1><p>Token CSRF invalide ou expiré.</p><a href="admin.php" style="color:#FF4B26;">Retour à l\'admin</a></div>');
+    }
 }
 
 // DB Connection
@@ -28,20 +123,29 @@ try {
     $dbError = $e->getMessage();
 }
 
-// LOGIN
+// LOGIN with rate limiting
 if ($page === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
-    if ($pdo) {
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? AND active = 1");
-        $stmt->execute([$username]);
-        $user = $stmt->fetch();
-        if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['admin_user'] = $user;
-            header('Location: admin.php');
-            exit;
+    if (!checkLoginRateLimit()) {
+        $loginError = "Trop de tentatives. Réessayez dans 15 minutes.";
+    } else {
+        $username = trim($_POST['username'] ?? '');
+        $password = $_POST['password'] ?? '';
+        if ($pdo && $username && $password) {
+            $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? AND active = 1");
+            $stmt->execute([$username]);
+            $user = $stmt->fetch();
+            if ($user && password_verify($password, $user['password'])) {
+                $_SESSION['admin_user'] = $user;
+                $_SESSION['admin_login_time'] = time();
+                resetLoginAttempts();
+                // Regenerate session ID to prevent session fixation
+                session_regenerate_id(true);
+                header('Location: admin.php');
+                exit;
+            }
+            incrementLoginAttempts();
+            $loginError = "Identifiants incorrects";
         }
-        $loginError = "Identifiants incorrects";
     }
 }
 
@@ -638,6 +742,8 @@ $user = $_SESSION['admin_user'] ?? null;
             <div class="alert alert-danger">Erreur BDD: <?= htmlspecialchars($dbError) ?><br><a href="import-content.php">Lancer l'import</a></div>
         <?php else: ?>
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+            
             <div class="form-group">
                 <label class="form-label">Utilisateur</label>
                 <input type="text" name="username" class="form-control" placeholder="admin" required autofocus>
@@ -861,7 +967,9 @@ $user = $_SESSION['admin_user'] ?? null;
         <?php // ============ PRODUCT EDIT ============ ?>
         <?php elseif ($page === 'product' && $id): ?>
         <?php $p = $data['item'] ?? []; ?>
-        <form method="POST" action="?page=product&id=<?= $id ?>">
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+            <?php // form continues... ? action="?page=product&id=<?= $id ?>">
             <input type="hidden" name="action" value="save_product">
 
             <div class="card">
@@ -1099,6 +1207,8 @@ $user = $_SESSION['admin_user'] ?? null;
                 <span class="card-title"><?= $id ? 'Modifier' : 'Nouvelle' ?> catégorie</span>
             </div>
             <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+            
                 <input type="hidden" name="action" value="save_category">
                 <div class="card-body">
                     <div class="form-row">
@@ -1166,6 +1276,8 @@ $user = $_SESSION['admin_user'] ?? null;
                 <span class="card-title"><?= $id ? 'Modifier' : 'Nouvelle' ?> page</span>
             </div>
             <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+            
                 <input type="hidden" name="action" value="save_page">
                 <div class="card-body">
                     <div class="form-row">
@@ -1244,6 +1356,8 @@ $user = $_SESSION['admin_user'] ?? null;
                 <span class="card-title"><?= $id ? 'Modifier' : 'Nouvel' ?> article</span>
             </div>
             <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+            
                 <input type="hidden" name="action" value="save_blog">
                 <div class="card-body">
                     <div class="form-row">
@@ -1389,6 +1503,8 @@ $user = $_SESSION['admin_user'] ?? null;
                     <span class="card-title">Mettre à jour</span>
                 </div>
                 <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+            
                     <input type="hidden" name="action" value="update_quote">
                     <div class="card-body">
                         <div class="form-group">
@@ -1417,7 +1533,9 @@ $user = $_SESSION['admin_user'] ?? null;
         <?php // ============ SETTINGS ============ ?>
         <?php elseif ($page === 'settings'): ?>
         <?php $s = $data['settings'] ?? []; ?>
-        <form method="POST" action="?page=settings" id="settings-form">
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+            <?php // form continues... ? action="?page=settings" id="settings-form">
             <input type="hidden" name="action" value="save_settings">
 
             <div class="card">
@@ -1745,7 +1863,9 @@ $user = $_SESSION['admin_user'] ?? null;
 
                         <h4 style="margin-bottom: 20px;">Changer le mot de passe admin</h4>
                         </form>
-                        <form method="POST" action="?page=settings">
+                        <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+            <?php // form continues... ? action="?page=settings">
                             <input type="hidden" name="action" value="change_password">
                             <div class="form-row">
                                 <div class="form-group">
@@ -1788,7 +1908,9 @@ $user = $_SESSION['admin_user'] ?? null;
                 <div class="card-header">
                     <span class="card-title">Import CSV Produits</span>
                 </div>
-                <form method="POST" action="?page=import" enctype="multipart/form-data">
+                <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+            <?php // form continues... ? action="?page=import" enctype="multipart/form-data">
                     <input type="hidden" name="action" value="import_csv">
                     <div class="card-body">
                         <div class="alert alert-success" style="background: rgba(80,205,137,0.1); border: 1px solid rgba(80,205,137,0.2); color: var(--success);">
