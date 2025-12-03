@@ -39,6 +39,21 @@
 </IfModule>
 
 # ============================================
-# 5. CHARSET UTF-8
+# 5. ROUTING PRODUITS DYNAMIQUES (SEO OPTIMIZED)
+# ============================================
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # URL canonique: /produit/FLARE-XXX → produit.php?ref=FLARE-XXX
+    RewriteRule ^produit/([A-Za-z0-9_-]+)/?$ produit.php?ref=$1 [L,QSA]
+
+    # REDIRECTION 301 SEO: anciennes URLs HTML → nouvelles URLs propres
+    # Ceci indique à Google de mettre à jour son index
+    RewriteRule ^pages/produits/([A-Za-z0-9_-]+)\.html$ /produit/$1 [R=301,L]
+</IfModule>
+
+# ============================================
+# 6. CHARSET UTF-8
 # ============================================
 AddDefaultCharset UTF-8

@@ -166,12 +166,56 @@ if ($action && $pdo) {
                     'prix_1', 'prix_5', 'prix_10', 'prix_20', 'prix_50', 'prix_100', 'prix_250', 'prix_500',
                     'photo_1', 'photo_2', 'photo_3', 'photo_4', 'photo_5', 'genre', 'finition',
                     'meta_title', 'meta_description', 'tab_description', 'tab_specifications',
-                    'tab_sizes', 'tab_templates', 'tab_faq', 'configurator_config'];
+                    'tab_sizes', 'tab_templates', 'tab_faq', 'configurator_config', 'size_chart_id'];
                 $set = implode('=?, ', $fields) . '=?';
                 $values = array_map(fn($f) => $_POST[$f] ?? null, $fields);
+                // Convertir size_chart_id en int ou null
+                $idx = array_search('size_chart_id', $fields);
+                if ($idx !== false && $values[$idx] !== null) {
+                    $values[$idx] = $values[$idx] === '' ? null : intval($values[$idx]);
+                }
                 $values[] = $id;
                 $pdo->prepare("UPDATE products SET $set WHERE id=?")->execute($values);
                 $toast = 'Produit enregistré';
+                break;
+
+            case 'add_photo':
+                $productId = intval($_POST['product_id'] ?? 0);
+                $photoUrl = trim($_POST['photo_url'] ?? '');
+                $altText = trim($_POST['alt_text'] ?? '');
+                if ($productId && $photoUrl) {
+                    $maxOrdre = $pdo->prepare("SELECT MAX(ordre) FROM product_photos WHERE product_id=?");
+                    $maxOrdre->execute([$productId]);
+                    $ordre = intval($maxOrdre->fetchColumn()) + 1;
+                    $pdo->prepare("INSERT INTO product_photos (product_id, url, alt_text, ordre) VALUES (?,?,?,?)")
+                        ->execute([$productId, $photoUrl, $altText, $ordre]);
+                    $toast = 'Photo ajoutée';
+                }
+                break;
+
+            case 'delete_photo':
+                $photoId = intval($_POST['photo_id'] ?? 0);
+                if ($photoId) {
+                    $pdo->prepare("DELETE FROM product_photos WHERE id=?")->execute([$photoId]);
+                    $toast = 'Photo supprimée';
+                }
+                break;
+
+            case 'set_main_photo':
+                $photoId = intval($_POST['photo_id'] ?? 0);
+                $productId = intval($_POST['product_id'] ?? 0);
+                if ($photoId && $productId) {
+                    $pdo->prepare("UPDATE product_photos SET is_main=0 WHERE product_id=?")->execute([$productId]);
+                    $pdo->prepare("UPDATE product_photos SET is_main=1 WHERE id=?")->execute([$photoId]);
+                    // Mettre à jour photo_1 du produit
+                    $stmt = $pdo->prepare("SELECT url FROM product_photos WHERE id=?");
+                    $stmt->execute([$photoId]);
+                    $url = $stmt->fetchColumn();
+                    if ($url) {
+                        $pdo->prepare("UPDATE products SET photo_1=? WHERE id=?")->execute([$url, $productId]);
+                    }
+                    $toast = 'Photo principale définie';
+                }
                 break;
 
             case 'save_category':
@@ -425,9 +469,19 @@ if ($pdo && $page !== 'login') {
                     $stmt = $pdo->prepare("SELECT * FROM products WHERE id=?");
                     $stmt->execute([$id]);
                     $data['item'] = $stmt->fetch();
+                    // Récupérer les photos de la galerie
+                    $stmt = $pdo->prepare("SELECT * FROM product_photos WHERE product_id=? ORDER BY ordre, id");
+                    $stmt->execute([$id]);
+                    $data['photos'] = $stmt->fetchAll();
                 }
                 $data['sports'] = $pdo->query("SELECT DISTINCT sport FROM products WHERE sport!='' ORDER BY sport")->fetchAll(PDO::FETCH_COLUMN);
                 $data['familles'] = $pdo->query("SELECT DISTINCT famille FROM products WHERE famille!='' ORDER BY famille")->fetchAll(PDO::FETCH_COLUMN);
+                // Récupérer les guides de tailles disponibles
+                try {
+                    $data['size_charts'] = $pdo->query("SELECT * FROM size_charts WHERE active=1 ORDER BY sport, ordre")->fetchAll();
+                } catch (Exception $e) {
+                    $data['size_charts'] = [];
+                }
                 break;
 
             case 'categories':
@@ -1062,14 +1116,82 @@ $user = $_SESSION['admin_user'] ?? null;
                 <!-- TAB: PHOTOS -->
                 <div class="tab-content <?= $tab === 'photos' ? 'active' : '' ?>" id="tab-photos">
                     <div class="card-body">
+                        <h4 style="margin-bottom: 20px;">Photo principale</h4>
+                        <div class="form-group">
+                            <label class="form-label">Photo principale (photo_1)</label>
+                            <input type="text" name="photo_1" class="form-control" value="<?= htmlspecialchars($p['photo_1'] ?? '') ?>" placeholder="URL de l'image principale">
+                            <?php if (!empty($p['photo_1'])): ?>
+                            <img src="<?= htmlspecialchars($p['photo_1']) ?>" style="max-width: 200px; margin-top: 10px; border-radius: 8px;">
+                            <?php endif; ?>
+                        </div>
+
+                        <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
+
+                        <h4 style="margin-bottom: 20px;">Galerie photos (illimitée)</h4>
+
+                        <!-- Photos existantes dans la galerie -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px;">
+                            <?php foreach ($data['photos'] ?? [] as $photo): ?>
+                            <div style="border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fafbfc;">
+                                <img src="<?= htmlspecialchars($photo['url']) ?>" style="width: 100%; height: 140px; object-fit: cover;">
+                                <div style="padding: 10px;">
+                                    <small style="color: var(--text-muted); display: block; margin-bottom: 8px; word-break: break-all;"><?= htmlspecialchars(basename($photo['url'])) ?></small>
+                                    <div style="display: flex; gap: 5px;">
+                                        <?php if (!$photo['is_main']): ?>
+                                        <form method="POST" style="margin: 0;">
+                                            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+                                            <input type="hidden" name="action" value="set_main_photo">
+                                            <input type="hidden" name="photo_id" value="<?= $photo['id'] ?>">
+                                            <input type="hidden" name="product_id" value="<?= $id ?>">
+                                            <button type="submit" class="btn btn-sm btn-light" title="Définir comme principale">⭐</button>
+                                        </form>
+                                        <?php else: ?>
+                                        <span class="badge badge-success">Principale</span>
+                                        <?php endif; ?>
+                                        <form method="POST" style="margin: 0;" onsubmit="return confirm('Supprimer cette photo ?')">
+                                            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+                                            <input type="hidden" name="action" value="delete_photo">
+                                            <input type="hidden" name="photo_id" value="<?= $photo['id'] ?>">
+                                            <button type="submit" class="btn btn-sm btn-danger">🗑</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+
+                            <?php if (empty($data['photos'])): ?>
+                            <p style="color: var(--text-muted); grid-column: 1/-1;">Aucune photo dans la galerie. Ajoutez des photos ci-dessous.</p>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Ajouter une photo -->
+                        <div style="background: #fafbfc; border-radius: 8px; padding: 20px;">
+                            <h5 style="margin-bottom: 15px;">Ajouter une photo à la galerie</h5>
+                            <form method="POST" style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
+                                <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+                                <input type="hidden" name="action" value="add_photo">
+                                <input type="hidden" name="product_id" value="<?= $id ?>">
+                                <div class="form-group" style="margin: 0; flex: 1; min-width: 300px;">
+                                    <label class="form-label">URL de la photo</label>
+                                    <input type="url" name="photo_url" class="form-control" placeholder="https://..." required>
+                                </div>
+                                <div class="form-group" style="margin: 0; width: 200px;">
+                                    <label class="form-label">Texte alternatif</label>
+                                    <input type="text" name="alt_text" class="form-control" placeholder="Description">
+                                </div>
+                                <button type="submit" class="btn btn-primary">+ Ajouter</button>
+                            </form>
+                        </div>
+
+                        <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
+
+                        <h4 style="margin-bottom: 20px;">Photos additionnelles (ancienne méthode)</h4>
+                        <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 12px;">Ces champs sont conservés pour compatibilité. Préférez la galerie ci-dessus.</p>
                         <div class="form-row">
-                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                            <?php for ($i = 2; $i <= 5; $i++): ?>
                             <div class="form-group">
                                 <label class="form-label">Photo <?= $i ?></label>
-                                <input type="text" name="photo_<?= $i ?>" class="form-control" value="<?= htmlspecialchars($p['photo_'.$i] ?? '') ?>" placeholder="URL de l'image">
-                                <?php if (!empty($p['photo_'.$i])): ?>
-                                <img src="<?= htmlspecialchars($p['photo_'.$i]) ?>" style="max-width: 150px; margin-top: 10px; border-radius: 8px;">
-                                <?php endif; ?>
+                                <input type="text" name="photo_<?= $i ?>" class="form-control" value="<?= htmlspecialchars($p['photo_'.$i] ?? '') ?>" placeholder="URL">
                             </div>
                             <?php endfor; ?>
                         </div>
@@ -1079,45 +1201,104 @@ $user = $_SESSION['admin_user'] ?? null;
                 <!-- TAB: TABS CONTENT -->
                 <div class="tab-content <?= $tab === 'tabs' ? 'active' : '' ?>" id="tab-tabs">
                     <div class="card-body">
-                        <p style="color: var(--text-muted); margin-bottom: 20px;">Contenu des onglets affichés sur la fiche produit. Laissez vide pour utiliser le contenu par défaut.</p>
+                        <p style="color: var(--text-muted); margin-bottom: 20px;">Contenu des onglets affichés sur la fiche produit.</p>
 
                         <div class="form-group">
                             <label class="form-label">📝 Onglet Description</label>
-                            <textarea name="tab_description" class="form-control" style="min-height: 200px; font-family: monospace;"><?= htmlspecialchars($p['tab_description'] ?? '') ?></textarea>
-                            <div class="form-hint">HTML autorisé. Contenu principal de la fiche produit.</div>
+                            <textarea name="tab_description" class="form-control" style="min-height: 150px; font-family: monospace;"><?= htmlspecialchars($p['tab_description'] ?? '') ?></textarea>
+                            <div class="form-hint">HTML autorisé. Laissez vide pour utiliser la description SEO.</div>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">📋 Onglet Caractéristiques</label>
-                            <textarea name="tab_specifications" class="form-control" style="min-height: 200px; font-family: monospace;"><?= htmlspecialchars($p['tab_specifications'] ?? '') ?></textarea>
+                            <textarea name="tab_specifications" class="form-control" style="min-height: 150px; font-family: monospace;"><?= htmlspecialchars($p['tab_specifications'] ?? '') ?></textarea>
                             <div class="form-hint">HTML autorisé. Tableau des spécifications techniques.</div>
                         </div>
 
+                        <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
+
+                        <h4 style="margin-bottom: 20px;">📏 Guide des Tailles</h4>
+
                         <div class="form-group">
-                            <label class="form-label">📏 Onglet Guide des Tailles</label>
-                            <textarea name="tab_sizes" class="form-control" style="min-height: 200px; font-family: monospace;"><?= htmlspecialchars($p['tab_sizes'] ?? '') ?></textarea>
-                            <div class="form-hint">HTML autorisé. Tableau des tailles.</div>
+                            <label class="form-label">Sélectionner un guide de tailles prédéfini</label>
+                            <select name="size_chart_id" class="form-control" style="max-width: 400px;" onchange="toggleCustomSizes(this)">
+                                <option value="">-- Aucun (contenu personnalisé) --</option>
+                                <?php
+                                $currentSport = $p['sport'] ?? '';
+                                $sizeChartsByGroup = [];
+                                foreach ($data['size_charts'] ?? [] as $sc) {
+                                    $group = $sc['sport'] ?: 'Général';
+                                    $sizeChartsByGroup[$group][] = $sc;
+                                }
+                                foreach ($sizeChartsByGroup as $group => $charts): ?>
+                                <optgroup label="<?= htmlspecialchars($group) ?>">
+                                    <?php foreach ($charts as $sc): ?>
+                                    <option value="<?= $sc['id'] ?>" <?= ($p['size_chart_id'] ?? '') == $sc['id'] ? 'selected' : '' ?>
+                                        data-content="<?= htmlspecialchars($sc['html_content']) ?>">
+                                        <?= htmlspecialchars($sc['nom']) ?> (<?= $sc['type'] ?>)
+                                    </option>
+                                    <?php endforeach; ?>
+                                </optgroup>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="form-hint">Choisissez un guide prédéfini ou créez un contenu personnalisé ci-dessous.</div>
                         </div>
+
+                        <!-- Prévisualisation du guide sélectionné -->
+                        <div id="size-chart-preview" style="background: #fafbfc; border-radius: 8px; padding: 15px; margin: 15px 0; display: none;">
+                            <strong style="font-size: 12px; color: var(--text-muted);">APERÇU DU GUIDE:</strong>
+                            <div id="size-chart-preview-content" style="margin-top: 10px; overflow-x: auto;"></div>
+                        </div>
+
+                        <div class="form-group" id="custom-sizes-area">
+                            <label class="form-label">Contenu personnalisé (si pas de guide sélectionné)</label>
+                            <textarea name="tab_sizes" class="form-control" style="min-height: 150px; font-family: monospace;"><?= htmlspecialchars($p['tab_sizes'] ?? '') ?></textarea>
+                            <div class="form-hint">HTML autorisé. Utilisé uniquement si aucun guide n'est sélectionné.</div>
+                        </div>
+
+                        <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
 
                         <div class="form-group">
                             <label class="form-label">🎨 Onglet Templates</label>
-                            <textarea name="tab_templates" class="form-control" style="min-height: 200px; font-family: monospace;"><?= htmlspecialchars($p['tab_templates'] ?? '') ?></textarea>
+                            <textarea name="tab_templates" class="form-control" style="min-height: 150px; font-family: monospace;"><?= htmlspecialchars($p['tab_templates'] ?? '') ?></textarea>
                             <div class="form-hint">HTML autorisé. Galerie de templates disponibles.</div>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">❓ Onglet FAQ</label>
-                            <textarea name="tab_faq" class="form-control" style="min-height: 200px; font-family: monospace;"><?= htmlspecialchars($p['tab_faq'] ?? '') ?></textarea>
+                            <textarea name="tab_faq" class="form-control" style="min-height: 150px; font-family: monospace;"><?= htmlspecialchars($p['tab_faq'] ?? '') ?></textarea>
                             <div class="form-hint">HTML autorisé. Questions fréquentes sur ce produit.</div>
                         </div>
                     </div>
                 </div>
 
+                <script>
+                function toggleCustomSizes(select) {
+                    var preview = document.getElementById('size-chart-preview');
+                    var previewContent = document.getElementById('size-chart-preview-content');
+                    var customArea = document.getElementById('custom-sizes-area');
+
+                    if (select.value) {
+                        var option = select.options[select.selectedIndex];
+                        var content = option.getAttribute('data-content');
+                        previewContent.innerHTML = content || 'Aucun aperçu disponible';
+                        preview.style.display = 'block';
+                        customArea.style.opacity = '0.5';
+                    } else {
+                        preview.style.display = 'none';
+                        customArea.style.opacity = '1';
+                    }
+                }
+                // Init on load
+                document.addEventListener('DOMContentLoaded', function() {
+                    var select = document.querySelector('select[name="size_chart_id"]');
+                    if (select && select.value) toggleCustomSizes(select);
+                });
+                </script>
+
                 <!-- TAB: CONFIGURATOR -->
                 <div class="tab-content <?= $tab === 'configurator' ? 'active' : '' ?>" id="tab-configurator">
                     <div class="card-body">
-                        <p style="color: var(--text-muted); margin-bottom: 20px;">Configuration du configurateur produit (JSON). Définissez les options disponibles pour ce produit.</p>
-
                         <?php
                         $defaultConfig = [
                             'design_options' => ['flare' => true, 'client' => true, 'template' => true],
@@ -1132,13 +1313,122 @@ $user = $_SESSION['admin_user'] ?? null;
                         $config = json_decode($p['configurator_config'] ?? '', true) ?: $defaultConfig;
                         ?>
 
-                        <div class="form-group">
-                            <label class="form-label">Configuration JSON</label>
-                            <textarea name="configurator_config" class="form-control" style="min-height: 350px; font-family: monospace;"><?= htmlspecialchars(json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) ?></textarea>
-                            <div class="form-hint">
-                                Options disponibles: design_options (flare, client, template), personalization (nom, numero, logo, sponsor), sizes, sizes_kids, colors_available, collar_options, min_quantity, delivery_time
+                        <h4 style="margin-bottom: 20px;">🎨 Options de design</h4>
+                        <div style="display: flex; gap: 30px; flex-wrap: wrap; margin-bottom: 25px; padding: 20px; background: #fafbfc; border-radius: 8px;">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                <input type="checkbox" id="cfg_design_flare" <?= ($config['design_options']['flare'] ?? true) ? 'checked' : '' ?>>
+                                <span><strong>Design FLARE</strong><br><small style="color: var(--text-muted);">FLARE crée le design</small></span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                <input type="checkbox" id="cfg_design_client" <?= ($config['design_options']['client'] ?? true) ? 'checked' : '' ?>>
+                                <span><strong>Design Client</strong><br><small style="color: var(--text-muted);">Le client fournit son design</small></span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                <input type="checkbox" id="cfg_design_template" <?= ($config['design_options']['template'] ?? true) ? 'checked' : '' ?>>
+                                <span><strong>Template Catalogue</strong><br><small style="color: var(--text-muted);">Choisir un template</small></span>
+                            </label>
+                        </div>
+
+                        <h4 style="margin-bottom: 20px;">✏️ Options de personnalisation</h4>
+                        <div style="display: flex; gap: 30px; flex-wrap: wrap; margin-bottom: 25px; padding: 20px; background: #fafbfc; border-radius: 8px;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" id="cfg_perso_nom" <?= ($config['personalization']['nom'] ?? true) ? 'checked' : '' ?>>
+                                Nom / Flocage
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" id="cfg_perso_numero" <?= ($config['personalization']['numero'] ?? true) ? 'checked' : '' ?>>
+                                Numéro
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" id="cfg_perso_logo" <?= ($config['personalization']['logo'] ?? true) ? 'checked' : '' ?>>
+                                Logo club
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" id="cfg_perso_sponsor" <?= ($config['personalization']['sponsor'] ?? true) ? 'checked' : '' ?>>
+                                Sponsors
+                            </label>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">📐 Tailles adultes disponibles</label>
+                                <input type="text" id="cfg_sizes" class="form-control" value="<?= htmlspecialchars(implode(', ', $config['sizes'] ?? ['XS','S','M','L','XL','XXL','3XL'])) ?>">
+                                <div class="form-hint">Séparées par des virgules</div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">👶 Tailles enfants disponibles</label>
+                                <input type="text" id="cfg_sizes_kids" class="form-control" value="<?= htmlspecialchars(implode(', ', $config['sizes_kids'] ?? ['6ans','8ans','10ans','12ans','14ans'])) ?>">
+                                <div class="form-hint">Séparées par des virgules</div>
                             </div>
                         </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">👔 Options de col</label>
+                                <input type="text" id="cfg_collars" class="form-control" value="<?= htmlspecialchars(implode(', ', $config['collar_options'] ?? ['col_v','col_rond','col_polo'])) ?>">
+                                <div class="form-hint">Ex: col_v, col_rond, col_polo</div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">🎨 Couleurs personnalisables</label>
+                                <select id="cfg_colors" class="form-control">
+                                    <option value="true" <?= ($config['colors_available'] ?? true) ? 'selected' : '' ?>>Oui</option>
+                                    <option value="false" <?= !($config['colors_available'] ?? true) ? 'selected' : '' ?>>Non</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">📦 Quantité minimum</label>
+                                <input type="number" id="cfg_min_qty" class="form-control" value="<?= intval($config['min_quantity'] ?? 1) ?>" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">🚚 Délai de livraison</label>
+                                <input type="text" id="cfg_delivery" class="form-control" value="<?= htmlspecialchars($config['delivery_time'] ?? '3-4 semaines') ?>">
+                            </div>
+                        </div>
+
+                        <hr style="margin: 25px 0; border: none; border-top: 1px solid var(--border);">
+
+                        <!-- Hidden field pour stocker le JSON -->
+                        <textarea name="configurator_config" id="configurator_config_json" class="form-control" style="min-height: 150px; font-family: monospace; font-size: 11px; display: none;"><?= htmlspecialchars(json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) ?></textarea>
+
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" id="show_json_config" onchange="document.getElementById('configurator_config_json').style.display = this.checked ? 'block' : 'none'">
+                                Afficher/modifier le JSON brut (avancé)
+                            </label>
+                        </div>
+
+                        <script>
+                        function updateConfigJSON() {
+                            var config = {
+                                design_options: {
+                                    flare: document.getElementById('cfg_design_flare').checked,
+                                    client: document.getElementById('cfg_design_client').checked,
+                                    template: document.getElementById('cfg_design_template').checked
+                                },
+                                personalization: {
+                                    nom: document.getElementById('cfg_perso_nom').checked,
+                                    numero: document.getElementById('cfg_perso_numero').checked,
+                                    logo: document.getElementById('cfg_perso_logo').checked,
+                                    sponsor: document.getElementById('cfg_perso_sponsor').checked
+                                },
+                                sizes: document.getElementById('cfg_sizes').value.split(',').map(s => s.trim()).filter(s => s),
+                                sizes_kids: document.getElementById('cfg_sizes_kids').value.split(',').map(s => s.trim()).filter(s => s),
+                                colors_available: document.getElementById('cfg_colors').value === 'true',
+                                collar_options: document.getElementById('cfg_collars').value.split(',').map(s => s.trim()).filter(s => s),
+                                min_quantity: parseInt(document.getElementById('cfg_min_qty').value) || 1,
+                                delivery_time: document.getElementById('cfg_delivery').value
+                            };
+                            document.getElementById('configurator_config_json').value = JSON.stringify(config, null, 2);
+                        }
+                        // Attach to all config inputs
+                        document.querySelectorAll('[id^="cfg_"]').forEach(function(el) {
+                            el.addEventListener('change', updateConfigJSON);
+                            el.addEventListener('input', updateConfigJSON);
+                        });
+                        </script>
                     </div>
                 </div>
 

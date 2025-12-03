@@ -128,6 +128,8 @@ function initTables($pdo) {
         tab_faq LONGTEXT,
         tabs_config JSON,
         configurator_config JSON,
+        size_chart_id INT NULL,
+        has_custom_sizes BOOLEAN DEFAULT FALSE,
         active BOOLEAN DEFAULT TRUE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -229,6 +231,118 @@ function initTables($pdo) {
         description TEXT
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
     $created[] = 'settings';
+
+    // Table size_charts - Guides de tailles prédéfinis
+    $pdo->exec("CREATE TABLE IF NOT EXISTS size_charts (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nom VARCHAR(100) NOT NULL,
+        slug VARCHAR(100) UNIQUE NOT NULL,
+        sport VARCHAR(100),
+        type ENUM('adulte', 'enfant', 'unisex') DEFAULT 'unisex',
+        html_content LONGTEXT NOT NULL,
+        description TEXT,
+        active BOOLEAN DEFAULT TRUE,
+        ordre INT DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $created[] = 'size_charts';
+
+    // Table product_photos - Galerie photos illimitée
+    $pdo->exec("CREATE TABLE IF NOT EXISTS product_photos (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        product_id INT NOT NULL,
+        url VARCHAR(500) NOT NULL,
+        alt_text VARCHAR(255),
+        is_main BOOLEAN DEFAULT FALSE,
+        ordre INT DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_product (product_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $created[] = 'product_photos';
+
+    // Table tab_templates - Templates de contenu pour les onglets
+    $pdo->exec("CREATE TABLE IF NOT EXISTS tab_templates (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nom VARCHAR(100) NOT NULL,
+        slug VARCHAR(100) UNIQUE NOT NULL,
+        tab_type ENUM('description', 'specifications', 'sizes', 'templates', 'faq') NOT NULL,
+        sport VARCHAR(100),
+        famille VARCHAR(100),
+        html_content LONGTEXT NOT NULL,
+        description TEXT,
+        active BOOLEAN DEFAULT TRUE,
+        ordre INT DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $created[] = 'tab_templates';
+
+    // Importer les guides de tailles depuis le fichier JSON existant
+    $jsonPath = __DIR__ . '/../assets/data/tableaux-tailles-complet.json';
+    $sizeChartsImported = 0;
+
+    if (file_exists($jsonPath)) {
+        $sizeData = json_decode(file_get_contents($jsonPath), true);
+
+        if ($sizeData) {
+            $stmtSize = $pdo->prepare("INSERT INTO size_charts (nom, slug, sport, type, html_content, description, ordre) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $ordre = 1;
+
+            foreach ($sizeData as $sport => $produits) {
+                foreach ($produits as $nomProduit => $data) {
+                    if (!isset($data['tailles']) || !isset($data['mesures'])) continue;
+
+                    // Générer le HTML du tableau
+                    $html = '<table class="size-chart"><thead><tr><th>Taille</th>';
+                    foreach ($data['tailles'] as $taille) {
+                        $html .= '<th>' . htmlspecialchars($taille) . '</th>';
+                    }
+                    $html .= '</tr></thead><tbody>';
+
+                    foreach ($data['mesures'] as $mesure) {
+                        $html .= '<tr><td>' . htmlspecialchars($mesure['label']) . '</td>';
+                        foreach ($mesure['values'] as $val) {
+                            $html .= '<td>' . htmlspecialchars($val) . '</td>';
+                        }
+                        $html .= '</tr>';
+                    }
+                    $html .= '</tbody></table>';
+
+                    // Créer le slug
+                    $slug = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '-', $nomProduit . '-' . $sport));
+                    $slug = trim($slug, '-');
+
+                    // Déterminer le type (adulte/enfant/unisex)
+                    $type = 'unisex';
+                    if (stripos($nomProduit, 'enfant') !== false || stripos($nomProduit, 'junior') !== false) {
+                        $type = 'enfant';
+                    } elseif (stripos($nomProduit, 'femme') !== false) {
+                        $type = 'adulte';
+                    } elseif (stripos($nomProduit, 'homme') !== false) {
+                        $type = 'adulte';
+                    }
+
+                    // Formater le nom du sport
+                    $sportFormatted = ucfirst(strtolower($sport));
+
+                    try {
+                        $stmtSize->execute([
+                            $nomProduit,
+                            $slug,
+                            $sportFormatted,
+                            $type,
+                            $html,
+                            "Guide des tailles pour " . $nomProduit . " - " . $sportFormatted,
+                            $ordre++
+                        ]);
+                        $sizeChartsImported++;
+                    } catch (Exception $e) {
+                        // Ignorer les doublons (clé unique sur slug)
+                    }
+                }
+            }
+        }
+    }
+    $created[] = 'size_charts_data (' . $sizeChartsImported . ' guides)';
 
     // Créer admin par défaut avec prepared statement
     $adminPass = password_hash('admin123', PASSWORD_DEFAULT);
