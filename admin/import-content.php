@@ -28,6 +28,9 @@ if ($action) {
             case 'import_products':
                 $results = importProducts($pdo);
                 break;
+            case 'import_products_html':
+                $results = importProductsFromHTML($pdo);
+                break;
             case 'import_categories':
                 $results = importCategories($pdo);
                 break;
@@ -41,6 +44,7 @@ if ($action) {
                 $results['tables'] = initTables($pdo);
                 $results['categories'] = importCategories($pdo);
                 $results['products'] = importProducts($pdo);
+                $results['products_html'] = importProductsFromHTML($pdo);
                 $results['pages'] = importPages($pdo);
                 $results['blog'] = importBlog($pdo);
                 break;
@@ -393,6 +397,123 @@ function importProducts($pdo) {
 }
 
 /**
+ * Import des produits depuis les fiches HTML (JSON-LD)
+ */
+function importProductsFromHTML($pdo) {
+    $produitsDir = __DIR__ . '/../pages/produits';
+    if (!is_dir($produitsDir)) {
+        return ['error' => 'Dossier /pages/produits/ non trouvé', 'imported' => 0];
+    }
+
+    $files = glob($produitsDir . '/*.html');
+    if (empty($files)) {
+        return ['error' => 'Aucun fichier HTML trouvé', 'imported' => 0];
+    }
+
+    $sql = "INSERT INTO products (reference, nom, sport, famille, description, description_seo, tissu, grammage,
+            prix_1, prix_500, photo_1, genre, finition, meta_title, meta_description, slug, url, active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+            ON DUPLICATE KEY UPDATE
+            nom=VALUES(nom), description=VALUES(description), description_seo=VALUES(description_seo),
+            tissu=VALUES(tissu), grammage=VALUES(grammage),
+            prix_1=VALUES(prix_1), prix_500=VALUES(prix_500),
+            photo_1=VALUES(photo_1), genre=VALUES(genre), finition=VALUES(finition),
+            meta_title=VALUES(meta_title), meta_description=VALUES(meta_description),
+            slug=VALUES(slug), url=VALUES(url)";
+    $stmt = $pdo->prepare($sql);
+
+    $count = 0;
+    $errors = [];
+
+    foreach ($files as $file) {
+        $html = file_get_contents($file);
+        $ref = basename($file, '.html');
+
+        // Extraire JSON-LD
+        if (!preg_match('/<script type="application\/ld\+json">\s*(\{.+?\})\s*<\/script>/s', $html, $jsonMatch)) {
+            continue;
+        }
+
+        $jsonData = json_decode($jsonMatch[1], true);
+        if (!$jsonData || !isset($jsonData['name'])) {
+            continue;
+        }
+
+        // Extraire les propriétés additionnelles
+        $props = [];
+        if (isset($jsonData['additionalProperty'])) {
+            foreach ($jsonData['additionalProperty'] as $prop) {
+                $props[strtolower($prop['name'])] = $prop['value'];
+            }
+        }
+
+        // Extraire meta description
+        preg_match('/<meta\s+name=["\']description["\']\s+content=["\']([^"\']+)/i', $html, $metaMatch);
+        $metaDesc = $metaMatch[1] ?? $jsonData['description'] ?? '';
+
+        // Extraire la catégorie (sport + type)
+        $category = $jsonData['category'] ?? '';
+        $sport = $props['sport'] ?? '';
+        if (empty($sport) && strpos($category, ' ') !== false) {
+            $parts = explode(' ', $category);
+            $sport = $parts[1] ?? $parts[0];
+        }
+
+        // Famille depuis la catégorie
+        $famille = '';
+        if (strpos(strtolower($category), 'maillot') !== false) $famille = 'Maillot';
+        elseif (strpos(strtolower($category), 'short') !== false) $famille = 'Short';
+        elseif (strpos(strtolower($category), 'polo') !== false) $famille = 'Polo';
+        elseif (strpos(strtolower($category), 'veste') !== false) $famille = 'Veste';
+        elseif (strpos(strtolower($category), 'pantalon') !== false) $famille = 'Pantalon';
+        elseif (strpos(strtolower($category), 'sweat') !== false) $famille = 'Sweat';
+
+        // Prix
+        $prixHigh = isset($jsonData['offers']['highPrice']) ? floatval($jsonData['offers']['highPrice']) : null;
+        $prixLow = isset($jsonData['offers']['lowPrice']) ? floatval($jsonData['offers']['lowPrice']) : null;
+
+        // Image
+        $image = '';
+        if (isset($jsonData['image'])) {
+            $image = is_array($jsonData['image']) ? $jsonData['image'][0] : $jsonData['image'];
+        }
+        if (empty($image)) {
+            preg_match('/<meta\s+property=["\']og:image["\']\s+content=["\']([^"\']+)/i', $html, $imgMatch);
+            $image = $imgMatch[1] ?? '';
+        }
+
+        try {
+            $stmt->execute([
+                $ref,
+                $jsonData['name'],
+                $sport,
+                $famille,
+                $jsonData['description'] ?? '',
+                $metaDesc,
+                $jsonData['material'] ?? $props['tissu'] ?? '',
+                $props['grammage'] ?? '',
+                $prixHigh,
+                $prixLow,
+                $image,
+                $props['genre'] ?? 'Mixte',
+                $props['finition'] ?? '',
+                $jsonData['name'],
+                $metaDesc,
+                $ref,
+                "pages/produits/$ref.html"
+            ]);
+            $count++;
+        } catch (Exception $e) {
+            if (count($errors) < 5) {
+                $errors[] = "$ref: " . $e->getMessage();
+            }
+        }
+    }
+
+    return ['imported' => $count, 'total_files' => count($files), 'errors' => $errors];
+}
+
+/**
  * Import des pages depuis /pages/info/
  */
 function importPages($pdo) {
@@ -723,6 +844,24 @@ try {
             </div>
             <?php endif; ?>
             <?php endif; ?>
+            <?php if (isset($results['products_html'])): ?>
+            <div class="result-item">
+                <span>🏷️ Fiches Produits HTML</span>
+                <span class="result-value"><?php echo $results['products_html']['imported'] ?? 0; ?> / <?php echo $results['products_html']['total_files'] ?? 0; ?> importées</span>
+            </div>
+            <?php if (!empty($results['products_html']['error'])): ?>
+            <div class="result-item" style="color: var(--danger);">
+                <span>⚠️ Erreur</span>
+                <span><?php echo htmlspecialchars($results['products_html']['error']); ?></span>
+            </div>
+            <?php endif; ?>
+            <?php if (!empty($results['products_html']['errors'])): ?>
+            <div class="result-item" style="color: var(--warning);">
+                <span>⚠️ Erreurs fiches</span>
+                <span style="font-size:11px"><?php echo implode('<br>', array_slice($results['products_html']['errors'], 0, 3)); ?></span>
+            </div>
+            <?php endif; ?>
+            <?php endif; ?>
             <?php if (isset($results['pages'])): ?>
             <div class="result-item">
                 <span>📄 Pages</span>
@@ -812,19 +951,25 @@ try {
 
                     <button type="submit" name="action" value="import_products" class="import-btn">
                         <div class="icon">📦</div>
-                        <div class="title">3. Produits</div>
-                        <div class="desc">~1700 produits depuis CSV</div>
+                        <div class="title">3. Produits CSV</div>
+                        <div class="desc">Prix depuis le fichier CSV</div>
+                    </button>
+
+                    <button type="submit" name="action" value="import_products_html" class="import-btn">
+                        <div class="icon">🏷️</div>
+                        <div class="title">4. Fiches Produits</div>
+                        <div class="desc">395 fiches HTML complètes</div>
                     </button>
 
                     <button type="submit" name="action" value="import_pages" class="import-btn">
                         <div class="icon">📄</div>
-                        <div class="title">4. Pages</div>
+                        <div class="title">5. Pages</div>
                         <div class="desc">Pages info (CGV, FAQ, etc.)</div>
                     </button>
 
                     <button type="submit" name="action" value="import_blog" class="import-btn">
                         <div class="icon">📝</div>
-                        <div class="title">5. Blog</div>
+                        <div class="title">6. Blog</div>
                         <div class="desc">Articles de blog</div>
                     </button>
                 </div>
