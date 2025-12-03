@@ -111,11 +111,18 @@ function initTables($pdo) {
         photo_4 VARCHAR(500),
         photo_5 VARCHAR(500),
         genre ENUM('Homme', 'Femme', 'Mixte', 'Enfant') DEFAULT 'Mixte',
+        meta_title VARCHAR(255),
+        meta_description TEXT,
+        slug VARCHAR(255),
+        url VARCHAR(500),
+        finition VARCHAR(100),
+        etiquettes VARCHAR(255),
         active BOOLEAN DEFAULT TRUE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         INDEX idx_sport (sport),
-        INDEX idx_famille (famille)
+        INDEX idx_famille (famille),
+        INDEX idx_slug (slug)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
     $created[] = 'products';
 

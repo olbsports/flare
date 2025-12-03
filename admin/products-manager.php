@@ -12,20 +12,29 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/Product.php';
 require_once __DIR__ . '/../includes/Category.php';
 
-$productModel = new Product();
-$categoryModel = new Category();
-
-$action = $_GET['action'] ?? 'list';
-$productId = $_GET['id'] ?? null;
+$error = null;
+$sports = [];
+$familles = [];
 $product = null;
 
-if ($productId && in_array($action, ['edit', 'view'])) {
-    $product = $productModel->getById($productId);
-}
+try {
+    $productModel = new Product();
+    $categoryModel = new Category();
 
-// Récupérer les catégories
-$sports = $categoryModel->getByType('sport');
-$familles = $categoryModel->getByType('famille');
+    $action = $_GET['action'] ?? 'list';
+    $productId = $_GET['id'] ?? null;
+
+    if ($productId && in_array($action, ['edit', 'view'])) {
+        $product = $productModel->getById($productId);
+    }
+
+    // Récupérer les catégories
+    $sports = $categoryModel->getByType('sport');
+    $familles = $categoryModel->getByType('famille');
+} catch (Exception $e) {
+    $error = "Erreur BDD: " . $e->getMessage() . " - Avez-vous lancé l'import depuis /admin/import-content.php ?";
+    $action = 'list';
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -161,6 +170,13 @@ $familles = $categoryModel->getByType('famille');
                 <a href="?action=add" class="btn btn-primary">➕ Nouveau produit</a>
             </div>
         </div>
+
+        <?php if ($error): ?>
+        <div style="background:#ff3b30;color:#fff;padding:16px;border-radius:8px;margin-bottom:20px;">
+            ⚠️ <?php echo htmlspecialchars($error); ?>
+            <br><a href="import-content.php" style="color:#fff;text-decoration:underline;">Lancer l'import</a>
+        </div>
+        <?php endif; ?>
 
         <div id="alerts"></div>
 
