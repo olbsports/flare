@@ -19,15 +19,25 @@ require_once __DIR__ . '/../includes/Blog.php';
 require_once __DIR__ . '/../includes/Page.php';
 require_once __DIR__ . '/../includes/Category.php';
 
-// Initialiser les modèles
-$productModel = new Product();
-$quoteModel = new Quote();
-$blogModel = new Blog();
-$pageModel = new Page();
-$categoryModel = new Category();
+$dbError = null;
+$stats = [
+    'products' => 0,
+    'quotes_pending' => 0,
+    'quotes_total' => 0,
+    'blog_posts' => 0,
+    'pages' => 0,
+    'categories' => 0
+];
+$recentQuotes = [];
 
-// Récupérer les statistiques
+// Initialiser les modèles et récupérer les stats
 try {
+    $productModel = new Product();
+    $quoteModel = new Quote();
+    $blogModel = new Blog();
+    $pageModel = new Page();
+    $categoryModel = new Category();
+
     $stats = [
         'products' => $productModel->count(),
         'quotes_pending' => $quoteModel->count('pending'),
@@ -36,22 +46,10 @@ try {
         'pages' => $pageModel->count(),
         'categories' => $categoryModel->count()
     ];
-} catch (Exception $e) {
-    $stats = [
-        'products' => 0,
-        'quotes_pending' => 0,
-        'quotes_total' => 0,
-        'blog_posts' => 0,
-        'pages' => 0,
-        'categories' => 0
-    ];
-}
 
-// Récupérer les derniers devis
-try {
-    $recentQuotes = $quoteModel->getAll([], 1, 5)['data'];
+    $recentQuotes = $quoteModel->getAll([], 1, 5)['data'] ?? [];
 } catch (Exception $e) {
-    $recentQuotes = [];
+    $dbError = $e->getMessage();
 }
 
 $currentUser = $_SESSION['admin_user'];
@@ -614,6 +612,13 @@ $currentUser = $_SESSION['admin_user'];
                 </div>
             </div>
         </header>
+
+        <?php if ($dbError): ?>
+        <div style="background:#ff3b30;color:#fff;padding:16px;border-radius:8px;margin:20px 0;">
+            ⚠️ <strong>Erreur BDD:</strong> <?php echo htmlspecialchars($dbError); ?>
+            <br>👉 <a href="import-content.php" style="color:#fff;text-decoration:underline;">Lancez l'import pour créer les tables</a>
+        </div>
+        <?php endif; ?>
 
         <div class="content">
             <!-- Stats -->
