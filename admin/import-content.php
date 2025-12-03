@@ -2,13 +2,13 @@
 /**
  * FLARE CUSTOM - Import Complet du Contenu HTML
  * Extrait tout le contenu des fichiers HTML vers la BDD
+ *
+ * ⚠️ CE SCRIPT EST ACCESSIBLE SANS LOGIN POUR L'INSTALLATION INITIALE
  */
 
 session_start();
-if (!isset($_SESSION['admin_user'])) {
-    header('Location: login.php');
-    exit;
-}
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 require_once __DIR__ . '/../config/database.php';
 
