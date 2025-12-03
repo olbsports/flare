@@ -299,21 +299,38 @@ function importCategories($pdo) {
 function importProducts($pdo) {
     $csvFile = __DIR__ . '/../assets/data/PRICING-FLARE-2025.csv';
     if (!file_exists($csvFile)) {
-        return ['error' => 'Fichier CSV non trouvé', 'imported' => 0];
+        return ['error' => 'Fichier CSV non trouvé: ' . $csvFile, 'imported' => 0];
     }
 
     $handle = fopen($csvFile, 'r');
-    $headers = fgetcsv($handle, 0, ';');
-    $headers = array_map(function($h) { return strtolower(trim($h)); }, $headers);
+    if (!$handle) {
+        return ['error' => 'Impossible d\'ouvrir le CSV', 'imported' => 0];
+    }
 
-    $sql = "INSERT INTO products (reference, nom, sport, famille, description, tissu, grammage,
-            prix_1, prix_5, prix_10, prix_20, prix_50, prix_100, prix_250, prix_500, photo_1, active)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+    $headers = fgetcsv($handle, 0, ';');
+    if (!$headers) {
+        fclose($handle);
+        return ['error' => 'CSV vide ou mal formaté', 'imported' => 0];
+    }
+
+    // Normaliser les headers (lowercase, trim)
+    $headers = array_map(function($h) {
+        return strtolower(trim(str_replace(['é', 'è', 'ê'], 'e', $h)));
+    }, $headers);
+
+    $sql = "INSERT INTO products (reference, nom, sport, famille, description, description_seo, tissu, grammage,
+            prix_1, prix_5, prix_10, prix_20, prix_50, prix_100, prix_250, prix_500,
+            photo_1, photo_2, photo_3, photo_4, photo_5, genre, finition, etiquettes, url, active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
             ON DUPLICATE KEY UPDATE
             nom=VALUES(nom), sport=VALUES(sport), famille=VALUES(famille),
+            description_seo=VALUES(description_seo),
             prix_1=VALUES(prix_1), prix_5=VALUES(prix_5), prix_10=VALUES(prix_10),
             prix_20=VALUES(prix_20), prix_50=VALUES(prix_50), prix_100=VALUES(prix_100),
-            prix_250=VALUES(prix_250), prix_500=VALUES(prix_500), photo_1=VALUES(photo_1)";
+            prix_250=VALUES(prix_250), prix_500=VALUES(prix_500),
+            photo_1=VALUES(photo_1), photo_2=VALUES(photo_2), photo_3=VALUES(photo_3),
+            photo_4=VALUES(photo_4), photo_5=VALUES(photo_5),
+            genre=VALUES(genre), finition=VALUES(finition), url=VALUES(url)";
     $stmt = $pdo->prepare($sql);
 
     $parsePrice = function($v) {
@@ -322,6 +339,7 @@ function importProducts($pdo) {
     };
 
     $count = 0;
+    $errors = [];
     while (($row = fgetcsv($handle, 0, ';')) !== false) {
         if (count($row) < 5) continue;
 
@@ -330,34 +348,48 @@ function importProducts($pdo) {
             $data[$h] = isset($row[$i]) ? trim($row[$i]) : '';
         }
 
-        $ref = $data['reference'] ?? $data['ref'] ?? '';
+        // Utiliser les vrais noms de colonnes du CSV
+        $ref = $data['reference_flare'] ?? $data['code'] ?? $data['reference'] ?? '';
         if (empty($ref)) continue;
 
         try {
             $stmt->execute([
                 $ref,
-                $data['nom'] ?? $data['name'] ?? $ref,
+                $data['titre_vendeur'] ?? $data['nom'] ?? $ref,
                 $data['sport'] ?? '',
-                $data['famille'] ?? $data['family'] ?? '',
+                $data['famille_produit'] ?? $data['famille'] ?? '',
                 $data['description'] ?? '',
+                $data['description_seo'] ?? '',
                 $data['tissu'] ?? '',
                 $data['grammage'] ?? '',
-                $parsePrice($data['prix_1'] ?? $data['1'] ?? ''),
-                $parsePrice($data['prix_5'] ?? $data['5'] ?? ''),
-                $parsePrice($data['prix_10'] ?? $data['10'] ?? ''),
-                $parsePrice($data['prix_20'] ?? $data['20'] ?? ''),
-                $parsePrice($data['prix_50'] ?? $data['50'] ?? ''),
-                $parsePrice($data['prix_100'] ?? $data['100'] ?? ''),
-                $parsePrice($data['prix_250'] ?? $data['250'] ?? ''),
-                $parsePrice($data['prix_500'] ?? $data['500'] ?? ''),
-                $data['photo_1'] ?? $data['image'] ?? ''
+                $parsePrice($data['qty_1'] ?? $data['prix_1'] ?? ''),
+                $parsePrice($data['qty_5'] ?? $data['prix_5'] ?? ''),
+                $parsePrice($data['qty_10'] ?? $data['prix_10'] ?? ''),
+                $parsePrice($data['qty_20'] ?? $data['prix_20'] ?? ''),
+                $parsePrice($data['qty_50'] ?? $data['prix_50'] ?? ''),
+                $parsePrice($data['qty_100'] ?? $data['prix_100'] ?? ''),
+                $parsePrice($data['qty_250'] ?? $data['prix_250'] ?? ''),
+                $parsePrice($data['qty_500'] ?? $data['prix_500'] ?? ''),
+                $data['photo_1'] ?? '',
+                $data['photo_2'] ?? '',
+                $data['photo_3'] ?? '',
+                $data['photo_4'] ?? '',
+                $data['photo_5'] ?? '',
+                $data['genre'] ?? 'Mixte',
+                $data['finition'] ?? '',
+                $data['etiquettes'] ?? '',
+                $data['url'] ?? ''
             ]);
             $count++;
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+            if (count($errors) < 5) {
+                $errors[] = "$ref: " . $e->getMessage();
+            }
+        }
     }
 
     fclose($handle);
-    return ['imported' => $count];
+    return ['imported' => $count, 'errors' => $errors];
 }
 
 /**
@@ -678,6 +710,18 @@ try {
                 <span>📦 Produits</span>
                 <span class="result-value"><?php echo $results['products']['imported'] ?? 0; ?> importés</span>
             </div>
+            <?php if (!empty($results['products']['error'])): ?>
+            <div class="result-item" style="color: var(--danger);">
+                <span>⚠️ Erreur produits</span>
+                <span><?php echo htmlspecialchars($results['products']['error']); ?></span>
+            </div>
+            <?php endif; ?>
+            <?php if (!empty($results['products']['errors'])): ?>
+            <div class="result-item" style="color: var(--warning);">
+                <span>⚠️ Erreurs produits</span>
+                <span style="font-size:11px"><?php echo implode('<br>', array_slice($results['products']['errors'], 0, 3)); ?></span>
+            </div>
+            <?php endif; ?>
             <?php endif; ?>
             <?php if (isset($results['pages'])): ?>
             <div class="result-item">
