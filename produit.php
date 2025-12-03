@@ -64,7 +64,15 @@ try {
 
 } catch (Exception $e) {
     http_response_code(500);
-    die("Erreur de chargement");
+    // Afficher l'erreur en mode debug, sinon message générique
+    if (isset($_GET['debug'])) {
+        die("Erreur: " . $e->getMessage());
+    }
+    // Vérifier si c'est un problème de table manquante
+    if (strpos($e->getMessage(), "doesn't exist") !== false) {
+        die("<h2>Base de données non initialisée</h2><p>Allez sur <a href='/admin/import-content.php'>/admin/import-content.php</a> et cliquez 'TOUT IMPORTER D'UN COUP'</p>");
+    }
+    die("Erreur de chargement - <a href='?ref=" . htmlspecialchars($reference) . "&debug=1'>Voir détails</a>");
 }
 
 // Calculer les prix min/max
