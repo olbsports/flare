@@ -30,25 +30,39 @@ try {
     $staticDir = $type === 'category' ? 'products' : 'info';
     $staticFile = __DIR__ . '/pages/' . $staticDir . '/' . $slug . '.html';
 
-    // Pour les pages catégories, toujours utiliser le fichier HTML original
-    // et injecter les produits dynamiquement
-    if ($type === 'category' && file_exists($staticFile)) {
-        $content = file_get_contents($staticFile);
+    // Pour les pages catégories, vérifier d'abord la BDD (pages dynamiques)
+    if ($type === 'category') {
+        // Vérifier si une page catégorie dynamique existe en BDD
+        $stmt = $pdo->prepare("SELECT id FROM category_pages WHERE slug = ? AND active = 1");
+        $stmt->execute([$slug]);
+        $dynamicPage = $stmt->fetch();
 
-        // Charger les filtres produits depuis la BDD si disponibles
-        $filters = loadCategoryFilters($pdo, $slug);
+        if ($dynamicPage) {
+            // Utiliser le template dynamique categorie.php
+            $_GET['slug'] = $slug;
+            include __DIR__ . '/categorie.php';
+            exit;
+        }
 
-        // Charger les produits selon les filtres
-        $products = loadCategoryProducts($pdo, $slug, $filters);
+        // Sinon, utiliser le fichier HTML statique si disponible
+        if (file_exists($staticFile)) {
+            $content = file_get_contents($staticFile);
 
-        // Injecter les produits dans le HTML
-        $content = injectProductsIntoHtml($content, $products);
+            // Charger les filtres produits depuis la BDD si disponibles
+            $filters = loadCategoryFilters($pdo, $slug);
 
-        // Corriger les URLs relatives
-        $content = fixUrls($content);
+            // Charger les produits selon les filtres
+            $products = loadCategoryProducts($pdo, $slug, $filters);
 
-        echo $content;
-        exit;
+            // Injecter les produits dans le HTML
+            $content = injectProductsIntoHtml($content, $products);
+
+            // Corriger les URLs relatives
+            $content = fixUrls($content);
+
+            echo $content;
+            exit;
+        }
     }
 
     // Pour les pages info, essayer d'abord le fichier statique
