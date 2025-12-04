@@ -2252,15 +2252,16 @@ $user = $_SESSION['admin_user'] ?? null;
                             <!-- Grille des photos -->
                             <div class="photo-gallery-grid" id="photoGalleryGrid">
                                 <?php foreach ($data['photos'] ?? [] as $photo): ?>
-                                <div class="photo-gallery-item <?= $photo['is_main'] ? 'main-photo' : '' ?>" data-id="<?= $photo['id'] ?>" draggable="true">
+                                <?php $isMain = ($photo['type'] ?? '') === 'main'; ?>
+                                <div class="photo-gallery-item <?= $isMain ? 'main-photo' : '' ?>" data-id="<?= $photo['id'] ?>" draggable="true">
                                     <img src="<?= htmlspecialchars($photo['url']) ?>" alt="<?= htmlspecialchars($photo['alt_text'] ?? '') ?>">
                                     <div class="photo-gallery-item-overlay">
-                                        <?php if (!$photo['is_main']): ?>
+                                        <?php if (!$isMain): ?>
                                         <button type="button" class="photo-gallery-item-btn star" onclick="setMainPhoto(<?= $photo['id'] ?>)" title="Définir comme principale">⭐</button>
                                         <?php endif; ?>
                                         <button type="button" class="photo-gallery-item-btn delete" onclick="deletePhoto(<?= $photo['id'] ?>)" title="Supprimer">✕</button>
                                     </div>
-                                    <?php if ($photo['is_main']): ?>
+                                    <?php if ($isMain): ?>
                                     <div class="photo-gallery-item-badge">Photo principale</div>
                                     <?php endif; ?>
                                 </div>
