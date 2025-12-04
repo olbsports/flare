@@ -15,7 +15,10 @@ if (empty($slug)) {
 }
 
 try {
-    $pdo = Database::getInstance()->getConnection();
+    // Utiliser la connexion existante si disponible (quand inclus depuis page.php)
+    if (!isset($pdo) || !$pdo) {
+        $pdo = getConnection();
+    }
 
     // Charger la page catégorie
     $stmt = $pdo->prepare("SELECT * FROM category_pages WHERE slug = ? AND active = 1");
