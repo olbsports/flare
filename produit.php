@@ -94,6 +94,30 @@ $descriptionSeo = $product['description_seo'] ?? $description;
 $metaTitle = $product['meta_title'] ?? $nom;
 $metaDescription = $product['meta_description'] ?? $descriptionSeo;
 
+// Nouveaux champs pour affichage frontend
+$stockStatus = $product['stock_status'] ?? 'in_stock';
+$etiquettes = array_filter(array_map('trim', explode(',', $product['etiquettes'] ?? '')));
+$isNew = !empty($product['is_new']);
+$onSale = !empty($product['on_sale']);
+$relatedProductIds = json_decode($product['related_products'] ?? '[]', true) ?: [];
+
+// Charger les produits liés
+$relatedProducts = [];
+if (!empty($relatedProductIds)) {
+    $placeholders = implode(',', array_fill(0, count($relatedProductIds), '?'));
+    $stmt = $pdo->prepare("SELECT id, reference, nom, meta_title, photo_1, prix_500, sport, famille FROM products WHERE id IN ($placeholders) AND active = 1");
+    $stmt->execute($relatedProductIds);
+    $relatedProducts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Mapper stock_status vers schema.org
+$stockSchemaMap = [
+    'in_stock' => 'https://schema.org/InStock',
+    'preorder' => 'https://schema.org/PreOrder',
+    'out_of_stock' => 'https://schema.org/OutOfStock'
+];
+$stockSchemaUrl = $stockSchemaMap[$stockStatus] ?? 'https://schema.org/InStock';
+
 // Contenu des onglets (depuis BDD ou génération par défaut)
 $tabDescription = $product['tab_description'] ?? '';
 $tabSpecifications = $product['tab_specifications'] ?? '';
@@ -148,7 +172,7 @@ $tabFaq = $product['tab_faq'] ?? '';
         "lowPrice": "<?php echo $priceLow; ?>",
         "highPrice": "<?php echo $priceHigh; ?>",
         "offerCount": "<?php echo count($priceData); ?>",
-        "availability": "https://schema.org/InStock",
+        "availability": "<?php echo $stockSchemaUrl; ?>",
         "seller": {
           "@type": "Organization",
           "name": "<?php echo addslashes($siteName); ?>",
@@ -234,8 +258,28 @@ $tabFaq = $product['tab_faq'] ?? '';
     <section class="hero-product">
         <div class="product-grid">
             <!-- GALLERY -->
-            <div class="product-gallery">
-                <div class="main-image" id="mainImage">
+            <div class="product-gallery" style="position: relative;">
+                <!-- BADGES -->
+                <?php if ($isNew || $onSale || !empty($etiquettes) || $stockStatus !== 'in_stock'): ?>
+                <div class="product-badges" style="position: absolute; top: 15px; left: 15px; z-index: 10; display: flex; flex-direction: column; gap: 8px;">
+                    <?php if ($isNew): ?>
+                    <span style="background: #22c55e; color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 700; text-transform: uppercase;">Nouveau</span>
+                    <?php endif; ?>
+                    <?php if ($onSale): ?>
+                    <span style="background: #ef4444; color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 700; text-transform: uppercase;">Promo</span>
+                    <?php endif; ?>
+                    <?php if ($stockStatus === 'preorder'): ?>
+                    <span style="background: #f59e0b; color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 700;">Précommande</span>
+                    <?php elseif ($stockStatus === 'out_of_stock'): ?>
+                    <span style="background: #6b7280; color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 700;">Rupture</span>
+                    <?php endif; ?>
+                    <?php foreach ($etiquettes as $tag): ?>
+                    <span style="background: #FF4B26; color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;"><?php echo htmlspecialchars($tag); ?></span>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
+
+                <div class="main-image" id="mainImage" style="position: relative;">
                     <img src="<?php echo htmlspecialchars($photos[0]); ?>" alt="<?php echo htmlspecialchars($nom); ?>">
                 </div>
                 <div class="thumbnail-grid">
@@ -390,19 +434,34 @@ $tabFaq = $product['tab_faq'] ?? '';
                 </details>
             </div>
 
-            <!-- MAILLAGE INTERNE & VENTE CROISÉE -->
+            <!-- PRODUITS LIÉS / VENTE CROISÉE -->
+            <?php if (!empty($relatedProducts)): ?>
+            <div style="margin: 2rem 0; padding: 2rem; background: linear-gradient(135deg, #f8f8f8 0%, #fff 100%); border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <h3 style="font-size: 1.4rem; margin-bottom: 1.25rem; color: #1a1a1a; font-weight: 700;">Produits associés</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
+                    <?php foreach ($relatedProducts as $related):
+                        $relatedName = !empty($related['meta_title']) ? $related['meta_title'] : $related['nom'];
+                        $relatedPrice = $related['prix_500'] ? number_format($related['prix_500'], 2, ',', ' ') . ' €' : '';
+                    ?>
+                    <a href="/produit/<?php echo htmlspecialchars($related['reference']); ?>" style="display: block; background: #fff; border-radius: 8px; overflow: hidden; text-decoration: none; border: 1px solid #e8e8e8; transition: all 0.3s ease;">
+                        <img src="<?php echo htmlspecialchars($related['photo_1'] ?: '/photos/placeholder.webp'); ?>" alt="<?php echo htmlspecialchars($relatedName); ?>" style="width: 100%; height: 150px; object-fit: cover;">
+                        <div style="padding: 12px;">
+                            <div style="color: #1a1a1a; font-weight: 600; font-size: 14px; margin-bottom: 4px;"><?php echo htmlspecialchars($relatedName); ?></div>
+                            <div style="color: #666; font-size: 12px;"><?php echo htmlspecialchars($related['sport']); ?></div>
+                            <?php if ($relatedPrice): ?>
+                            <div style="color: #FF4B26; font-weight: 700; margin-top: 8px;">Dès <?php echo $relatedPrice; ?></div>
+                            <?php endif; ?>
+                        </div>
+                    </a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php else: ?>
+            <!-- MAILLAGE INTERNE PAR DÉFAUT -->
             <div style="margin: 2rem 0; padding: 2rem; background: linear-gradient(135deg, #f8f8f8 0%, #fff 100%); border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                 <h3 style="font-size: 1.4rem; margin-bottom: 1.25rem; color: #1a1a1a; font-weight: 700;">Complétez votre équipement</h3>
                 <p style="margin-bottom: 1.5rem; color: #666; font-size: 1rem;">Produits complémentaires pour votre <?php echo htmlspecialchars($famille . ' ' . $sport); ?> :</p>
                 <div style="display: grid; gap: 0.75rem;">
-                    <a href="/pages/products/shorts-sport-personnalises.html" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: #fff; border-radius: 6px; text-decoration: none; transition: all 0.3s ease; border: 1px solid #e8e8e8;">
-                        <span style="color: #FF4B26; font-size: 1.25rem;">🎯</span>
-                        <span style="color: #1a1a1a; font-weight: 600;">Shorts <?php echo htmlspecialchars($sport); ?></span>
-                    </a>
-                    <a href="/pages/products/chaussettes-sport-personnalisees.html" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: #fff; border-radius: 6px; text-decoration: none; transition: all 0.3s ease; border: 1px solid #e8e8e8;">
-                        <span style="color: #FF4B26; font-size: 1.25rem;">🎯</span>
-                        <span style="color: #1a1a1a; font-weight: 600;">Chaussettes <?php echo htmlspecialchars($sport); ?></span>
-                    </a>
                     <a href="/pages/products/equipement-<?php echo $sportLower; ?>-personnalise-sublimation.html" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: #fff; border-radius: 6px; text-decoration: none; transition: all 0.3s ease; border: 1px solid #e8e8e8;">
                         <span style="color: #FF4B26; font-size: 1.25rem;">→</span>
                         <span style="color: #1a1a1a; font-weight: 600;">Tout l'équipement <?php echo htmlspecialchars($sport); ?></span>
@@ -413,6 +472,7 @@ $tabFaq = $product['tab_faq'] ?? '';
                     </a>
                 </div>
             </div>
+            <?php endif; ?>
             <?php endif; ?>
         </div>
 
