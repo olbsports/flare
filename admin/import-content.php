@@ -37,6 +37,9 @@ if ($action) {
             case 'import_pages':
                 $results = importPages($pdo);
                 break;
+            case 'import_category_pages':
+                $results = importCategoryPages($pdo);
+                break;
             case 'import_blog':
                 $results = importBlog($pdo);
                 break;
@@ -50,6 +53,7 @@ if ($action) {
                 $results['products_html'] = importProductsFromHTML($pdo);
                 $results['tabs'] = importTabsFromHTML($pdo);
                 $results['pages'] = importPages($pdo);
+                $results['category_pages'] = importCategoryPages($pdo);
                 $results['blog'] = importBlog($pdo);
                 break;
         }
@@ -758,6 +762,69 @@ function importBlog($pdo) {
 }
 
 /**
+ * Import des pages catégories depuis /pages/products/
+ */
+function importCategoryPages($pdo) {
+    $categoryDir = __DIR__ . '/../pages/products';
+    if (!is_dir($categoryDir)) {
+        return ['error' => 'Dossier non trouvé', 'imported' => 0];
+    }
+
+    $files = glob($categoryDir . '/*.html');
+    $stmt = $pdo->prepare("INSERT INTO pages (title, slug, content, excerpt, meta_title, meta_description, type, status, template)
+                           VALUES (?, ?, ?, ?, ?, ?, 'category', 'published', 'category')
+                           ON DUPLICATE KEY UPDATE
+                           title=VALUES(title), content=VALUES(content), excerpt=VALUES(excerpt),
+                           meta_title=VALUES(meta_title), meta_description=VALUES(meta_description), type='category'");
+
+    $count = 0;
+    $errors = [];
+    foreach ($files as $file) {
+        $slug = basename($file, '.html');
+        $html = file_get_contents($file);
+
+        // Extraire le titre
+        preg_match('/<title>([^<|]+)/i', $html, $titleMatch);
+        $title = trim($titleMatch[1] ?? ucwords(str_replace('-', ' ', $slug)));
+
+        // Extraire la meta description
+        preg_match('/<meta\s+name=["\']description["\']\s+content=["\']([^"\']+)/i', $html, $descMatch);
+        $metaDesc = $descMatch[1] ?? '';
+
+        // Extraire le contenu principal (entre <main> ou après le header)
+        $content = $html;
+
+        // Nettoyer - garder seulement le body
+        if (preg_match('/<body[^>]*>(.*?)<\/body>/is', $html, $bodyMatch)) {
+            $content = $bodyMatch[1];
+        }
+
+        // Supprimer header et footer pour garder le contenu principal
+        $content = preg_replace('/<header[^>]*>.*?<\/header>/is', '', $content);
+        $content = preg_replace('/<footer[^>]*>.*?<\/footer>/is', '', $content);
+        $content = preg_replace('/<nav[^>]*>.*?<\/nav>/is', '', $content);
+        $content = preg_replace('/<script[^>]*>.*?<\/script>/is', '', $content);
+        $content = preg_replace('/<div\s+id=["\']dynamic-header["\'][^>]*>.*?<\/div>/is', '', $content);
+        $content = preg_replace('/<div\s+id=["\']dynamic-footer["\'][^>]*>.*?<\/div>/is', '', $content);
+
+        // Créer un extrait
+        $excerpt = substr(strip_tags($content), 0, 300);
+        $excerpt = preg_replace('/\s+/', ' ', $excerpt);
+
+        try {
+            $stmt->execute([$title, $slug, $content, $excerpt, $title, $metaDesc]);
+            $count++;
+        } catch (Exception $e) {
+            if (count($errors) < 5) {
+                $errors[] = "$slug: " . $e->getMessage();
+            }
+        }
+    }
+
+    return ['imported' => $count, 'source' => $categoryDir, 'total_files' => count($files), 'errors' => $errors];
+}
+
+/**
  * Import du contenu des onglets depuis les fichiers HTML produits
  */
 function importTabsFromHTML($pdo) {
@@ -1124,6 +1191,18 @@ try {
                 <span class="result-value"><?php echo $results['blog']['imported'] ?? 0; ?> importés</span>
             </div>
             <?php endif; ?>
+            <?php if (isset($results['category_pages'])): ?>
+            <div class="result-item">
+                <span>🏷️ Pages Catégories</span>
+                <span class="result-value"><?php echo $results['category_pages']['imported'] ?? 0; ?> / <?php echo $results['category_pages']['total_files'] ?? 0; ?> importées</span>
+            </div>
+            <?php if (!empty($results['category_pages']['errors'])): ?>
+            <div class="result-item" style="color: var(--warning);">
+                <span>⚠️ Erreurs catégories</span>
+                <span style="font-size:11px"><?php echo implode('<br>', array_slice($results['category_pages']['errors'], 0, 3)); ?></span>
+            </div>
+            <?php endif; ?>
+            <?php endif; ?>
         </div>
 
         <?php if (isset($results['tables'])): ?>
@@ -1221,6 +1300,12 @@ try {
                         <div class="icon">📝</div>
                         <div class="title">7. Blog</div>
                         <div class="desc">Articles de blog</div>
+                    </button>
+
+                    <button type="submit" name="action" value="import_category_pages" class="import-btn">
+                        <div class="icon">🏷️</div>
+                        <div class="title">8. Pages Catégories</div>
+                        <div class="desc">~50 pages catégories produits</div>
                     </button>
                 </div>
 
