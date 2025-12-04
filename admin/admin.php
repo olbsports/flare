@@ -2540,32 +2540,45 @@ $user = $_SESSION['admin_user'] ?? null;
                         <textarea name="excerpt" class="form-control" rows="3" placeholder="Résumé court de l'article..."><?= htmlspecialchars($post['excerpt'] ?? '') ?></textarea>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Contenu de l'article</label>
-                        <!-- WYSIWYG Toolbar -->
-                        <div class="wysiwyg-toolbar" style="background: #f8fafc; border: 1px solid #e2e8f0; border-bottom: none; border-radius: 6px 6px 0 0; padding: 8px; display: flex; gap: 5px; flex-wrap: wrap;">
-                            <button type="button" onclick="formatDoc('bold')" title="Gras" style="width: 32px; height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; font-weight: bold;">B</button>
-                            <button type="button" onclick="formatDoc('italic')" title="Italique" style="width: 32px; height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; font-style: italic;">I</button>
-                            <button type="button" onclick="formatDoc('underline')" title="Souligné" style="width: 32px; height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; text-decoration: underline;">U</button>
-                            <span style="width: 1px; background: #e2e8f0; margin: 0 5px;"></span>
-                            <button type="button" onclick="formatDoc('formatBlock', 'h2')" title="Titre H2" style="height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; padding: 0 10px; font-weight: bold;">H2</button>
-                            <button type="button" onclick="formatDoc('formatBlock', 'h3')" title="Titre H3" style="height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; padding: 0 10px; font-weight: bold;">H3</button>
-                            <button type="button" onclick="formatDoc('formatBlock', 'p')" title="Paragraphe" style="height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; padding: 0 10px;">P</button>
-                            <span style="width: 1px; background: #e2e8f0; margin: 0 5px;"></span>
-                            <button type="button" onclick="formatDoc('insertUnorderedList')" title="Liste à puces" style="width: 32px; height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer;">•</button>
-                            <button type="button" onclick="formatDoc('insertOrderedList')" title="Liste numérotée" style="width: 32px; height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer;">1.</button>
-                            <span style="width: 1px; background: #e2e8f0; margin: 0 5px;"></span>
-                            <button type="button" onclick="insertLink()" title="Insérer un lien" style="height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; padding: 0 10px;">🔗 Lien</button>
-                            <button type="button" onclick="insertImage()" title="Insérer une image" style="height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; padding: 0 10px;">🖼️ Image</button>
-                            <span style="flex: 1;"></span>
-                            <button type="button" onclick="toggleHtmlView()" id="htmlViewBtn" title="Voir HTML" style="height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; padding: 0 10px;">{"} HTML</button>
+                        <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+                            Contenu de l'article
+                            <div style="display: flex; gap: 5px;">
+                                <button type="button" class="btn btn-sm" id="modeSimpleBtn" onclick="setEditorMode('simple')" style="background: var(--primary); color: #fff;">Texte Simple</button>
+                                <button type="button" class="btn btn-sm btn-light" id="modeVisuelBtn" onclick="setEditorMode('visuel')">Éditeur Visuel</button>
+                            </div>
+                        </label>
+
+                        <!-- MODE SIMPLE: Textarea -->
+                        <div id="modeSimple">
+                            <textarea name="content" id="contentSimple" class="form-control" rows="20" style="font-size: 14px; line-height: 1.6; font-family: inherit;"><?= htmlspecialchars($post['content'] ?? '') ?></textarea>
+                            <small style="color: var(--text-muted);">Écrivez en HTML simple: &lt;h2&gt;Titre&lt;/h2&gt; &lt;p&gt;Paragraphe&lt;/p&gt; &lt;strong&gt;Gras&lt;/strong&gt;</small>
                         </div>
-                        <!-- WYSIWYG Editor -->
-                        <div id="wysiwygEditor" contenteditable="true" style="border: 1px solid #e2e8f0; border-radius: 0 0 6px 6px; min-height: 400px; padding: 20px; background: #fff; font-size: 15px; line-height: 1.7; outline: none;"><?= $post['content'] ?? '' ?></div>
-                        <!-- Hidden textarea for form submission -->
-                        <textarea name="content" id="blogContentHidden" style="display: none;"><?= htmlspecialchars($post['content'] ?? '') ?></textarea>
-                        <!-- HTML View (hidden by default) -->
-                        <textarea id="htmlViewEditor" style="display: none; width: 100%; min-height: 400px; border: 1px solid #e2e8f0; border-radius: 0 0 6px 6px; padding: 15px; font-family: monospace; font-size: 13px;"><?= htmlspecialchars($post['content'] ?? '') ?></textarea>
+
+                        <!-- MODE VISUEL: Iframe WYSIWYG -->
+                        <div id="modeVisuel" style="display: none;">
+                            <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-bottom: none; border-radius: 6px 6px 0 0; padding: 8px; display: flex; gap: 4px; flex-wrap: wrap;">
+                                <button type="button" class="we-btn" onclick="weCmd('bold')" title="Gras"><b>G</b></button>
+                                <button type="button" class="we-btn" onclick="weCmd('italic')" title="Italique"><i>I</i></button>
+                                <button type="button" class="we-btn" onclick="weCmd('underline')" title="Souligné"><u>S</u></button>
+                                <span class="we-sep"></span>
+                                <button type="button" class="we-btn" onclick="weBlock('h2')">H2</button>
+                                <button type="button" class="we-btn" onclick="weBlock('h3')">H3</button>
+                                <button type="button" class="we-btn" onclick="weBlock('p')">P</button>
+                                <span class="we-sep"></span>
+                                <button type="button" class="we-btn" onclick="weCmd('insertUnorderedList')">• Liste</button>
+                                <button type="button" class="we-btn" onclick="weCmd('insertOrderedList')">1. Liste</button>
+                                <span class="we-sep"></span>
+                                <button type="button" class="we-btn" onclick="weLink()">Lien</button>
+                                <button type="button" class="we-btn" onclick="weImage()">Image</button>
+                            </div>
+                            <iframe id="weFrame" style="width: 100%; height: 400px; border: 1px solid #e2e8f0; border-radius: 0 0 6px 6px; background: #fff;"></iframe>
+                        </div>
                     </div>
+                    <style>
+                    .we-btn { padding: 6px 12px; border: 1px solid #d1d5db; background: #fff; border-radius: 4px; cursor: pointer; font-size: 13px; }
+                    .we-btn:hover { background: #f3f4f6; }
+                    .we-sep { width: 1px; background: #d1d5db; margin: 0 4px; }
+                    </style>
                     <div class="form-row" style="margin-top: 15px;">
                         <div class="form-group">
                             <label class="form-label">Meta Title (SEO)</label>
@@ -2585,55 +2598,72 @@ $user = $_SESSION['admin_user'] ?? null;
         </div>
 
         <script>
-        // WYSIWYG Editor Functions
-        var isHtmlView = false;
-        var editor = document.getElementById('wysiwygEditor');
-        var htmlView = document.getElementById('htmlViewEditor');
-        var hiddenContent = document.getElementById('blogContentHidden');
+        var currentMode = 'simple';
+        var weDoc = null;
+        var initialContent = <?= json_encode($post['content'] ?? '', JSON_UNESCAPED_UNICODE) ?>;
 
-        function formatDoc(command, value) {
-            document.execCommand(command, false, value || null);
-            editor.focus();
+        function setEditorMode(mode) {
+            currentMode = mode;
+            document.getElementById('modeSimple').style.display = mode === 'simple' ? 'block' : 'none';
+            document.getElementById('modeVisuel').style.display = mode === 'visuel' ? 'block' : 'none';
+            document.getElementById('modeSimpleBtn').className = 'btn btn-sm ' + (mode === 'simple' ? '' : 'btn-light');
+            document.getElementById('modeSimpleBtn').style.background = mode === 'simple' ? 'var(--primary)' : '';
+            document.getElementById('modeSimpleBtn').style.color = mode === 'simple' ? '#fff' : '';
+            document.getElementById('modeVisuelBtn').className = 'btn btn-sm ' + (mode === 'visuel' ? '' : 'btn-light');
+            document.getElementById('modeVisuelBtn').style.background = mode === 'visuel' ? 'var(--primary)' : '';
+            document.getElementById('modeVisuelBtn').style.color = mode === 'visuel' ? '#fff' : '';
+
+            if (mode === 'visuel') {
+                initWysiwygEditor();
+            } else {
+                // Sync back to textarea
+                if (weDoc && weDoc.body) {
+                    document.getElementById('contentSimple').value = weDoc.body.innerHTML;
+                }
+            }
         }
 
-        function insertLink() {
+        function initWysiwygEditor() {
+            var iframe = document.getElementById('weFrame');
+            weDoc = iframe.contentDocument || iframe.contentWindow.document;
+            weDoc.open();
+            weDoc.write('<!DOCTYPE html><html><head><style>body{font-family:system-ui,sans-serif;font-size:15px;line-height:1.7;padding:20px;margin:0;} h2{font-size:24px;margin:20px 0 10px;} h3{font-size:20px;margin:18px 0 8px;} p{margin:10px 0;} img{max-width:100%;height:auto;}</style></head><body contenteditable="true">' + document.getElementById('contentSimple').value + '</body></html>');
+            weDoc.close();
+            weDoc.body.focus();
+        }
+
+        function weCmd(cmd) {
+            if (weDoc) {
+                weDoc.execCommand(cmd, false, null);
+                weDoc.body.focus();
+            }
+        }
+
+        function weBlock(tag) {
+            if (weDoc) {
+                weDoc.execCommand('formatBlock', false, '<' + tag + '>');
+                weDoc.body.focus();
+            }
+        }
+
+        function weLink() {
             var url = prompt('URL du lien:', 'https://');
-            if (url) {
-                document.execCommand('createLink', false, url);
+            if (url && weDoc) {
+                weDoc.execCommand('createLink', false, url);
             }
         }
 
-        function insertImage() {
+        function weImage() {
             var url = prompt('URL de l\'image:', '/assets/images/');
-            if (url) {
-                document.execCommand('insertImage', false, url);
+            if (url && weDoc) {
+                weDoc.execCommand('insertImage', false, url);
             }
         }
 
-        function toggleHtmlView() {
-            isHtmlView = !isHtmlView;
-            var btn = document.getElementById('htmlViewBtn');
-            if (isHtmlView) {
-                htmlView.value = editor.innerHTML;
-                editor.style.display = 'none';
-                htmlView.style.display = 'block';
-                btn.style.background = 'var(--primary)';
-                btn.style.color = '#fff';
-            } else {
-                editor.innerHTML = htmlView.value;
-                editor.style.display = 'block';
-                htmlView.style.display = 'none';
-                btn.style.background = '#fff';
-                btn.style.color = 'inherit';
-            }
-        }
-
-        // Sync content to hidden field before submit
-        document.getElementById('blogForm').addEventListener('submit', function() {
-            if (isHtmlView) {
-                hiddenContent.value = htmlView.value;
-            } else {
-                hiddenContent.value = editor.innerHTML;
+        // Sync before submit
+        document.getElementById('blogForm').addEventListener('submit', function(e) {
+            if (currentMode === 'visuel' && weDoc && weDoc.body) {
+                document.getElementById('contentSimple').value = weDoc.body.innerHTML;
             }
         });
 
