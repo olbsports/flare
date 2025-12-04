@@ -15,6 +15,7 @@ class ConfigurateurProduit {
 
     constructor(productData) {
         this.product = productData;
+        this.productConfig = productData.config || {}; // Config depuis admin
         this.currentStep = 1;
         this.totalSteps = 6;
 
@@ -70,7 +71,9 @@ class ConfigurateurProduit {
             }
         };
 
-        this.taillesDisponibles = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL'];
+        // Utiliser les tailles depuis la config admin ou valeurs par défaut
+        this.taillesDisponibles = this.productConfig.sizes || ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL'];
+        this.taillesEnfants = this.productConfig.sizes_kids || ['6ans', '8ans', '10ans', '12ans', '14ans'];
         this.isOpen = false;
 
         // Charger les prix du CSV si pas déjà fait
@@ -423,30 +426,39 @@ class ConfigurateurProduit {
      * ÉTAPE 1 : Choix du type de design
      */
     renderStep1Design() {
+        // Options de design depuis la config admin
+        const designOptions = this.productConfig.design_options || { flare: true, client: true, template: true };
+
         return `
             <div class="config-step-content">
                 <h3 class="config-step-title">Comment souhaitez-vous créer votre design ?</h3>
                 <p class="config-step-description">Choisissez la méthode qui vous convient le mieux pour personnaliser vos équipements</p>
 
                 <div class="config-design-options">
+                    ${designOptions.flare ? `
                     <div class="config-design-card ${this.configuration.design.type === 'flare' ? 'selected' : ''}" onclick="configurateurProduitInstance.selectDesignType('flare')">
                         <div class="config-design-icon">🎨</div>
                         <h4>Design par FLARE</h4>
                         <p>Notre équipe de designers crée votre design sur-mesure selon vos indications</p>
                         <div class="config-design-badge">Recommandé</div>
                     </div>
+                    ` : ''}
 
+                    ${designOptions.client ? `
                     <div class="config-design-card ${this.configuration.design.type === 'client' ? 'selected' : ''}" onclick="configurateurProduitInstance.selectDesignType('client')">
                         <div class="config-design-icon">📁</div>
                         <h4>Mes fichiers</h4>
                         <p>Vous fournissez vos fichiers de design prêts à l'impression (AI, PDF, PNG haute résolution)</p>
                     </div>
+                    ` : ''}
 
+                    ${designOptions.template ? `
                     <div class="config-design-card ${this.configuration.design.type === 'template' ? 'selected' : ''}" onclick="configurateurProduitInstance.selectDesignType('template')">
                         <div class="config-design-icon">📐</div>
                         <h4>Template</h4>
                         <p>Choisissez parmi nos templates prédéfinis et personnalisez les couleurs et logos</p>
                     </div>
+                    ` : ''}
                 </div>
 
                 ${this.configuration.design.type === 'template' ? this.renderTemplateSelector() : ''}
@@ -669,13 +681,16 @@ class ConfigurateurProduit {
      * ÉTAPE 4 : Tailles et quantités
      */
     renderStep4Tailles() {
+        // Utiliser les tailles enfants si genre=enfants
+        const tailles = this.configuration.genre === 'enfants' ? this.taillesEnfants : this.taillesDisponibles;
+
         return `
             <div class="config-step-content">
                 <h3 class="config-step-title">Tailles et quantités</h3>
-                <p class="config-step-description">Indiquez le nombre de pièces par taille</p>
+                <p class="config-step-description">Indiquez le nombre de pièces par taille ${this.configuration.genre === 'enfants' ? '(tailles enfants)' : ''}</p>
 
                 <div class="config-tailles-grid">
-                    ${this.taillesDisponibles.map(taille => `
+                    ${tailles.map(taille => `
                         <div class="config-taille-item">
                             <label class="config-taille-label">${taille}</label>
                             <input
@@ -717,6 +732,10 @@ class ConfigurateurProduit {
      * ÉTAPE 5 : Personnalisation
      */
     renderStep5Personnalisation() {
+        // Options de personnalisation depuis la config admin
+        const persoOptions = this.productConfig.personalization || { nom: true, numero: true, logo: true, sponsor: true };
+        const colorsAvailable = this.productConfig.colors_available !== false; // true par défaut
+
         return `
             <div class="config-step-content">
                 <h3 class="config-step-title">Personnalisation</h3>
@@ -724,6 +743,7 @@ class ConfigurateurProduit {
 
                 <div class="config-perso-sections">
                     <!-- Couleurs -->
+                    ${colorsAvailable ? `
                     <div class="config-perso-section">
                         <h4 class="config-perso-subtitle">🎨 Couleurs</h4>
                         <div class="config-couleurs-grid">
@@ -753,8 +773,10 @@ class ConfigurateurProduit {
                             </div>
                         </div>
                     </div>
+                    ` : ''}
 
                     <!-- Logos -->
+                    ${persoOptions.logo || persoOptions.sponsor ? `
                     <div class="config-perso-section">
                         <h4 class="config-perso-subtitle">📌 Logos et visuels</h4>
                         <div class="config-form-group">
@@ -768,12 +790,15 @@ class ConfigurateurProduit {
                             <p class="config-hint">Vous pourrez nous envoyer vos fichiers logos après validation du devis</p>
                         </div>
                     </div>
+                    ` : ''}
 
                     <!-- Numéros et noms -->
+                    ${(persoOptions.numero || persoOptions.nom) ? `
                     <div class="config-perso-section">
                         <h4 class="config-perso-subtitle">🔢 Numéros et noms</h4>
 
                         <!-- Numéros -->
+                        ${persoOptions.numero ? `
                         <div class="config-checkbox-group">
                             <label class="config-checkbox">
                                 <input type="checkbox" ${this.configuration.personnalisation.numeros ? 'checked' : ''}
@@ -801,8 +826,10 @@ class ConfigurateurProduit {
                                 </div>
                             ` : ''}
                         </div>
+                        ` : ''}
 
                         <!-- Noms -->
+                        ${persoOptions.nom ? `
                         <div class="config-checkbox-group">
                             <label class="config-checkbox">
                                 <input type="checkbox" ${this.configuration.personnalisation.noms ? 'checked' : ''}
@@ -830,7 +857,9 @@ class ConfigurateurProduit {
                                 </div>
                             ` : ''}
                         </div>
+                        ` : ''}
                     </div>
+                    ` : ''}
 
                     <!-- Remarques -->
                     <div class="config-perso-section">

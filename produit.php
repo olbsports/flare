@@ -294,6 +294,9 @@ $tabFaq = $product['tab_faq'] ?? '';
             <!-- PRODUCT INFO -->
             <div class="product-info">
                 <h1><?php echo htmlspecialchars($nomUpper); ?></h1>
+                <div class="product-reference" style="font-size: 13px; color: #666; margin-bottom: 12px; font-family: monospace; letter-spacing: 0.5px;">
+                    Réf: <?php echo htmlspecialchars($reference); ?>
+                </div>
 
                 <?php if (!empty($finition)): ?>
                 <div class="product-finitions" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
@@ -365,6 +368,33 @@ $tabFaq = $product['tab_faq'] ?? '';
                 </div>
 
                 <div class="cta-buttons">
+                    <?php
+                    // Charger la config du configurateur (spécifique produit ou défaut)
+                    $configuratorConfig = json_decode($product['configurator_config'] ?? '', true);
+                    if (empty($configuratorConfig)) {
+                        // Charger la config par défaut depuis settings
+                        $defaultConfig = [
+                            'design_options' => [
+                                'flare' => (getSetting('configurator_design_flare', '1') === '1'),
+                                'client' => (getSetting('configurator_design_client', '1') === '1'),
+                                'template' => (getSetting('configurator_design_template', '1') === '1')
+                            ],
+                            'personalization' => [
+                                'nom' => (getSetting('configurator_perso_nom', '1') === '1'),
+                                'numero' => (getSetting('configurator_perso_numero', '1') === '1'),
+                                'logo' => (getSetting('configurator_perso_logo', '1') === '1'),
+                                'sponsor' => (getSetting('configurator_perso_sponsor', '1') === '1')
+                            ],
+                            'sizes' => array_map('trim', explode(',', getSetting('configurator_sizes', 'XS,S,M,L,XL,XXL,3XL'))),
+                            'sizes_kids' => array_map('trim', explode(',', getSetting('configurator_sizes_kids', '6ans,8ans,10ans,12ans,14ans'))),
+                            'collar_options' => array_map('trim', explode(',', getSetting('configurator_collars', 'col_v,col_rond,col_polo'))),
+                            'colors_available' => true,
+                            'min_quantity' => 1,
+                            'delivery_time' => '3-4 semaines'
+                        ];
+                        $configuratorConfig = $defaultConfig;
+                    }
+                    ?>
                     <button class="btn-primary" onclick='initConfigurateurProduit(<?php echo json_encode([
                         "reference" => $reference,
                         "nom" => $nom,
@@ -373,7 +403,8 @@ $tabFaq = $product['tab_faq'] ?? '';
                         "photo" => $photos[0],
                         "tissu" => $tissu,
                         "grammage" => $grammage,
-                        "prixBase" => $priceLow
+                        "prixBase" => $priceLow,
+                        "config" => $configuratorConfig
                     ]); ?>)'>CONFIGURER MON DEVIS</button>
                     <a href="#description" class="btn-secondary">EN SAVOIR PLUS</a>
                 </div>

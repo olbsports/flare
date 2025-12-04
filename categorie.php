@@ -138,6 +138,30 @@ $productCount = count($products);
         background: #FF4B26;
         color: #fff;
     }
+
+    /* Card clickable - stretched link */
+    .product-card {
+        position: relative;
+    }
+
+    .product-card-link {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1;
+    }
+
+    .product-card .slider-controls {
+        position: relative;
+        z-index: 2;
+    }
+
+    .product-card .slider-dot {
+        position: relative;
+        z-index: 2;
+    }
     </style>
 </head>
 <body>
@@ -241,6 +265,7 @@ $productCount = count($products);
                     }
                 ?>
                 <div class="product-card" data-sport="<?= htmlspecialchars($prod['sport'] ?? '') ?>" data-genre="<?= htmlspecialchars($prod['genre'] ?? '') ?>" data-famille="<?= htmlspecialchars($prod['famille'] ?? '') ?>" data-price="<?= floatval($prod['prix_500'] ?? 0) ?>" data-name="<?= htmlspecialchars($prodName) ?>">
+                    <a href="/produit/<?= htmlspecialchars($prod['reference']) ?>" class="product-card-link"></a>
                     <div class="product-image-wrapper">
                         <div class="product-slider">
                             <?php foreach ($photos as $idx => $photo): ?>
@@ -262,8 +287,12 @@ $productCount = count($products);
                     <div class="product-info">
                         <h3 class="product-title"><?= htmlspecialchars($prodName) ?></h3>
                         <div class="product-specs">
-                            <?php if (!empty($prod['grammage'])): ?>
-                            <span class="product-spec"><?= htmlspecialchars($prod['grammage']) ?> gr/m²</span>
+                            <?php if (!empty($prod['grammage'])):
+                                $grammageVal = $prod['grammage'];
+                                // N'ajouter gr/m² que si pas déjà présent
+                                $grammageDisplay = (stripos($grammageVal, 'gr') === false) ? $grammageVal . ' gr/m²' : $grammageVal;
+                            ?>
+                            <span class="product-spec"><?= htmlspecialchars($grammageDisplay) ?></span>
                             <?php endif; ?>
                             <?php if (!empty($prod['tissu'])): ?>
                             <span class="product-spec"><?= htmlspecialchars($prod['tissu']) ?></span>
@@ -292,7 +321,7 @@ $productCount = count($products);
                             </div>
                         </div>
                         <?php endif; ?>
-                        <a href="/produit/<?= htmlspecialchars($prod['reference']) ?>" class="product-link">Voir le produit →</a>
+                        <span class="product-link">Voir le produit →</span>
                     </div>
                 </div>
                 <?php endforeach; ?>
