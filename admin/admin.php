@@ -371,6 +371,12 @@ if ($action && $pdo) {
 
                 if ($id) {
                     // Mise à jour d'un produit existant
+                    // Debug: log les valeurs reçues pour les onglets
+                    error_log("SAVE_PRODUCT ID=$id");
+                    error_log("tab_description: " . substr($_POST['tab_description'] ?? 'NULL', 0, 100));
+                    error_log("configurator_config: " . substr($_POST['configurator_config'] ?? 'NULL', 0, 100));
+                    error_log("meta_title: " . ($_POST['meta_title'] ?? 'NULL'));
+
                     $values[] = $id;
                     $stmt = $pdo->prepare("UPDATE products SET $set, etiquettes=?, related_products=?, updated_at=NOW() WHERE id=?");
                     $result = $stmt->execute(array_merge($values, [$etiquettesStr, $relatedProductsJson]));
@@ -733,6 +739,20 @@ if ($action && $pdo) {
                 if (in_array($table, ['products', 'categories', 'pages', 'blog_posts'])) {
                     $pdo->prepare("UPDATE $table SET active=0 WHERE id=?")->execute([$id]);
                     $toast = 'Élément supprimé';
+                }
+                break;
+
+            case 'delete_product':
+                if ($id) {
+                    // Supprimer les photos associées
+                    $pdo->prepare("DELETE FROM product_photos WHERE product_id = ?")->execute([$id]);
+                    // Supprimer les associations templates
+                    try {
+                        $pdo->prepare("DELETE FROM template_products WHERE product_id = ?")->execute([$id]);
+                    } catch (Exception $e) {}
+                    // Supprimer le produit
+                    $pdo->prepare("DELETE FROM products WHERE id = ?")->execute([$id]);
+                    $toast = 'Produit supprimé définitivement';
                 }
                 break;
 
@@ -2759,12 +2779,20 @@ $user = $_SESSION['admin_user'] ?? null;
                                 updateConfigJSON();
                             }
                             // Synchroniser tous les éditeurs Quill vers leurs textareas
-                            document.querySelectorAll('.ql-editor').forEach(function(editor) {
-                                var container = editor.closest('.quill-editor-container');
-                                if (container && container.nextElementSibling && container.nextElementSibling.tagName === 'TEXTAREA') {
-                                    container.nextElementSibling.value = editor.innerHTML;
+                            document.querySelectorAll('textarea.wysiwyg').forEach(function(textarea) {
+                                var container = textarea.previousElementSibling;
+                                if (container && container.classList.contains('quill-editor-container')) {
+                                    var editor = container.querySelector('.ql-editor');
+                                    if (editor) {
+                                        textarea.value = editor.innerHTML;
+                                        console.log('Synced ' + textarea.name + ':', textarea.value.substring(0, 100));
+                                    }
                                 }
                             });
+                            // Debug: afficher les valeurs importantes
+                            console.log('tab_description:', document.querySelector('[name="tab_description"]')?.value?.substring(0, 100));
+                            console.log('configurator_config:', document.querySelector('[name="configurator_config"]')?.value?.substring(0, 100));
+                            console.log('meta_title:', document.querySelector('[name="meta_title"]')?.value);
                             return true; // Permettre la soumission
                         }
                         </script>
@@ -3029,6 +3057,9 @@ $user = $_SESSION['admin_user'] ?? null;
                         <a href="/produit/<?= htmlspecialchars($p['reference']) ?>" target="_blank" class="btn btn-light" style="display: inline-flex; align-items: center; gap: 6px;">
                             👁️ Voir le produit
                         </a>
+                        <button type="button" class="btn btn-danger" onclick="deleteProduct(<?= $id ?>, '<?= htmlspecialchars($p['nom'] ?? $p['reference']) ?>')">
+                            🗑️ Supprimer
+                        </button>
                         <?php endif; ?>
                         <button type="submit" class="btn btn-primary">
                             <?= $productIsNew ? '✅ Créer le produit' : '💾 Enregistrer les modifications' ?>
@@ -3044,6 +3075,25 @@ $user = $_SESSION['admin_user'] ?? null;
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             document.querySelector(`[onclick="switchTab('${tabId}')"]`).classList.add('active');
             document.getElementById('tab-' + tabId).classList.add('active');
+        }
+
+        function deleteProduct(id, name) {
+            if (!confirm('⚠️ ATTENTION!\n\nVoulez-vous vraiment supprimer définitivement le produit:\n"' + name + '" ?\n\nCette action est IRRÉVERSIBLE!')) {
+                return;
+            }
+            // Double confirmation
+            if (!confirm('Dernière confirmation: Supprimer définitivement ce produit?')) {
+                return;
+            }
+            // Créer un formulaire caché et soumettre
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '?page=products';
+            form.innerHTML = '<input type="hidden" name="action" value="delete_product">' +
+                           '<input type="hidden" name="id" value="' + id + '">' +
+                           '<input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">';
+            document.body.appendChild(form);
+            form.submit();
         }
         </script>
 
