@@ -561,6 +561,8 @@ $user = $_SESSION['admin_user'] ?? null;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - FLARE CUSTOM</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- TinyMCE Editor -->
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     <style>
         :root {
             --primary: #FF4B26;
@@ -1205,14 +1207,14 @@ $user = $_SESSION['admin_user'] ?? null;
 
                         <div class="form-group">
                             <label class="form-label">📝 Onglet Description</label>
-                            <textarea name="tab_description" class="form-control" style="min-height: 150px; font-family: monospace;"><?= htmlspecialchars($p['tab_description'] ?? '') ?></textarea>
-                            <div class="form-hint">HTML autorisé. Laissez vide pour utiliser la description SEO.</div>
+                            <textarea name="tab_description" class="form-control wysiwyg"><?= htmlspecialchars($p['tab_description'] ?? '') ?></textarea>
+                            <div class="form-hint">Éditeur visuel. Laissez vide pour utiliser la description SEO.</div>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">📋 Onglet Caractéristiques</label>
-                            <textarea name="tab_specifications" class="form-control" style="min-height: 150px; font-family: monospace;"><?= htmlspecialchars($p['tab_specifications'] ?? '') ?></textarea>
-                            <div class="form-hint">HTML autorisé. Tableau des spécifications techniques.</div>
+                            <textarea name="tab_specifications" class="form-control wysiwyg"><?= htmlspecialchars($p['tab_specifications'] ?? '') ?></textarea>
+                            <div class="form-hint">Éditeur visuel. Tableau des spécifications techniques.</div>
                         </div>
 
                         <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
@@ -1252,22 +1254,22 @@ $user = $_SESSION['admin_user'] ?? null;
 
                         <div class="form-group" id="custom-sizes-area">
                             <label class="form-label">Contenu personnalisé (si pas de guide sélectionné)</label>
-                            <textarea name="tab_sizes" class="form-control" style="min-height: 150px; font-family: monospace;"><?= htmlspecialchars($p['tab_sizes'] ?? '') ?></textarea>
-                            <div class="form-hint">HTML autorisé. Utilisé uniquement si aucun guide n'est sélectionné.</div>
+                            <textarea name="tab_sizes" class="form-control wysiwyg"><?= htmlspecialchars($p['tab_sizes'] ?? '') ?></textarea>
+                            <div class="form-hint">Éditeur visuel. Utilisé uniquement si aucun guide n'est sélectionné.</div>
                         </div>
 
                         <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
 
                         <div class="form-group">
                             <label class="form-label">🎨 Onglet Templates</label>
-                            <textarea name="tab_templates" class="form-control" style="min-height: 150px; font-family: monospace;"><?= htmlspecialchars($p['tab_templates'] ?? '') ?></textarea>
-                            <div class="form-hint">HTML autorisé. Galerie de templates disponibles.</div>
+                            <textarea name="tab_templates" class="form-control wysiwyg"><?= htmlspecialchars($p['tab_templates'] ?? '') ?></textarea>
+                            <div class="form-hint">Éditeur visuel. Galerie de templates disponibles.</div>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">❓ Onglet FAQ</label>
-                            <textarea name="tab_faq" class="form-control" style="min-height: 150px; font-family: monospace;"><?= htmlspecialchars($p['tab_faq'] ?? '') ?></textarea>
-                            <div class="form-hint">HTML autorisé. Questions fréquentes sur ce produit.</div>
+                            <textarea name="tab_faq" class="form-control wysiwyg"><?= htmlspecialchars($p['tab_faq'] ?? '') ?></textarea>
+                            <div class="form-hint">Éditeur visuel. Questions fréquentes sur ce produit.</div>
                         </div>
                     </div>
                 </div>
@@ -2260,6 +2262,67 @@ $user = $_SESSION['admin_user'] ?? null;
     </div>
 </main>
 <?php endif; ?>
+
+<script>
+// Initialisation TinyMCE pour les éditeurs WYSIWYG
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof tinymce !== 'undefined') {
+        tinymce.init({
+            selector: 'textarea.wysiwyg',
+            height: 350,
+            menubar: false,
+            language: 'fr_FR',
+            plugins: [
+                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
+                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                'insertdatetime', 'media', 'table', 'help', 'wordcount'
+            ],
+            toolbar: 'undo redo | blocks | bold italic forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | table link image | code fullscreen',
+            content_style: 'body { font-family: Inter, sans-serif; font-size: 14px; line-height: 1.6; } table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #ddd; padding: 8px; text-align: left; } th { background: #f5f5f5; }',
+            setup: function(editor) {
+                editor.on('change', function() {
+                    tinymce.triggerSave();
+                });
+            }
+        });
+    }
+
+    // Sync TinyMCE content avant soumission du formulaire
+    document.querySelectorAll('form').forEach(function(form) {
+        form.addEventListener('submit', function() {
+            if (typeof tinymce !== 'undefined') {
+                tinymce.triggerSave();
+            }
+        });
+    });
+});
+
+// Preview du guide des tailles
+function toggleCustomSizes(select) {
+    var preview = document.getElementById('size-chart-preview');
+    var previewContent = document.getElementById('size-chart-preview-content');
+    var customArea = document.getElementById('custom-sizes-area');
+    var selected = select.options[select.selectedIndex];
+
+    if (select.value && selected.dataset.content) {
+        preview.style.display = 'block';
+        previewContent.innerHTML = selected.dataset.content;
+        customArea.style.opacity = '0.5';
+    } else {
+        preview.style.display = 'none';
+        previewContent.innerHTML = '';
+        customArea.style.opacity = '1';
+    }
+}
+
+// Initialiser le preview si un guide est déjà sélectionné
+document.addEventListener('DOMContentLoaded', function() {
+    var sizeSelect = document.querySelector('select[name="size_chart_id"]');
+    if (sizeSelect && sizeSelect.value) {
+        toggleCustomSizes(sizeSelect);
+    }
+});
+</script>
 
 </body>
 </html>

@@ -39,18 +39,51 @@
 </IfModule>
 
 # ============================================
-# 5. ROUTING PRODUITS DYNAMIQUES (SEO OPTIMIZED)
+# 5. ROUTING DYNAMIQUE COMPLET (SEO OPTIMIZED)
 # ============================================
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /
 
+    # ==========================================
+    # A. PRODUITS - Fiches produits dynamiques
+    # ==========================================
+
     # URL canonique: /produit/FLARE-XXX → produit.php?ref=FLARE-XXX
     RewriteRule ^produit/([A-Za-z0-9_-]+)/?$ produit.php?ref=$1 [L,QSA]
 
-    # REDIRECTION 301 SEO: anciennes URLs HTML → nouvelles URLs propres
-    # Ceci indique à Google de mettre à jour son index
+    # REDIRECTION 301: anciennes URLs HTML → nouvelles URLs propres
     RewriteRule ^pages/produits/([A-Za-z0-9_-]+)\.html$ /produit/$1 [R=301,L]
+
+    # ==========================================
+    # B. PAGES INFO - Pages statiques dynamiques
+    # ==========================================
+
+    # URL canonique: /info/contact → page.php?slug=contact&type=info
+    RewriteRule ^info/([A-Za-z0-9_-]+)/?$ page.php?slug=$1&type=info [L,QSA]
+
+    # REDIRECTION 301: anciennes URLs HTML → nouvelles URLs propres
+    RewriteRule ^pages/info/([A-Za-z0-9_-]+)\.html$ /info/$1 [R=301,L]
+
+    # ==========================================
+    # C. BLOG - Articles de blog dynamiques
+    # ==========================================
+
+    # URL canonique: /blog/mon-article → blog.php?slug=mon-article
+    RewriteRule ^blog/([A-Za-z0-9_-]+)/?$ blog.php?slug=$1 [L,QSA]
+
+    # REDIRECTION 301: anciennes URLs HTML → nouvelles URLs propres
+    RewriteRule ^pages/blog/([A-Za-z0-9_-]+)\.html$ /blog/$1 [R=301,L]
+
+    # ==========================================
+    # D. CATEGORIES PRODUITS - Pages catégories
+    # ==========================================
+
+    # URL canonique: /categorie/maillots-football → page.php?slug=maillots-football&type=category
+    RewriteRule ^categorie/([A-Za-z0-9_-]+)/?$ page.php?slug=$1&type=category [L,QSA]
+
+    # REDIRECTION 301: anciennes URLs HTML → nouvelles URLs propres
+    RewriteRule ^pages/products/([A-Za-z0-9_-]+)\.html$ /categorie/$1 [R=301,L]
 </IfModule>
 
 # ============================================
