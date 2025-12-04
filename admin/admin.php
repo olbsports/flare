@@ -127,6 +127,39 @@ try {
     } catch (PDOException $e) {
         // Column likely already exists, ignore
     }
+
+    // Create page_products table for managing products on pages
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS page_products (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            page_type VARCHAR(50) NOT NULL,
+            page_slug VARCHAR(255) NOT NULL,
+            product_id INT NOT NULL,
+            position INT DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY unique_page_product (page_type, page_slug, product_id),
+            INDEX idx_page (page_type, page_slug),
+            INDEX idx_product (product_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    } catch (PDOException $e) {
+        // Table likely already exists
+    }
+
+    // Add new product columns for enhanced settings
+    $newColumns = [
+        'featured' => 'BOOLEAN DEFAULT FALSE',
+        'is_new' => 'BOOLEAN DEFAULT FALSE',
+        'on_sale' => 'BOOLEAN DEFAULT FALSE',
+        'sort_order' => 'INT DEFAULT 0',
+        'related_products' => 'JSON'
+    ];
+    foreach ($newColumns as $col => $definition) {
+        try {
+            $pdo->exec("ALTER TABLE products ADD COLUMN $col $definition");
+        } catch (PDOException $e) {
+            // Column likely already exists
+        }
+    }
 } catch (Exception $e) {
     $dbError = $e->getMessage();
 }
@@ -174,16 +207,46 @@ if ($action && $pdo) {
                     'prix_1', 'prix_5', 'prix_10', 'prix_20', 'prix_50', 'prix_100', 'prix_250', 'prix_500',
                     'photo_1', 'photo_2', 'photo_3', 'photo_4', 'photo_5', 'genre', 'finition',
                     'meta_title', 'meta_description', 'tab_description', 'tab_specifications',
-                    'tab_sizes', 'tab_templates', 'tab_faq', 'configurator_config', 'size_chart_id'];
+                    'tab_sizes', 'tab_templates', 'tab_faq', 'configurator_config', 'size_chart_id',
+                    'active', 'stock_status', 'slug', 'url', 'featured', 'is_new', 'on_sale', 'sort_order'];
                 $set = implode('=?, ', $fields) . '=?';
                 $values = array_map(fn($f) => $_POST[$f] ?? null, $fields);
+
                 // Convertir size_chart_id en int ou null
                 $idx = array_search('size_chart_id', $fields);
                 if ($idx !== false && $values[$idx] !== null) {
                     $values[$idx] = $values[$idx] === '' ? null : intval($values[$idx]);
                 }
+
+                // Convertir les booléens
+                foreach (['active', 'featured', 'is_new', 'on_sale'] as $boolField) {
+                    $idx = array_search($boolField, $fields);
+                    if ($idx !== false) {
+                        $values[$idx] = isset($_POST[$boolField]) ? 1 : 0;
+                    }
+                }
+
+                // Convertir sort_order en int
+                $idx = array_search('sort_order', $fields);
+                if ($idx !== false) {
+                    $values[$idx] = intval($values[$idx] ?? 0);
+                }
+
+                // Gérer les étiquettes (combiner checkboxes + custom)
+                $etiquettes = $_POST['etiquettes'] ?? [];
+                $customTags = trim($_POST['etiquettes_custom'] ?? '');
+                if ($customTags) {
+                    $etiquettes = array_merge($etiquettes, array_map('trim', explode(',', $customTags)));
+                }
+                $etiquettesStr = implode(',', array_unique(array_filter($etiquettes)));
+
+                // Gérer les produits liés (JSON)
+                $relatedProducts = $_POST['related_products'] ?? [];
+                $relatedProductsJson = json_encode(array_map('intval', $relatedProducts));
+
                 $values[] = $id;
-                $pdo->prepare("UPDATE products SET $set WHERE id=?")->execute($values);
+                $pdo->prepare("UPDATE products SET $set, etiquettes=?, related_products=? WHERE id=?")
+                    ->execute(array_merge($values, [$etiquettesStr, $relatedProductsJson]));
                 $toast = 'Produit enregistré';
                 break;
 
@@ -268,6 +331,24 @@ if ($action && $pdo) {
                     $toast = 'Page HTML sauvegardée avec succès !';
                 } else {
                     $toast = 'Erreur: Impossible de sauvegarder le fichier';
+                }
+
+                // Sauvegarder les produits associés (pour pages catégories)
+                if ($pageType === 'category' && isset($_POST['page_products'])) {
+                    // Supprimer les anciens
+                    $stmt = $pdo->prepare("DELETE FROM page_products WHERE page_type = ? AND page_slug = ?");
+                    $stmt->execute([$pageType, $pageSlug]);
+
+                    // Ajouter les nouveaux
+                    $productIds = array_filter(array_map('intval', $_POST['page_products']));
+                    if (!empty($productIds)) {
+                        $insertStmt = $pdo->prepare("INSERT INTO page_products (page_type, page_slug, product_id, position) VALUES (?, ?, ?, ?)");
+                        $pos = 0;
+                        foreach ($productIds as $prodId) {
+                            $insertStmt->execute([$pageType, $pageSlug, $prodId, $pos++]);
+                        }
+                        $toast .= ' + ' . count($productIds) . ' produits associés';
+                    }
                 }
                 break;
 
@@ -586,6 +667,12 @@ if ($pdo && $page !== 'login') {
                 } catch (Exception $e) {
                     $data['size_charts'] = [];
                 }
+                // Tous les produits pour le sélecteur de produits liés (avec nom SEO)
+                $data['all_products'] = $pdo->query("
+                    SELECT id, nom, meta_title, sport, famille
+                    FROM products WHERE active=1
+                    ORDER BY sport, famille, nom
+                ")->fetchAll();
                 break;
 
             case 'categories':
@@ -655,6 +742,28 @@ if ($pdo && $page !== 'login') {
                         $data['filename'] = basename($filePath);
                         $data['slug'] = $pageSlug;
                         $data['type'] = $pageType;
+
+                        // Pour les pages catégories, charger les produits
+                        if ($pageType === 'category') {
+                            // Tous les produits disponibles (avec nom SEO)
+                            $data['all_products'] = $pdo->query("
+                                SELECT id, reference, nom,
+                                       COALESCE(NULLIF(meta_title, ''), nom) as nom_seo,
+                                       sport, famille, photo_1, prix_500, active
+                                FROM products
+                                WHERE active = 1
+                                ORDER BY sport, famille, nom
+                            ")->fetchAll();
+
+                            // Produits sélectionnés pour cette page
+                            $stmt = $pdo->prepare("
+                                SELECT product_id FROM page_products
+                                WHERE page_type = ? AND page_slug = ?
+                                ORDER BY position
+                            ");
+                            $stmt->execute([$pageType, $pageSlug]);
+                            $data['selected_products'] = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                        }
                     }
                 }
                 break;
@@ -1340,7 +1449,7 @@ $user = $_SESSION['admin_user'] ?? null;
                                 <td>
                                     <a href="?page=product&id=<?= $p['id'] ?>" style="display: flex; align-items: center; gap: 10px;">
                                         <img src="<?= htmlspecialchars($p['photo_1'] ?: '/photos/placeholder.webp') ?>" class="table-img">
-                                        <?= htmlspecialchars(mb_substr($p['nom'], 0, 40)) ?>
+                                        <?= htmlspecialchars(mb_substr(!empty($p['meta_title']) ? $p['meta_title'] : $p['nom'], 0, 40)) ?>
                                     </a>
                                 </td>
                                 <td><span class="badge badge-primary"><?= htmlspecialchars($p['sport']) ?></span></td>
@@ -1374,13 +1483,18 @@ $user = $_SESSION['admin_user'] ?? null;
 
                 <div class="table-container">
                     <table>
-                        <thead><tr><th style="width:60px"></th><th>Référence</th><th>Nom</th><th>Sport</th><th>Prix</th><th style="width:100px">Actions</th></tr></thead>
+                        <thead><tr><th style="width:60px"></th><th>Référence</th><th>Nom SEO / Nom</th><th>Sport</th><th>Prix 500</th><th style="width:100px">Actions</th></tr></thead>
                         <tbody>
                         <?php foreach ($data['items'] ?? [] as $p): ?>
                             <tr>
                                 <td><img src="<?= htmlspecialchars($p['photo_1'] ?: '/photos/placeholder.webp') ?>" class="table-img"></td>
                                 <td><strong><?= htmlspecialchars($p['reference']) ?></strong></td>
-                                <td><a href="?page=product&id=<?= $p['id'] ?>"><?= htmlspecialchars(mb_substr($p['nom'], 0, 50)) ?></a></td>
+                                <td>
+                                    <a href="?page=product&id=<?= $p['id'] ?>"><?= htmlspecialchars(mb_substr(!empty($p['meta_title']) ? $p['meta_title'] : $p['nom'], 0, 50)) ?></a>
+                                    <?php if (!empty($p['meta_title']) && $p['meta_title'] !== $p['nom']): ?>
+                                    <br><small style="color: var(--text-muted);"><?= htmlspecialchars(mb_substr($p['nom'], 0, 30)) ?></small>
+                                    <?php endif; ?>
+                                </td>
                                 <td><span class="badge badge-primary"><?= htmlspecialchars($p['sport']) ?></span></td>
                                 <td><?= $p['prix_500'] ? number_format($p['prix_500'], 2).'€' : '-' ?></td>
                                 <td>
@@ -1409,6 +1523,7 @@ $user = $_SESSION['admin_user'] ?? null;
                     <button type="button" class="tab-btn <?= $tab === 'tabs' ? 'active' : '' ?>" onclick="switchTab('tabs')">Contenu onglets</button>
                     <button type="button" class="tab-btn <?= $tab === 'configurator' ? 'active' : '' ?>" onclick="switchTab('configurator')">Configurateur</button>
                     <button type="button" class="tab-btn <?= $tab === 'seo' ? 'active' : '' ?>" onclick="switchTab('seo')">SEO</button>
+                    <button type="button" class="tab-btn <?= $tab === 'settings' ? 'active' : '' ?>" onclick="switchTab('settings')">⚙️ Paramètres</button>
                 </div>
 
                 <!-- TAB: GENERAL -->
@@ -1812,14 +1927,140 @@ $user = $_SESSION['admin_user'] ?? null;
                 <div class="tab-content <?= $tab === 'seo' ? 'active' : '' ?>" id="tab-seo">
                     <div class="card-body">
                         <div class="form-group">
-                            <label class="form-label">Meta Title</label>
+                            <label class="form-label">Meta Title (Nom SEO)</label>
                             <input type="text" name="meta_title" class="form-control" value="<?= htmlspecialchars($p['meta_title'] ?? '') ?>">
-                            <div class="form-hint">Recommandé: 50-60 caractères</div>
+                            <div class="form-hint">Ce nom sera utilisé pour l'affichage sur le site. Recommandé: 50-60 caractères</div>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Meta Description</label>
                             <textarea name="meta_description" class="form-control" style="min-height: 100px;"><?= htmlspecialchars($p['meta_description'] ?? '') ?></textarea>
                             <div class="form-hint">Recommandé: 150-160 caractères</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: SETTINGS -->
+                <div class="tab-content <?= $tab === 'settings' ? 'active' : '' ?>" id="tab-settings">
+                    <div class="card-body">
+                        <h4 style="margin-bottom: 20px;">🔧 Statut du produit</h4>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Produit actif</label>
+                                <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="radio" name="active" value="1" <?= ($p['active'] ?? 1) ? 'checked' : '' ?>>
+                                        <span style="color: #22c55e; font-weight: 600;">✓ Actif</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="radio" name="active" value="0" <?= !($p['active'] ?? 1) ? 'checked' : '' ?>>
+                                        <span style="color: #ef4444; font-weight: 600;">✕ Inactif</span>
+                                    </label>
+                                </div>
+                                <div class="form-hint">Un produit inactif n'apparaît pas sur le site</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Statut du stock</label>
+                                <select name="stock_status" class="form-control">
+                                    <option value="in_stock" <?= ($p['stock_status'] ?? 'in_stock') === 'in_stock' ? 'selected' : '' ?>>✅ En stock</option>
+                                    <option value="preorder" <?= ($p['stock_status'] ?? '') === 'preorder' ? 'selected' : '' ?>>⏳ Précommande</option>
+                                    <option value="out_of_stock" <?= ($p['stock_status'] ?? '') === 'out_of_stock' ? 'selected' : '' ?>>❌ Rupture de stock</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
+
+                        <h4 style="margin-bottom: 20px;">🏷️ Étiquettes et badges</h4>
+
+                        <div class="form-group">
+                            <label class="form-label">Étiquettes</label>
+                            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+                                <?php
+                                $currentTags = array_filter(array_map('trim', explode(',', $p['etiquettes'] ?? '')));
+                                $availableTags = ['Nouveau', 'Promo', 'Best-seller', 'Exclusif', 'Limited Edition', 'Éco-responsable'];
+                                foreach ($availableTags as $tag):
+                                    $isChecked = in_array($tag, $currentTags);
+                                ?>
+                                <label style="display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: <?= $isChecked ? '#fff5f3' : '#fafbfc' ?>; border: 1px solid <?= $isChecked ? '#FF4B26' : '#e2e8f0' ?>; border-radius: 20px; cursor: pointer; transition: all 0.2s;">
+                                    <input type="checkbox" name="etiquettes[]" value="<?= $tag ?>" <?= $isChecked ? 'checked' : '' ?> style="display: none;" onchange="this.parentElement.style.background = this.checked ? '#fff5f3' : '#fafbfc'; this.parentElement.style.borderColor = this.checked ? '#FF4B26' : '#e2e8f0';">
+                                    <?= $tag ?>
+                                </label>
+                                <?php endforeach; ?>
+                            </div>
+                            <input type="text" name="etiquettes_custom" class="form-control" placeholder="Autres étiquettes séparées par des virgules" style="margin-top: 8px;">
+                            <div class="form-hint">Les étiquettes apparaissent comme badges sur la fiche produit</div>
+                        </div>
+
+                        <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
+
+                        <h4 style="margin-bottom: 20px;">🔗 URL et référencement</h4>
+
+                        <div class="form-group">
+                            <label class="form-label">Slug (URL)</label>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <span style="color: var(--text-muted);">/produit/</span>
+                                <input type="text" name="slug" class="form-control" value="<?= htmlspecialchars($p['slug'] ?? '') ?>" style="flex: 1;">
+                            </div>
+                            <div class="form-hint">Laissez vide pour générer automatiquement depuis le nom</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">URL personnalisée (optionnel)</label>
+                            <input type="text" name="url" class="form-control" value="<?= htmlspecialchars($p['url'] ?? '') ?>" placeholder="https://...">
+                            <div class="form-hint">Remplace l'URL par défaut du produit</div>
+                        </div>
+
+                        <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
+
+                        <h4 style="margin-bottom: 20px;">📊 Options d'affichage</h4>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Mise en avant</label>
+                                <div style="display: flex; flex-direction: column; gap: 10px; padding: 15px; background: #fafbfc; border-radius: 8px;">
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="checkbox" name="featured" value="1" <?= !empty($p['featured']) ? 'checked' : '' ?>>
+                                        ⭐ Produit vedette (page d'accueil)
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="checkbox" name="is_new" value="1" <?= !empty($p['is_new']) ? 'checked' : '' ?>>
+                                        🆕 Nouveauté (badge "Nouveau")
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="checkbox" name="on_sale" value="1" <?= !empty($p['on_sale']) ? 'checked' : '' ?>>
+                                        💰 En promotion
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Position / Ordre</label>
+                                <input type="number" name="sort_order" class="form-control" value="<?= intval($p['sort_order'] ?? 0) ?>" min="0">
+                                <div class="form-hint">Les produits avec un ordre plus bas apparaissent en premier</div>
+                            </div>
+                        </div>
+
+                        <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
+
+                        <h4 style="margin-bottom: 20px;">🔗 Produits liés</h4>
+
+                        <div class="form-group">
+                            <label class="form-label">Produits associés</label>
+                            <select name="related_products[]" class="form-control" multiple size="6" style="min-height: 150px;">
+                                <?php
+                                $relatedIds = json_decode($p['related_products'] ?? '[]', true) ?: [];
+                                foreach ($data['all_products'] ?? [] as $relProd):
+                                    if ($relProd['id'] == $id) continue;
+                                    $selName = !empty($relProd['meta_title']) ? $relProd['meta_title'] : $relProd['nom'];
+                                ?>
+                                <option value="<?= $relProd['id'] ?>" <?= in_array($relProd['id'], $relatedIds) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($selName) ?> (<?= $relProd['sport'] ?>)
+                                </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="form-hint">Maintenez Ctrl (ou Cmd) pour sélectionner plusieurs produits</div>
                         </div>
                     </div>
                 </div>
@@ -2018,11 +2259,95 @@ $user = $_SESSION['admin_user'] ?? null;
                     <code style="font-size: 11px; color: #64748b;"><?= htmlspecialchars($filename) ?></code>
                 </div>
 
-                <div style="flex: 1; overflow-y: auto; padding: 15px;" id="stylePanel">
-                    <div style="text-align:center; padding:40px 20px; color:#94a3b8;">
-                        <p>👆 Cliquez sur un élément dans la preview pour le modifier</p>
+                <?php if ($pageType === 'category'): ?>
+                <!-- Onglets pour pages catégorie -->
+                <div style="display: flex; border-bottom: 1px solid #e2e8f0;">
+                    <button class="ve-tab active" data-tab="styles" onclick="switchTab('styles')">🎨 Styles</button>
+                    <button class="ve-tab" data-tab="products" onclick="switchTab('products')">📦 Produits</button>
+                </div>
+                <style>
+                .ve-tab { flex: 1; padding: 12px; border: none; background: none; font-size: 13px; cursor: pointer; color: #64748b; transition: all 0.2s; }
+                .ve-tab:hover { background: #f8fafc; }
+                .ve-tab.active { color: #FF4B26; border-bottom: 2px solid #FF4B26; margin-bottom: -1px; background: #fff; }
+                .ve-tab-content { display: none; }
+                .ve-tab-content.active { display: block; }
+                .product-item { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 8px; background: #fff; cursor: grab; }
+                .product-item:hover { border-color: #FF4B26; }
+                .product-item.selected { border-color: #FF4B26; background: #fff5f3; }
+                .product-item img { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; background: #f1f5f9; }
+                .product-item .info { flex: 1; overflow: hidden; }
+                .product-item .name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                .product-item .meta { font-size: 10px; color: #64748b; }
+                .product-item .checkbox { width: 18px; height: 18px; }
+                .selected-products { min-height: 100px; border: 2px dashed #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 15px; }
+                .selected-products.drag-over { border-color: #FF4B26; background: #fff5f3; }
+                </style>
+                <?php endif; ?>
+
+                <!-- Tab Styles -->
+                <div id="tabStyles" class="ve-tab-content <?= $pageType !== 'category' ? '' : 'active' ?>" style="flex: 1; overflow-y: auto; padding: 15px;">
+                    <div id="stylePanel">
+                        <div style="text-align:center; padding:40px 20px; color:#94a3b8;">
+                            <p>👆 Cliquez sur un élément dans la preview pour le modifier</p>
+                        </div>
                     </div>
                 </div>
+
+                <?php if ($pageType === 'category'): ?>
+                <!-- Tab Produits -->
+                <div id="tabProducts" class="ve-tab-content" style="flex: 1; overflow-y: auto; padding: 15px;">
+                    <div style="margin-bottom: 15px;">
+                        <div class="ve-group-title">Produits sélectionnés (<?= count($data['selected_products'] ?? []) ?>)</div>
+                        <div class="selected-products" id="selectedProducts">
+                            <?php
+                            $selectedIds = $data['selected_products'] ?? [];
+                            $allProducts = $data['all_products'] ?? [];
+                            foreach ($selectedIds as $prodId):
+                                $prod = array_filter($allProducts, fn($p) => $p['id'] == $prodId);
+                                $prod = reset($prod);
+                                if ($prod):
+                            ?>
+                            <div class="product-item selected" data-id="<?= $prod['id'] ?>" draggable="true">
+                                <img src="<?= htmlspecialchars($prod['photo_1'] ?: '/assets/images/placeholder.jpg') ?>" alt="">
+                                <div class="info">
+                                    <div class="name"><?= htmlspecialchars($prod['nom_seo']) ?></div>
+                                    <div class="meta"><?= htmlspecialchars($prod['sport'] . ' • ' . $prod['famille']) ?></div>
+                                </div>
+                                <button type="button" class="btn btn-sm" style="color:#ef4444;" onclick="removeProduct(<?= $prod['id'] ?>)">✕</button>
+                            </div>
+                            <?php endif; endforeach; ?>
+                        </div>
+                        <p style="font-size: 11px; color: #94a3b8; margin-top: 5px;">Glissez pour réorganiser</p>
+                    </div>
+
+                    <div>
+                        <div class="ve-group-title">Tous les produits</div>
+                        <input type="text" class="ve-input" id="productSearch" placeholder="Rechercher un produit..." style="margin-bottom: 10px;">
+                        <select class="ve-input" id="productFilter" style="margin-bottom: 10px;">
+                            <option value="">Tous les sports</option>
+                            <?php
+                            $sports = array_unique(array_column($allProducts, 'sport'));
+                            foreach ($sports as $sport): ?>
+                            <option value="<?= htmlspecialchars($sport) ?>"><?= htmlspecialchars($sport) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <div id="availableProducts" style="max-height: 300px; overflow-y: auto;">
+                            <?php foreach ($allProducts as $prod):
+                                $isSelected = in_array($prod['id'], $selectedIds);
+                            ?>
+                            <div class="product-item <?= $isSelected ? 'selected' : '' ?>" data-id="<?= $prod['id'] ?>" data-sport="<?= htmlspecialchars($prod['sport']) ?>" data-name="<?= htmlspecialchars(strtolower($prod['nom_seo'])) ?>">
+                                <input type="checkbox" class="checkbox" <?= $isSelected ? 'checked' : '' ?> onchange="toggleProduct(<?= $prod['id'] ?>, this.checked)">
+                                <img src="<?= htmlspecialchars($prod['photo_1'] ?: '/assets/images/placeholder.jpg') ?>" alt="">
+                                <div class="info">
+                                    <div class="name"><?= htmlspecialchars($prod['nom_seo']) ?></div>
+                                    <div class="meta"><?= htmlspecialchars($prod['sport'] . ' • ' . number_format($prod['prix_500'] ?? 0, 2)) ?> €</div>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
 
                 <div style="padding: 15px; border-top: 1px solid #e2e8f0; background: #f8fafc;">
                     <form method="POST" id="saveForm">
@@ -2031,6 +2356,7 @@ $user = $_SESSION['admin_user'] ?? null;
                         <input type="hidden" name="page_type" value="<?= htmlspecialchars($pageType) ?>">
                         <input type="hidden" name="page_slug" value="<?= htmlspecialchars($slug) ?>">
                         <input type="hidden" name="content" id="finalContent">
+                        <div id="productInputs"></div>
                         <button type="submit" class="btn btn-primary" style="width:100%; margin-bottom:10px;">💾 Enregistrer</button>
                     </form>
                     <div style="display:flex; gap:8px;">
@@ -2241,6 +2567,139 @@ $user = $_SESSION['admin_user'] ?? null;
             // Init
             load(html);
         })();
+
+        <?php if ($pageType === 'category'): ?>
+        // ========== GESTION DES PRODUITS ==========
+        var selectedProductIds = <?= json_encode($data['selected_products'] ?? []) ?>;
+        var allProductsData = <?= json_encode($data['all_products'] ?? [], JSON_HEX_TAG | JSON_HEX_AMP) ?>;
+
+        function switchTab(tab) {
+            document.querySelectorAll('.ve-tab').forEach(function(t) { t.classList.remove('active'); });
+            document.querySelectorAll('.ve-tab-content').forEach(function(c) { c.classList.remove('active'); });
+            document.querySelector('.ve-tab[data-tab="' + tab + '"]').classList.add('active');
+            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+        }
+
+        function toggleProduct(id, checked) {
+            if (checked) {
+                if (!selectedProductIds.includes(id)) {
+                    selectedProductIds.push(id);
+                    var prod = allProductsData.find(function(p) { return p.id == id; });
+                    if (prod) {
+                        var html = '<div class="product-item selected" data-id="' + prod.id + '" draggable="true">' +
+                            '<img src="' + (prod.photo_1 || '/assets/images/placeholder.jpg') + '" alt="">' +
+                            '<div class="info"><div class="name">' + escapeHtml(prod.nom_seo) + '</div>' +
+                            '<div class="meta">' + escapeHtml(prod.sport + ' • ' + prod.famille) + '</div></div>' +
+                            '<button type="button" class="btn btn-sm" style="color:#ef4444;" onclick="removeProduct(' + prod.id + ')">✕</button></div>';
+                        document.getElementById('selectedProducts').insertAdjacentHTML('beforeend', html);
+                    }
+                }
+            } else {
+                removeProduct(id);
+            }
+            updateProductCount();
+            setupDragDrop();
+        }
+
+        function removeProduct(id) {
+            selectedProductIds = selectedProductIds.filter(function(x) { return x != id; });
+            var selEl = document.querySelector('#selectedProducts .product-item[data-id="' + id + '"]');
+            if (selEl) selEl.remove();
+            var avEl = document.querySelector('#availableProducts .product-item[data-id="' + id + '"]');
+            if (avEl) {
+                avEl.classList.remove('selected');
+                var cb = avEl.querySelector('.checkbox');
+                if (cb) cb.checked = false;
+            }
+            updateProductCount();
+        }
+
+        function updateProductCount() {
+            var title = document.querySelector('#tabProducts .ve-group-title');
+            if (title) title.textContent = 'Produits sélectionnés (' + selectedProductIds.length + ')';
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        // Recherche et filtre
+        document.getElementById('productSearch')?.addEventListener('input', function() {
+            filterProducts();
+        });
+        document.getElementById('productFilter')?.addEventListener('change', function() {
+            filterProducts();
+        });
+
+        function filterProducts() {
+            var search = (document.getElementById('productSearch')?.value || '').toLowerCase();
+            var sport = document.getElementById('productFilter')?.value || '';
+            document.querySelectorAll('#availableProducts .product-item').forEach(function(el) {
+                var name = el.dataset.name || '';
+                var elSport = el.dataset.sport || '';
+                var show = true;
+                if (search && name.indexOf(search) === -1) show = false;
+                if (sport && elSport !== sport) show = false;
+                el.style.display = show ? 'flex' : 'none';
+            });
+        }
+
+        // Drag and drop pour réorganiser
+        function setupDragDrop() {
+            var container = document.getElementById('selectedProducts');
+            if (!container) return;
+            var items = container.querySelectorAll('.product-item');
+            items.forEach(function(item) {
+                item.ondragstart = function(e) {
+                    e.dataTransfer.setData('text/plain', item.dataset.id);
+                    item.style.opacity = '0.5';
+                };
+                item.ondragend = function() {
+                    item.style.opacity = '1';
+                };
+                item.ondragover = function(e) {
+                    e.preventDefault();
+                    item.style.borderTop = '3px solid #FF4B26';
+                };
+                item.ondragleave = function() {
+                    item.style.borderTop = '';
+                };
+                item.ondrop = function(e) {
+                    e.preventDefault();
+                    item.style.borderTop = '';
+                    var dragId = e.dataTransfer.getData('text/plain');
+                    var dragEl = container.querySelector('.product-item[data-id="' + dragId + '"]');
+                    if (dragEl && dragEl !== item) {
+                        container.insertBefore(dragEl, item);
+                        updateSelectedOrder();
+                    }
+                };
+            });
+        }
+
+        function updateSelectedOrder() {
+            selectedProductIds = [];
+            document.querySelectorAll('#selectedProducts .product-item').forEach(function(el) {
+                selectedProductIds.push(parseInt(el.dataset.id));
+            });
+        }
+
+        // Avant soumission du formulaire
+        document.getElementById('saveForm').addEventListener('submit', function() {
+            var container = document.getElementById('productInputs');
+            container.innerHTML = '';
+            selectedProductIds.forEach(function(id) {
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'page_products[]';
+                input.value = id;
+                container.appendChild(input);
+            });
+        });
+
+        setupDragDrop();
+        <?php endif; ?>
         </script>
         <?php endif; ?>
 
