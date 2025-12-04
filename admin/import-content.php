@@ -685,6 +685,9 @@ function importPages($pdo) {
         $content = preg_replace('/<nav[^>]*>.*?<\/nav>/is', '', $content);
         $content = preg_replace('/<script[^>]*>.*?<\/script>/is', '', $content);
 
+        // CORRIGER LES LIENS RELATIFS → ABSOLUS
+        $content = fixRelativeUrls($content);
+
         // Créer un extrait
         $excerpt = substr(strip_tags($content), 0, 300);
         $excerpt = preg_replace('/\s+/', ' ', $excerpt);
@@ -743,6 +746,9 @@ function importBlog($pdo) {
         $content = preg_replace('/<nav[^>]*>.*?<\/nav>/is', '', $content);
         $content = preg_replace('/<script[^>]*>.*?<\/script>/is', '', $content);
 
+        // CORRIGER LES LIENS RELATIFS → ABSOLUS
+        $content = fixRelativeUrls($content);
+
         // Extrait
         $excerpt = substr(strip_tags($content), 0, 250);
         $excerpt = preg_replace('/\s+/', ' ', $excerpt);
@@ -759,6 +765,61 @@ function importBlog($pdo) {
     }
 
     return ['imported' => $count, 'source' => $blogDir];
+}
+
+/**
+ * Convertir les liens relatifs en liens absolus
+ */
+function fixRelativeUrls($content) {
+    // Corriger les liens vers les pages produits
+    $content = preg_replace(
+        '/href=["\'](?:\.\.\/)*pages\/produits\/([A-Za-z0-9_-]+)\.html["\']/i',
+        'href="/produit/$1"',
+        $content
+    );
+
+    // Corriger les liens vers les pages catégories
+    $content = preg_replace(
+        '/href=["\'](?:\.\.\/)*pages\/products\/([A-Za-z0-9_-]+)\.html["\']/i',
+        'href="/categorie/$1"',
+        $content
+    );
+
+    // Corriger les liens vers les pages info
+    $content = preg_replace(
+        '/href=["\'](?:\.\.\/)*pages\/info\/([A-Za-z0-9_-]+)\.html["\']/i',
+        'href="/info/$1"',
+        $content
+    );
+
+    // Corriger les liens vers le blog
+    $content = preg_replace(
+        '/href=["\'](?:\.\.\/)*pages\/blog\/([A-Za-z0-9_-]+)\.html["\']/i',
+        'href="/blog/$1"',
+        $content
+    );
+
+    // Corriger les chemins vers les assets (images, CSS, JS)
+    $content = preg_replace(
+        '/(?:src|href)=["\'](?:\.\.\/)*assets\//i',
+        '$0/assets/',
+        $content
+    );
+    // Nettoyer les doubles slashes potentiels
+    $content = preg_replace(
+        '/(src|href)=["\'](?:\.\.\/)+assets\//i',
+        '$1="/assets/',
+        $content
+    );
+
+    // Corriger les liens .html simples vers /info/
+    $content = preg_replace(
+        '/href=["\']([a-z0-9_-]+)\.html["\']/i',
+        'href="/info/$1"',
+        $content
+    );
+
+    return $content;
 }
 
 /**
@@ -806,6 +867,9 @@ function importCategoryPages($pdo) {
         $content = preg_replace('/<script[^>]*>.*?<\/script>/is', '', $content);
         $content = preg_replace('/<div\s+id=["\']dynamic-header["\'][^>]*>.*?<\/div>/is', '', $content);
         $content = preg_replace('/<div\s+id=["\']dynamic-footer["\'][^>]*>.*?<\/div>/is', '', $content);
+
+        // CORRIGER LES LIENS RELATIFS → ABSOLUS
+        $content = fixRelativeUrls($content);
 
         // Créer un extrait
         $excerpt = substr(strip_tags($content), 0, 300);
