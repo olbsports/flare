@@ -146,6 +146,33 @@ try {
         // Table likely already exists
     }
 
+    // Create product_photos table for unlimited product photos
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS product_photos (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            product_id INT NOT NULL,
+            url VARCHAR(500) NOT NULL,
+            filename VARCHAR(255),
+            alt_text VARCHAR(255),
+            title VARCHAR(255),
+            type ENUM('main', 'gallery', 'thumbnail', 'hover', 'zoom') DEFAULT 'gallery',
+            ordre INT DEFAULT 0,
+            width INT,
+            height INT,
+            size_bytes INT,
+            mime_type VARCHAR(100),
+            active BOOLEAN DEFAULT TRUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX idx_product (product_id),
+            INDEX idx_type (type),
+            INDEX idx_ordre (ordre),
+            INDEX idx_active (active)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    } catch (PDOException $e) {
+        // Table likely already exists
+    }
+
     // Add new product columns for enhanced settings
     $newColumns = [
         'featured' => 'BOOLEAN DEFAULT FALSE',
@@ -343,10 +370,10 @@ if ($action && $pdo) {
                         $toast = 'Erreur: Cette référence existe déjà';
                         break;
                     }
-                    // Construire la requête INSERT
+                    // Construire la requête INSERT avec created_at et updated_at
                     $insertFields = array_merge(['reference'], $fields);
-                    $insertPlaceholders = implode(', ', array_fill(0, count($insertFields) + 2, '?'));
-                    $insertFieldNames = implode(', ', $insertFields) . ', etiquettes, related_products';
+                    $insertFieldNames = implode(', ', $insertFields) . ', etiquettes, related_products, created_at, updated_at';
+                    $insertPlaceholders = implode(', ', array_fill(0, count($insertFields) + 2, '?')) . ', NOW(), NOW()';
                     $insertValues = array_merge([$reference], $values, [$etiquettesStr, $relatedProductsJson]);
 
                     $pdo->prepare("INSERT INTO products ($insertFieldNames) VALUES ($insertPlaceholders)")
@@ -385,8 +412,16 @@ if ($action && $pdo) {
                     $maxOrdre = $pdo->prepare("SELECT MAX(ordre) FROM product_photos WHERE product_id=?");
                     $maxOrdre->execute([$productId]);
                     $ordre = intval($maxOrdre->fetchColumn()) + 1;
-                    $pdo->prepare("INSERT INTO product_photos (product_id, url, alt_text, ordre) VALUES (?,?,?,?)")
-                        ->execute([$productId, $photoUrl, $altText, $ordre]);
+                    // Vérifie s'il y a déjà une photo principale
+                    $hasMain = $pdo->prepare("SELECT COUNT(*) FROM product_photos WHERE product_id=? AND type='main'");
+                    $hasMain->execute([$productId]);
+                    $photoType = ($hasMain->fetchColumn() == 0 && $ordre == 1) ? 'main' : 'gallery';
+                    $pdo->prepare("INSERT INTO product_photos (product_id, url, alt_text, ordre, type, active) VALUES (?,?,?,?,?,1)")
+                        ->execute([$productId, $photoUrl, $altText, $ordre, $photoType]);
+                    // Si c'est la photo principale, mettre à jour photo_1 du produit
+                    if ($photoType === 'main') {
+                        $pdo->prepare("UPDATE products SET photo_1=? WHERE id=?")->execute([$photoUrl, $productId]);
+                    }
                     $toast = 'Photo ajoutée';
                 }
                 break;
@@ -403,8 +438,10 @@ if ($action && $pdo) {
                 $photoId = intval($_POST['photo_id'] ?? 0);
                 $productId = intval($_POST['product_id'] ?? 0);
                 if ($photoId && $productId) {
-                    $pdo->prepare("UPDATE product_photos SET is_main=0 WHERE product_id=?")->execute([$productId]);
-                    $pdo->prepare("UPDATE product_photos SET is_main=1 WHERE id=?")->execute([$photoId]);
+                    // Enlever le type 'main' des autres photos
+                    $pdo->prepare("UPDATE product_photos SET type='gallery' WHERE product_id=? AND type='main'")->execute([$productId]);
+                    // Définir celle-ci comme principale
+                    $pdo->prepare("UPDATE product_photos SET type='main' WHERE id=?")->execute([$photoId]);
                     // Mettre à jour photo_1 du produit
                     $stmt = $pdo->prepare("SELECT url FROM product_photos WHERE id=?");
                     $stmt->execute([$photoId]);
@@ -2048,7 +2085,7 @@ $user = $_SESSION['admin_user'] ?? null;
         $p = $data['item'] ?? [];
         $productIsNew = $data['isNew'] ?? false;
         ?>
-        <form method="POST" action="?page=product<?= $id ? '&id='.$id : '' ?>">
+        <form method="POST" action="?page=product<?= $id ? '&id='.$id : '' ?>" id="product-form" onsubmit="return prepareProductSubmit()">
             <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
             <input type="hidden" name="action" value="save_product">
 
@@ -2215,15 +2252,16 @@ $user = $_SESSION['admin_user'] ?? null;
                             <!-- Grille des photos -->
                             <div class="photo-gallery-grid" id="photoGalleryGrid">
                                 <?php foreach ($data['photos'] ?? [] as $photo): ?>
-                                <div class="photo-gallery-item <?= $photo['is_main'] ? 'main-photo' : '' ?>" data-id="<?= $photo['id'] ?>" draggable="true">
+                                <?php $isMain = ($photo['type'] ?? '') === 'main'; ?>
+                                <div class="photo-gallery-item <?= $isMain ? 'main-photo' : '' ?>" data-id="<?= $photo['id'] ?>" draggable="true">
                                     <img src="<?= htmlspecialchars($photo['url']) ?>" alt="<?= htmlspecialchars($photo['alt_text'] ?? '') ?>">
                                     <div class="photo-gallery-item-overlay">
-                                        <?php if (!$photo['is_main']): ?>
+                                        <?php if (!$isMain): ?>
                                         <button type="button" class="photo-gallery-item-btn star" onclick="setMainPhoto(<?= $photo['id'] ?>)" title="Définir comme principale">⭐</button>
                                         <?php endif; ?>
                                         <button type="button" class="photo-gallery-item-btn delete" onclick="deletePhoto(<?= $photo['id'] ?>)" title="Supprimer">✕</button>
                                     </div>
-                                    <?php if ($photo['is_main']): ?>
+                                    <?php if ($isMain): ?>
                                     <div class="photo-gallery-item-badge">Photo principale</div>
                                     <?php endif; ?>
                                 </div>
@@ -2689,6 +2727,29 @@ $user = $_SESSION['admin_user'] ?? null;
                             el.addEventListener('change', updateConfigJSON);
                             el.addEventListener('input', updateConfigJSON);
                         });
+                        // Initialiser le JSON au chargement
+                        updateConfigJSON();
+                        </script>
+                        <script>
+                        // Fonction appelée avant la soumission du formulaire produit
+                        function prepareProductSubmit() {
+                            // Mettre à jour le JSON du configurateur
+                            if (typeof updateConfigJSON === 'function') {
+                                updateConfigJSON();
+                            }
+                            // Mettre à jour les contenus Quill vers les textareas
+                            if (typeof quillEditors !== 'undefined') {
+                                for (var key in quillEditors) {
+                                    if (quillEditors.hasOwnProperty(key) && quillEditors[key].quill) {
+                                        var textarea = document.querySelector('textarea[name="' + key + '"]');
+                                        if (textarea) {
+                                            textarea.value = quillEditors[key].quill.root.innerHTML;
+                                        }
+                                    }
+                                }
+                            }
+                            return true; // Permettre la soumission
+                        }
                         </script>
 
                         <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
@@ -4444,6 +4505,9 @@ $user = $_SESSION['admin_user'] ?? null;
             <div class="card-header">
                 <span class="card-title">📷 Gestionnaire de photos</span>
                 <div style="display: flex; gap: 10px;">
+                    <button type="button" class="btn btn-light" onclick="createFolder()">
+                        📁 Nouveau dossier
+                    </button>
                     <button type="button" class="btn btn-primary" onclick="document.getElementById('uploadPhotoInput').click()">
                         + Uploader des photos
                     </button>
@@ -4484,8 +4548,8 @@ $user = $_SESSION['admin_user'] ?? null;
                 <!-- Grille des photos -->
                 <div id="photosGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px;">
                     <?php foreach ($data['photos'] ?? [] as $photo): ?>
-                    <div class="photo-manager-item" style="border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff;">
-                        <div style="height: 140px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                    <div class="photo-manager-item" style="border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff; position: relative;">
+                        <div style="height: 140px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer;" onclick="showPhotoInfo('<?= htmlspecialchars($photo['url']) ?>')">
                             <img src="<?= htmlspecialchars($photo['url']) ?>" alt="" style="max-width: 100%; max-height: 100%; object-fit: contain;">
                         </div>
                         <div style="padding: 10px;">
@@ -4496,9 +4560,11 @@ $user = $_SESSION['admin_user'] ?? null;
                                 <span><?= number_format($photo['size'] / 1024, 1) ?> Ko</span>
                                 <span><?= date('d/m/Y', $photo['modified']) ?></span>
                             </div>
-                            <div style="margin-top: 8px; display: flex; gap: 5px;">
-                                <button type="button" class="btn btn-sm btn-light" style="flex: 1; font-size: 10px;" onclick="copyPhotoUrl('<?= htmlspecialchars($photo['url']) ?>')">📋 Copier URL</button>
-                                <button type="button" class="btn btn-sm btn-danger" style="font-size: 10px;" onclick="deletePhoto('<?= htmlspecialchars($photo['url']) ?>')">🗑</button>
+                            <div style="margin-top: 8px; display: flex; gap: 3px; flex-wrap: wrap;">
+                                <button type="button" class="btn btn-sm btn-light" style="flex: 1; font-size: 9px; padding: 4px 6px;" onclick="copyPhotoUrl('<?= htmlspecialchars($photo['url']) ?>')" title="Copier URL">📋</button>
+                                <button type="button" class="btn btn-sm btn-light" style="flex: 1; font-size: 9px; padding: 4px 6px;" onclick="renamePhoto('<?= htmlspecialchars($photo['url']) ?>', '<?= htmlspecialchars($photo['name']) ?>')" title="Renommer">✏️</button>
+                                <button type="button" class="btn btn-sm btn-light" style="flex: 1; font-size: 9px; padding: 4px 6px;" onclick="movePhoto('<?= htmlspecialchars($photo['url']) ?>')" title="Déplacer">📦</button>
+                                <button type="button" class="btn btn-sm btn-danger" style="font-size: 9px; padding: 4px 6px;" onclick="deletePhoto('<?= htmlspecialchars($photo['url']) ?>')" title="Supprimer">🗑</button>
                             </div>
                         </div>
                     </div>
@@ -4573,6 +4639,101 @@ $user = $_SESSION['admin_user'] ?? null;
                 } else {
                     alert('Erreur: ' + result.error);
                 }
+            };
+
+            // Créer un nouveau dossier
+            window.createFolder = async function() {
+                const name = prompt('Nom du nouveau dossier (lettres, chiffres, tirets uniquement):');
+                if (!name) return;
+                const res = await fetch('/api/photos-manager.php?action=create_folder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    location.reload();
+                } else {
+                    alert('Erreur: ' + result.error);
+                }
+            };
+
+            // Renommer une photo
+            window.renamePhoto = async function(url, currentName) {
+                const baseName = currentName.replace(/\.[^/.]+$/, '');
+                const newName = prompt('Nouveau nom (sans extension):', baseName);
+                if (!newName || newName === baseName) return;
+                const res = await fetch('/api/photos-manager.php?action=rename', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url, new_name: newName })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    location.reload();
+                } else {
+                    alert('Erreur: ' + result.error);
+                }
+            };
+
+            // Déplacer une photo
+            window.movePhoto = async function(url) {
+                // Charger la liste des dossiers
+                const foldersRes = await fetch('/api/photos-manager.php?action=folders');
+                const foldersData = await foldersRes.json();
+                if (!foldersData.success) {
+                    alert('Erreur lors du chargement des dossiers');
+                    return;
+                }
+                const folders = foldersData.folders;
+                let options = 'Dossiers disponibles:\n0. Racine (/photos/)\n';
+                folders.forEach((f, i) => {
+                    options += (i + 1) + '. ' + f.name + ' (' + f.count + ' photos)\n';
+                });
+                const choice = prompt(options + '\nEntrez le numéro du dossier de destination:');
+                if (choice === null) return;
+                const idx = parseInt(choice);
+                let targetFolder = '';
+                if (idx === 0) {
+                    targetFolder = '';
+                } else if (idx > 0 && idx <= folders.length) {
+                    targetFolder = folders[idx - 1].path;
+                } else {
+                    alert('Choix invalide');
+                    return;
+                }
+                const res = await fetch('/api/photos-manager.php?action=move', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url, target_folder: targetFolder })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    location.reload();
+                } else {
+                    alert('Erreur: ' + result.error);
+                }
+            };
+
+            // Afficher les infos d'une photo
+            window.showPhotoInfo = async function(url) {
+                const res = await fetch('/api/photos-manager.php?action=info&url=' + encodeURIComponent(url));
+                const result = await res.json();
+                if (!result.success) {
+                    alert('Erreur: ' + result.error);
+                    return;
+                }
+                const info = result.info;
+                const sizeKo = (info.size / 1024).toFixed(1);
+                const sizeMo = (info.size / (1024 * 1024)).toFixed(2);
+                const date = new Date(info.modified * 1000).toLocaleString('fr-FR');
+                let msg = '📷 ' + info.name + '\n\n';
+                msg += '📏 Dimensions: ' + (info.width || '?') + ' x ' + (info.height || '?') + ' px\n';
+                msg += '📦 Taille: ' + sizeKo + ' Ko (' + sizeMo + ' Mo)\n';
+                msg += '📁 Type: ' + info.type + '\n';
+                msg += '📅 Modifié: ' + date + '\n';
+                msg += '\n🔗 URL: ' + info.url;
+                alert(msg);
             };
         })();
         </script>

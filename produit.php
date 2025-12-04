@@ -55,14 +55,15 @@ $photos = [];
 
 // D'abord essayer de charger depuis la table product_photos
 try {
-    $stmtPhotos = $pdo->prepare("SELECT url FROM product_photos WHERE product_id = ? ORDER BY is_main DESC, ordre ASC, id ASC");
+    // Utilise type='main' pour la photo principale (pas is_main)
+    $stmtPhotos = $pdo->prepare("SELECT url FROM product_photos WHERE product_id = ? AND active = 1 ORDER BY CASE WHEN type='main' THEN 0 ELSE 1 END, ordre ASC, id ASC");
     $stmtPhotos->execute([$product['id']]);
     $dbPhotos = $stmtPhotos->fetchAll(PDO::FETCH_COLUMN);
     if (!empty($dbPhotos)) {
         $photos = $dbPhotos;
     }
 } catch (Exception $e) {
-    // Table peut ne pas exister
+    // Table peut ne pas exister, ou erreur - ignorer silencieusement
 }
 
 // Si pas de photos depuis product_photos, utiliser les champs photo_1-5
