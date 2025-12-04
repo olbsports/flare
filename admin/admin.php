@@ -246,8 +246,7 @@ if ($action && $pdo) {
                 // Construire le chemin selon le type
                 $directories = [
                     'info' => __DIR__ . '/../pages/info/',
-                    'category' => __DIR__ . '/../pages/products/',
-                    'blog' => __DIR__ . '/../pages/blog/'
+                    'category' => __DIR__ . '/../pages/products/'
                 ];
 
                 if (!$pageSlug || !isset($directories[$pageType])) {
@@ -606,8 +605,7 @@ if ($pdo && $page !== 'login') {
                 $data['items'] = [];
                 $directories = [
                     'info' => __DIR__ . '/../pages/info/',
-                    'category' => __DIR__ . '/../pages/products/',
-                    'blog' => __DIR__ . '/../pages/blog/'
+                    'category' => __DIR__ . '/../pages/products/'
                 ];
                 foreach ($directories as $type => $dir) {
                     if (is_dir($dir)) {
@@ -643,8 +641,7 @@ if ($pdo && $page !== 'login') {
                 // Construire le chemin selon le type
                 $directories = [
                     'info' => __DIR__ . '/../pages/info/',
-                    'category' => __DIR__ . '/../pages/products/',
-                    'blog' => __DIR__ . '/../pages/blog/'
+                    'category' => __DIR__ . '/../pages/products/'
                 ];
 
                 if ($pageSlug && isset($directories[$pageType])) {
@@ -2465,18 +2462,6 @@ $user = $_SESSION['admin_user'] ?? null;
 
         <?php // ============ BLOG ============ ?>
         <?php elseif ($page === 'blog'): ?>
-        <!-- Bouton d'import blog -->
-        <div class="card" style="margin-bottom: 20px;">
-            <div class="card-body" style="display: flex; gap: 15px; align-items: center;">
-                <span style="font-weight: 600;">Importer depuis fichiers HTML :</span>
-                <form method="POST" style="display: inline;">
-                    <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
-                    <input type="hidden" name="action" value="import_html_blog">
-                    <button type="submit" class="btn btn-light">Importer Articles Blog</button>
-                </form>
-            </div>
-        </div>
-
         <div class="card">
             <div class="card-header">
                 <span class="card-title">Articles de blog (<?= count($data['items'] ?? []) ?>)</span>
@@ -2503,7 +2488,7 @@ $user = $_SESSION['admin_user'] ?? null;
             </div>
         </div>
 
-        <?php // ============ BLOG EDIT ============ ?>
+        <?php // ============ BLOG EDIT - SIMPLE TEXTE ============ ?>
         <?php elseif ($page === 'blog_edit'): ?>
         <?php $post = $data['item'] ?? []; ?>
         <div class="card">
@@ -2514,19 +2499,18 @@ $user = $_SESSION['admin_user'] ?? null;
                 <?php endif; ?>
             </div>
             <form method="POST" id="blogForm">
-            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
-
+                <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
                 <input type="hidden" name="action" value="save_blog">
                 <div class="card-body">
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">Titre</label>
-                            <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($post['title'] ?? '') ?>" required>
+                            <label class="form-label">Titre de l'article</label>
+                            <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($post['title'] ?? '') ?>" required placeholder="Ex: Comment personnaliser vos maillots">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Slug (URL)</label>
-                            <input type="text" name="slug" class="form-control" value="<?= htmlspecialchars($post['slug'] ?? '') ?>" required>
-                            <small style="color:var(--text-muted)">URL: /blog/<span id="blogSlugPreview"><?= htmlspecialchars($post['slug'] ?? '') ?></span></small>
+                            <label class="form-label">URL (slug)</label>
+                            <input type="text" name="slug" class="form-control" value="<?= htmlspecialchars($post['slug'] ?? '') ?>" required placeholder="comment-personnaliser-maillots">
+                            <small style="color:var(--text-muted)">URL: /blog/<?= htmlspecialchars($post['slug'] ?? 'mon-article') ?></small>
                         </div>
                     </div>
                     <div class="form-row">
@@ -2536,6 +2520,7 @@ $user = $_SESSION['admin_user'] ?? null;
                                 <option value="conseils" <?= ($post['category'] ?? '') === 'conseils' ? 'selected' : '' ?>>Conseils</option>
                                 <option value="tutoriels" <?= ($post['category'] ?? '') === 'tutoriels' ? 'selected' : '' ?>>Tutoriels</option>
                                 <option value="nouveautes" <?= ($post['category'] ?? '') === 'nouveautes' ? 'selected' : '' ?>>Nouveautés</option>
+                                <option value="actualites" <?= ($post['category'] ?? '') === 'actualites' ? 'selected' : '' ?>>Actualités</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -2546,141 +2531,57 @@ $user = $_SESSION['admin_user'] ?? null;
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Image mise en avant</label>
-                            <input type="text" name="featured_image" class="form-control" value="<?= htmlspecialchars($post['featured_image'] ?? '') ?>">
+                            <label class="form-label">Image mise en avant (URL)</label>
+                            <input type="text" name="featured_image" class="form-control" value="<?= htmlspecialchars($post['featured_image'] ?? '') ?>" placeholder="/assets/images/blog/mon-image.jpg">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Extrait</label>
-                        <textarea name="excerpt" class="form-control" style="min-height: 80px;"><?= htmlspecialchars($post['excerpt'] ?? '') ?></textarea>
+                        <label class="form-label">Extrait (affiché dans la liste des articles)</label>
+                        <textarea name="excerpt" class="form-control" rows="3" placeholder="Résumé court de l'article..."><?= htmlspecialchars($post['excerpt'] ?? '') ?></textarea>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Contenu HTML complet</label>
-                        <div class="html-editor-toolbar">
-                            <button type="button" class="btn btn-light" onclick="formatBlogCode()">Formater</button>
-                            <button type="button" class="btn btn-light" onclick="toggleBlogTheme()">Theme Sombre/Clair</button>
-                            <button type="button" class="btn btn-light" onclick="toggleBlogFullscreen()">Plein écran</button>
-                            <button type="button" class="btn btn-light" onclick="previewBlog()">Prévisualiser</button>
-                            <span class="editor-status" id="blogEditorStatus">Prêt</span>
-                        </div>
-                        <textarea name="content" id="blogHtmlEditor" style="display:none;"><?= htmlspecialchars($post['content'] ?? '') ?></textarea>
-                    </div>
+                        <label class="form-label">Contenu de l'article</label>
+                        <textarea name="content" class="form-control" rows="15" style="font-size: 14px; line-height: 1.6;" placeholder="Écrivez votre article ici...
 
-                    <!-- Preview modal for blog -->
-                    <div id="blogPreviewModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; padding:20px;">
-                        <div style="background:#fff; height:100%; border-radius:8px; overflow:hidden; display:flex; flex-direction:column;">
-                            <div style="padding:10px 20px; background:var(--sidebar-bg); color:#fff; display:flex; justify-content:space-between; align-items:center;">
-                                <span>Prévisualisation Article</span>
-                                <button type="button" onclick="closeBlogPreview()" style="background:none; border:none; color:#fff; font-size:24px; cursor:pointer;">&times;</button>
-                            </div>
-                            <iframe id="blogPreviewFrame" class="preview-frame" style="flex:1; border:none;"></iframe>
-                        </div>
+Vous pouvez utiliser du HTML simple :
+<h2>Titre de section</h2>
+<p>Paragraphe de texte.</p>
+<ul><li>Liste à puces</li></ul>
+<strong>Texte en gras</strong>"><?= htmlspecialchars($post['content'] ?? '') ?></textarea>
+                        <small style="color:var(--text-muted)">Vous pouvez utiliser du HTML basique (h2, p, ul, li, strong, em, a, img)</small>
                     </div>
-
-                    <div class="form-row" style="margin-top: 20px;">
+                    <div class="form-row" style="margin-top: 15px;">
                         <div class="form-group">
                             <label class="form-label">Meta Title (SEO)</label>
-                            <input type="text" name="meta_title" class="form-control" value="<?= htmlspecialchars($post['meta_title'] ?? '') ?>">
+                            <input type="text" name="meta_title" class="form-control" value="<?= htmlspecialchars($post['meta_title'] ?? '') ?>" placeholder="Titre pour Google (60 car. max)">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Meta Description (SEO)</label>
-                            <textarea name="meta_description" class="form-control"><?= htmlspecialchars($post['meta_description'] ?? '') ?></textarea>
+                            <input type="text" name="meta_description" class="form-control" value="<?= htmlspecialchars($post['meta_description'] ?? '') ?>" placeholder="Description pour Google (160 car. max)">
                         </div>
                     </div>
                 </div>
                 <div class="card-footer">
                     <a href="?page=blog" class="btn btn-light">← Retour</a>
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer l'article</button>
                 </div>
             </form>
         </div>
 
         <script>
-        // Initialize CodeMirror for blog
-        var blogEditor = CodeMirror.fromTextArea(document.getElementById('blogHtmlEditor'), {
-            mode: 'htmlmixed',
-            theme: 'default',
-            lineNumbers: true,
-            lineWrapping: true,
-            autoCloseTags: true,
-            matchTags: {bothTags: true},
-            foldGutter: true,
-            gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
-            extraKeys: {
-                "Ctrl-S": function(cm) { document.getElementById('blogForm').submit(); },
-                "Cmd-S": function(cm) { document.getElementById('blogForm').submit(); },
-                "F11": function(cm) { toggleBlogFullscreen(); }
+        // Auto-generate slug from title
+        document.querySelector('input[name="title"]')?.addEventListener('input', function() {
+            var slugInput = document.querySelector('input[name="slug"]');
+            if (slugInput && !slugInput.dataset.edited) {
+                slugInput.value = this.value
+                    .toLowerCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-|-$/g, '');
             }
         });
-
-        blogEditor.setSize(null, 500);
-
-        blogEditor.on('change', function() {
-            document.getElementById('blogEditorStatus').textContent = 'Modifié (non sauvegardé)';
-        });
-
-        // Slug preview
         document.querySelector('input[name="slug"]')?.addEventListener('input', function() {
-            var preview = document.getElementById('blogSlugPreview');
-            if (preview) preview.textContent = this.value;
-        });
-
-        function formatBlogCode() {
-            var content = blogEditor.getValue();
-            try {
-                var formatted = content.replace(/></g, '>\n<').replace(/\n\s*\n/g, '\n');
-                blogEditor.setValue(formatted);
-                document.getElementById('blogEditorStatus').textContent = 'Code formaté';
-            } catch(e) {
-                alert('Erreur de formatage');
-            }
-        }
-
-        var blogIsDark = false;
-        function toggleBlogTheme() {
-            blogIsDark = !blogIsDark;
-            blogEditor.setOption('theme', blogIsDark ? 'monokai' : 'default');
-        }
-
-        var blogIsFullscreen = false;
-        function toggleBlogFullscreen() {
-            var wrapper = blogEditor.getWrapperElement();
-            blogIsFullscreen = !blogIsFullscreen;
-            if (blogIsFullscreen) {
-                wrapper.style.position = 'fixed';
-                wrapper.style.inset = '0';
-                wrapper.style.zIndex = '9999';
-                wrapper.style.height = '100vh';
-                blogEditor.setSize('100%', '100%');
-            } else {
-                wrapper.style.position = '';
-                wrapper.style.inset = '';
-                wrapper.style.zIndex = '';
-                wrapper.style.height = '';
-                blogEditor.setSize(null, 500);
-            }
-            blogEditor.refresh();
-        }
-
-        function previewBlog() {
-            var content = blogEditor.getValue();
-            var iframe = document.getElementById('blogPreviewFrame');
-            var doc = iframe.contentDocument || iframe.contentWindow.document;
-            doc.open();
-            doc.write(content);
-            doc.close();
-            document.getElementById('blogPreviewModal').style.display = 'block';
-        }
-
-        function closeBlogPreview() {
-            document.getElementById('blogPreviewModal').style.display = 'none';
-        }
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeBlogPreview();
-                if (blogIsFullscreen) toggleBlogFullscreen();
-            }
+            this.dataset.edited = 'true';
         });
         </script>
 
