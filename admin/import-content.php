@@ -174,6 +174,7 @@ function initTables($pdo) {
         meta_title VARCHAR(255),
         meta_description TEXT,
         meta_keywords VARCHAR(500),
+        product_filters JSON COMMENT 'Filtres produits pour pages catégories: sport, famille, included_ids, excluded_ids',
         status ENUM('draft', 'published', 'archived') DEFAULT 'published',
         author_id INT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -644,6 +645,7 @@ function importProductsFromHTML($pdo) {
 
 /**
  * Import des pages depuis /pages/info/
+ * STOCKE LE HTML COMPLET pour préserver le design exact
  */
 function importPages($pdo) {
     $infoDir = __DIR__ . '/../pages/info';
@@ -659,6 +661,7 @@ function importPages($pdo) {
                            meta_title=VALUES(meta_title), meta_description=VALUES(meta_description)");
 
     $count = 0;
+    $errors = [];
     foreach ($files as $file) {
         $slug = basename($file, '.html');
         $html = file_get_contents($file);
@@ -671,26 +674,15 @@ function importPages($pdo) {
         preg_match('/<meta\s+name=["\']description["\']\s+content=["\']([^"\']+)/i', $html, $descMatch);
         $metaDesc = $descMatch[1] ?? '';
 
-        // Extraire le contenu principal (entre <main> ou <body> ou après le header)
+        // GARDER LE HTML COMPLET (design exact)
         $content = $html;
-
-        // Nettoyer - garder seulement le body
-        if (preg_match('/<body[^>]*>(.*?)<\/body>/is', $html, $bodyMatch)) {
-            $content = $bodyMatch[1];
-        }
-
-        // Supprimer header et footer pour garder le contenu principal
-        $content = preg_replace('/<header[^>]*>.*?<\/header>/is', '', $content);
-        $content = preg_replace('/<footer[^>]*>.*?<\/footer>/is', '', $content);
-        $content = preg_replace('/<nav[^>]*>.*?<\/nav>/is', '', $content);
-        $content = preg_replace('/<script[^>]*>.*?<\/script>/is', '', $content);
 
         // CORRIGER LES LIENS RELATIFS → ABSOLUS
         $content = fixRelativeUrls($content);
 
-        // Créer un extrait
-        $excerpt = substr(strip_tags($content), 0, 300);
-        $excerpt = preg_replace('/\s+/', ' ', $excerpt);
+        // Créer un extrait depuis le texte visible
+        $textContent = strip_tags(preg_replace('/<(script|style)[^>]*>.*?<\/\1>/is', '', $content));
+        $excerpt = substr(preg_replace('/\s+/', ' ', $textContent), 0, 300);
 
         try {
             $stmt->execute([$title, $slug, $content, $excerpt, $title, $metaDesc]);
@@ -700,11 +692,12 @@ function importPages($pdo) {
         }
     }
 
-    return ['imported' => $count, 'source' => $infoDir, 'errors' => $errors ?? []];
+    return ['imported' => $count, 'source' => $infoDir, 'errors' => $errors];
 }
 
 /**
  * Import du blog depuis /pages/blog/
+ * STOCKE LE HTML COMPLET pour préserver le design exact
  */
 function importBlog($pdo) {
     $blogDir = __DIR__ . '/../pages/blog';
@@ -720,6 +713,7 @@ function importBlog($pdo) {
                            meta_title=VALUES(meta_title), meta_description=VALUES(meta_description)");
 
     $count = 0;
+    $errors = [];
     foreach ($files as $file) {
         if (basename($file) === 'README.md') continue;
 
@@ -734,24 +728,15 @@ function importBlog($pdo) {
         preg_match('/<meta\s+name=["\']description["\']\s+content=["\']([^"\']+)/i', $html, $descMatch);
         $metaDesc = $descMatch[1] ?? '';
 
-        // Extraire le contenu
+        // GARDER LE HTML COMPLET (design exact)
         $content = $html;
-        if (preg_match('/<body[^>]*>(.*?)<\/body>/is', $html, $bodyMatch)) {
-            $content = $bodyMatch[1];
-        }
-
-        // Nettoyer
-        $content = preg_replace('/<header[^>]*>.*?<\/header>/is', '', $content);
-        $content = preg_replace('/<footer[^>]*>.*?<\/footer>/is', '', $content);
-        $content = preg_replace('/<nav[^>]*>.*?<\/nav>/is', '', $content);
-        $content = preg_replace('/<script[^>]*>.*?<\/script>/is', '', $content);
 
         // CORRIGER LES LIENS RELATIFS → ABSOLUS
         $content = fixRelativeUrls($content);
 
-        // Extrait
-        $excerpt = substr(strip_tags($content), 0, 250);
-        $excerpt = preg_replace('/\s+/', ' ', $excerpt);
+        // Créer un extrait depuis le texte visible
+        $textContent = strip_tags(preg_replace('/<(script|style)[^>]*>.*?<\/\1>/is', '', $content));
+        $excerpt = substr(preg_replace('/\s+/', ' ', $textContent), 0, 300);
 
         // Catégorie par défaut
         $category = 'conseils';
@@ -761,10 +746,12 @@ function importBlog($pdo) {
         try {
             $stmt->execute([$title, $slug, $content, $excerpt, $title, $metaDesc, $category]);
             $count++;
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+            $errors[] = "$slug: " . $e->getMessage();
+        }
     }
 
-    return ['imported' => $count, 'source' => $blogDir];
+    return ['imported' => $count, 'source' => $blogDir, 'errors' => $errors];
 }
 
 /**
@@ -824,6 +811,7 @@ function fixRelativeUrls($content) {
 
 /**
  * Import des pages catégories depuis /pages/products/
+ * STOCKE LE HTML COMPLET pour préserver le design exact
  */
 function importCategoryPages($pdo) {
     $categoryDir = __DIR__ . '/../pages/products';
@@ -852,28 +840,15 @@ function importCategoryPages($pdo) {
         preg_match('/<meta\s+name=["\']description["\']\s+content=["\']([^"\']+)/i', $html, $descMatch);
         $metaDesc = $descMatch[1] ?? '';
 
-        // Extraire le contenu principal (entre <main> ou après le header)
+        // GARDER LE HTML COMPLET (design exact)
         $content = $html;
 
-        // Nettoyer - garder seulement le body
-        if (preg_match('/<body[^>]*>(.*?)<\/body>/is', $html, $bodyMatch)) {
-            $content = $bodyMatch[1];
-        }
-
-        // Supprimer header et footer pour garder le contenu principal
-        $content = preg_replace('/<header[^>]*>.*?<\/header>/is', '', $content);
-        $content = preg_replace('/<footer[^>]*>.*?<\/footer>/is', '', $content);
-        $content = preg_replace('/<nav[^>]*>.*?<\/nav>/is', '', $content);
-        $content = preg_replace('/<script[^>]*>.*?<\/script>/is', '', $content);
-        $content = preg_replace('/<div\s+id=["\']dynamic-header["\'][^>]*>.*?<\/div>/is', '', $content);
-        $content = preg_replace('/<div\s+id=["\']dynamic-footer["\'][^>]*>.*?<\/div>/is', '', $content);
-
-        // CORRIGER LES LIENS RELATIFS → ABSOLUS
+        // CORRIGER LES LIENS RELATIFS → ABSOLUS dans le HTML complet
         $content = fixRelativeUrls($content);
 
-        // Créer un extrait
-        $excerpt = substr(strip_tags($content), 0, 300);
-        $excerpt = preg_replace('/\s+/', ' ', $excerpt);
+        // Créer un extrait depuis le texte visible
+        $textContent = strip_tags(preg_replace('/<(script|style)[^>]*>.*?<\/\1>/is', '', $content));
+        $excerpt = substr(preg_replace('/\s+/', ' ', $textContent), 0, 300);
 
         try {
             $stmt->execute([$title, $slug, $content, $excerpt, $title, $metaDesc]);
