@@ -104,6 +104,41 @@ $productCount = count($products);
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Bebas+Neue&display=swap"></noscript>
     <link rel="preload" href="/assets/css/components.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="/assets/css/components.css"></noscript>
+
+    <style>
+    /* Product Cards - Styles complémentaires */
+    .product-title {
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1.3;
+        margin-bottom: 8px;
+        color: #1a1a1a;
+    }
+
+    .product-link {
+        display: inline-block;
+        color: #FF4B26;
+        font-weight: 600;
+        font-size: 14px;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .product-link:hover {
+        color: #E63910;
+    }
+
+    /* Badge styles */
+    .badge-genre {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .badge-tissu {
+        background: #FF4B26;
+        color: #fff;
+    }
+    </style>
 </head>
 <body>
     <div id="dynamic-header"></div>
@@ -240,10 +275,19 @@ $productCount = count($products);
                             <span class="product-spec"><?= htmlspecialchars($prod['grammage']) ?> gr/m²</span>
                             <?php endif; ?>
                         </div>
-                        <?php if ($prodPrice): ?>
-                        <div class="product-price">
-                            <span class="price-label">À partir de</span>
-                            <span class="price-value"><?= $prodPrice ?>€</span>
+                        <?php if ($prodPrice):
+                            $prixEnfant = number_format(floatval($prod['prix_500']) * 0.90, 2, '.', '');
+                        ?>
+                        <div class="product-pricing">
+                            <div class="product-price-label">À partir de</div>
+                            <div class="product-price-adulte">
+                                <span class="product-price-type">Adulte</span>
+                                <span class="product-price"><?= $prodPrice ?>€</span>
+                            </div>
+                            <div class="product-price-enfant">
+                                <span class="product-price-type">Enfant</span>
+                                <span class="product-price-small"><?= $prixEnfant ?>€</span>
+                            </div>
                         </div>
                         <?php endif; ?>
                         <a href="/produit/<?= htmlspecialchars($prod['reference']) ?>" class="product-link">Voir le produit →</a>
