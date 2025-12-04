@@ -180,6 +180,17 @@ try {
         'on_sale' => 'BOOLEAN DEFAULT FALSE',
         'sort_order' => 'INT DEFAULT 0',
         'related_products' => 'JSON',
+        'stock_status' => "VARCHAR(50) DEFAULT 'in_stock'",
+        'slug' => 'VARCHAR(255) DEFAULT NULL',
+        'meta_title' => 'VARCHAR(255) DEFAULT NULL',
+        'meta_description' => 'TEXT DEFAULT NULL',
+        'tab_description' => 'LONGTEXT DEFAULT NULL',
+        'tab_specifications' => 'LONGTEXT DEFAULT NULL',
+        'tab_sizes' => 'LONGTEXT DEFAULT NULL',
+        'tab_templates' => 'LONGTEXT DEFAULT NULL',
+        'tab_faq' => 'LONGTEXT DEFAULT NULL',
+        'configurator_config' => 'LONGTEXT DEFAULT NULL',
+        'size_chart_id' => 'INT DEFAULT NULL',
         // Prix enfants par quantité (-10% du prix adulte par défaut)
         'prix_enfant_1' => 'DECIMAL(10,2) DEFAULT NULL',
         'prix_enfant_5' => 'DECIMAL(10,2) DEFAULT NULL',
@@ -2737,17 +2748,13 @@ $user = $_SESSION['admin_user'] ?? null;
                             if (typeof updateConfigJSON === 'function') {
                                 updateConfigJSON();
                             }
-                            // Mettre à jour les contenus Quill vers les textareas
-                            if (typeof quillEditors !== 'undefined') {
-                                for (var key in quillEditors) {
-                                    if (quillEditors.hasOwnProperty(key) && quillEditors[key].quill) {
-                                        var textarea = document.querySelector('textarea[name="' + key + '"]');
-                                        if (textarea) {
-                                            textarea.value = quillEditors[key].quill.root.innerHTML;
-                                        }
-                                    }
+                            // Synchroniser tous les éditeurs Quill vers leurs textareas
+                            document.querySelectorAll('.ql-editor').forEach(function(editor) {
+                                var container = editor.closest('.quill-editor-container');
+                                if (container && container.nextElementSibling && container.nextElementSibling.tagName === 'TEXTAREA') {
+                                    container.nextElementSibling.value = editor.innerHTML;
                                 }
-                            }
+                            });
                             return true; // Permettre la soumission
                         }
                         </script>
