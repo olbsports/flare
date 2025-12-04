@@ -314,10 +314,19 @@ if ($page === 'logout') {
 
 // ACTIONS
 $toast = '';
+$debugInfo = ''; // Pour afficher les infos de debug
 if ($action && $pdo) {
     try {
         switch ($action) {
             case 'save_product':
+                // DEBUG: Afficher ce qui est reçu pour les onglets
+                $debugInfo = "DEBUG POST reçu:\n";
+                $debugInfo .= "- tab_description: " . (empty($_POST['tab_description']) ? 'VIDE' : strlen($_POST['tab_description']) . ' chars') . "\n";
+                $debugInfo .= "- tab_specifications: " . (empty($_POST['tab_specifications']) ? 'VIDE' : strlen($_POST['tab_specifications']) . ' chars') . "\n";
+                $debugInfo .= "- configurator_config: " . (empty($_POST['configurator_config']) ? 'VIDE' : strlen($_POST['configurator_config']) . ' chars') . "\n";
+                $debugInfo .= "- meta_title: " . ($_POST['meta_title'] ?? 'NULL') . "\n";
+                $debugInfo .= "- active: " . ($_POST['active'] ?? 'NULL') . "\n";
+
                 $fields = ['nom', 'sport', 'famille', 'description', 'description_seo', 'tissu', 'grammage',
                     'prix_1', 'prix_5', 'prix_10', 'prix_20', 'prix_50', 'prix_100', 'prix_250', 'prix_500',
                     'prix_enfant_1', 'prix_enfant_5', 'prix_enfant_10', 'prix_enfant_20', 'prix_enfant_50', 'prix_enfant_100', 'prix_enfant_250', 'prix_enfant_500',
@@ -1899,6 +1908,13 @@ $user = $_SESSION['admin_user'] ?? null;
 <?php if ($toast): ?>
 <div class="toast"><?= htmlspecialchars($toast) ?></div>
 <script>setTimeout(() => document.querySelector('.toast').remove(), 3000);</script>
+<?php endif; ?>
+
+<?php if ($debugInfo): ?>
+<div style="position: fixed; top: 80px; right: 20px; background: #1e293b; color: #22c55e; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; white-space: pre-wrap; z-index: 10000; max-width: 400px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+    <strong style="color: #f59e0b;">🔍 DEBUG INFO</strong><br><br><?= htmlspecialchars($debugInfo) ?>
+    <br><button onclick="this.parentElement.remove()" style="margin-top: 10px; padding: 5px 10px; cursor: pointer;">Fermer</button>
+</div>
 <?php endif; ?>
 
 <!-- SIDEBAR -->
