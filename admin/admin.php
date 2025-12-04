@@ -238,28 +238,28 @@ if ($action && $pdo) {
                 break;
 
             case 'save_page':
-                // Sauvegarder directement dans le fichier HTML
-                $filePath = $_POST['file_path'] ?? '';
+                // Sauvegarder directement dans le fichier HTML via type et slug
+                $pageType = $_POST['page_type'] ?? 'info';
+                $pageSlug = $_POST['page_slug'] ?? '';
                 $content = $_POST['content'] ?? '';
 
-                // Validation du chemin (sécurité)
-                $allowedDirs = [
-                    realpath(__DIR__ . '/../pages/info/'),
-                    realpath(__DIR__ . '/../pages/products/'),
-                    realpath(__DIR__ . '/../pages/blog/')
+                // Construire le chemin selon le type
+                $directories = [
+                    'info' => __DIR__ . '/../pages/info/',
+                    'category' => __DIR__ . '/../pages/products/'
                 ];
 
-                $realPath = realpath(dirname($filePath));
-                $isAllowed = false;
-                foreach ($allowedDirs as $dir) {
-                    if ($dir && strpos($realPath, $dir) === 0) {
-                        $isAllowed = true;
-                        break;
-                    }
+                if (!$pageSlug || !isset($directories[$pageType])) {
+                    $toast = 'Erreur: Type ou slug invalide';
+                    break;
                 }
 
-                if (!$isAllowed || !file_exists($filePath)) {
-                    $toast = 'Erreur: Chemin de fichier invalide';
+                // Nettoyer le slug (sécurité)
+                $pageSlug = preg_replace('/[^a-zA-Z0-9\-_]/', '', $pageSlug);
+                $filePath = $directories[$pageType] . $pageSlug . '.html';
+
+                if (!file_exists($filePath)) {
+                    $toast = 'Erreur: Fichier introuvable';
                     break;
                 }
 
@@ -605,8 +605,7 @@ if ($pdo && $page !== 'login') {
                 $data['items'] = [];
                 $directories = [
                     'info' => __DIR__ . '/../pages/info/',
-                    'category' => __DIR__ . '/../pages/products/',
-                    'blog' => __DIR__ . '/../pages/blog/'
+                    'category' => __DIR__ . '/../pages/products/'
                 ];
                 foreach ($directories as $type => $dir) {
                     if (is_dir($dir)) {
@@ -635,36 +634,27 @@ if ($pdo && $page !== 'login') {
                 break;
 
             case 'page':
-                // Charger un fichier HTML pour édition
-                $filePath = $_GET['file'] ?? '';
-                if ($filePath && file_exists($filePath)) {
-                    // Vérifier que le fichier est dans un répertoire autorisé
-                    $allowedDirs = [
-                        realpath(__DIR__ . '/../pages/info/'),
-                        realpath(__DIR__ . '/../pages/products/'),
-                        realpath(__DIR__ . '/../pages/blog/')
-                    ];
-                    $realPath = realpath(dirname($filePath));
-                    $isAllowed = false;
-                    foreach ($allowedDirs as $dir) {
-                        if ($dir && strpos($realPath, $dir) === 0) {
-                            $isAllowed = true;
-                            break;
-                        }
-                    }
-                    if ($isAllowed) {
+                // Charger un fichier HTML pour édition via type et slug
+                $pageType = $_GET['type'] ?? 'info';
+                $pageSlug = $_GET['slug'] ?? '';
+
+                // Construire le chemin selon le type
+                $directories = [
+                    'info' => __DIR__ . '/../pages/info/',
+                    'category' => __DIR__ . '/../pages/products/'
+                ];
+
+                if ($pageSlug && isset($directories[$pageType])) {
+                    // Nettoyer le slug (sécurité)
+                    $pageSlug = preg_replace('/[^a-zA-Z0-9\-_]/', '', $pageSlug);
+                    $filePath = $directories[$pageType] . $pageSlug . '.html';
+
+                    if (file_exists($filePath)) {
                         $data['file_path'] = $filePath;
                         $data['content'] = file_get_contents($filePath);
                         $data['filename'] = basename($filePath);
-                        $data['slug'] = basename($filePath, '.html');
-                        // Déterminer le type
-                        if (strpos($filePath, '/products/') !== false) {
-                            $data['type'] = 'category';
-                        } elseif (strpos($filePath, '/blog/') !== false) {
-                            $data['type'] = 'blog';
-                        } else {
-                            $data['type'] = 'info';
-                        }
+                        $data['slug'] = $pageSlug;
+                        $data['type'] = $pageType;
                     }
                 }
                 break;
@@ -1960,7 +1950,7 @@ $user = $_SESSION['admin_user'] ?? null;
                             <td><a href="<?= $pageUrl ?>" target="_blank" style="color:var(--primary); font-size: 12px;"><?= $pageUrl ?></a></td>
                             <td style="font-size: 12px; color: var(--text-muted);"><?= date('d/m/Y H:i', $pg['modified']) ?></td>
                             <td>
-                                <a href="?page=page&file=<?= urlencode($pg['file']) ?>" class="btn btn-sm btn-primary">Modifier</a>
+                                <a href="?page=page&type=<?= urlencode($pg['type']) ?>&slug=<?= urlencode($pg['slug']) ?>" class="btn btn-sm btn-primary">Modifier</a>
                                 <a href="<?= $pageUrl ?>" target="_blank" class="btn btn-sm btn-light">Voir</a>
                             </td>
                         </tr>
@@ -2014,7 +2004,8 @@ $user = $_SESSION['admin_user'] ?? null;
                 <form method="POST" id="pageForm" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
                     <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
                     <input type="hidden" name="action" value="save_page">
-                    <input type="hidden" name="file_path" value="<?= htmlspecialchars($filePath) ?>">
+                    <input type="hidden" name="page_type" value="<?= htmlspecialchars($pageType) ?>">
+                    <input type="hidden" name="page_slug" value="<?= htmlspecialchars($slug) ?>">
                     <input type="hidden" name="content" id="htmlContent">
 
                     <!-- Onglets sidebar -->
@@ -2471,18 +2462,6 @@ $user = $_SESSION['admin_user'] ?? null;
 
         <?php // ============ BLOG ============ ?>
         <?php elseif ($page === 'blog'): ?>
-        <!-- Bouton d'import blog -->
-        <div class="card" style="margin-bottom: 20px;">
-            <div class="card-body" style="display: flex; gap: 15px; align-items: center;">
-                <span style="font-weight: 600;">Importer depuis fichiers HTML :</span>
-                <form method="POST" style="display: inline;">
-                    <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
-                    <input type="hidden" name="action" value="import_html_blog">
-                    <button type="submit" class="btn btn-light">Importer Articles Blog</button>
-                </form>
-            </div>
-        </div>
-
         <div class="card">
             <div class="card-header">
                 <span class="card-title">Articles de blog (<?= count($data['items'] ?? []) ?>)</span>
@@ -2509,7 +2488,7 @@ $user = $_SESSION['admin_user'] ?? null;
             </div>
         </div>
 
-        <?php // ============ BLOG EDIT ============ ?>
+        <?php // ============ BLOG EDIT - SIMPLE TEXTE ============ ?>
         <?php elseif ($page === 'blog_edit'): ?>
         <?php $post = $data['item'] ?? []; ?>
         <div class="card">
@@ -2520,19 +2499,18 @@ $user = $_SESSION['admin_user'] ?? null;
                 <?php endif; ?>
             </div>
             <form method="POST" id="blogForm">
-            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
-
+                <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
                 <input type="hidden" name="action" value="save_blog">
                 <div class="card-body">
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">Titre</label>
-                            <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($post['title'] ?? '') ?>" required>
+                            <label class="form-label">Titre de l'article</label>
+                            <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($post['title'] ?? '') ?>" required placeholder="Ex: Comment personnaliser vos maillots">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Slug (URL)</label>
-                            <input type="text" name="slug" class="form-control" value="<?= htmlspecialchars($post['slug'] ?? '') ?>" required>
-                            <small style="color:var(--text-muted)">URL: /blog/<span id="blogSlugPreview"><?= htmlspecialchars($post['slug'] ?? '') ?></span></small>
+                            <label class="form-label">URL (slug)</label>
+                            <input type="text" name="slug" class="form-control" value="<?= htmlspecialchars($post['slug'] ?? '') ?>" required placeholder="comment-personnaliser-maillots">
+                            <small style="color:var(--text-muted)">URL: /blog/<?= htmlspecialchars($post['slug'] ?? 'mon-article') ?></small>
                         </div>
                     </div>
                     <div class="form-row">
@@ -2542,6 +2520,7 @@ $user = $_SESSION['admin_user'] ?? null;
                                 <option value="conseils" <?= ($post['category'] ?? '') === 'conseils' ? 'selected' : '' ?>>Conseils</option>
                                 <option value="tutoriels" <?= ($post['category'] ?? '') === 'tutoriels' ? 'selected' : '' ?>>Tutoriels</option>
                                 <option value="nouveautes" <?= ($post['category'] ?? '') === 'nouveautes' ? 'selected' : '' ?>>Nouveautés</option>
+                                <option value="actualites" <?= ($post['category'] ?? '') === 'actualites' ? 'selected' : '' ?>>Actualités</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -2552,141 +2531,125 @@ $user = $_SESSION['admin_user'] ?? null;
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Image mise en avant</label>
-                            <input type="text" name="featured_image" class="form-control" value="<?= htmlspecialchars($post['featured_image'] ?? '') ?>">
+                            <label class="form-label">Image mise en avant (URL)</label>
+                            <input type="text" name="featured_image" class="form-control" value="<?= htmlspecialchars($post['featured_image'] ?? '') ?>" placeholder="/assets/images/blog/mon-image.jpg">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Extrait</label>
-                        <textarea name="excerpt" class="form-control" style="min-height: 80px;"><?= htmlspecialchars($post['excerpt'] ?? '') ?></textarea>
+                        <label class="form-label">Extrait (affiché dans la liste des articles)</label>
+                        <textarea name="excerpt" class="form-control" rows="3" placeholder="Résumé court de l'article..."><?= htmlspecialchars($post['excerpt'] ?? '') ?></textarea>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Contenu HTML complet</label>
-                        <div class="html-editor-toolbar">
-                            <button type="button" class="btn btn-light" onclick="formatBlogCode()">Formater</button>
-                            <button type="button" class="btn btn-light" onclick="toggleBlogTheme()">Theme Sombre/Clair</button>
-                            <button type="button" class="btn btn-light" onclick="toggleBlogFullscreen()">Plein écran</button>
-                            <button type="button" class="btn btn-light" onclick="previewBlog()">Prévisualiser</button>
-                            <span class="editor-status" id="blogEditorStatus">Prêt</span>
+                        <label class="form-label">Contenu de l'article</label>
+                        <!-- WYSIWYG Toolbar -->
+                        <div class="wysiwyg-toolbar" style="background: #f8fafc; border: 1px solid #e2e8f0; border-bottom: none; border-radius: 6px 6px 0 0; padding: 8px; display: flex; gap: 5px; flex-wrap: wrap;">
+                            <button type="button" onclick="formatDoc('bold')" title="Gras" style="width: 32px; height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; font-weight: bold;">B</button>
+                            <button type="button" onclick="formatDoc('italic')" title="Italique" style="width: 32px; height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; font-style: italic;">I</button>
+                            <button type="button" onclick="formatDoc('underline')" title="Souligné" style="width: 32px; height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; text-decoration: underline;">U</button>
+                            <span style="width: 1px; background: #e2e8f0; margin: 0 5px;"></span>
+                            <button type="button" onclick="formatDoc('formatBlock', 'h2')" title="Titre H2" style="height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; padding: 0 10px; font-weight: bold;">H2</button>
+                            <button type="button" onclick="formatDoc('formatBlock', 'h3')" title="Titre H3" style="height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; padding: 0 10px; font-weight: bold;">H3</button>
+                            <button type="button" onclick="formatDoc('formatBlock', 'p')" title="Paragraphe" style="height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; padding: 0 10px;">P</button>
+                            <span style="width: 1px; background: #e2e8f0; margin: 0 5px;"></span>
+                            <button type="button" onclick="formatDoc('insertUnorderedList')" title="Liste à puces" style="width: 32px; height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer;">•</button>
+                            <button type="button" onclick="formatDoc('insertOrderedList')" title="Liste numérotée" style="width: 32px; height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer;">1.</button>
+                            <span style="width: 1px; background: #e2e8f0; margin: 0 5px;"></span>
+                            <button type="button" onclick="insertLink()" title="Insérer un lien" style="height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; padding: 0 10px;">🔗 Lien</button>
+                            <button type="button" onclick="insertImage()" title="Insérer une image" style="height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; padding: 0 10px;">🖼️ Image</button>
+                            <span style="flex: 1;"></span>
+                            <button type="button" onclick="toggleHtmlView()" id="htmlViewBtn" title="Voir HTML" style="height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; padding: 0 10px;">{"} HTML</button>
                         </div>
-                        <textarea name="content" id="blogHtmlEditor" style="display:none;"><?= htmlspecialchars($post['content'] ?? '') ?></textarea>
+                        <!-- WYSIWYG Editor -->
+                        <div id="wysiwygEditor" contenteditable="true" style="border: 1px solid #e2e8f0; border-radius: 0 0 6px 6px; min-height: 400px; padding: 20px; background: #fff; font-size: 15px; line-height: 1.7; outline: none;"><?= $post['content'] ?? '' ?></div>
+                        <!-- Hidden textarea for form submission -->
+                        <textarea name="content" id="blogContentHidden" style="display: none;"><?= htmlspecialchars($post['content'] ?? '') ?></textarea>
+                        <!-- HTML View (hidden by default) -->
+                        <textarea id="htmlViewEditor" style="display: none; width: 100%; min-height: 400px; border: 1px solid #e2e8f0; border-radius: 0 0 6px 6px; padding: 15px; font-family: monospace; font-size: 13px;"><?= htmlspecialchars($post['content'] ?? '') ?></textarea>
                     </div>
-
-                    <!-- Preview modal for blog -->
-                    <div id="blogPreviewModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; padding:20px;">
-                        <div style="background:#fff; height:100%; border-radius:8px; overflow:hidden; display:flex; flex-direction:column;">
-                            <div style="padding:10px 20px; background:var(--sidebar-bg); color:#fff; display:flex; justify-content:space-between; align-items:center;">
-                                <span>Prévisualisation Article</span>
-                                <button type="button" onclick="closeBlogPreview()" style="background:none; border:none; color:#fff; font-size:24px; cursor:pointer;">&times;</button>
-                            </div>
-                            <iframe id="blogPreviewFrame" class="preview-frame" style="flex:1; border:none;"></iframe>
-                        </div>
-                    </div>
-
-                    <div class="form-row" style="margin-top: 20px;">
+                    <div class="form-row" style="margin-top: 15px;">
                         <div class="form-group">
                             <label class="form-label">Meta Title (SEO)</label>
-                            <input type="text" name="meta_title" class="form-control" value="<?= htmlspecialchars($post['meta_title'] ?? '') ?>">
+                            <input type="text" name="meta_title" class="form-control" value="<?= htmlspecialchars($post['meta_title'] ?? '') ?>" placeholder="Titre pour Google (60 car. max)">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Meta Description (SEO)</label>
-                            <textarea name="meta_description" class="form-control"><?= htmlspecialchars($post['meta_description'] ?? '') ?></textarea>
+                            <input type="text" name="meta_description" class="form-control" value="<?= htmlspecialchars($post['meta_description'] ?? '') ?>" placeholder="Description pour Google (160 car. max)">
                         </div>
                     </div>
                 </div>
                 <div class="card-footer">
                     <a href="?page=blog" class="btn btn-light">← Retour</a>
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer l'article</button>
                 </div>
             </form>
         </div>
 
         <script>
-        // Initialize CodeMirror for blog
-        var blogEditor = CodeMirror.fromTextArea(document.getElementById('blogHtmlEditor'), {
-            mode: 'htmlmixed',
-            theme: 'default',
-            lineNumbers: true,
-            lineWrapping: true,
-            autoCloseTags: true,
-            matchTags: {bothTags: true},
-            foldGutter: true,
-            gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
-            extraKeys: {
-                "Ctrl-S": function(cm) { document.getElementById('blogForm').submit(); },
-                "Cmd-S": function(cm) { document.getElementById('blogForm').submit(); },
-                "F11": function(cm) { toggleBlogFullscreen(); }
-            }
-        });
+        // WYSIWYG Editor Functions
+        var isHtmlView = false;
+        var editor = document.getElementById('wysiwygEditor');
+        var htmlView = document.getElementById('htmlViewEditor');
+        var hiddenContent = document.getElementById('blogContentHidden');
 
-        blogEditor.setSize(null, 500);
+        function formatDoc(command, value) {
+            document.execCommand(command, false, value || null);
+            editor.focus();
+        }
 
-        blogEditor.on('change', function() {
-            document.getElementById('blogEditorStatus').textContent = 'Modifié (non sauvegardé)';
-        });
-
-        // Slug preview
-        document.querySelector('input[name="slug"]')?.addEventListener('input', function() {
-            var preview = document.getElementById('blogSlugPreview');
-            if (preview) preview.textContent = this.value;
-        });
-
-        function formatBlogCode() {
-            var content = blogEditor.getValue();
-            try {
-                var formatted = content.replace(/></g, '>\n<').replace(/\n\s*\n/g, '\n');
-                blogEditor.setValue(formatted);
-                document.getElementById('blogEditorStatus').textContent = 'Code formaté';
-            } catch(e) {
-                alert('Erreur de formatage');
+        function insertLink() {
+            var url = prompt('URL du lien:', 'https://');
+            if (url) {
+                document.execCommand('createLink', false, url);
             }
         }
 
-        var blogIsDark = false;
-        function toggleBlogTheme() {
-            blogIsDark = !blogIsDark;
-            blogEditor.setOption('theme', blogIsDark ? 'monokai' : 'default');
+        function insertImage() {
+            var url = prompt('URL de l\'image:', '/assets/images/');
+            if (url) {
+                document.execCommand('insertImage', false, url);
+            }
         }
 
-        var blogIsFullscreen = false;
-        function toggleBlogFullscreen() {
-            var wrapper = blogEditor.getWrapperElement();
-            blogIsFullscreen = !blogIsFullscreen;
-            if (blogIsFullscreen) {
-                wrapper.style.position = 'fixed';
-                wrapper.style.inset = '0';
-                wrapper.style.zIndex = '9999';
-                wrapper.style.height = '100vh';
-                blogEditor.setSize('100%', '100%');
+        function toggleHtmlView() {
+            isHtmlView = !isHtmlView;
+            var btn = document.getElementById('htmlViewBtn');
+            if (isHtmlView) {
+                htmlView.value = editor.innerHTML;
+                editor.style.display = 'none';
+                htmlView.style.display = 'block';
+                btn.style.background = 'var(--primary)';
+                btn.style.color = '#fff';
             } else {
-                wrapper.style.position = '';
-                wrapper.style.inset = '';
-                wrapper.style.zIndex = '';
-                wrapper.style.height = '';
-                blogEditor.setSize(null, 500);
+                editor.innerHTML = htmlView.value;
+                editor.style.display = 'block';
+                htmlView.style.display = 'none';
+                btn.style.background = '#fff';
+                btn.style.color = 'inherit';
             }
-            blogEditor.refresh();
         }
 
-        function previewBlog() {
-            var content = blogEditor.getValue();
-            var iframe = document.getElementById('blogPreviewFrame');
-            var doc = iframe.contentDocument || iframe.contentWindow.document;
-            doc.open();
-            doc.write(content);
-            doc.close();
-            document.getElementById('blogPreviewModal').style.display = 'block';
-        }
-
-        function closeBlogPreview() {
-            document.getElementById('blogPreviewModal').style.display = 'none';
-        }
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeBlogPreview();
-                if (blogIsFullscreen) toggleBlogFullscreen();
+        // Sync content to hidden field before submit
+        document.getElementById('blogForm').addEventListener('submit', function() {
+            if (isHtmlView) {
+                hiddenContent.value = htmlView.value;
+            } else {
+                hiddenContent.value = editor.innerHTML;
             }
+        });
+
+        // Auto-generate slug from title
+        document.querySelector('input[name="title"]')?.addEventListener('input', function() {
+            var slugInput = document.querySelector('input[name="slug"]');
+            if (slugInput && !slugInput.dataset.edited) {
+                slugInput.value = this.value
+                    .toLowerCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-|-$/g, '');
+            }
+        });
+        document.querySelector('input[name="slug"]')?.addEventListener('input', function() {
+            this.dataset.edited = 'true';
         });
         </script>
 
