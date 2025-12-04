@@ -238,28 +238,29 @@ if ($action && $pdo) {
                 break;
 
             case 'save_page':
-                // Sauvegarder directement dans le fichier HTML
-                $filePath = $_POST['file_path'] ?? '';
+                // Sauvegarder directement dans le fichier HTML via type et slug
+                $pageType = $_POST['page_type'] ?? 'info';
+                $pageSlug = $_POST['page_slug'] ?? '';
                 $content = $_POST['content'] ?? '';
 
-                // Validation du chemin (sécurité)
-                $allowedDirs = [
-                    realpath(__DIR__ . '/../pages/info/'),
-                    realpath(__DIR__ . '/../pages/products/'),
-                    realpath(__DIR__ . '/../pages/blog/')
+                // Construire le chemin selon le type
+                $directories = [
+                    'info' => __DIR__ . '/../pages/info/',
+                    'category' => __DIR__ . '/../pages/products/',
+                    'blog' => __DIR__ . '/../pages/blog/'
                 ];
 
-                $realPath = realpath(dirname($filePath));
-                $isAllowed = false;
-                foreach ($allowedDirs as $dir) {
-                    if ($dir && strpos($realPath, $dir) === 0) {
-                        $isAllowed = true;
-                        break;
-                    }
+                if (!$pageSlug || !isset($directories[$pageType])) {
+                    $toast = 'Erreur: Type ou slug invalide';
+                    break;
                 }
 
-                if (!$isAllowed || !file_exists($filePath)) {
-                    $toast = 'Erreur: Chemin de fichier invalide';
+                // Nettoyer le slug (sécurité)
+                $pageSlug = preg_replace('/[^a-zA-Z0-9\-_]/', '', $pageSlug);
+                $filePath = $directories[$pageType] . $pageSlug . '.html';
+
+                if (!file_exists($filePath)) {
+                    $toast = 'Erreur: Fichier introuvable';
                     break;
                 }
 
@@ -635,36 +636,28 @@ if ($pdo && $page !== 'login') {
                 break;
 
             case 'page':
-                // Charger un fichier HTML pour édition
-                $filePath = $_GET['file'] ?? '';
-                if ($filePath && file_exists($filePath)) {
-                    // Vérifier que le fichier est dans un répertoire autorisé
-                    $allowedDirs = [
-                        realpath(__DIR__ . '/../pages/info/'),
-                        realpath(__DIR__ . '/../pages/products/'),
-                        realpath(__DIR__ . '/../pages/blog/')
-                    ];
-                    $realPath = realpath(dirname($filePath));
-                    $isAllowed = false;
-                    foreach ($allowedDirs as $dir) {
-                        if ($dir && strpos($realPath, $dir) === 0) {
-                            $isAllowed = true;
-                            break;
-                        }
-                    }
-                    if ($isAllowed) {
+                // Charger un fichier HTML pour édition via type et slug
+                $pageType = $_GET['type'] ?? 'info';
+                $pageSlug = $_GET['slug'] ?? '';
+
+                // Construire le chemin selon le type
+                $directories = [
+                    'info' => __DIR__ . '/../pages/info/',
+                    'category' => __DIR__ . '/../pages/products/',
+                    'blog' => __DIR__ . '/../pages/blog/'
+                ];
+
+                if ($pageSlug && isset($directories[$pageType])) {
+                    // Nettoyer le slug (sécurité)
+                    $pageSlug = preg_replace('/[^a-zA-Z0-9\-_]/', '', $pageSlug);
+                    $filePath = $directories[$pageType] . $pageSlug . '.html';
+
+                    if (file_exists($filePath)) {
                         $data['file_path'] = $filePath;
                         $data['content'] = file_get_contents($filePath);
                         $data['filename'] = basename($filePath);
-                        $data['slug'] = basename($filePath, '.html');
-                        // Déterminer le type
-                        if (strpos($filePath, '/products/') !== false) {
-                            $data['type'] = 'category';
-                        } elseif (strpos($filePath, '/blog/') !== false) {
-                            $data['type'] = 'blog';
-                        } else {
-                            $data['type'] = 'info';
-                        }
+                        $data['slug'] = $pageSlug;
+                        $data['type'] = $pageType;
                     }
                 }
                 break;
@@ -1960,7 +1953,7 @@ $user = $_SESSION['admin_user'] ?? null;
                             <td><a href="<?= $pageUrl ?>" target="_blank" style="color:var(--primary); font-size: 12px;"><?= $pageUrl ?></a></td>
                             <td style="font-size: 12px; color: var(--text-muted);"><?= date('d/m/Y H:i', $pg['modified']) ?></td>
                             <td>
-                                <a href="?page=page&file=<?= urlencode($pg['file']) ?>" class="btn btn-sm btn-primary">Modifier</a>
+                                <a href="?page=page&type=<?= urlencode($pg['type']) ?>&slug=<?= urlencode($pg['slug']) ?>" class="btn btn-sm btn-primary">Modifier</a>
                                 <a href="<?= $pageUrl ?>" target="_blank" class="btn btn-sm btn-light">Voir</a>
                             </td>
                         </tr>
@@ -2014,7 +2007,8 @@ $user = $_SESSION['admin_user'] ?? null;
                 <form method="POST" id="pageForm" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
                     <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
                     <input type="hidden" name="action" value="save_page">
-                    <input type="hidden" name="file_path" value="<?= htmlspecialchars($filePath) ?>">
+                    <input type="hidden" name="page_type" value="<?= htmlspecialchars($pageType) ?>">
+                    <input type="hidden" name="page_slug" value="<?= htmlspecialchars($slug) ?>">
                     <input type="hidden" name="content" id="htmlContent">
 
                     <!-- Onglets sidebar -->
