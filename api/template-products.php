@@ -67,41 +67,65 @@ if ($method === 'GET') {
     exit;
 }
 
-// POST - Définir les produits d'un template
+// POST - Définir les produits d'un template OU les templates d'un produit
 if ($method === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
 
     $templateId = $input['template_id'] ?? null;
+    $productId = $input['product_id'] ?? null;
     $products = $input['products'] ?? [];
-
-    if (!$templateId) {
-        echo json_encode(['success' => false, 'error' => 'template_id required']);
-        exit;
-    }
+    $templates = $input['templates'] ?? [];
 
     $db->beginTransaction();
 
     try {
-        // Supprimer les associations existantes
-        $stmt = $db->prepare("DELETE FROM template_products WHERE template_id = ?");
-        $stmt->execute([$templateId]);
+        // Mode 1: Définir les produits d'un template
+        if ($templateId) {
+            $stmt = $db->prepare("DELETE FROM template_products WHERE template_id = ?");
+            $stmt->execute([$templateId]);
 
-        // Ajouter les nouvelles associations
-        if (!empty($products)) {
-            $stmt = $db->prepare("INSERT INTO template_products (template_id, product_id) VALUES (?, ?)");
-            foreach ($products as $productId) {
-                $stmt->execute([$templateId, (int)$productId]);
+            if (!empty($products)) {
+                $stmt = $db->prepare("INSERT INTO template_products (template_id, product_id) VALUES (?, ?)");
+                foreach ($products as $pid) {
+                    $stmt->execute([$templateId, (int)$pid]);
+                }
             }
+
+            $db->commit();
+            echo json_encode([
+                'success' => true,
+                'message' => 'Products associated successfully',
+                'template_id' => $templateId,
+                'products_count' => count($products)
+            ]);
+            exit;
         }
 
-        $db->commit();
+        // Mode 2: Définir les templates d'un produit
+        if ($productId) {
+            $stmt = $db->prepare("DELETE FROM template_products WHERE product_id = ?");
+            $stmt->execute([$productId]);
 
-        echo json_encode([
-            'success' => true,
-            'message' => 'Products associated successfully',
-            'template_id' => $templateId,
-            'products_count' => count($products)
-        ]);
+            if (!empty($templates)) {
+                $stmt = $db->prepare("INSERT INTO template_products (template_id, product_id) VALUES (?, ?)");
+                foreach ($templates as $tid) {
+                    $stmt->execute([(int)$tid, $productId]);
+                }
+            }
+
+            $db->commit();
+            echo json_encode([
+                'success' => true,
+                'message' => 'Templates associated successfully',
+                'product_id' => $productId,
+                'templates_count' => count($templates)
+            ]);
+            exit;
+        }
+
+        echo json_encode(['success' => false, 'error' => 'template_id or product_id required']);
+        exit;
+
     } catch (Exception $e) {
         $db->rollBack();
         echo json_encode(['success' => false, 'error' => 'Failed to save: ' . $e->getMessage()]);

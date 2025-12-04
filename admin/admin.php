@@ -324,6 +324,23 @@ if ($action && $pdo) {
                 $values[] = $id;
                 $pdo->prepare("UPDATE products SET $set, etiquettes=?, related_products=? WHERE id=?")
                     ->execute(array_merge($values, [$etiquettesStr, $relatedProductsJson]));
+
+                // Sauvegarder les templates associés au produit
+                $productTemplates = $_POST['product_templates'] ?? [];
+                try {
+                    // Supprimer les anciennes associations
+                    $pdo->prepare("DELETE FROM template_products WHERE product_id = ?")->execute([$id]);
+                    // Ajouter les nouvelles associations
+                    if (!empty($productTemplates)) {
+                        $stmt = $pdo->prepare("INSERT INTO template_products (template_id, product_id) VALUES (?, ?)");
+                        foreach ($productTemplates as $templateId) {
+                            $stmt->execute([(int)$templateId, $id]);
+                        }
+                    }
+                } catch (Exception $e) {
+                    // Table peut ne pas exister encore
+                }
+
                 $toast = 'Produit enregistré';
                 break;
 
@@ -837,6 +854,14 @@ if ($pdo && $page !== 'login') {
                     $stmt = $pdo->prepare("SELECT * FROM product_photos WHERE product_id=? ORDER BY ordre, id");
                     $stmt->execute([$id]);
                     $data['photos'] = $stmt->fetchAll();
+                    // Récupérer les templates associés à ce produit
+                    try {
+                        $stmt = $pdo->prepare("SELECT template_id FROM template_products WHERE product_id = ?");
+                        $stmt->execute([$id]);
+                        $data['associated_templates'] = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                    } catch (Exception $e) {
+                        $data['associated_templates'] = [];
+                    }
                 }
                 $data['sports'] = $pdo->query("SELECT DISTINCT sport FROM products WHERE sport!='' ORDER BY sport")->fetchAll(PDO::FETCH_COLUMN);
                 $data['familles'] = $pdo->query("SELECT DISTINCT famille FROM products WHERE famille!='' ORDER BY famille")->fetchAll(PDO::FETCH_COLUMN);
@@ -852,6 +877,16 @@ if ($pdo && $page !== 'login') {
                     FROM products WHERE active=1
                     ORDER BY sport, famille, nom
                 ")->fetchAll();
+                // Tous les templates disponibles pour le sélecteur
+                try {
+                    $data['all_templates'] = $pdo->query("
+                        SELECT id, nom, filename, path, sport, famille
+                        FROM templates WHERE active=1
+                        ORDER BY sport, nom
+                    ")->fetchAll();
+                } catch (Exception $e) {
+                    $data['all_templates'] = [];
+                }
                 break;
 
             case 'categories':
@@ -1029,12 +1064,22 @@ if ($pdo && $page !== 'login') {
                     $params[] = $searchTerm;
                 }
                 if (!empty($_GET['sport'])) {
-                    $where .= " AND t.sport = ?";
-                    $params[] = $_GET['sport'];
+                    // Recherche dans un champ multi-valeurs séparé par virgule
+                    $where .= " AND (t.sport = ? OR t.sport LIKE ? OR t.sport LIKE ? OR t.sport LIKE ?)";
+                    $sportFilter = $_GET['sport'];
+                    $params[] = $sportFilter;           // exact match
+                    $params[] = $sportFilter . ',%';    // début
+                    $params[] = '%,' . $sportFilter;    // fin
+                    $params[] = '%,' . $sportFilter . ',%'; // milieu
                 }
                 if (!empty($_GET['famille'])) {
-                    $where .= " AND t.famille = ?";
-                    $params[] = $_GET['famille'];
+                    // Recherche dans un champ multi-valeurs séparé par virgule
+                    $where .= " AND (t.famille = ? OR t.famille LIKE ? OR t.famille LIKE ? OR t.famille LIKE ?)";
+                    $familleFilter = $_GET['famille'];
+                    $params[] = $familleFilter;
+                    $params[] = $familleFilter . ',%';
+                    $params[] = '%,' . $familleFilter;
+                    $params[] = '%,' . $familleFilter . ',%';
                 }
                 if (!empty($_GET['category'])) {
                     $where .= " AND t.category_id = ?";
@@ -1054,8 +1099,9 @@ if ($pdo && $page !== 'login') {
                     ");
                     $stmt->execute($params);
                     $data['items'] = $stmt->fetchAll();
-                    $data['sports'] = $pdo->query("SELECT DISTINCT sport FROM templates WHERE sport IS NOT NULL AND sport != '' ORDER BY sport")->fetchAll(PDO::FETCH_COLUMN);
-                    $data['familles'] = $pdo->query("SELECT DISTINCT famille FROM templates WHERE famille IS NOT NULL AND famille != '' ORDER BY famille")->fetchAll(PDO::FETCH_COLUMN);
+                    // Récupérer tous les sports uniques depuis les produits (pas les templates)
+                    $data['sports'] = $pdo->query("SELECT DISTINCT sport FROM products WHERE sport IS NOT NULL AND sport != '' ORDER BY sport")->fetchAll(PDO::FETCH_COLUMN);
+                    $data['familles'] = $pdo->query("SELECT DISTINCT famille FROM products WHERE famille IS NOT NULL AND famille != '' ORDER BY famille")->fetchAll(PDO::FETCH_COLUMN);
                     $data['categories'] = $pdo->query("SELECT * FROM template_categories ORDER BY nom")->fetchAll();
                 } catch (Exception $e) {
                     $data['items'] = [];
@@ -1111,8 +1157,9 @@ $user = $_SESSION['admin_user'] ?? null;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - FLARE CUSTOM</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- TinyMCE Editor -->
-    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <!-- Quill Editor (gratuit, open source) -->
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
     <style>
         :root {
             --primary: #FF4B26;
@@ -1535,6 +1582,104 @@ $user = $_SESSION['admin_user'] ?? null;
             background: var(--primary);
             color: #fff;
         }
+
+        /* Quill Editor Custom Styles */
+        .quill-editor-container { margin-bottom: 15px; }
+        .quill-editor-container .ql-container { min-height: 200px; font-size: 14px; }
+        .quill-editor-container .ql-editor { min-height: 200px; }
+        .quill-editor-container .ql-toolbar { border-radius: 6px 6px 0 0; background: #fafbfc; }
+        .quill-editor-container .ql-container { border-radius: 0 0 6px 6px; }
+
+        /* Photo Gallery Manager */
+        .photo-gallery-manager { margin-bottom: 30px; }
+        .photo-dropzone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+            margin-bottom: 20px;
+        }
+        .photo-dropzone:hover, .photo-dropzone.dragover {
+            border-color: var(--primary);
+            background: #fff5f3;
+        }
+        .photo-dropzone-icon { font-size: 48px; margin-bottom: 10px; opacity: 0.5; }
+        .photo-dropzone-text { color: var(--text-muted); margin-bottom: 10px; }
+        .photo-dropzone-hint { font-size: 12px; color: var(--text-muted); }
+        .photo-gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .photo-gallery-item {
+            position: relative;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+            cursor: grab;
+            transition: all 0.2s ease;
+        }
+        .photo-gallery-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .photo-gallery-item.dragging { opacity: 0.5; }
+        .photo-gallery-item.main-photo { border: 2px solid var(--success); }
+        .photo-gallery-item img { width: 100%; height: 120px; object-fit: cover; display: block; }
+        .photo-gallery-item-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 4px;
+            padding: 6px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .photo-gallery-item:hover .photo-gallery-item-overlay { opacity: 1; }
+        .photo-gallery-item-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .photo-gallery-item-btn.star { background: rgba(255,255,255,0.9); color: #f59e0b; }
+        .photo-gallery-item-btn.delete { background: rgba(241,65,108,0.9); color: #fff; }
+        .photo-gallery-item-badge {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 6px;
+            background: var(--success);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .photo-upload-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: rgba(0,0,0,0.1);
+        }
+        .photo-upload-progress-bar {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s;
+        }
     </style>
     <!-- CodeMirror for HTML editing -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
@@ -1941,74 +2086,267 @@ $user = $_SESSION['admin_user'] ?? null;
 
                         <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
 
-                        <h4 style="margin-bottom: 20px;">Galerie photos (illimitée)</h4>
+                        <h4 style="margin-bottom: 20px;">📸 Galerie photos</h4>
+                        <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 13px;">
+                            Glissez-déposez vos images ou cliquez pour sélectionner. Les photos sont stockées dans <code>/photos/produits/</code>
+                        </p>
 
-                        <!-- Photos existantes dans la galerie -->
-                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px;">
-                            <?php foreach ($data['photos'] ?? [] as $photo): ?>
-                            <div style="border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fafbfc;">
-                                <img src="<?= htmlspecialchars($photo['url']) ?>" style="width: 100%; height: 140px; object-fit: cover;">
-                                <div style="padding: 10px;">
-                                    <small style="color: var(--text-muted); display: block; margin-bottom: 8px; word-break: break-all;"><?= htmlspecialchars(basename($photo['url'])) ?></small>
-                                    <div style="display: flex; gap: 5px;">
+                        <div class="photo-gallery-manager" id="photoGalleryManager" data-product-id="<?= $id ?>">
+                            <!-- Zone de drop pour upload -->
+                            <div class="photo-dropzone" id="photoDropzone">
+                                <div class="photo-dropzone-icon">📁</div>
+                                <div class="photo-dropzone-text">
+                                    <strong>Glissez-déposez vos photos ici</strong><br>
+                                    ou cliquez pour parcourir
+                                </div>
+                                <div class="photo-dropzone-hint">PNG, JPG, WebP - Max 10 Mo par fichier</div>
+                                <input type="file" id="photoFileInput" multiple accept="image/*" style="display: none;">
+                            </div>
+
+                            <!-- Grille des photos -->
+                            <div class="photo-gallery-grid" id="photoGalleryGrid">
+                                <?php foreach ($data['photos'] ?? [] as $photo): ?>
+                                <div class="photo-gallery-item <?= $photo['is_main'] ? 'main-photo' : '' ?>" data-id="<?= $photo['id'] ?>" draggable="true">
+                                    <img src="<?= htmlspecialchars($photo['url']) ?>" alt="<?= htmlspecialchars($photo['alt_text'] ?? '') ?>">
+                                    <div class="photo-gallery-item-overlay">
                                         <?php if (!$photo['is_main']): ?>
-                                        <form method="POST" style="margin: 0;">
-                                            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
-                                            <input type="hidden" name="action" value="set_main_photo">
-                                            <input type="hidden" name="photo_id" value="<?= $photo['id'] ?>">
-                                            <input type="hidden" name="product_id" value="<?= $id ?>">
-                                            <button type="submit" class="btn btn-sm btn-light" title="Définir comme principale">⭐</button>
-                                        </form>
-                                        <?php else: ?>
-                                        <span class="badge badge-success">Principale</span>
+                                        <button type="button" class="photo-gallery-item-btn star" onclick="setMainPhoto(<?= $photo['id'] ?>)" title="Définir comme principale">⭐</button>
                                         <?php endif; ?>
-                                        <form method="POST" style="margin: 0;" onsubmit="return confirm('Supprimer cette photo ?')">
-                                            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
-                                            <input type="hidden" name="action" value="delete_photo">
-                                            <input type="hidden" name="photo_id" value="<?= $photo['id'] ?>">
-                                            <button type="submit" class="btn btn-sm btn-danger">🗑</button>
-                                        </form>
+                                        <button type="button" class="photo-gallery-item-btn delete" onclick="deletePhoto(<?= $photo['id'] ?>)" title="Supprimer">✕</button>
                                     </div>
+                                    <?php if ($photo['is_main']): ?>
+                                    <div class="photo-gallery-item-badge">Photo principale</div>
+                                    <?php endif; ?>
                                 </div>
+                                <?php endforeach; ?>
+
+                                <?php if (empty($data['photos'])): ?>
+                                <p style="color: var(--text-muted); grid-column: 1/-1; text-align: center; padding: 20px;" id="noPhotosMessage">
+                                    Aucune photo. Ajoutez des photos en les glissant-déposant ci-dessus.
+                                </p>
+                                <?php endif; ?>
                             </div>
-                            <?php endforeach; ?>
-
-                            <?php if (empty($data['photos'])): ?>
-                            <p style="color: var(--text-muted); grid-column: 1/-1;">Aucune photo dans la galerie. Ajoutez des photos ci-dessous.</p>
-                            <?php endif; ?>
                         </div>
 
-                        <!-- Ajouter une photo -->
-                        <div style="background: #fafbfc; border-radius: 8px; padding: 20px;">
-                            <h5 style="margin-bottom: 15px;">Ajouter une photo à la galerie</h5>
-                            <form method="POST" style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
-                                <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
-                                <input type="hidden" name="action" value="add_photo">
-                                <input type="hidden" name="product_id" value="<?= $id ?>">
-                                <div class="form-group" style="margin: 0; flex: 1; min-width: 300px;">
-                                    <label class="form-label">URL de la photo</label>
-                                    <input type="url" name="photo_url" class="form-control" placeholder="https://..." required>
-                                </div>
-                                <div class="form-group" style="margin: 0; width: 200px;">
-                                    <label class="form-label">Texte alternatif</label>
-                                    <input type="text" name="alt_text" class="form-control" placeholder="Description">
-                                </div>
-                                <button type="submit" class="btn btn-primary">+ Ajouter</button>
-                            </form>
-                        </div>
+                        <script>
+                        (function() {
+                            const productId = <?= $id ?>;
+                            const dropzone = document.getElementById('photoDropzone');
+                            const fileInput = document.getElementById('photoFileInput');
+                            const grid = document.getElementById('photoGalleryGrid');
+                            const csrfToken = '<?= generateCsrfToken() ?>';
 
-                        <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
+                            // Click to browse
+                            dropzone.addEventListener('click', () => fileInput.click());
 
-                        <h4 style="margin-bottom: 20px;">Photos additionnelles (ancienne méthode)</h4>
-                        <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 12px;">Ces champs sont conservés pour compatibilité. Préférez la galerie ci-dessus.</p>
-                        <div class="form-row">
-                            <?php for ($i = 2; $i <= 5; $i++): ?>
-                            <div class="form-group">
-                                <label class="form-label">Photo <?= $i ?></label>
-                                <input type="text" name="photo_<?= $i ?>" class="form-control" value="<?= htmlspecialchars($p['photo_'.$i] ?? '') ?>" placeholder="URL">
-                            </div>
-                            <?php endfor; ?>
-                        </div>
+                            // File input change
+                            fileInput.addEventListener('change', (e) => {
+                                handleFiles(e.target.files);
+                                fileInput.value = '';
+                            });
+
+                            // Drag and drop
+                            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                                dropzone.addEventListener(eventName, preventDefaults);
+                            });
+
+                            function preventDefaults(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }
+
+                            ['dragenter', 'dragover'].forEach(eventName => {
+                                dropzone.addEventListener(eventName, () => dropzone.classList.add('dragover'));
+                            });
+
+                            ['dragleave', 'drop'].forEach(eventName => {
+                                dropzone.addEventListener(eventName, () => dropzone.classList.remove('dragover'));
+                            });
+
+                            dropzone.addEventListener('drop', (e) => {
+                                handleFiles(e.dataTransfer.files);
+                            });
+
+                            function handleFiles(files) {
+                                // Remove "no photos" message
+                                const noMsg = document.getElementById('noPhotosMessage');
+                                if (noMsg) noMsg.remove();
+
+                                [...files].forEach(uploadFile);
+                            }
+
+                            function uploadFile(file) {
+                                if (!file.type.startsWith('image/')) {
+                                    alert('Seules les images sont autorisées');
+                                    return;
+                                }
+                                if (file.size > 10 * 1024 * 1024) {
+                                    alert('Fichier trop volumineux (max 10 Mo)');
+                                    return;
+                                }
+
+                                // Create preview element
+                                const item = document.createElement('div');
+                                item.className = 'photo-gallery-item';
+                                item.innerHTML = `
+                                    <img src="${URL.createObjectURL(file)}" alt="Uploading...">
+                                    <div class="photo-upload-progress">
+                                        <div class="photo-upload-progress-bar" style="width: 0%"></div>
+                                    </div>
+                                `;
+                                grid.appendChild(item);
+
+                                // Upload via API
+                                const formData = new FormData();
+                                formData.append('file', file);
+
+                                const xhr = new XMLHttpRequest();
+                                xhr.open('POST', '/api/product-photos.php?action=upload', true);
+
+                                xhr.upload.onprogress = (e) => {
+                                    if (e.lengthComputable) {
+                                        const pct = (e.loaded / e.total) * 100;
+                                        item.querySelector('.photo-upload-progress-bar').style.width = pct + '%';
+                                    }
+                                };
+
+                                xhr.onload = function() {
+                                    const progress = item.querySelector('.photo-upload-progress');
+                                    if (progress) progress.remove();
+
+                                    if (xhr.status === 200) {
+                                        const resp = JSON.parse(xhr.responseText);
+                                        if (resp.success) {
+                                            // Add to database
+                                            addPhotoToDatabase(resp.file.url, resp.file.filename, item);
+                                        } else {
+                                            item.remove();
+                                            alert('Erreur: ' + resp.error);
+                                        }
+                                    } else {
+                                        item.remove();
+                                        alert('Erreur lors de l\'upload');
+                                    }
+                                };
+
+                                xhr.onerror = function() {
+                                    item.remove();
+                                    alert('Erreur réseau');
+                                };
+
+                                xhr.send(formData);
+                            }
+
+                            function addPhotoToDatabase(url, filename, element) {
+                                fetch('/api/product-photos.php', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        product_id: productId,
+                                        url: url,
+                                        filename: filename
+                                    })
+                                })
+                                .then(r => r.json())
+                                .then(resp => {
+                                    if (resp.success) {
+                                        element.dataset.id = resp.id;
+                                        element.setAttribute('draggable', 'true');
+                                        element.innerHTML = `
+                                            <img src="${url}" alt="">
+                                            <div class="photo-gallery-item-overlay">
+                                                <button type="button" class="photo-gallery-item-btn star" onclick="setMainPhoto(${resp.id})" title="Définir comme principale">⭐</button>
+                                                <button type="button" class="photo-gallery-item-btn delete" onclick="deletePhoto(${resp.id})" title="Supprimer">✕</button>
+                                            </div>
+                                        `;
+                                        initDragDrop();
+                                    }
+                                });
+                            }
+
+                            // Drag & drop reorder
+                            function initDragDrop() {
+                                const items = grid.querySelectorAll('.photo-gallery-item');
+                                items.forEach(item => {
+                                    item.addEventListener('dragstart', handleDragStart);
+                                    item.addEventListener('dragend', handleDragEnd);
+                                    item.addEventListener('dragover', handleDragOver);
+                                    item.addEventListener('drop', handleDropReorder);
+                                });
+                            }
+
+                            let draggedItem = null;
+
+                            function handleDragStart(e) {
+                                draggedItem = this;
+                                this.classList.add('dragging');
+                            }
+
+                            function handleDragEnd(e) {
+                                this.classList.remove('dragging');
+                                draggedItem = null;
+                            }
+
+                            function handleDragOver(e) {
+                                e.preventDefault();
+                                if (draggedItem && draggedItem !== this) {
+                                    const rect = this.getBoundingClientRect();
+                                    const midX = rect.left + rect.width / 2;
+                                    if (e.clientX < midX) {
+                                        grid.insertBefore(draggedItem, this);
+                                    } else {
+                                        grid.insertBefore(draggedItem, this.nextSibling);
+                                    }
+                                }
+                            }
+
+                            function handleDropReorder(e) {
+                                e.preventDefault();
+                                saveOrder();
+                            }
+
+                            function saveOrder() {
+                                const order = [...grid.querySelectorAll('.photo-gallery-item')]
+                                    .map(el => el.dataset.id)
+                                    .filter(id => id);
+
+                                fetch('/api/product-photos.php?action=reorder', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ product_id: productId, order: order })
+                                });
+                            }
+
+                            initDragDrop();
+
+                            // Global functions
+                            window.setMainPhoto = function(photoId) {
+                                const form = document.createElement('form');
+                                form.method = 'POST';
+                                form.innerHTML = `
+                                    <input type="hidden" name="csrf_token" value="${csrfToken}">
+                                    <input type="hidden" name="action" value="set_main_photo">
+                                    <input type="hidden" name="photo_id" value="${photoId}">
+                                    <input type="hidden" name="product_id" value="${productId}">
+                                `;
+                                document.body.appendChild(form);
+                                form.submit();
+                            };
+
+                            window.deletePhoto = function(photoId) {
+                                if (!confirm('Supprimer cette photo ?')) return;
+                                const form = document.createElement('form');
+                                form.method = 'POST';
+                                form.innerHTML = `
+                                    <input type="hidden" name="csrf_token" value="${csrfToken}">
+                                    <input type="hidden" name="action" value="delete_photo">
+                                    <input type="hidden" name="photo_id" value="${photoId}">
+                                `;
+                                document.body.appendChild(form);
+                                form.submit();
+                            };
+                        })();
+                        </script>
                     </div>
                 </div>
 
@@ -2243,6 +2581,115 @@ $user = $_SESSION['admin_user'] ?? null;
                             el.addEventListener('input', updateConfigJSON);
                         });
                         </script>
+
+                        <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
+
+                        <h4 style="margin-bottom: 15px;">🎨 Templates associés à ce produit</h4>
+                        <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 13px;">
+                            Sélectionnez les templates disponibles pour ce produit dans le configurateur. Si aucun n'est sélectionné, tous les templates actifs seront disponibles.
+                        </p>
+
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                            <input type="text" id="template-search-product" class="form-control" placeholder="Rechercher un template..." style="max-width: 250px;">
+                            <select id="template-sport-filter" class="form-control" style="max-width: 180px;" onchange="filterProductTemplates()">
+                                <option value="">-- Tous les sports --</option>
+                                <?php
+                                $allSportsForTemplates = [];
+                                foreach ($data['all_templates'] ?? [] as $tpl) {
+                                    if (!empty($tpl['sport'])) {
+                                        foreach (explode(',', $tpl['sport']) as $s) {
+                                            $allSportsForTemplates[trim($s)] = true;
+                                        }
+                                    }
+                                }
+                                foreach (array_keys($allSportsForTemplates) as $sport): ?>
+                                <option value="<?= htmlspecialchars($sport) ?>"><?= htmlspecialchars($sport) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <button type="button" class="btn btn-light" onclick="selectAllProductTemplates()">Tout sélectionner</button>
+                            <button type="button" class="btn btn-light" onclick="deselectAllProductTemplates()">Tout désélectionner</button>
+                        </div>
+
+                        <div id="product-templates-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; max-height: 400px; overflow-y: auto; padding: 15px; background: #fafbfc; border-radius: 8px; border: 1px solid var(--border);">
+                            <?php
+                            $associatedTemplates = $data['associated_templates'] ?? [];
+                            foreach ($data['all_templates'] ?? [] as $tpl):
+                                $isSelected = in_array($tpl['id'], $associatedTemplates);
+                            ?>
+                            <label class="product-template-item" data-id="<?= $tpl['id'] ?>" data-name="<?= htmlspecialchars(strtolower($tpl['nom'] ?? $tpl['filename'])) ?>" data-sport="<?= htmlspecialchars($tpl['sport'] ?? '') ?>" style="display: flex; flex-direction: column; background: #fff; border: 2px solid <?= $isSelected ? 'var(--primary)' : 'var(--border)' ?>; border-radius: 8px; overflow: hidden; cursor: pointer; transition: all 0.2s;">
+                                <div style="height: 80px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                    <?php if (!empty($tpl['path'])): ?>
+                                    <img src="<?= htmlspecialchars($tpl['path']) ?>" alt="" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                                    <?php else: ?>
+                                    <span style="font-size: 32px; opacity: 0.3;">🎨</span>
+                                    <?php endif; ?>
+                                </div>
+                                <div style="padding: 8px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" name="product_templates[]" value="<?= $tpl['id'] ?>" <?= $isSelected ? 'checked' : '' ?> style="flex-shrink: 0;">
+                                    <div style="overflow: hidden;">
+                                        <div style="font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= htmlspecialchars($tpl['nom'] ?? $tpl['filename']) ?></div>
+                                        <?php if (!empty($tpl['sport'])): ?>
+                                        <div style="font-size: 10px; color: var(--text-muted);"><?= htmlspecialchars($tpl['sport']) ?></div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </label>
+                            <?php endforeach; ?>
+
+                            <?php if (empty($data['all_templates'])): ?>
+                            <p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 20px;">
+                                Aucun template disponible. <a href="?page=templates">Gérer les templates</a>
+                            </p>
+                            <?php endif; ?>
+                        </div>
+
+                        <script>
+                        (function() {
+                            const grid = document.getElementById('product-templates-grid');
+                            const searchInput = document.getElementById('template-search-product');
+                            const sportFilter = document.getElementById('template-sport-filter');
+
+                            // Recherche
+                            searchInput?.addEventListener('input', filterProductTemplates);
+
+                            window.filterProductTemplates = function() {
+                                const term = searchInput.value.toLowerCase();
+                                const sport = sportFilter.value;
+                                grid.querySelectorAll('.product-template-item').forEach(item => {
+                                    const name = item.dataset.name || '';
+                                    const itemSport = item.dataset.sport || '';
+                                    const matchSearch = name.includes(term);
+                                    const matchSport = !sport || itemSport.includes(sport);
+                                    item.style.display = (matchSearch && matchSport) ? 'flex' : 'none';
+                                });
+                            };
+
+                            window.selectAllProductTemplates = function() {
+                                grid.querySelectorAll('.product-template-item').forEach(item => {
+                                    if (item.style.display !== 'none') {
+                                        const cb = item.querySelector('input[type="checkbox"]');
+                                        cb.checked = true;
+                                        item.style.borderColor = 'var(--primary)';
+                                    }
+                                });
+                            };
+
+                            window.deselectAllProductTemplates = function() {
+                                grid.querySelectorAll('.product-template-item').forEach(item => {
+                                    const cb = item.querySelector('input[type="checkbox"]');
+                                    cb.checked = false;
+                                    item.style.borderColor = 'var(--border)';
+                                });
+                            };
+
+                            // Visual feedback on checkbox change
+                            grid.querySelectorAll('.product-template-item input[type="checkbox"]').forEach(cb => {
+                                cb.addEventListener('change', function() {
+                                    this.closest('.product-template-item').style.borderColor = this.checked ? 'var(--primary)' : 'var(--border)';
+                                });
+                            });
+                        })();
+                        </script>
                     </div>
                 </div>
 
@@ -2388,9 +2835,21 @@ $user = $_SESSION['admin_user'] ?? null;
                     </div>
                 </div>
 
-                <div class="card-footer" style="display: flex; justify-content: space-between;">
+                <div class="card-footer" style="display: flex; justify-content: space-between; align-items: center;">
                     <a href="?page=products" class="btn btn-light">← Retour aux produits</a>
-                    <button type="submit" class="btn btn-primary">💾 Enregistrer les modifications</button>
+                    <div style="display: flex; gap: 10px;">
+                        <?php
+                        $productSlug = $p['slug'] ?? '';
+                        if (empty($productSlug)) {
+                            $productSlug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $p['nom'] ?? '')));
+                        }
+                        $productUrl = '/produit/' . ($p['reference'] ?? '') . '/' . $productSlug;
+                        ?>
+                        <a href="<?= htmlspecialchars($productUrl) ?>" target="_blank" class="btn btn-light" style="display: inline-flex; align-items: center; gap: 6px;">
+                            👁️ Voir le produit
+                        </a>
+                        <button type="submit" class="btn btn-primary">💾 Enregistrer les modifications</button>
+                    </div>
                 </div>
             </div>
         </form>
@@ -4485,24 +4944,51 @@ $user = $_SESSION['admin_user'] ?? null;
                         <?php endif; ?>
                     </div>
 
+                    <div class="form-group">
+                        <label class="form-label">Sports (sélection multiple)</label>
+                        <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 10px;">
+                            Cochez les sports pour lesquels ce template sera disponible. Si aucun n'est coché, le template est disponible pour tous.
+                        </p>
+                        <?php
+                        // Récupérer les sports déjà associés (stockés dans un champ JSON ou séparés par virgule)
+                        $templateSports = [];
+                        if (!empty($t['sports'])) {
+                            $templateSports = is_array($t['sports']) ? $t['sports'] : explode(',', $t['sports']);
+                            $templateSports = array_map('trim', $templateSports);
+                        } elseif (!empty($t['sport'])) {
+                            $templateSports = [$t['sport']];
+                        }
+                        ?>
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px; padding: 15px; background: #fafbfc; border-radius: 8px; border: 1px solid var(--border);">
+                            <?php foreach ($data['sports'] ?? [] as $sport): ?>
+                            <label style="display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: #fff; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; transition: all 0.2s;">
+                                <input type="checkbox" name="sports[]" value="<?= htmlspecialchars($sport) ?>" <?= in_array($sport, $templateSports) ? 'checked' : '' ?>>
+                                <span><?= htmlspecialchars($sport) ?></span>
+                            </label>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">Sport</label>
-                            <select name="sport" class="form-control">
-                                <option value="">-- Sélectionner --</option>
-                                <?php foreach ($data['sports'] ?? [] as $sport): ?>
-                                <option value="<?= htmlspecialchars($sport) ?>" <?= ($t['sport'] ?? '') === $sport ? 'selected' : '' ?>><?= htmlspecialchars($sport) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Famille produit</label>
-                            <select name="famille" class="form-control">
-                                <option value="">-- Sélectionner --</option>
+                            <label class="form-label">Familles produit (sélection multiple)</label>
+                            <?php
+                            $templateFamilles = [];
+                            if (!empty($t['familles'])) {
+                                $templateFamilles = is_array($t['familles']) ? $t['familles'] : explode(',', $t['familles']);
+                                $templateFamilles = array_map('trim', $templateFamilles);
+                            } elseif (!empty($t['famille'])) {
+                                $templateFamilles = [$t['famille']];
+                            }
+                            ?>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; background: #fafbfc; border-radius: 8px; border: 1px solid var(--border); max-height: 150px; overflow-y: auto;">
                                 <?php foreach ($data['familles'] ?? [] as $famille): ?>
-                                <option value="<?= htmlspecialchars($famille) ?>" <?= ($t['famille'] ?? '') === $famille ? 'selected' : '' ?>><?= htmlspecialchars($famille) ?></option>
+                                <label style="display: flex; align-items: center; gap: 5px; padding: 6px 10px; background: #fff; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-size: 13px;">
+                                    <input type="checkbox" name="familles[]" value="<?= htmlspecialchars($famille) ?>" <?= in_array($famille, $templateFamilles) ? 'checked' : '' ?>>
+                                    <span><?= htmlspecialchars($famille) ?></span>
+                                </label>
                                 <?php endforeach; ?>
-                            </select>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Catégorie</label>
@@ -4652,8 +5138,8 @@ $user = $_SESSION['admin_user'] ?? null;
             const data = {
                 nom: formData.get('nom'),
                 description: formData.get('description'),
-                sport: formData.get('sport'),
-                famille: formData.get('famille'),
+                sports: formData.getAll('sports[]'),
+                familles: formData.getAll('familles[]'),
                 category_id: formData.get('category_id') || null,
                 tags: formData.get('tags'),
                 ordre: parseInt(formData.get('ordre')) || 0,
@@ -4723,37 +5209,60 @@ $user = $_SESSION['admin_user'] ?? null;
 <?php endif; ?>
 
 <script>
-// Initialisation TinyMCE pour les éditeurs WYSIWYG
+// Initialisation Quill pour les éditeurs WYSIWYG (gratuit, open source)
 document.addEventListener('DOMContentLoaded', function() {
-    if (typeof tinymce !== 'undefined') {
-        tinymce.init({
-            selector: 'textarea.wysiwyg',
-            height: 350,
-            menubar: false,
-            language: 'fr_FR',
-            plugins: [
-                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
-                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                'insertdatetime', 'media', 'table', 'help', 'wordcount'
-            ],
-            toolbar: 'undo redo | blocks | bold italic forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | table link image | code fullscreen',
-            content_style: 'body { font-family: Inter, sans-serif; font-size: 14px; line-height: 1.6; } table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #ddd; padding: 8px; text-align: left; } th { background: #f5f5f5; }',
-            setup: function(editor) {
-                editor.on('change', function() {
-                    tinymce.triggerSave();
+    if (typeof Quill !== 'undefined') {
+        const quillInstances = [];
+        const quillToolbarOptions = [
+            [{ 'header': [1, 2, 3, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ 'align': [] }],
+            ['link', 'image'],
+            ['clean']
+        ];
+
+        // Pour chaque textarea.wysiwyg, créer un éditeur Quill
+        document.querySelectorAll('textarea.wysiwyg').forEach(function(textarea, index) {
+            // Créer le conteneur Quill
+            const container = document.createElement('div');
+            container.className = 'quill-editor-container';
+            const editorDiv = document.createElement('div');
+            editorDiv.id = 'quill-editor-' + index;
+            editorDiv.innerHTML = textarea.value;
+            container.appendChild(editorDiv);
+
+            // Cacher le textarea et insérer le conteneur
+            textarea.style.display = 'none';
+            textarea.parentNode.insertBefore(container, textarea);
+
+            // Initialiser Quill
+            const quill = new Quill('#quill-editor-' + index, {
+                theme: 'snow',
+                modules: {
+                    toolbar: quillToolbarOptions
+                }
+            });
+
+            // Stocker la référence
+            quillInstances.push({ quill: quill, textarea: textarea });
+
+            // Sync au changement
+            quill.on('text-change', function() {
+                textarea.value = quill.root.innerHTML;
+            });
+        });
+
+        // Sync avant soumission du formulaire
+        document.querySelectorAll('form').forEach(function(form) {
+            form.addEventListener('submit', function() {
+                quillInstances.forEach(function(instance) {
+                    instance.textarea.value = instance.quill.root.innerHTML;
                 });
-            }
+            });
         });
     }
-
-    // Sync TinyMCE content avant soumission du formulaire
-    document.querySelectorAll('form').forEach(function(form) {
-        form.addEventListener('submit', function() {
-            if (typeof tinymce !== 'undefined') {
-                tinymce.triggerSave();
-            }
-        });
-    });
 });
 
 // Preview du guide des tailles
