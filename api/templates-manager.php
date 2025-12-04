@@ -330,6 +330,16 @@ if ($method === 'POST') {
         }
     }
 
+    // Gérer les sports et familles multiples (tableau -> string séparé par virgule)
+    $sports = $input['sports'] ?? $input['sport'] ?? null;
+    if (is_array($sports)) {
+        $sports = implode(',', array_filter($sports));
+    }
+    $familles = $input['familles'] ?? $input['famille'] ?? null;
+    if (is_array($familles)) {
+        $familles = implode(',', array_filter($familles));
+    }
+
     $stmt = $db->prepare("
         INSERT INTO templates (
             filename, nom, description, path, preview_url, type,
@@ -347,8 +357,8 @@ if ($method === 'POST') {
         $input['type'] ?? 'svg',
         $input['tags'] ?? null,
         $input['category_id'] ?? null,
-        $input['sport'] ?? null,
-        $input['famille'] ?? null,
+        $sports,
+        $familles,
         $input['svg_content'] ?? null,
         $input['width'] ?? null,
         $input['height'] ?? null,
@@ -427,6 +437,16 @@ if ($method === 'PUT') {
                 exit;
             }
         }
+    }
+
+    // Gérer les sports et familles multiples (tableau -> string séparé par virgule)
+    if (isset($input['sports'])) {
+        $input['sport'] = is_array($input['sports']) ? implode(',', array_filter($input['sports'])) : $input['sports'];
+        unset($input['sports']);
+    }
+    if (isset($input['familles'])) {
+        $input['famille'] = is_array($input['familles']) ? implode(',', array_filter($input['familles'])) : $input['familles'];
+        unset($input['familles']);
     }
 
     // Construit la requête UPDATE dynamiquement
