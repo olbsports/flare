@@ -2,7 +2,8 @@
 /**
  * ARTICLE DE BLOG DYNAMIQUE - FLARE CUSTOM
  *
- * Sert le HTML complet stocké en BDD (conserve le design original de chaque article)
+ * Sert les articles de blog avec le design original
+ * Priorise les fichiers HTML statiques originaux
  *
  * URL: /blog/mon-article → blog.php?slug=mon-article
  */
@@ -22,37 +23,26 @@ if (empty($slug)) {
 try {
     $pdo = getConnection();
 
-    // Charger l'article depuis la BDD
+    // Essayer d'abord le fichier HTML statique original
+    $staticFile = __DIR__ . '/pages/blog/' . $slug . '.html';
+    if (file_exists($staticFile)) {
+        $content = file_get_contents($staticFile);
+        $content = fixBlogUrls($content);
+        echo $content;
+        exit;
+    }
+
+    // Sinon, charger depuis la BDD
     $stmt = $pdo->prepare("SELECT * FROM blog_posts WHERE slug = ? AND status = 'published'");
     $stmt->execute([$slug]);
     $article = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$article) {
-        // Essayer avec des variations du slug
-        $variations = [$slug, str_replace('-', '_', $slug)];
-        foreach ($variations as $variation) {
-            $stmt->execute([$variation]);
-            $article = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($article) break;
-        }
-    }
-
-    // Si toujours pas trouvé
-    if (!$article) {
         http_response_code(404);
         if ($debug) {
             echo "<h1>Article non trouvé</h1>";
             echo "<p>Slug: " . htmlspecialchars($slug) . "</p>";
-            echo "<h3>Articles disponibles:</h3><pre>";
-            $all = $pdo->query("SELECT slug, title FROM blog_posts ORDER BY slug")->fetchAll();
-            print_r($all);
-            echo "</pre>";
-            exit;
-        }
-        // Essayer de servir le fichier HTML statique original
-        $staticFile = __DIR__ . '/pages/blog/' . $slug . '.html';
-        if (file_exists($staticFile)) {
-            readfile($staticFile);
+            echo "<p>Fichier statique cherché: " . htmlspecialchars($staticFile) . "</p>";
             exit;
         }
         include __DIR__ . '/pages/404.html';
@@ -62,8 +52,10 @@ try {
     // Incrémenter le compteur de vues
     $pdo->prepare("UPDATE blog_posts SET views_count = views_count + 1 WHERE id = ?")->execute([$article['id']]);
 
-    // Servir le contenu HTML complet
-    echo $article['content'] ?? '';
+    // Servir le contenu HTML
+    $content = $article['content'] ?? '';
+    $content = fixBlogUrls($content);
+    echo $content;
 
 } catch (Exception $e) {
     http_response_code(500);
@@ -72,4 +64,26 @@ try {
     } else {
         echo "Erreur de chargement";
     }
+}
+
+/**
+ * Corriger les URLs relatives dans le HTML du blog
+ */
+function fixBlogUrls($content) {
+    // Corriger les liens produits
+    $content = preg_replace('/href=["\'](?:\.\.\/)*pages\/produits\/([A-Za-z0-9_-]+)\.html["\']/i', 'href="/produit/$1"', $content);
+
+    // Corriger les liens catégories
+    $content = preg_replace('/href=["\'](?:\.\.\/)*pages\/products\/([A-Za-z0-9_-]+)\.html["\']/i', 'href="/categorie/$1"', $content);
+
+    // Corriger les liens info
+    $content = preg_replace('/href=["\'](?:\.\.\/)*pages\/info\/([A-Za-z0-9_-]+)\.html["\']/i', 'href="/info/$1"', $content);
+
+    // Corriger les liens blog
+    $content = preg_replace('/href=["\'](?:\.\.\/)*pages\/blog\/([A-Za-z0-9_-]+)\.html["\']/i', 'href="/blog/$1"', $content);
+
+    // Corriger les chemins assets
+    $content = preg_replace('/(?:\.\.\/)+assets\//i', '/assets/', $content);
+
+    return $content;
 }
