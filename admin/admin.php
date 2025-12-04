@@ -1946,371 +1946,513 @@ $user = $_SESSION['admin_user'] ?? null;
         $pg = $data['item'] ?? [];
         $currentType = $pg['type'] ?? 'info';
         $previewUrl = $currentType === 'category' ? '/categorie/' . ($pg['slug'] ?? '') : '/info/' . ($pg['slug'] ?? '');
+        $currentFilters = json_decode($pg['product_filters'] ?? '{}', true);
+        $selectedIds = $currentFilters['included_ids'] ?? [];
+
+        // Charger le contenu HTML (depuis fichier statique ou BDD)
+        $htmlContent = $pg['content'] ?? '';
+        if (empty($htmlContent) && !empty($pg['slug'])) {
+            $staticDir = $currentType === 'category' ? 'products' : 'info';
+            $staticFile = __DIR__ . '/../pages/' . $staticDir . '/' . $pg['slug'] . '.html';
+            if (file_exists($staticFile)) {
+                $htmlContent = file_get_contents($staticFile);
+            }
+        }
         ?>
-        <div class="card">
-            <div class="card-header">
-                <span class="card-title"><?= $id ? 'Modifier' : 'Nouvelle' ?> page</span>
-                <?php if ($id && !empty($pg['slug'])): ?>
-                <a href="<?= $previewUrl ?>" target="_blank" class="btn btn-light">Voir la page</a>
-                <?php endif; ?>
-            </div>
-            <form method="POST" id="pageForm">
-            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
 
-                <input type="hidden" name="action" value="save_page">
-                <div class="card-body">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Titre</label>
-                            <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($pg['title'] ?? '') ?>" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Slug (URL)</label>
-                            <input type="text" name="slug" class="form-control" value="<?= htmlspecialchars($pg['slug'] ?? '') ?>" required>
-                            <small style="color:var(--text-muted)">URL: <?= $currentType === 'category' ? '/categorie/' : '/info/' ?><span id="slugPreview"><?= htmlspecialchars($pg['slug'] ?? '') ?></span></small>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Type de page</label>
-                            <select name="type" class="form-control" id="pageType">
-                                <option value="info" <?= $currentType === 'info' ? 'selected' : '' ?>>Page Info (contact, CGV, etc.)</option>
-                                <option value="category" <?= $currentType === 'category' ? 'selected' : '' ?>>Page Catégorie (produits)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Statut</label>
-                            <select name="status" class="form-control">
-                                <option value="published" <?= ($pg['status'] ?? '') === 'published' ? 'selected' : '' ?>>Publié</option>
-                                <option value="draft" <?= ($pg['status'] ?? '') === 'draft' ? 'selected' : '' ?>>Brouillon</option>
-                            </select>
-                        </div>
+        <!-- ========== ÉDITEUR VISUEL LIVE STYLE ELEMENTOR ========== -->
+        <div class="visual-editor-container" style="display: flex; height: calc(100vh - 80px); margin: -30px; gap: 0;">
+
+            <!-- SIDEBAR GAUCHE - Paramètres -->
+            <div class="ve-sidebar" style="width: 350px; background: #fff; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; flex-shrink: 0;">
+                <div style="padding: 20px; border-bottom: 1px solid #e2e8f0;">
+                    <h2 style="margin: 0 0 5px; font-size: 18px;"><?= $id ? 'Modifier' : 'Nouvelle' ?> Page</h2>
+                    <span style="font-size: 12px; color: var(--text-muted);"><?= $currentType === 'category' ? 'Page Catégorie' : 'Page Info' ?></span>
+                </div>
+
+                <form method="POST" id="pageForm" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+                    <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+                    <input type="hidden" name="action" value="save_page">
+                    <input type="hidden" name="content" id="htmlContent">
+                    <input type="hidden" name="type" value="<?= $currentType ?>">
+
+                    <!-- Onglets sidebar -->
+                    <div class="ve-tabs" style="display: flex; border-bottom: 1px solid #e2e8f0;">
+                        <button type="button" class="ve-tab active" data-tab="settings" style="flex:1; padding: 12px; border: none; background: #fff; cursor: pointer; font-weight: 600; border-bottom: 2px solid var(--primary);">Paramètres</button>
+                        <button type="button" class="ve-tab" data-tab="style" style="flex:1; padding: 12px; border: none; background: #f8fafc; cursor: pointer;">Style</button>
+                        <?php if ($currentType === 'category'): ?>
+                        <button type="button" class="ve-tab" data-tab="products" style="flex:1; padding: 12px; border: none; background: #f8fafc; cursor: pointer;">Produits</button>
+                        <?php endif; ?>
                     </div>
 
-                    <!-- Section Sélection Produits pour pages catégories -->
-                    <div id="categoryProductsSection" style="display: <?= $currentType === 'category' ? 'block' : 'none' ?>; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-                        <h4 style="margin-top:0; margin-bottom: 15px; font-size: 16px; color: var(--primary);">Sélection des produits</h4>
+                    <div style="flex: 1; overflow-y: auto;">
+                        <!-- TAB: Paramètres -->
+                        <div class="ve-tab-content active" data-tab="settings" style="padding: 20px;">
+                            <div class="form-group" style="margin-bottom: 15px;">
+                                <label class="form-label">Titre de la page</label>
+                                <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($pg['title'] ?? '') ?>" required>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 15px;">
+                                <label class="form-label">Slug (URL)</label>
+                                <input type="text" name="slug" class="form-control" value="<?= htmlspecialchars($pg['slug'] ?? '') ?>" required>
+                                <small style="color:var(--text-muted); font-size: 11px;"><?= $currentType === 'category' ? '/categorie/' : '/info/' ?><?= htmlspecialchars($pg['slug'] ?? '') ?></small>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 15px;">
+                                <label class="form-label">Statut</label>
+                                <select name="status" class="form-control">
+                                    <option value="published" <?= ($pg['status'] ?? '') === 'published' ? 'selected' : '' ?>>Publié</option>
+                                    <option value="draft" <?= ($pg['status'] ?? '') === 'draft' ? 'selected' : '' ?>>Brouillon</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 15px;">
+                                <label class="form-label">Meta Title (SEO)</label>
+                                <input type="text" name="meta_title" class="form-control" value="<?= htmlspecialchars($pg['meta_title'] ?? '') ?>">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 15px;">
+                                <label class="form-label">Meta Description (SEO)</label>
+                                <textarea name="meta_description" class="form-control" rows="3"><?= htmlspecialchars($pg['meta_description'] ?? '') ?></textarea>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 15px;">
+                                <label class="form-label">Extrait</label>
+                                <textarea name="excerpt" class="form-control" rows="2"><?= htmlspecialchars($pg['excerpt'] ?? '') ?></textarea>
+                            </div>
+                        </div>
 
-                        <?php
-                        $currentFilters = json_decode($pg['product_filters'] ?? '{}', true);
-                        $selectedIds = $currentFilters['included_ids'] ?? [];
-                        ?>
+                        <!-- TAB: Style -->
+                        <div class="ve-tab-content" data-tab="style" style="padding: 20px; display: none;">
+                            <div id="elementStylePanel">
+                                <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 40px 0;">
+                                    Cliquez sur un élément dans la preview pour le modifier
+                                </p>
+                            </div>
+                        </div>
 
-                        <!-- Filtres automatiques -->
-                        <div class="form-row" style="margin-bottom: 15px;">
-                            <div class="form-group">
+                        <!-- TAB: Produits (pour catégories) -->
+                        <?php if ($currentType === 'category'): ?>
+                        <div class="ve-tab-content" data-tab="products" style="padding: 20px; display: none;">
+                            <div class="form-group" style="margin-bottom: 15px;">
                                 <label class="form-label">Filtrer par Sport</label>
-                                <select name="filter_sport" class="form-control" id="filterSport">
-                                    <option value="">-- Tous les sports --</option>
+                                <select name="filter_sport" class="form-control">
+                                    <option value="">-- Tous --</option>
                                     <?php foreach ($data['sports'] ?? [] as $sport): ?>
                                     <option value="<?= htmlspecialchars($sport) ?>" <?= ($currentFilters['sport'] ?? '') === $sport ? 'selected' : '' ?>><?= htmlspecialchars($sport) ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" style="margin-bottom: 15px;">
                                 <label class="form-label">Filtrer par Famille</label>
-                                <select name="filter_famille" class="form-control" id="filterFamille">
-                                    <option value="">-- Toutes les familles --</option>
+                                <select name="filter_famille" class="form-control">
+                                    <option value="">-- Toutes --</option>
                                     <?php foreach ($data['familles'] ?? [] as $famille): ?>
                                     <option value="<?= htmlspecialchars($famille) ?>" <?= ($currentFilters['famille'] ?? '') === $famille ? 'selected' : '' ?>><?= htmlspecialchars($famille) ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                        </div>
-
-                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">
-                            Les filtres ci-dessus s'appliquent automatiquement. Pour une sélection manuelle, cochez les produits ci-dessous :
-                        </p>
-
-                        <!-- Grille de sélection manuelle -->
-                        <div style="margin-bottom: 15px;">
-                            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
-                                <input type="text" id="productSearch" class="form-control" placeholder="Rechercher un produit..." style="max-width: 300px;">
-                                <button type="button" class="btn btn-light btn-sm" onclick="selectAllVisible()">Tout sélectionner</button>
-                                <button type="button" class="btn btn-light btn-sm" onclick="deselectAll()">Tout désélectionner</button>
-                                <span id="selectedCount" style="font-size: 13px; color: var(--text-muted);"><?= count($selectedIds) ?> produit(s) sélectionné(s)</span>
+                            <div style="margin-bottom: 10px;">
+                                <input type="text" id="productSearch" class="form-control" placeholder="Rechercher..." style="font-size: 13px;">
                             </div>
-                        </div>
-
-                        <div id="productsGrid" style="max-height: 400px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; background: #fff;">
-                            <?php foreach ($data['products'] ?? [] as $prod): ?>
-                            <label class="product-select-item" data-sport="<?= htmlspecialchars(strtolower($prod['sport'] ?? '')) ?>" data-famille="<?= htmlspecialchars(strtolower($prod['famille'] ?? '')) ?>" data-name="<?= htmlspecialchars(strtolower($prod['nom'] ?? '')) ?>" style="display: flex; align-items: center; gap: 10px; padding: 8px; border-bottom: 1px solid #f1f5f9; cursor: pointer;">
-                                <input type="checkbox" name="selected_products[]" value="<?= $prod['id'] ?>" <?= in_array($prod['id'], $selectedIds) ? 'checked' : '' ?> onchange="updateSelectedCount()">
-                                <img src="<?= htmlspecialchars($prod['photo_1'] ?? '/assets/images/placeholder.jpg') ?>" alt="" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
-                                <div style="flex: 1;">
-                                    <div style="font-weight: 500; font-size: 13px;"><?= htmlspecialchars($prod['nom']) ?></div>
-                                    <div style="font-size: 11px; color: var(--text-muted);"><?= htmlspecialchars($prod['reference']) ?> | <?= htmlspecialchars($prod['sport'] ?? '') ?> - <?= htmlspecialchars($prod['famille'] ?? '') ?></div>
-                                </div>
-                            </label>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Extrait / Description courte</label>
-                        <textarea name="excerpt" class="form-control" style="min-height: 80px;"><?= htmlspecialchars($pg['excerpt'] ?? '') ?></textarea>
-                    </div>
-
-                    <!-- ========== PAGE BUILDER VISUAL EDITOR ========== -->
-                    <?php
-                    $existingBlocks = json_decode($pg['page_blocks'] ?? '{}', true);
-                    $blocks = $existingBlocks['blocks'] ?? [];
-                    $categories = getModuleCategories();
-                    ?>
-
-                    <div class="form-group">
-                        <label class="form-label">Contenu de la page</label>
-                        <div class="page-builder-tabs" style="display: flex; gap: 10px; margin-bottom: 15px;">
-                            <button type="button" class="btn btn-primary pb-tab-btn active" data-tab="visual">Éditeur visuel</button>
-                            <button type="button" class="btn btn-light pb-tab-btn" data-tab="html">Code HTML</button>
-                        </div>
-                    </div>
-
-                    <!-- TAB: Visual Editor -->
-                    <div id="visualEditorTab" class="pb-tab-content">
-                        <div class="page-builder" style="display: flex; gap: 20px; min-height: 600px;">
-
-                            <!-- Sidebar - Modules disponibles -->
-                            <div class="pb-sidebar" style="width: 280px; flex-shrink: 0; background: #f8fafc; border-radius: 8px; padding: 15px; max-height: 700px; overflow-y: auto;">
-                                <div style="font-weight: 600; margin-bottom: 15px; color: var(--primary);">Modules</div>
-
-                                <?php foreach ($categories as $catKey => $cat): ?>
-                                <div class="pb-module-category" style="margin-bottom: 15px;">
-                                    <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;"><?= $cat['name'] ?></div>
-                                    <div class="pb-module-list" style="display: flex; flex-direction: column; gap: 6px;">
-                                        <?php foreach ($PAGE_BUILDER_MODULES as $modKey => $mod):
-                                            if (($mod['category'] ?? '') !== $catKey) continue;
-                                        ?>
-                                        <div class="pb-module-item" draggable="true" data-module="<?= $modKey ?>" style="background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; cursor: grab; display: flex; align-items: center; gap: 10px; transition: all 0.2s;">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0;"><path d="<?= $mod['icon'] ?>"/></svg>
-                                            <span style="font-size: 13px; font-weight: 500;"><?= $mod['name'] ?></span>
-                                        </div>
-                                        <?php endforeach; ?>
-                                    </div>
-                                </div>
+                            <div id="productsGrid" style="max-height: 300px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px;">
+                                <?php foreach ($data['products'] ?? [] as $prod): ?>
+                                <label class="product-select-item" data-name="<?= htmlspecialchars(strtolower($prod['nom'] ?? '')) ?>" style="display: flex; align-items: center; gap: 8px; padding: 8px; border-bottom: 1px solid #f1f5f9; cursor: pointer; font-size: 12px;">
+                                    <input type="checkbox" name="selected_products[]" value="<?= $prod['id'] ?>" <?= in_array($prod['id'], $selectedIds) ? 'checked' : '' ?>>
+                                    <img src="<?= htmlspecialchars($prod['photo_1'] ?? '/assets/images/placeholder.jpg') ?>" style="width: 30px; height: 30px; object-fit: cover; border-radius: 3px;">
+                                    <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?= htmlspecialchars($prod['nom']) ?></span>
+                                </label>
                                 <?php endforeach; ?>
                             </div>
-
-                            <!-- Zone de construction -->
-                            <div class="pb-canvas" style="flex: 1; background: #fff; border: 2px dashed #e2e8f0; border-radius: 8px; min-height: 500px; position: relative;">
-                                <div id="pbDropZone" class="pb-drop-zone" style="min-height: 500px; padding: 20px;">
-                                    <?php if (empty($blocks)): ?>
-                                    <div class="pb-empty-state" style="text-align: center; padding: 100px 20px; color: var(--text-muted);">
-                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 15px; opacity: 0.5;"><path d="M12 5v14M5 12h14"/></svg>
-                                        <p style="font-size: 15px;">Glissez des modules ici pour construire votre page</p>
-                                    </div>
-                                    <?php else: ?>
-                                        <?php foreach ($blocks as $index => $block): ?>
-                                        <div class="pb-block" data-index="<?= $index ?>" data-type="<?= htmlspecialchars($block['type']) ?>">
-                                            <div class="pb-block-header">
-                                                <span class="pb-block-handle">⋮⋮</span>
-                                                <span class="pb-block-name"><?= htmlspecialchars($PAGE_BUILDER_MODULES[$block['type']]['name'] ?? $block['type']) ?></span>
-                                                <div class="pb-block-actions">
-                                                    <button type="button" class="pb-btn-edit" onclick="editBlock(<?= $index ?>)">✏️</button>
-                                                    <button type="button" class="pb-btn-duplicate" onclick="duplicateBlock(<?= $index ?>)">📋</button>
-                                                    <button type="button" class="pb-btn-delete" onclick="deleteBlock(<?= $index ?>)">🗑️</button>
-                                                </div>
-                                            </div>
-                                            <div class="pb-block-preview">
-                                                <?php
-                                                $previewData = $block['data'] ?? [];
-                                                $previewText = '';
-                                                if (isset($previewData['title'])) $previewText = $previewData['title'];
-                                                elseif (isset($previewData['eyebrow'])) $previewText = $previewData['eyebrow'];
-                                                ?>
-                                                <span style="color: var(--text-muted); font-size: 12px;"><?= htmlspecialchars(substr($previewText, 0, 50)) ?><?= strlen($previewText) > 50 ? '...' : '' ?></span>
-                                            </div>
-                                        </div>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
                         </div>
-
-                        <!-- Hidden input pour stocker les blocs -->
-                        <input type="hidden" name="page_blocks" id="pageBlocksData" value="<?= htmlspecialchars(json_encode($existingBlocks)) ?>">
+                        <?php endif; ?>
                     </div>
 
-                    <!-- TAB: HTML Editor -->
-                    <div id="htmlEditorTab" class="pb-tab-content" style="display: none;">
-                        <div class="html-editor-toolbar" style="margin-bottom: 10px;">
-                            <button type="button" class="btn btn-light btn-sm" onclick="formatCode()">Formater</button>
-                            <button type="button" class="btn btn-light btn-sm" onclick="toggleTheme()">Theme</button>
-                            <button type="button" class="btn btn-light btn-sm" onclick="toggleFullscreen()">Plein écran</button>
-                            <span class="editor-status" id="editorStatus" style="margin-left: 10px; font-size: 12px; color: var(--text-muted);">Prêt</span>
+                    <!-- Footer avec boutons -->
+                    <div style="padding: 15px 20px; border-top: 1px solid #e2e8f0; background: #f8fafc;">
+                        <div style="display: flex; gap: 10px;">
+                            <a href="?page=pages" class="btn btn-light" style="flex: 1;">← Retour</a>
+                            <button type="submit" class="btn btn-primary" style="flex: 2;">💾 Enregistrer</button>
                         </div>
-                        <textarea name="content" id="htmlEditor" style="display:none;"><?= htmlspecialchars($pg['content'] ?? '') ?></textarea>
+                        <?php if ($id && !empty($pg['slug'])): ?>
+                        <a href="<?= $previewUrl ?>" target="_blank" style="display: block; text-align: center; margin-top: 10px; font-size: 12px; color: var(--primary);">Voir la page en ligne →</a>
+                        <?php endif; ?>
                     </div>
+                </form>
+            </div>
 
-                    <!-- Modal d'édition de bloc -->
-                    <div id="blockEditModal" class="pb-modal" style="display: none;">
-                        <div class="pb-modal-overlay" onclick="closeBlockModal()"></div>
-                        <div class="pb-modal-content">
-                            <div class="pb-modal-header">
-                                <h3 id="blockModalTitle">Éditer le bloc</h3>
-                                <button type="button" onclick="closeBlockModal()" class="pb-modal-close">&times;</button>
-                            </div>
-                            <div class="pb-modal-body" id="blockModalBody">
-                                <!-- Formulaire généré dynamiquement -->
-                            </div>
-                            <div class="pb-modal-footer">
-                                <button type="button" class="btn btn-light" onclick="closeBlockModal()">Annuler</button>
-                                <button type="button" class="btn btn-primary" onclick="saveBlockChanges()">Appliquer</button>
-                            </div>
-                        </div>
+            <!-- ZONE CENTRALE - Preview Live -->
+            <div class="ve-preview-area" style="flex: 1; background: #f1f5f9; display: flex; flex-direction: column; overflow: hidden;">
+                <!-- Toolbar preview -->
+                <div class="ve-toolbar" style="background: #fff; border-bottom: 1px solid #e2e8f0; padding: 10px 20px; display: flex; align-items: center; gap: 15px;">
+                    <div style="display: flex; gap: 5px;">
+                        <button type="button" class="btn btn-light btn-sm ve-device-btn active" data-device="desktop" title="Desktop">🖥️</button>
+                        <button type="button" class="btn btn-light btn-sm ve-device-btn" data-device="tablet" title="Tablet">📱</button>
+                        <button type="button" class="btn btn-light btn-sm ve-device-btn" data-device="mobile" title="Mobile">📲</button>
                     </div>
+                    <div style="flex: 1;"></div>
+                    <button type="button" class="btn btn-light btn-sm" onclick="undoChange()">↩️ Annuler</button>
+                    <button type="button" class="btn btn-light btn-sm" onclick="redoChange()">↪️ Rétablir</button>
+                    <button type="button" class="btn btn-light btn-sm" onclick="toggleCodeView()">{"} Code</button>
+                    <button type="button" class="btn btn-info btn-sm" onclick="refreshPreview()">🔄 Actualiser</button>
+                </div>
 
-                    <!-- Preview modal -->
-                    <div id="previewModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; padding:20px;">
-                        <div style="background:#fff; height:100%; border-radius:8px; overflow:hidden; display:flex; flex-direction:column;">
-                            <div style="padding:10px 20px; background:var(--sidebar-bg); color:#fff; display:flex; justify-content:space-between; align-items:center;">
-                                <span>Prévisualisation</span>
-                                <button type="button" onclick="closePreview()" style="background:none; border:none; color:#fff; font-size:24px; cursor:pointer;">&times;</button>
-                            </div>
-                            <iframe id="previewFrame" class="preview-frame" style="flex:1; border:none;"></iframe>
-                        </div>
-                    </div>
-
-                    <div class="form-row" style="margin-top: 20px;">
-                        <div class="form-group">
-                            <label class="form-label">Meta Title (SEO)</label>
-                            <input type="text" name="meta_title" class="form-control" value="<?= htmlspecialchars($pg['meta_title'] ?? '') ?>">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Meta Description (SEO)</label>
-                            <textarea name="meta_description" class="form-control"><?= htmlspecialchars($pg['meta_description'] ?? '') ?></textarea>
-                        </div>
+                <!-- Iframe Preview -->
+                <div class="ve-iframe-container" style="flex: 1; padding: 20px; overflow: auto; display: flex; justify-content: center;">
+                    <div id="previewWrapper" style="width: 100%; max-width: 100%; background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; transition: all 0.3s;">
+                        <iframe id="livePreview" style="width: 100%; height: 100%; border: none; min-height: 800px;"></iframe>
                     </div>
                 </div>
-                <div class="card-footer">
-                    <a href="?page=pages" class="btn btn-light">← Retour</a>
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                </div>
-            </form>
+            </div>
         </div>
 
+        <!-- Modal Code HTML -->
+        <div id="codeModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 10000; padding: 30px;">
+            <div style="background: #fff; height: 100%; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden;">
+                <div style="padding: 15px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 600;">Code HTML</span>
+                    <button onclick="closeCodeView()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+                </div>
+                <textarea id="codeEditor" style="flex: 1; border: none; padding: 20px; font-family: monospace; font-size: 13px; resize: none;"></textarea>
+                <div style="padding: 15px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px;">
+                    <button class="btn btn-light" onclick="closeCodeView()">Annuler</button>
+                    <button class="btn btn-primary" onclick="applyCodeChanges()">Appliquer</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stocker le HTML initial -->
         <script>
-        // Initialize CodeMirror
-        var pageEditor = CodeMirror.fromTextArea(document.getElementById('htmlEditor'), {
-            mode: 'htmlmixed',
-            theme: 'default',
-            lineNumbers: true,
-            lineWrapping: true,
-            autoCloseTags: true,
-            matchTags: {bothTags: true},
-            foldGutter: true,
-            gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
-            extraKeys: {
-                "Ctrl-S": function(cm) { document.getElementById('pageForm').submit(); },
-                "Cmd-S": function(cm) { document.getElementById('pageForm').submit(); },
-                "F11": function(cm) { toggleFullscreen(); }
-            }
-        });
+        var initialHtml = <?= json_encode($htmlContent, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+        var currentHtml = initialHtml;
+        var historyStack = [initialHtml];
+        var historyIndex = 0;
+        var selectedElement = null;
+        </script>
 
-        pageEditor.setSize(null, 500);
+        <script>
+        // ========== VISUAL EDITOR - LIVE PREVIEW ==========
 
-        // Update status on change
-        pageEditor.on('change', function() {
-            document.getElementById('editorStatus').textContent = 'Modifié (non sauvegardé)';
-        });
+        // Initialize preview
+        function initPreview() {
+            var iframe = document.getElementById('livePreview');
+            if (!iframe) return;
 
-        // Slug preview
-        document.querySelector('input[name="slug"]').addEventListener('input', function() {
-            document.getElementById('slugPreview').textContent = this.value;
-        });
-
-        // Type change handler
-        document.getElementById('pageType').addEventListener('change', function() {
-            var urlPrefix = this.value === 'category' ? '/categorie/' : '/info/';
-            document.querySelector('small span#slugPreview').parentElement.innerHTML =
-                'URL: ' + urlPrefix + '<span id="slugPreview">' + document.querySelector('input[name="slug"]').value + '</span>';
-        });
-
-        function formatCode() {
-            var content = pageEditor.getValue();
-            // Basic HTML formatting
-            try {
-                var formatted = content
-                    .replace(/></g, '>\n<')
-                    .replace(/\n\s*\n/g, '\n');
-                pageEditor.setValue(formatted);
-                document.getElementById('editorStatus').textContent = 'Code formaté';
-            } catch(e) {
-                alert('Erreur de formatage');
-            }
-        }
-
-        var isDark = false;
-        function toggleTheme() {
-            isDark = !isDark;
-            pageEditor.setOption('theme', isDark ? 'monokai' : 'default');
-        }
-
-        var isFullscreen = false;
-        function toggleFullscreen() {
-            var wrapper = pageEditor.getWrapperElement();
-            isFullscreen = !isFullscreen;
-            if (isFullscreen) {
-                wrapper.style.position = 'fixed';
-                wrapper.style.inset = '0';
-                wrapper.style.zIndex = '9999';
-                wrapper.style.height = '100vh';
-                pageEditor.setSize('100%', '100%');
-            } else {
-                wrapper.style.position = '';
-                wrapper.style.inset = '';
-                wrapper.style.zIndex = '';
-                wrapper.style.height = '';
-                pageEditor.setSize(null, 500);
-            }
-            pageEditor.refresh();
-        }
-
-        function previewPage() {
-            var content = pageEditor.getValue();
-            var iframe = document.getElementById('previewFrame');
             var doc = iframe.contentDocument || iframe.contentWindow.document;
             doc.open();
-            doc.write(content);
+            doc.write(currentHtml);
             doc.close();
-            document.getElementById('previewModal').style.display = 'block';
+
+            // Wait for iframe to load then setup editing
+            iframe.onload = function() {
+                setupLiveEditing(iframe);
+            };
+
+            // Update hidden input
+            document.getElementById('htmlContent').value = currentHtml;
         }
 
-        function closePreview() {
-            document.getElementById('previewModal').style.display = 'none';
+        // Setup live editing in iframe
+        function setupLiveEditing(iframe) {
+            var doc = iframe.contentDocument || iframe.contentWindow.document;
+
+            // Add editor styles
+            var style = doc.createElement('style');
+            style.textContent = `
+                [contenteditable="true"] { outline: 2px dashed #FF4B26 !important; outline-offset: 2px; }
+                .ve-hover { outline: 2px solid #3b82f6 !important; outline-offset: 2px; cursor: pointer; }
+                .ve-selected { outline: 2px solid #FF4B26 !important; outline-offset: 2px; background: rgba(255,75,38,0.05) !important; }
+            `;
+            doc.head.appendChild(style);
+
+            // Make text elements editable
+            var editableSelectors = 'h1, h2, h3, h4, h5, h6, p, span, a, li, td, th, label, button, .hero-sport-eyebrow, .hero-sport-title, .hero-sport-subtitle, .hero-contact-eyebrow, .hero-contact-title, .hero-contact-subtitle, .section-eyebrow, .section-title, .section-description, .cta-title, .cta-text, .why-us-card-redesign h3, .why-us-card-redesign p, .trust-item strong, .trust-item span, .faq-question span, .faq-answer p';
+
+            doc.querySelectorAll(editableSelectors).forEach(function(el) {
+                // Hover effect
+                el.addEventListener('mouseenter', function() {
+                    if (!this.classList.contains('ve-selected')) {
+                        this.classList.add('ve-hover');
+                    }
+                });
+                el.addEventListener('mouseleave', function() {
+                    this.classList.remove('ve-hover');
+                });
+
+                // Click to select
+                el.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    // Deselect previous
+                    doc.querySelectorAll('.ve-selected').forEach(function(s) {
+                        s.classList.remove('ve-selected');
+                        s.contentEditable = 'false';
+                    });
+
+                    // Select this
+                    this.classList.add('ve-selected');
+                    this.classList.remove('ve-hover');
+                    this.contentEditable = 'true';
+                    this.focus();
+
+                    selectedElement = this;
+                    showStylePanel(this);
+                });
+
+                // Save on blur
+                el.addEventListener('blur', function() {
+                    saveCurrentState();
+                });
+
+                // Save on input
+                el.addEventListener('input', function() {
+                    // Debounce save
+                    clearTimeout(this.saveTimeout);
+                    this.saveTimeout = setTimeout(function() {
+                        saveCurrentState();
+                    }, 500);
+                });
+            });
+
+            // Click outside to deselect
+            doc.body.addEventListener('click', function(e) {
+                if (e.target === doc.body) {
+                    doc.querySelectorAll('.ve-selected').forEach(function(s) {
+                        s.classList.remove('ve-selected');
+                        s.contentEditable = 'false';
+                    });
+                    selectedElement = null;
+                    hideStylePanel();
+                }
+            });
         }
 
-        // Close preview on escape
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closePreview();
-                if (isFullscreen) toggleFullscreen();
+        // Save current state
+        function saveCurrentState() {
+            var iframe = document.getElementById('livePreview');
+            if (!iframe) return;
+
+            var doc = iframe.contentDocument || iframe.contentWindow.document;
+
+            // Remove editor classes before saving
+            doc.querySelectorAll('.ve-hover, .ve-selected').forEach(function(el) {
+                el.classList.remove('ve-hover', 've-selected');
+                el.contentEditable = 'false';
+            });
+
+            // Get HTML
+            currentHtml = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+
+            // Add to history
+            if (historyStack[historyIndex] !== currentHtml) {
+                historyStack = historyStack.slice(0, historyIndex + 1);
+                historyStack.push(currentHtml);
+                historyIndex = historyStack.length - 1;
             }
+
+            // Update hidden input
+            document.getElementById('htmlContent').value = currentHtml;
+        }
+
+        // Show style panel for selected element
+        function showStylePanel(el) {
+            var panel = document.getElementById('elementStylePanel');
+            if (!panel) return;
+
+            var computed = window.getComputedStyle(el);
+            var tagName = el.tagName.toLowerCase();
+
+            panel.innerHTML = `
+                <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;">
+                    <strong style="font-size: 12px; color: var(--primary);">&lt;${tagName}&gt;</strong>
+                    <span style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 3px;">${el.className || 'pas de classe'}</span>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label style="font-size: 11px; font-weight: 600; margin-bottom: 4px; display: block;">Texte</label>
+                    <textarea id="styleText" rows="2" style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 12px;">${el.innerText}</textarea>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label style="font-size: 11px; font-weight: 600; margin-bottom: 4px; display: block;">Couleur texte</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="color" id="styleColor" value="${rgbToHex(computed.color)}" style="width: 40px; height: 30px; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer;">
+                        <input type="text" id="styleColorText" value="${computed.color}" style="flex: 1; padding: 6px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 11px;">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label style="font-size: 11px; font-weight: 600; margin-bottom: 4px; display: block;">Couleur fond</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="color" id="styleBgColor" value="${rgbToHex(computed.backgroundColor)}" style="width: 40px; height: 30px; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer;">
+                        <input type="text" id="styleBgColorText" value="${computed.backgroundColor}" style="flex: 1; padding: 6px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 11px;">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label style="font-size: 11px; font-weight: 600; margin-bottom: 4px; display: block;">Taille police</label>
+                    <input type="text" id="styleFontSize" value="${computed.fontSize}" style="width: 100%; padding: 6px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 12px;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label style="font-size: 11px; font-weight: 600; margin-bottom: 4px; display: block;">Graisse</label>
+                    <select id="styleFontWeight" style="width: 100%; padding: 6px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 12px;">
+                        <option value="400" ${computed.fontWeight == '400' ? 'selected' : ''}>Normal (400)</option>
+                        <option value="500" ${computed.fontWeight == '500' ? 'selected' : ''}>Medium (500)</option>
+                        <option value="600" ${computed.fontWeight == '600' ? 'selected' : ''}>Semi-bold (600)</option>
+                        <option value="700" ${computed.fontWeight == '700' ? 'selected' : ''}>Bold (700)</option>
+                        <option value="800" ${computed.fontWeight == '800' ? 'selected' : ''}>Extra-bold (800)</option>
+                    </select>
+                </div>
+
+                <button type="button" onclick="applyStyles()" class="btn btn-primary btn-sm" style="width: 100%; margin-top: 10px;">Appliquer</button>
+            `;
+
+            // Switch to style tab
+            switchTab('style');
+        }
+
+        // Apply styles
+        function applyStyles() {
+            if (!selectedElement) return;
+
+            selectedElement.innerText = document.getElementById('styleText').value;
+            selectedElement.style.color = document.getElementById('styleColor').value;
+            selectedElement.style.backgroundColor = document.getElementById('styleBgColor').value;
+            selectedElement.style.fontSize = document.getElementById('styleFontSize').value;
+            selectedElement.style.fontWeight = document.getElementById('styleFontWeight').value;
+
+            saveCurrentState();
+        }
+
+        // Hide style panel
+        function hideStylePanel() {
+            var panel = document.getElementById('elementStylePanel');
+            if (panel) {
+                panel.innerHTML = '<p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 40px 0;">Cliquez sur un élément dans la preview pour le modifier</p>';
+            }
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.ve-tab').forEach(function(tab) {
+                tab.classList.remove('active');
+                tab.style.background = '#f8fafc';
+                tab.style.borderBottom = 'none';
+                tab.style.fontWeight = 'normal';
+            });
+            document.querySelectorAll('.ve-tab-content').forEach(function(content) {
+                content.style.display = 'none';
+            });
+
+            var activeTab = document.querySelector('.ve-tab[data-tab="' + tabName + '"]');
+            var activeContent = document.querySelector('.ve-tab-content[data-tab="' + tabName + '"]');
+
+            if (activeTab) {
+                activeTab.classList.add('active');
+                activeTab.style.background = '#fff';
+                activeTab.style.borderBottom = '2px solid var(--primary)';
+                activeTab.style.fontWeight = '600';
+            }
+            if (activeContent) {
+                activeContent.style.display = 'block';
+            }
+        }
+
+        document.querySelectorAll('.ve-tab').forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                switchTab(this.dataset.tab);
+            });
         });
 
-        // ========== PRODUCT SELECTION FUNCTIONS ==========
+        // Device preview
+        document.querySelectorAll('.ve-device-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.ve-device-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
 
-        // Toggle visibility based on page type
-        document.getElementById('pageType').addEventListener('change', function() {
-            var section = document.getElementById('categoryProductsSection');
-            section.style.display = this.value === 'category' ? 'block' : 'none';
+                var wrapper = document.getElementById('previewWrapper');
+                var device = this.dataset.device;
 
-            var urlPrefix = this.value === 'category' ? '/categorie/' : '/info/';
-            var slugVal = document.querySelector('input[name="slug"]').value;
-            document.querySelector('small').innerHTML = 'URL: ' + urlPrefix + '<span id="slugPreview">' + slugVal + '</span>';
+                if (device === 'mobile') {
+                    wrapper.style.maxWidth = '375px';
+                } else if (device === 'tablet') {
+                    wrapper.style.maxWidth = '768px';
+                } else {
+                    wrapper.style.maxWidth = '100%';
+                }
+            });
+        });
+
+        // Undo/Redo
+        function undoChange() {
+            if (historyIndex > 0) {
+                historyIndex--;
+                currentHtml = historyStack[historyIndex];
+                refreshPreview();
+            }
+        }
+
+        function redoChange() {
+            if (historyIndex < historyStack.length - 1) {
+                historyIndex++;
+                currentHtml = historyStack[historyIndex];
+                refreshPreview();
+            }
+        }
+
+        // Refresh preview
+        function refreshPreview() {
+            initPreview();
+        }
+
+        // Code view
+        function toggleCodeView() {
+            document.getElementById('codeEditor').value = currentHtml;
+            document.getElementById('codeModal').style.display = 'block';
+        }
+
+        function closeCodeView() {
+            document.getElementById('codeModal').style.display = 'none';
+        }
+
+        function applyCodeChanges() {
+            currentHtml = document.getElementById('codeEditor').value;
+            historyStack.push(currentHtml);
+            historyIndex = historyStack.length - 1;
+            refreshPreview();
+            closeCodeView();
+        }
+
+        // Helper: RGB to Hex
+        function rgbToHex(rgb) {
+            if (!rgb || rgb === 'transparent' || rgb === 'rgba(0, 0, 0, 0)') return '#ffffff';
+            var match = rgb.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+            if (!match) return '#000000';
+            return '#' + [match[1], match[2], match[3]].map(function(x) {
+                return ('0' + parseInt(x).toString(16)).slice(-2);
+            }).join('');
+        }
+
+        // Form submit - update content
+        document.getElementById('pageForm').addEventListener('submit', function() {
+            saveCurrentState();
         });
 
         // Product search
-        document.getElementById('productSearch')?.addEventListener('input', function() {
-            var search = this.value.toLowerCase();
-            document.querySelectorAll('.product-select-item').forEach(function(item) {
-                var name = item.dataset.name || '';
-                var sport = item.dataset.sport || '';
-                var famille = item.dataset.famille || '';
-                var match = name.includes(search) || sport.includes(search) || famille.includes(search);
-                item.style.display = match ? 'flex' : 'none';
+        var productSearch = document.getElementById('productSearch');
+        if (productSearch) {
+            productSearch.addEventListener('input', function() {
+                var search = this.value.toLowerCase();
+                document.querySelectorAll('.product-select-item').forEach(function(item) {
+                    var name = item.dataset.name || '';
+                    item.style.display = name.includes(search) ? 'flex' : 'none';
+                });
             });
-        });
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', initPreview);
+        if (document.readyState !== 'loading') {
+            initPreview();
+        }
 
         // Update selected count
         function updateSelectedCount() {
@@ -2340,268 +2482,6 @@ $user = $_SESSION['admin_user'] ?? null;
 
         // Initialize count on load
         updateSelectedCount();
-
-        // ========== PAGE BUILDER FUNCTIONS ==========
-
-        // Module definitions (from PHP)
-        var pbModules = <?= json_encode($PAGE_BUILDER_MODULES, JSON_UNESCAPED_UNICODE) ?>;
-
-        // Current blocks state
-        var pbBlocks = <?= json_encode($blocks, JSON_UNESCAPED_UNICODE) ?>;
-        var editingBlockIndex = null;
-
-        // Tab switching
-        document.querySelectorAll('.pb-tab-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                var tab = this.dataset.tab;
-                document.querySelectorAll('.pb-tab-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-
-                if (tab === 'visual') {
-                    document.getElementById('visualEditorTab').style.display = 'block';
-                    document.getElementById('htmlEditorTab').style.display = 'none';
-                } else {
-                    document.getElementById('visualEditorTab').style.display = 'none';
-                    document.getElementById('htmlEditorTab').style.display = 'block';
-                    if (pageEditor) pageEditor.refresh();
-                }
-            });
-        });
-
-        // Drag and drop from sidebar
-        document.querySelectorAll('.pb-module-item').forEach(function(item) {
-            item.addEventListener('dragstart', function(e) {
-                e.dataTransfer.setData('moduleType', this.dataset.module);
-                e.dataTransfer.effectAllowed = 'copy';
-            });
-        });
-
-        var dropZone = document.getElementById('pbDropZone');
-        if (dropZone) {
-            dropZone.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = 'copy';
-                this.classList.add('drag-over');
-            });
-
-            dropZone.addEventListener('dragleave', function(e) {
-                this.classList.remove('drag-over');
-            });
-
-            dropZone.addEventListener('drop', function(e) {
-                e.preventDefault();
-                this.classList.remove('drag-over');
-
-                var moduleType = e.dataTransfer.getData('moduleType');
-                if (moduleType && pbModules[moduleType]) {
-                    addBlock(moduleType);
-                }
-            });
-        }
-
-        // Add a new block
-        function addBlock(moduleType) {
-            var module = pbModules[moduleType];
-            if (!module) return;
-
-            // Create block with default values
-            var blockData = {};
-            for (var key in module.fields) {
-                var field = module.fields[key];
-                blockData[key] = field.default !== undefined ? field.default : '';
-            }
-
-            var newBlock = {
-                type: moduleType,
-                data: blockData
-            };
-
-            pbBlocks.push(newBlock);
-            renderBlocks();
-            updateBlocksData();
-        }
-
-        // Render all blocks
-        function renderBlocks() {
-            var dropZone = document.getElementById('pbDropZone');
-            if (!dropZone) return;
-
-            if (pbBlocks.length === 0) {
-                dropZone.innerHTML = '<div class="pb-empty-state" style="text-align: center; padding: 100px 20px; color: var(--text-muted);"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 15px; opacity: 0.5;"><path d="M12 5v14M5 12h14"/></svg><p style="font-size: 15px;">Glissez des modules ici pour construire votre page</p></div>';
-                return;
-            }
-
-            var html = '';
-            pbBlocks.forEach(function(block, index) {
-                var module = pbModules[block.type] || {};
-                var previewText = block.data.title || block.data.eyebrow || block.data.content || '';
-                if (previewText.length > 50) previewText = previewText.substring(0, 50) + '...';
-
-                html += '<div class="pb-block" data-index="' + index + '" data-type="' + block.type + '" draggable="true">';
-                html += '<div class="pb-block-header">';
-                html += '<span class="pb-block-handle">⋮⋮</span>';
-                html += '<span class="pb-block-name">' + (module.name || block.type) + '</span>';
-                html += '<div class="pb-block-actions">';
-                html += '<button type="button" onclick="editBlock(' + index + ')">✏️</button>';
-                html += '<button type="button" onclick="duplicateBlock(' + index + ')">📋</button>';
-                html += '<button type="button" onclick="deleteBlock(' + index + ')">🗑️</button>';
-                html += '</div></div>';
-                html += '<div class="pb-block-preview"><span style="color: var(--text-muted); font-size: 12px;">' + escapeHtml(previewText) + '</span></div>';
-                html += '</div>';
-            });
-
-            dropZone.innerHTML = html;
-            initBlockDragDrop();
-        }
-
-        // Initialize drag/drop for reordering blocks
-        function initBlockDragDrop() {
-            document.querySelectorAll('.pb-block').forEach(function(block) {
-                block.addEventListener('dragstart', function(e) {
-                    this.classList.add('dragging');
-                    e.dataTransfer.setData('blockIndex', this.dataset.index);
-                });
-
-                block.addEventListener('dragend', function() {
-                    this.classList.remove('dragging');
-                });
-
-                block.addEventListener('dragover', function(e) {
-                    e.preventDefault();
-                    var dragging = document.querySelector('.pb-block.dragging');
-                    if (dragging && dragging !== this) {
-                        var rect = this.getBoundingClientRect();
-                        var midY = rect.top + rect.height / 2;
-                        if (e.clientY < midY) {
-                            this.parentNode.insertBefore(dragging, this);
-                        } else {
-                            this.parentNode.insertBefore(dragging, this.nextSibling);
-                        }
-                    }
-                });
-
-                block.addEventListener('drop', function(e) {
-                    e.preventDefault();
-                    // Reorder pbBlocks array based on DOM order
-                    var newOrder = [];
-                    document.querySelectorAll('.pb-block').forEach(function(b) {
-                        newOrder.push(pbBlocks[parseInt(b.dataset.index)]);
-                    });
-                    pbBlocks = newOrder;
-                    renderBlocks();
-                    updateBlocksData();
-                });
-            });
-        }
-
-        // Edit block
-        function editBlock(index) {
-            editingBlockIndex = index;
-            var block = pbBlocks[index];
-            var module = pbModules[block.type];
-            if (!module) return;
-
-            document.getElementById('blockModalTitle').textContent = 'Éditer: ' + module.name;
-
-            var html = '';
-            for (var key in module.fields) {
-                var field = module.fields[key];
-                var value = block.data[key] !== undefined ? block.data[key] : (field.default || '');
-
-                html += '<div class="pb-field-group">';
-                html += '<label>' + field.label + '</label>';
-
-                if (field.type === 'textarea' || field.type === 'richtext') {
-                    html += '<textarea data-field="' + key + '" rows="4">' + escapeHtml(value) + '</textarea>';
-                } else if (field.type === 'select') {
-                    html += '<select data-field="' + key + '">';
-                    for (var optKey in field.options) {
-                        var selected = value === optKey ? ' selected' : '';
-                        html += '<option value="' + optKey + '"' + selected + '>' + field.options[optKey] + '</option>';
-                    }
-                    html += '</select>';
-                } else if (field.type === 'checkbox') {
-                    var checked = value ? ' checked' : '';
-                    html += '<input type="checkbox" data-field="' + key + '"' + checked + ' style="width: auto;">';
-                } else if (field.type === 'number') {
-                    html += '<input type="number" data-field="' + key + '" value="' + value + '">';
-                } else if (field.type === 'code') {
-                    html += '<textarea data-field="' + key + '" rows="8" style="font-family: monospace; font-size: 12px;">' + escapeHtml(value) + '</textarea>';
-                } else {
-                    html += '<input type="text" data-field="' + key + '" value="' + escapeHtml(value) + '">';
-                }
-
-                html += '</div>';
-            }
-
-            document.getElementById('blockModalBody').innerHTML = html;
-            document.getElementById('blockEditModal').style.display = 'flex';
-        }
-
-        // Save block changes
-        function saveBlockChanges() {
-            if (editingBlockIndex === null) return;
-
-            document.querySelectorAll('#blockModalBody [data-field]').forEach(function(input) {
-                var field = input.dataset.field;
-                var value;
-                if (input.type === 'checkbox') {
-                    value = input.checked;
-                } else {
-                    value = input.value;
-                }
-                pbBlocks[editingBlockIndex].data[field] = value;
-            });
-
-            renderBlocks();
-            updateBlocksData();
-            closeBlockModal();
-        }
-
-        // Close modal
-        function closeBlockModal() {
-            document.getElementById('blockEditModal').style.display = 'none';
-            editingBlockIndex = null;
-        }
-
-        // Duplicate block
-        function duplicateBlock(index) {
-            var block = JSON.parse(JSON.stringify(pbBlocks[index]));
-            pbBlocks.splice(index + 1, 0, block);
-            renderBlocks();
-            updateBlocksData();
-        }
-
-        // Delete block
-        function deleteBlock(index) {
-            if (confirm('Supprimer ce bloc ?')) {
-                pbBlocks.splice(index, 1);
-                renderBlocks();
-                updateBlocksData();
-            }
-        }
-
-        // Update hidden input with blocks data
-        function updateBlocksData() {
-            var input = document.getElementById('pageBlocksData');
-            if (input) {
-                input.value = JSON.stringify({ blocks: pbBlocks });
-            }
-        }
-
-        // Helper function
-        function escapeHtml(str) {
-            if (typeof str !== 'string') return str;
-            return str.replace(/&/g, '&amp;')
-                      .replace(/</g, '&lt;')
-                      .replace(/>/g, '&gt;')
-                      .replace(/"/g, '&quot;');
-        }
-
-        // Initialize on load
-        if (pbBlocks.length > 0) {
-            renderBlocks();
-        }
         </script>
 
         <?php // ============ BLOG ============ ?>

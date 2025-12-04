@@ -253,9 +253,9 @@ function generateProductCard($product) {
         $photos[] = '/assets/images/placeholder.jpg';
     }
 
-    // Prix
-    $prixAdulte = number_format($product['prix_1'] ?? 0, 2, '.', '');
-    $prixEnfant = number_format(($product['prix_1'] ?? 0) * 0.8, 2, '.', ''); // Estimation -20%
+    // Prix (toujours prix pour 500 pièces)
+    $prixAdulte = number_format($product['prix_500'] ?? $product['prix_1'] ?? 0, 2, '.', '');
+    $prixEnfant = number_format(($product['prix_500'] ?? $product['prix_1'] ?? 0) * 0.85, 2, '.', ''); // -15% pour enfant
 
     // Générer les slides
     $slidesHtml = '';
