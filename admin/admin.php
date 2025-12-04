@@ -380,9 +380,9 @@ if ($action && $pdo) {
 
                 if ($id) {
                     // Mise à jour d'un produit existant
-                    $values[] = $id;
+                    // IMPORTANT: L'ID doit être À LA FIN car WHERE id=? est à la fin de la requête
                     $stmt = $pdo->prepare("UPDATE products SET $set, etiquettes=?, related_products=?, updated_at=NOW() WHERE id=?");
-                    $allValues = array_merge($values, [$etiquettesStr, $relatedProductsJson]);
+                    $allValues = array_merge($values, [$etiquettesStr, $relatedProductsJson, $id]);
                     $result = $stmt->execute($allValues);
                     $rowCount = $stmt->rowCount();
 
