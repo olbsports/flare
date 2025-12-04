@@ -231,14 +231,99 @@ if ($action && $pdo) {
 
             case 'save_page':
                 $pageType = $_POST['type'] ?? 'info';
+                // Construire les filtres produits pour les pages catégories
+                $productFilters = [];
+                if ($pageType === 'category') {
+                    $productFilters = [
+                        'sport' => $_POST['filter_sport'] ?? '',
+                        'famille' => $_POST['filter_famille'] ?? '',
+                        'included_ids' => !empty($_POST['selected_products']) ? array_map('intval', $_POST['selected_products']) : [],
+                        'excluded_ids' => []
+                    ];
+                }
+                $filtersJson = json_encode($productFilters, JSON_UNESCAPED_UNICODE);
+
                 if ($id) {
-                    $pdo->prepare("UPDATE pages SET title=?, slug=?, content=?, excerpt=?, meta_title=?, meta_description=?, status=?, type=? WHERE id=?")
-                        ->execute([$_POST['title'], $_POST['slug'], $_POST['content'], $_POST['excerpt'], $_POST['meta_title'], $_POST['meta_description'], $_POST['status'], $pageType, $id]);
+                    $pdo->prepare("UPDATE pages SET title=?, slug=?, content=?, excerpt=?, meta_title=?, meta_description=?, status=?, type=?, product_filters=? WHERE id=?")
+                        ->execute([$_POST['title'], $_POST['slug'], $_POST['content'], $_POST['excerpt'], $_POST['meta_title'], $_POST['meta_description'], $_POST['status'], $pageType, $filtersJson, $id]);
                 } else {
-                    $pdo->prepare("INSERT INTO pages (title, slug, content, excerpt, meta_title, meta_description, status, type) VALUES (?,?,?,?,?,?,?,?)")
-                        ->execute([$_POST['title'], $_POST['slug'], $_POST['content'], $_POST['excerpt'], $_POST['meta_title'], $_POST['meta_description'], $_POST['status'], $pageType]);
+                    $pdo->prepare("INSERT INTO pages (title, slug, content, excerpt, meta_title, meta_description, status, type, product_filters) VALUES (?,?,?,?,?,?,?,?,?)")
+                        ->execute([$_POST['title'], $_POST['slug'], $_POST['content'], $_POST['excerpt'], $_POST['meta_title'], $_POST['meta_description'], $_POST['status'], $pageType, $filtersJson]);
                 }
                 $toast = 'Page enregistrée';
+                break;
+
+            case 'import_html_pages':
+                $importType = $_POST['import_type'] ?? 'info';
+                $dir = $importType === 'category' ? __DIR__ . '/../pages/products/' : __DIR__ . '/../pages/info/';
+                $dbType = $importType === 'category' ? 'category' : 'info';
+                $imported = 0;
+
+                if (is_dir($dir)) {
+                    $files = glob($dir . '*.html');
+                    foreach ($files as $file) {
+                        $slug = basename($file, '.html');
+                        // Vérifier si existe déjà
+                        $stmt = $pdo->prepare("SELECT id FROM pages WHERE slug = ?");
+                        $stmt->execute([$slug]);
+                        if (!$stmt->fetch()) {
+                            $html = file_get_contents($file);
+                            // Extraire titre et meta description
+                            preg_match('/<title>([^<]+)<\/title>/i', $html, $titleMatch);
+                            preg_match('/<meta[^>]*name=["\']description["\'][^>]*content=["\']([^"\']+)["\']/i', $html, $descMatch);
+
+                            $title = $titleMatch[1] ?? ucwords(str_replace('-', ' ', $slug));
+                            $metaDesc = $descMatch[1] ?? '';
+
+                            // Filtres auto pour catégories
+                            $filters = [];
+                            if ($dbType === 'category') {
+                                $slugLower = strtolower($slug);
+                                $sportMap = ['football'=>'Football','rugby'=>'Rugby','basketball'=>'Basketball','handball'=>'Handball','volleyball'=>'Volleyball','running'=>'Running','cyclisme'=>'Cyclisme','triathlon'=>'Triathlon','petanque'=>'Pétanque'];
+                                foreach ($sportMap as $k => $v) {
+                                    if (strpos($slugLower, $k) !== false) {
+                                        $filters['sport'] = $v;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            $stmt = $pdo->prepare("INSERT INTO pages (slug, title, type, status, meta_title, meta_description, content, product_filters) VALUES (?,?,?,?,?,?,?,?)");
+                            $stmt->execute([$slug, $title, $dbType, 'published', $title, $metaDesc, $html, json_encode($filters)]);
+                            $imported++;
+                        }
+                    }
+                }
+                $toast = "$imported pages $importType importées !";
+                break;
+
+            case 'import_html_blog':
+                $dir = __DIR__ . '/../pages/blog/';
+                $imported = 0;
+
+                if (is_dir($dir)) {
+                    $files = glob($dir . '*.html');
+                    foreach ($files as $file) {
+                        $slug = basename($file, '.html');
+                        // Vérifier si existe déjà
+                        $stmt = $pdo->prepare("SELECT id FROM blog_posts WHERE slug = ?");
+                        $stmt->execute([$slug]);
+                        if (!$stmt->fetch()) {
+                            $html = file_get_contents($file);
+                            // Extraire titre et meta description
+                            preg_match('/<title>([^<]+)<\/title>/i', $html, $titleMatch);
+                            preg_match('/<meta[^>]*name=["\']description["\'][^>]*content=["\']([^"\']+)["\']/i', $html, $descMatch);
+
+                            $title = $titleMatch[1] ?? ucwords(str_replace('-', ' ', $slug));
+                            $metaDesc = $descMatch[1] ?? '';
+
+                            $stmt = $pdo->prepare("INSERT INTO blog_posts (slug, title, status, meta_title, meta_description, content, published_at) VALUES (?,?,?,?,?,?,NOW())");
+                            $stmt->execute([$slug, $title, 'published', $title, $metaDesc, $html]);
+                            $imported++;
+                        }
+                    }
+                }
+                $toast = "$imported articles blog importés !";
                 break;
 
             case 'save_blog':
@@ -507,6 +592,10 @@ if ($pdo && $page !== 'login') {
                     $stmt->execute([$id]);
                     $data['item'] = $stmt->fetch();
                 }
+                // Charger sports, familles et produits pour la sélection
+                $data['sports'] = $pdo->query("SELECT DISTINCT sport FROM products WHERE sport IS NOT NULL AND sport != '' ORDER BY sport")->fetchAll(PDO::FETCH_COLUMN);
+                $data['familles'] = $pdo->query("SELECT DISTINCT famille FROM products WHERE famille IS NOT NULL AND famille != '' ORDER BY famille")->fetchAll(PDO::FETCH_COLUMN);
+                $data['products'] = $pdo->query("SELECT id, reference, nom, photo_1, sport, famille FROM products WHERE active = 1 ORDER BY sport, famille, nom LIMIT 500")->fetchAll(PDO::FETCH_ASSOC);
                 break;
 
             case 'blog':
@@ -898,15 +987,15 @@ $user = $_SESSION['admin_user'] ?? null;
         </a>
 
         <div class="menu-section">Contenu</div>
-        <a href="manage-pages.php?type=info" class="menu-item">
+        <a href="?page=pages&filter=info" class="menu-item <?= (in_array($page, ['pages', 'page']) && ($_GET['filter'] ?? '') === 'info') || ($page === 'page' && ($data['item']['type'] ?? 'info') === 'info') ? 'active' : '' ?>">
             <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             Pages Info
         </a>
-        <a href="manage-pages.php?type=category" class="menu-item">
+        <a href="?page=pages&filter=category" class="menu-item <?= ($page === 'pages' && ($_GET['filter'] ?? '') === 'category') || ($page === 'page' && ($data['item']['type'] ?? '') === 'category') ? 'active' : '' ?>">
             <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
             Pages Catégories
         </a>
-        <a href="manage-pages.php?type=blog" class="menu-item">
+        <a href="?page=blog" class="menu-item <?= in_array($page, ['blog', 'blog_edit']) ? 'active' : '' ?>">
             <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
             Articles Blog
         </a>
@@ -1592,33 +1681,67 @@ $user = $_SESSION['admin_user'] ?? null;
 
         <?php // ============ PAGES ============ ?>
         <?php elseif ($page === 'pages'): ?>
+        <?php $filterType = $_GET['filter'] ?? ''; ?>
+
+        <!-- Boutons d'import -->
+        <div class="card" style="margin-bottom: 20px;">
+            <div class="card-body" style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                <span style="font-weight: 600;">Importer depuis fichiers HTML :</span>
+                <form method="POST" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+                    <input type="hidden" name="action" value="import_html_pages">
+                    <input type="hidden" name="import_type" value="info">
+                    <button type="submit" class="btn btn-light">Importer Pages Info</button>
+                </form>
+                <form method="POST" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+                    <input type="hidden" name="action" value="import_html_pages">
+                    <input type="hidden" name="import_type" value="category">
+                    <button type="submit" class="btn btn-light">Importer Pages Catégories</button>
+                </form>
+                <a href="?page=page" class="btn btn-primary" style="margin-left: auto;">+ Nouvelle page</a>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="filters" style="margin-bottom: 20px;">
+            <a href="?page=pages" class="btn <?= $filterType === '' ? 'btn-primary' : 'btn-light' ?>">Toutes</a>
+            <a href="?page=pages&filter=info" class="btn <?= $filterType === 'info' ? 'btn-primary' : 'btn-light' ?>">Info</a>
+            <a href="?page=pages&filter=category" class="btn <?= $filterType === 'category' ? 'btn-primary' : 'btn-light' ?>">Catégories</a>
+        </div>
+
         <div class="card">
             <div class="card-header">
-                <span class="card-title">Pages</span>
-                <div style="display:flex; gap:10px;">
-                    <a href="category-products.php" class="btn btn-light">Gérer produits/catégorie</a>
-                    <a href="?page=page" class="btn btn-primary">+ Nouvelle page</a>
-                </div>
+                <span class="card-title">Pages (<?= count(array_filter($data['items'] ?? [], fn($p) => $filterType === '' || ($p['type'] ?? 'info') === $filterType)) ?>)</span>
             </div>
             <div class="table-container">
                 <table>
-                    <thead><tr><th>Titre</th><th>Type</th><th>Slug</th><th>URL</th><th>Statut</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>Titre</th><th>Type</th><th>URL</th><th>Filtres</th><th>Statut</th><th>Actions</th></tr></thead>
                     <tbody>
                     <?php foreach ($data['items'] ?? [] as $pg):
                         $pageType = $pg['type'] ?? 'info';
+                        if ($filterType !== '' && $pageType !== $filterType) continue;
                         $pageUrl = $pageType === 'category' ? '/categorie/' . $pg['slug'] : '/info/' . $pg['slug'];
+                        $filters = json_decode($pg['product_filters'] ?? '{}', true);
                     ?>
                         <tr>
                             <td><strong><?= htmlspecialchars($pg['title']) ?></strong></td>
                             <td><span class="badge badge-<?= $pageType === 'category' ? 'info' : 'secondary' ?>"><?= $pageType === 'category' ? 'Catégorie' : 'Info' ?></span></td>
-                            <td><?= htmlspecialchars($pg['slug']) ?></td>
                             <td><a href="<?= $pageUrl ?>" target="_blank" style="color:var(--primary)"><?= $pageUrl ?></a></td>
+                            <td>
+                                <?php if (!empty($filters['sport'])): ?>
+                                    <span class="badge badge-info"><?= htmlspecialchars($filters['sport']) ?></span>
+                                <?php endif; ?>
+                                <?php if (!empty($filters['famille'])): ?>
+                                    <span class="badge badge-info"><?= htmlspecialchars($filters['famille']) ?></span>
+                                <?php endif; ?>
+                                <?php if (!empty($filters['included_ids'])): ?>
+                                    <span class="badge badge-success"><?= count($filters['included_ids']) ?> produits</span>
+                                <?php endif; ?>
+                            </td>
                             <td><span class="badge badge-<?= $pg['status'] === 'published' ? 'success' : 'warning' ?>"><?= $pg['status'] ?></span></td>
                             <td>
                                 <a href="?page=page&id=<?= $pg['id'] ?>" class="btn btn-sm btn-light">Modifier</a>
-                                <?php if ($pageType === 'category'): ?>
-                                <a href="category-products.php?page_id=<?= $pg['id'] ?>" class="btn btn-sm btn-light" title="Gérer les produits">Produits</a>
-                                <?php endif; ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -1638,12 +1761,7 @@ $user = $_SESSION['admin_user'] ?? null;
             <div class="card-header">
                 <span class="card-title"><?= $id ? 'Modifier' : 'Nouvelle' ?> page</span>
                 <?php if ($id && !empty($pg['slug'])): ?>
-                <div style="display:flex; gap:10px;">
-                    <a href="<?= $previewUrl ?>" target="_blank" class="btn btn-light">Voir la page</a>
-                    <?php if ($currentType === 'category'): ?>
-                    <a href="category-products.php?page_id=<?= $id ?>" class="btn btn-info">Gérer les produits</a>
-                    <?php endif; ?>
-                </div>
+                <a href="<?= $previewUrl ?>" target="_blank" class="btn btn-light">Voir la page</a>
                 <?php endif; ?>
             </div>
             <form method="POST" id="pageForm">
@@ -1679,12 +1797,64 @@ $user = $_SESSION['admin_user'] ?? null;
                         </div>
                     </div>
 
-                    <?php if ($currentType === 'category' && $id): ?>
-                    <div class="form-group" style="background: #e0f2fe; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                        <strong>Page Catégorie</strong> -
-                        <a href="category-products.php?page_id=<?= $id ?>" style="color: var(--primary);">Cliquez ici pour gérer les produits affichés sur cette page</a>
+                    <!-- Section Sélection Produits pour pages catégories -->
+                    <div id="categoryProductsSection" style="display: <?= $currentType === 'category' ? 'block' : 'none' ?>; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                        <h4 style="margin-top:0; margin-bottom: 15px; font-size: 16px; color: var(--primary);">Sélection des produits</h4>
+
+                        <?php
+                        $currentFilters = json_decode($pg['product_filters'] ?? '{}', true);
+                        $selectedIds = $currentFilters['included_ids'] ?? [];
+                        ?>
+
+                        <!-- Filtres automatiques -->
+                        <div class="form-row" style="margin-bottom: 15px;">
+                            <div class="form-group">
+                                <label class="form-label">Filtrer par Sport</label>
+                                <select name="filter_sport" class="form-control" id="filterSport">
+                                    <option value="">-- Tous les sports --</option>
+                                    <?php foreach ($data['sports'] ?? [] as $sport): ?>
+                                    <option value="<?= htmlspecialchars($sport) ?>" <?= ($currentFilters['sport'] ?? '') === $sport ? 'selected' : '' ?>><?= htmlspecialchars($sport) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Filtrer par Famille</label>
+                                <select name="filter_famille" class="form-control" id="filterFamille">
+                                    <option value="">-- Toutes les familles --</option>
+                                    <?php foreach ($data['familles'] ?? [] as $famille): ?>
+                                    <option value="<?= htmlspecialchars($famille) ?>" <?= ($currentFilters['famille'] ?? '') === $famille ? 'selected' : '' ?>><?= htmlspecialchars($famille) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">
+                            Les filtres ci-dessus s'appliquent automatiquement. Pour une sélection manuelle, cochez les produits ci-dessous :
+                        </p>
+
+                        <!-- Grille de sélection manuelle -->
+                        <div style="margin-bottom: 15px;">
+                            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                                <input type="text" id="productSearch" class="form-control" placeholder="Rechercher un produit..." style="max-width: 300px;">
+                                <button type="button" class="btn btn-light btn-sm" onclick="selectAllVisible()">Tout sélectionner</button>
+                                <button type="button" class="btn btn-light btn-sm" onclick="deselectAll()">Tout désélectionner</button>
+                                <span id="selectedCount" style="font-size: 13px; color: var(--text-muted);"><?= count($selectedIds) ?> produit(s) sélectionné(s)</span>
+                            </div>
+                        </div>
+
+                        <div id="productsGrid" style="max-height: 400px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; background: #fff;">
+                            <?php foreach ($data['products'] ?? [] as $prod): ?>
+                            <label class="product-select-item" data-sport="<?= htmlspecialchars(strtolower($prod['sport'] ?? '')) ?>" data-famille="<?= htmlspecialchars(strtolower($prod['famille'] ?? '')) ?>" data-name="<?= htmlspecialchars(strtolower($prod['nom'] ?? '')) ?>" style="display: flex; align-items: center; gap: 10px; padding: 8px; border-bottom: 1px solid #f1f5f9; cursor: pointer;">
+                                <input type="checkbox" name="selected_products[]" value="<?= $prod['id'] ?>" <?= in_array($prod['id'], $selectedIds) ? 'checked' : '' ?> onchange="updateSelectedCount()">
+                                <img src="<?= htmlspecialchars($prod['photo_1'] ?? '/assets/images/placeholder.jpg') ?>" alt="" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 500; font-size: 13px;"><?= htmlspecialchars($prod['nom']) ?></div>
+                                    <div style="font-size: 11px; color: var(--text-muted);"><?= htmlspecialchars($prod['reference']) ?> | <?= htmlspecialchars($prod['sport'] ?? '') ?> - <?= htmlspecialchars($prod['famille'] ?? '') ?></div>
+                                </div>
+                            </label>
+                            <?php endforeach; ?>
+                        </div>
                     </div>
-                    <?php endif; ?>
 
                     <div class="form-group">
                         <label class="form-label">Extrait / Description courte</label>
@@ -1830,13 +2000,78 @@ $user = $_SESSION['admin_user'] ?? null;
                 if (isFullscreen) toggleFullscreen();
             }
         });
+
+        // ========== PRODUCT SELECTION FUNCTIONS ==========
+
+        // Toggle visibility based on page type
+        document.getElementById('pageType').addEventListener('change', function() {
+            var section = document.getElementById('categoryProductsSection');
+            section.style.display = this.value === 'category' ? 'block' : 'none';
+
+            var urlPrefix = this.value === 'category' ? '/categorie/' : '/info/';
+            var slugVal = document.querySelector('input[name="slug"]').value;
+            document.querySelector('small').innerHTML = 'URL: ' + urlPrefix + '<span id="slugPreview">' + slugVal + '</span>';
+        });
+
+        // Product search
+        document.getElementById('productSearch')?.addEventListener('input', function() {
+            var search = this.value.toLowerCase();
+            document.querySelectorAll('.product-select-item').forEach(function(item) {
+                var name = item.dataset.name || '';
+                var sport = item.dataset.sport || '';
+                var famille = item.dataset.famille || '';
+                var match = name.includes(search) || sport.includes(search) || famille.includes(search);
+                item.style.display = match ? 'flex' : 'none';
+            });
+        });
+
+        // Update selected count
+        function updateSelectedCount() {
+            var count = document.querySelectorAll('input[name="selected_products[]"]:checked').length;
+            var el = document.getElementById('selectedCount');
+            if (el) el.textContent = count + ' produit(s) sélectionné(s)';
+        }
+
+        // Select all visible products
+        function selectAllVisible() {
+            document.querySelectorAll('.product-select-item').forEach(function(item) {
+                if (item.style.display !== 'none') {
+                    var checkbox = item.querySelector('input[type="checkbox"]');
+                    if (checkbox) checkbox.checked = true;
+                }
+            });
+            updateSelectedCount();
+        }
+
+        // Deselect all products
+        function deselectAll() {
+            document.querySelectorAll('input[name="selected_products[]"]').forEach(function(cb) {
+                cb.checked = false;
+            });
+            updateSelectedCount();
+        }
+
+        // Initialize count on load
+        updateSelectedCount();
         </script>
 
         <?php // ============ BLOG ============ ?>
         <?php elseif ($page === 'blog'): ?>
+        <!-- Bouton d'import blog -->
+        <div class="card" style="margin-bottom: 20px;">
+            <div class="card-body" style="display: flex; gap: 15px; align-items: center;">
+                <span style="font-weight: 600;">Importer depuis fichiers HTML :</span>
+                <form method="POST" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+                    <input type="hidden" name="action" value="import_html_blog">
+                    <button type="submit" class="btn btn-light">Importer Articles Blog</button>
+                </form>
+            </div>
+        </div>
+
         <div class="card">
             <div class="card-header">
-                <span class="card-title">Articles de blog</span>
+                <span class="card-title">Articles de blog (<?= count($data['items'] ?? []) ?>)</span>
                 <a href="?page=blog_edit" class="btn btn-primary">+ Nouvel article</a>
             </div>
             <div class="table-container">
