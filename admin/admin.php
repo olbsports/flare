@@ -1991,89 +1991,255 @@ $user = $_SESSION['admin_user'] ?? null;
         </div>
         <?php else: ?>
 
-        <!-- ========== ÉDITEUR HTML SIMPLIFIÉ ========== -->
-        <div style="display: flex; height: calc(100vh - 100px); margin: -30px; gap: 0;">
+        <!-- ========== ÉDITEUR VISUEL COMPLET ========== -->
+        <style>
+        .ve-container { display: flex; height: calc(100vh - 80px); margin: -30px; }
+        .ve-sidebar { width: 340px; background: #fff; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; }
+        .ve-main { flex: 1; display: flex; flex-direction: column; background: #e5e7eb; }
+        .ve-toolbar { padding: 10px 15px; background: #fff; border-bottom: 1px solid #e2e8f0; display: flex; gap: 8px; align-items: center; }
+        .ve-preview-wrap { flex: 1; padding: 20px; overflow: auto; display: flex; justify-content: center; }
+        .ve-group { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #f1f5f9; }
+        .ve-group:last-child { border-bottom: none; }
+        .ve-group-title { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 10px; }
+        .ve-row { display: flex; gap: 8px; margin-bottom: 8px; }
+        .ve-field { flex: 1; }
+        .ve-label { font-size: 11px; color: #64748b; margin-bottom: 4px; display: block; }
+        .ve-input { width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 12px; }
+        .ve-input:focus { outline: none; border-color: #FF4B26; }
+        .ve-color-wrap { display: flex; gap: 6px; align-items: center; }
+        .ve-color { width: 36px; height: 36px; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer; padding: 2px; }
+        </style>
 
-            <!-- GAUCHE: Éditeur de code -->
-            <div style="width: 50%; display: flex; flex-direction: column; border-right: 1px solid #e2e8f0;">
-                <!-- Header -->
-                <div style="padding: 15px; background: #fff; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <h2 style="margin: 0; font-size: 16px;"><?= htmlspecialchars($pageTitle) ?></h2>
-                        <code style="font-size: 11px; color: var(--text-muted);"><?= htmlspecialchars($filename) ?></code>
-                    </div>
-                    <div style="display: flex; gap: 8px;">
-                        <a href="<?= $previewUrl ?>" target="_blank" class="btn btn-light btn-sm">Voir en ligne ↗</a>
+        <div class="ve-container">
+            <!-- SIDEBAR -->
+            <div class="ve-sidebar">
+                <div style="padding: 15px; border-bottom: 1px solid #e2e8f0;">
+                    <h3 style="margin: 0 0 5px; font-size: 15px;"><?= htmlspecialchars($pageTitle) ?></h3>
+                    <code style="font-size: 11px; color: #64748b;"><?= htmlspecialchars($filename) ?></code>
+                </div>
+
+                <div style="flex: 1; overflow-y: auto; padding: 15px;" id="stylePanel">
+                    <div style="text-align:center; padding:40px 20px; color:#94a3b8;">
+                        <p>👆 Cliquez sur un élément dans la preview pour le modifier</p>
                     </div>
                 </div>
 
-                <!-- Code Editor -->
-                <form method="POST" id="pageForm" style="flex: 1; display: flex; flex-direction: column;">
-                    <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
-                    <input type="hidden" name="action" value="save_page">
-                    <input type="hidden" name="page_type" value="<?= htmlspecialchars($pageType) ?>">
-                    <input type="hidden" name="page_slug" value="<?= htmlspecialchars($slug) ?>">
-
-                    <textarea name="content" id="codeEditor" style="flex: 1; border: none; padding: 15px; font-family: 'Monaco', 'Consolas', 'Courier New', monospace; font-size: 13px; line-height: 1.5; resize: none; background: #1e1e1e; color: #d4d4d4;"><?= htmlspecialchars($htmlContent) ?></textarea>
-
-                    <!-- Footer -->
-                    <div style="padding: 12px 15px; background: #fff; border-top: 1px solid #e2e8f0; display: flex; gap: 10px;">
-                        <a href="?page=pages" class="btn btn-light">← Retour</a>
-                        <button type="button" class="btn btn-info" onclick="updatePreview()">🔄 Actualiser Preview</button>
-                        <button type="submit" class="btn btn-primary" style="margin-left: auto;">💾 Enregistrer</button>
+                <div style="padding: 15px; border-top: 1px solid #e2e8f0; background: #f8fafc;">
+                    <form method="POST" id="saveForm">
+                        <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+                        <input type="hidden" name="action" value="save_page">
+                        <input type="hidden" name="page_type" value="<?= htmlspecialchars($pageType) ?>">
+                        <input type="hidden" name="page_slug" value="<?= htmlspecialchars($slug) ?>">
+                        <input type="hidden" name="content" id="finalContent">
+                        <button type="submit" class="btn btn-primary" style="width:100%; margin-bottom:10px;">💾 Enregistrer</button>
+                    </form>
+                    <div style="display:flex; gap:8px;">
+                        <a href="?page=pages" class="btn btn-light" style="flex:1;">← Retour</a>
+                        <a href="<?= $previewUrl ?>" target="_blank" class="btn btn-light" style="flex:1;">Voir ↗</a>
                     </div>
-                </form>
+                </div>
             </div>
 
-            <!-- DROITE: Preview -->
-            <div style="width: 50%; display: flex; flex-direction: column; background: #f1f5f9;">
-                <!-- Header Preview -->
-                <div style="padding: 10px 15px; background: #fff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 10px;">
-                    <span style="font-weight: 600; font-size: 14px;">Preview</span>
-                    <div style="flex: 1;"></div>
-                    <button type="button" class="btn btn-light btn-sm" onclick="setPreviewSize('100%')" title="Desktop">🖥️</button>
-                    <button type="button" class="btn btn-light btn-sm" onclick="setPreviewSize('768px')" title="Tablet">📱</button>
-                    <button type="button" class="btn btn-light btn-sm" onclick="setPreviewSize('375px')" title="Mobile">📲</button>
+            <!-- MAIN -->
+            <div class="ve-main">
+                <div class="ve-toolbar">
+                    <button class="btn btn-light btn-sm" onclick="veUndo()">↩️ Annuler</button>
+                    <button class="btn btn-light btn-sm" onclick="veRedo()">↪️ Rétablir</button>
+                    <div style="flex:1;"></div>
+                    <span style="font-size:12px; color:#64748b;" id="selectedInfo">Aucun élément sélectionné</span>
+                    <div style="flex:1;"></div>
+                    <button class="btn btn-light btn-sm" onclick="setWidth('100%')">🖥️</button>
+                    <button class="btn btn-light btn-sm" onclick="setWidth('768px')">📱</button>
+                    <button class="btn btn-light btn-sm" onclick="setWidth('375px')">📲</button>
                 </div>
-
-                <!-- Iframe -->
-                <div style="flex: 1; padding: 15px; overflow: auto; display: flex; justify-content: center;">
-                    <div id="previewContainer" style="width: 100%; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-radius: 4px; overflow: hidden; transition: width 0.3s;">
-                        <iframe id="previewFrame" style="width: 100%; height: 100%; min-height: 700px; border: none;"></iframe>
+                <div class="ve-preview-wrap">
+                    <div id="previewBox" style="width:100%; background:#fff; box-shadow:0 4px 20px rgba(0,0,0,0.12); border-radius:4px; overflow:hidden;">
+                        <iframe id="veFrame" style="width:100%; height:800px; border:none;"></iframe>
                     </div>
                 </div>
             </div>
         </div>
 
         <script>
-        (function() {
-            var codeEditor = document.getElementById('codeEditor');
-            var previewFrame = document.getElementById('previewFrame');
+        (function(){
+            var frame = document.getElementById('veFrame');
+            var fDoc = null;
+            var selected = null;
+            var history = [];
+            var hIdx = -1;
+            var html = <?= json_encode($htmlContent, JSON_HEX_TAG | JSON_HEX_AMP) ?>;
 
-            // Fonction pour mettre à jour la preview
-            window.updatePreview = function() {
-                var content = codeEditor.value;
-                var doc = previewFrame.contentDocument || previewFrame.contentWindow.document;
-                doc.open();
-                doc.write(content);
-                doc.close();
+            // Load
+            function load(h) {
+                fDoc = frame.contentDocument || frame.contentWindow.document;
+                fDoc.open();
+                fDoc.write(h);
+                fDoc.close();
+                frame.onload = setup;
+                setTimeout(setup, 200);
+            }
+
+            // Setup
+            function setup() {
+                if (!fDoc || !fDoc.body) return;
+
+                // Style
+                var s = fDoc.createElement('style');
+                s.id = 'veS';
+                s.textContent = '.veH{outline:2px dashed #3b82f6!important;cursor:pointer}.veS{outline:3px solid #FF4B26!important;outline-offset:2px}';
+                if (!fDoc.getElementById('veS')) fDoc.head.appendChild(s);
+
+                // Events
+                fDoc.body.querySelectorAll('*').forEach(function(el){
+                    el.onmouseenter = function(){ if(!this.classList.contains('veS')) this.classList.add('veH'); };
+                    el.onmouseleave = function(){ this.classList.remove('veH'); };
+                    el.onclick = function(e){ e.preventDefault(); e.stopPropagation(); sel(this); };
+                });
+
+                saveH();
+            }
+
+            // Select
+            function sel(el) {
+                if (selected) { selected.classList.remove('veS'); selected.contentEditable = 'false'; }
+                selected = el;
+                el.classList.remove('veH');
+                el.classList.add('veS');
+                document.getElementById('selectedInfo').innerHTML = '&lt;' + el.tagName.toLowerCase() + '&gt;' + (el.className ? ' .' + el.className.split(' ')[0] : '');
+                showPanel(el);
+            }
+
+            // Show panel
+            function showPanel(el) {
+                var cs = fDoc.defaultView.getComputedStyle(el);
+                var p = document.getElementById('stylePanel');
+
+                p.innerHTML =
+                '<div class="ve-group">' +
+                    '<div class="ve-group-title">📝 Contenu</div>' +
+                    '<textarea id="pText" class="ve-input" rows="4">' + el.innerHTML.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</textarea>' +
+                    '<button class="btn btn-sm btn-primary" style="width:100%;margin-top:8px;" onclick="applyText()">Appliquer</button>' +
+                '</div>' +
+                '<div class="ve-group">' +
+                    '<div class="ve-group-title">🎨 Couleurs</div>' +
+                    '<div class="ve-row">' +
+                        '<div class="ve-field"><label class="ve-label">Texte</label><div class="ve-color-wrap"><input type="color" id="pColor" class="ve-color" value="' + rgb2hex(cs.color) + '"><input type="text" class="ve-input" id="pColorT" value="' + cs.color + '" style="flex:1;"></div></div>' +
+                    '</div>' +
+                    '<div class="ve-row">' +
+                        '<div class="ve-field"><label class="ve-label">Fond</label><div class="ve-color-wrap"><input type="color" id="pBg" class="ve-color" value="' + rgb2hex(cs.backgroundColor) + '"><input type="text" class="ve-input" id="pBgT" value="' + cs.backgroundColor + '" style="flex:1;"></div></div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="ve-group">' +
+                    '<div class="ve-group-title">📏 Typographie</div>' +
+                    '<div class="ve-row">' +
+                        '<div class="ve-field"><label class="ve-label">Taille</label><input type="text" id="pSize" class="ve-input" value="' + cs.fontSize + '"></div>' +
+                        '<div class="ve-field"><label class="ve-label">Graisse</label><select id="pWeight" class="ve-input"><option value="400"' + (cs.fontWeight==='400'?' selected':'') + '>Normal</option><option value="600"' + (cs.fontWeight==='600'?' selected':'') + '>Semi-bold</option><option value="700"' + (cs.fontWeight==='700'?' selected':'') + '>Bold</option></select></div>' +
+                    '</div>' +
+                    '<div class="ve-row">' +
+                        '<div class="ve-field"><label class="ve-label">Line Height</label><input type="text" id="pLh" class="ve-input" value="' + cs.lineHeight + '"></div>' +
+                        '<div class="ve-field"><label class="ve-label">Letter Spacing</label><input type="text" id="pLs" class="ve-input" value="' + cs.letterSpacing + '"></div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="ve-group">' +
+                    '<div class="ve-group-title">📐 Espacement</div>' +
+                    '<div class="ve-row">' +
+                        '<div class="ve-field"><label class="ve-label">Padding</label><input type="text" id="pPad" class="ve-input" value="' + cs.padding + '"></div>' +
+                        '<div class="ve-field"><label class="ve-label">Margin</label><input type="text" id="pMar" class="ve-input" value="' + cs.margin + '"></div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="ve-group">' +
+                    '<div class="ve-group-title">📦 Bordure</div>' +
+                    '<div class="ve-row">' +
+                        '<div class="ve-field"><label class="ve-label">Border</label><input type="text" id="pBorder" class="ve-input" value="' + cs.border + '"></div>' +
+                        '<div class="ve-field"><label class="ve-label">Radius</label><input type="text" id="pRadius" class="ve-input" value="' + cs.borderRadius + '"></div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="ve-group">' +
+                    '<div class="ve-group-title">📐 Dimensions</div>' +
+                    '<div class="ve-row">' +
+                        '<div class="ve-field"><label class="ve-label">Width</label><input type="text" id="pW" class="ve-input" value="' + (el.style.width||'auto') + '"></div>' +
+                        '<div class="ve-field"><label class="ve-label">Height</label><input type="text" id="pH" class="ve-input" value="' + (el.style.height||'auto') + '"></div>' +
+                    '</div>' +
+                '</div>' +
+                '<button class="btn btn-primary" style="width:100%;" onclick="applyAll()">✓ Appliquer tous les styles</button>';
+
+                // Bind colors
+                setTimeout(function(){
+                    var pc = document.getElementById('pColor');
+                    var pb = document.getElementById('pBg');
+                    if(pc) pc.oninput = function(){ document.getElementById('pColorT').value = this.value; };
+                    if(pb) pb.oninput = function(){ document.getElementById('pBgT').value = this.value; };
+                }, 50);
+            }
+
+            // Apply text
+            window.applyText = function() {
+                if (!selected) return;
+                var t = document.getElementById('pText').value;
+                selected.innerHTML = t.replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+                saveH();
             };
 
-            // Fonction pour changer la taille de preview
-            window.setPreviewSize = function(width) {
-                document.getElementById('previewContainer').style.width = width;
+            // Apply all
+            window.applyAll = function() {
+                if (!selected) return;
+                selected.style.color = document.getElementById('pColor').value;
+                selected.style.backgroundColor = document.getElementById('pBg').value;
+                selected.style.fontSize = document.getElementById('pSize').value;
+                selected.style.fontWeight = document.getElementById('pWeight').value;
+                selected.style.lineHeight = document.getElementById('pLh').value;
+                selected.style.letterSpacing = document.getElementById('pLs').value;
+                selected.style.padding = document.getElementById('pPad').value;
+                selected.style.margin = document.getElementById('pMar').value;
+                selected.style.border = document.getElementById('pBorder').value;
+                selected.style.borderRadius = document.getElementById('pRadius').value;
+                var w = document.getElementById('pW').value;
+                var h = document.getElementById('pH').value;
+                if (w && w !== 'auto') selected.style.width = w;
+                if (h && h !== 'auto') selected.style.height = h;
+                saveH();
             };
 
-            // Charger la preview au démarrage
-            updatePreview();
-
-            // Raccourci Ctrl+S pour sauvegarder
-            codeEditor.addEventListener('keydown', function(e) {
-                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-                    e.preventDefault();
-                    document.getElementById('pageForm').submit();
+            // Save history
+            function saveH() {
+                var h = getHtml();
+                if (history[hIdx] !== h) {
+                    history = history.slice(0, hIdx + 1);
+                    history.push(h);
+                    hIdx = history.length - 1;
                 }
-            });
+                document.getElementById('finalContent').value = h;
+            }
+
+            // Get clean HTML
+            function getHtml() {
+                if (!fDoc) return html;
+                var c = fDoc.documentElement.cloneNode(true);
+                var s = c.querySelector('#veS'); if(s) s.remove();
+                c.querySelectorAll('.veH,.veS').forEach(function(e){
+                    e.classList.remove('veH','veS');
+                    if(!e.className) e.removeAttribute('class');
+                    e.removeAttribute('contenteditable');
+                });
+                return '<!DOCTYPE html>\n' + c.outerHTML;
+            }
+
+            // Undo/Redo
+            window.veUndo = function() { if(hIdx>0){ hIdx--; load(history[hIdx]); } };
+            window.veRedo = function() { if(hIdx<history.length-1){ hIdx++; load(history[hIdx]); } };
+
+            // Width
+            window.setWidth = function(w) { document.getElementById('previewBox').style.width = w; };
+
+            // RGB to Hex
+            function rgb2hex(rgb) {
+                if (!rgb || rgb==='transparent' || rgb.indexOf('rgba')===0 && rgb.indexOf(', 0)')>-1) return '#ffffff';
+                var m = rgb.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                return m ? '#'+[m[1],m[2],m[3]].map(function(x){return('0'+parseInt(x).toString(16)).slice(-2);}).join('') : '#000000';
+            }
+
+            // Init
+            load(html);
         })();
         </script>
         <?php endif; ?>
