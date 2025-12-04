@@ -230,6 +230,52 @@ if ($method === 'POST') {
         exit;
     }
 
+    // ACTION: Synchronise les templates depuis le dossier /templates/
+    if ($action === 'sync') {
+        $templatesFolder = __DIR__ . '/../templates/';
+
+        if (!is_dir($templatesFolder)) {
+            echo json_encode(['success' => false, 'error' => 'Le dossier /templates/ n\'existe pas']);
+            exit;
+        }
+
+        $files = scandir($templatesFolder);
+        $synced = 0;
+        $existing = 0;
+
+        foreach ($files as $file) {
+            if (pathinfo($file, PATHINFO_EXTENSION) === 'svg') {
+                // Vérifier si déjà en base
+                $stmt = $db->prepare("SELECT id FROM templates WHERE filename = ?");
+                $stmt->execute([$file]);
+
+                if (!$stmt->fetch()) {
+                    // Ajouter en base
+                    $path = '/templates/' . $file;
+                    $nom = pathinfo($file, PATHINFO_FILENAME);
+                    $nom = ucwords(str_replace(['-', '_'], ' ', $nom));
+
+                    $stmt = $db->prepare("
+                        INSERT INTO templates (filename, nom, path, type, active, ordre, created_at)
+                        VALUES (?, ?, ?, 'svg', 1, 0, NOW())
+                    ");
+                    $stmt->execute([$file, $nom, $path]);
+                    $synced++;
+                } else {
+                    $existing++;
+                }
+            }
+        }
+
+        echo json_encode([
+            'success' => true,
+            'message' => "Synchronisation terminée: $synced nouveaux, $existing déjà présents",
+            'synced' => $synced,
+            'existing' => $existing
+        ]);
+        exit;
+    }
+
     // ACTION: Réordonne les templates
     if ($action === 'reorder') {
         $input = json_decode(file_get_contents('php://input'), true);
@@ -344,6 +390,44 @@ if ($method === 'PUT') {
     }
 
     $input = json_decode(file_get_contents('php://input'), true);
+
+    // Récupérer le template actuel pour le renommage éventuel
+    $stmt = $db->prepare("SELECT filename, path FROM templates WHERE id = ?");
+    $stmt->execute([$id]);
+    $currentTemplate = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$currentTemplate) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'error' => 'Template not found']);
+        exit;
+    }
+
+    // Gérer le renommage du fichier
+    if (isset($input['new_filename']) && !empty($input['new_filename'])) {
+        $newFilename = preg_replace('/[^a-zA-Z0-9\-_.]/', '', $input['new_filename']);
+        if (!str_ends_with(strtolower($newFilename), '.svg')) {
+            $newFilename .= '.svg';
+        }
+
+        $oldPath = __DIR__ . '/../templates/' . $currentTemplate['filename'];
+        $newPath = __DIR__ . '/../templates/' . $newFilename;
+
+        if (file_exists($oldPath) && $newFilename !== $currentTemplate['filename']) {
+            if (file_exists($newPath)) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Un fichier avec ce nom existe déjà']);
+                exit;
+            }
+            if (rename($oldPath, $newPath)) {
+                $input['filename'] = $newFilename;
+                $input['path'] = '/templates/' . $newFilename;
+            } else {
+                http_response_code(500);
+                echo json_encode(['success' => false, 'error' => 'Impossible de renommer le fichier']);
+                exit;
+            }
+        }
+    }
 
     // Construit la requête UPDATE dynamiquement
     $allowedFields = [

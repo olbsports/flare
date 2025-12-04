@@ -4315,6 +4315,10 @@ $user = $_SESSION['admin_user'] ?? null;
             <div class="card-header">
                 <span class="card-title">Templates de design (<?= count($data['items'] ?? []) ?>)</span>
                 <div style="display: flex; gap: 10px;">
+                    <button type="button" class="btn btn-light" onclick="syncTemplates()" id="sync-btn">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        Sync /templates/
+                    </button>
                     <a href="?page=template" class="btn btn-primary">
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                         Nouveau template
@@ -4417,6 +4421,35 @@ $user = $_SESSION['admin_user'] ?? null;
                 })
                 .catch(e => alert('Erreur: ' + e.message));
         }
+
+        function syncTemplates() {
+            const btn = document.getElementById('sync-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<span style="animation: spin 1s linear infinite; display: inline-block;">⟳</span> Synchronisation...';
+
+            fetch('/api/templates-manager.php?action=sync', { method: 'POST' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        if (data.synced > 0) {
+                            window.location.reload();
+                        } else {
+                            btn.disabled = false;
+                            btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Sync /templates/';
+                        }
+                    } else {
+                        alert('Erreur: ' + (data.error || 'Impossible de synchroniser'));
+                        btn.disabled = false;
+                        btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Sync /templates/';
+                    }
+                })
+                .catch(e => {
+                    alert('Erreur: ' + e.message);
+                    btn.disabled = false;
+                    btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Sync /templates/';
+                });
+        }
         </script>
 
         <?php // ============ TEMPLATE EDIT ============ ?>
@@ -4440,9 +4473,16 @@ $user = $_SESSION['admin_user'] ?? null;
                             <label class="form-label">Fichier SVG</label>
                             <input type="file" name="svg_file" class="form-control" accept=".svg">
                             <?php if (!empty($t['path'])): ?>
-                            <div class="form-hint">Actuel: <?= htmlspecialchars($t['filename'] ?? basename($t['path'])) ?></div>
+                            <div class="form-hint">Fichier actuel dans /templates/</div>
                             <?php endif; ?>
                         </div>
+                        <?php if (!$isNew && !empty($t['filename'])): ?>
+                        <div class="form-group">
+                            <label class="form-label">Nom du fichier</label>
+                            <input type="text" name="new_filename" class="form-control" value="<?= htmlspecialchars($t['filename'] ?? '') ?>" placeholder="template.svg">
+                            <div class="form-hint">Renommer le fichier SVG (sans caractères spéciaux)</div>
+                        </div>
+                        <?php endif; ?>
                     </div>
 
                     <div class="form-row">
@@ -4619,6 +4659,12 @@ $user = $_SESSION['admin_user'] ?? null;
                 ordre: parseInt(formData.get('ordre')) || 0,
                 active: parseInt(formData.get('active'))
             };
+
+            // Renommage du fichier
+            const newFilename = formData.get('new_filename');
+            if (newFilename && !isNew) {
+                data.new_filename = newFilename;
+            }
 
             if (uploadedPath) {
                 data.path = uploadedPath;
