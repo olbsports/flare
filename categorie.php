@@ -258,23 +258,25 @@ $productCount = count($products);
                             </div>
                         </div>
                         <?php endif; ?>
-                        <div class="product-badges">
-                            <?php if (!empty($prod['genre'])): ?>
-                            <span class="product-badge badge-genre"><?= htmlspecialchars($prod['genre']) ?></span>
-                            <?php endif; ?>
-                            <?php if (!empty($prod['tissu'])): ?>
-                            <span class="product-badge badge-tissu"><?= htmlspecialchars($prod['tissu']) ?></span>
-                            <?php endif; ?>
-                        </div>
                     </div>
                     <div class="product-info">
                         <h3 class="product-title"><?= htmlspecialchars($prodName) ?></h3>
                         <div class="product-specs">
-                            <span class="product-spec">Réf: <?= htmlspecialchars($prod['reference']) ?></span>
                             <?php if (!empty($prod['grammage'])): ?>
                             <span class="product-spec"><?= htmlspecialchars($prod['grammage']) ?> gr/m²</span>
                             <?php endif; ?>
+                            <?php if (!empty($prod['tissu'])): ?>
+                            <span class="product-spec"><?= htmlspecialchars($prod['tissu']) ?></span>
+                            <?php endif; ?>
+                            <?php if (!empty($prod['genre'])): ?>
+                            <span class="product-spec"><?= htmlspecialchars($prod['genre']) ?></span>
+                            <?php endif; ?>
                         </div>
+                        <?php if (!empty($prod['finition'])): ?>
+                        <div class="product-finitions">
+                            <span class="product-finition-badge"><?= htmlspecialchars($prod['finition']) ?></span>
+                        </div>
+                        <?php endif; ?>
                         <?php if ($prodPrice):
                             $prixEnfant = number_format(floatval($prod['prix_500']) * 0.90, 2, '.', '');
                         ?>

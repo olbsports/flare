@@ -295,6 +295,12 @@ $tabFaq = $product['tab_faq'] ?? '';
             <div class="product-info">
                 <h1><?php echo htmlspecialchars($nomUpper); ?></h1>
 
+                <?php if (!empty($finition)): ?>
+                <div class="product-finitions" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
+                    <span style="font-size: 11px; font-weight: 600; padding: 4px 10px; background: rgba(255, 75, 38, 0.1); color: #FF4B26; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.03em;"><?php echo htmlspecialchars($finition); ?></span>
+                </div>
+                <?php endif; ?>
+
                 <div class="product-rating">
                     <div class="stars">★★★★★</div>
                     <span class="rating-count">4.8/5 · 127 avis clients</span>

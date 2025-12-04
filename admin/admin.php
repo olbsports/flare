@@ -151,7 +151,16 @@ try {
         'is_new' => 'BOOLEAN DEFAULT FALSE',
         'on_sale' => 'BOOLEAN DEFAULT FALSE',
         'sort_order' => 'INT DEFAULT 0',
-        'related_products' => 'JSON'
+        'related_products' => 'JSON',
+        // Prix enfants par quantité (-10% du prix adulte par défaut)
+        'prix_enfant_1' => 'DECIMAL(10,2) DEFAULT NULL',
+        'prix_enfant_5' => 'DECIMAL(10,2) DEFAULT NULL',
+        'prix_enfant_10' => 'DECIMAL(10,2) DEFAULT NULL',
+        'prix_enfant_20' => 'DECIMAL(10,2) DEFAULT NULL',
+        'prix_enfant_50' => 'DECIMAL(10,2) DEFAULT NULL',
+        'prix_enfant_100' => 'DECIMAL(10,2) DEFAULT NULL',
+        'prix_enfant_250' => 'DECIMAL(10,2) DEFAULT NULL',
+        'prix_enfant_500' => 'DECIMAL(10,2) DEFAULT NULL'
     ];
     foreach ($newColumns as $col => $definition) {
         try {
@@ -272,6 +281,7 @@ if ($action && $pdo) {
             case 'save_product':
                 $fields = ['nom', 'sport', 'famille', 'description', 'description_seo', 'tissu', 'grammage',
                     'prix_1', 'prix_5', 'prix_10', 'prix_20', 'prix_50', 'prix_100', 'prix_250', 'prix_500',
+                    'prix_enfant_1', 'prix_enfant_5', 'prix_enfant_10', 'prix_enfant_20', 'prix_enfant_50', 'prix_enfant_100', 'prix_enfant_250', 'prix_enfant_500',
                     'photo_1', 'photo_2', 'photo_3', 'photo_4', 'photo_5', 'genre', 'finition',
                     'meta_title', 'meta_description', 'tab_description', 'tab_specifications',
                     'tab_sizes', 'tab_templates', 'tab_faq', 'configurator_config', 'size_chart_id',
@@ -1796,6 +1806,7 @@ $user = $_SESSION['admin_user'] ?? null;
                 <!-- TAB: PRICES -->
                 <div class="tab-content <?= $tab === 'prices' ? 'active' : '' ?>" id="tab-prices">
                     <div class="card-body">
+                        <h4 style="margin-bottom: 15px;">Prix Adulte</h4>
                         <p style="color: var(--text-muted); margin-bottom: 20px;">Prix unitaire TTC par quantité</p>
                         <div class="form-row">
                             <?php foreach ([1, 5, 10, 20, 50, 100, 250, 500] as $qty): ?>
@@ -1805,6 +1816,30 @@ $user = $_SESSION['admin_user'] ?? null;
                             </div>
                             <?php endforeach; ?>
                         </div>
+
+                        <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
+
+                        <h4 style="margin-bottom: 15px;">Prix Enfant</h4>
+                        <p style="color: var(--text-muted); margin-bottom: 10px;">Prix unitaire TTC par quantité (laisser vide = -10% du prix adulte automatique)</p>
+                        <button type="button" class="btn btn-sm btn-light" style="margin-bottom: 20px;" onclick="calculerPrixEnfants()">Calculer auto (-10%)</button>
+                        <div class="form-row">
+                            <?php foreach ([1, 5, 10, 20, 50, 100, 250, 500] as $qty): ?>
+                            <div class="form-group">
+                                <label class="form-label"><?= $qty ?> pièce<?= $qty > 1 ? 's' : '' ?></label>
+                                <input type="number" step="0.01" name="prix_enfant_<?= $qty ?>" id="prix_enfant_<?= $qty ?>" class="form-control" value="<?= $p['prix_enfant_'.$qty] ?? '' ?>" placeholder="Auto -10%">
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <script>
+                        function calculerPrixEnfants() {
+                            <?php foreach ([1, 5, 10, 20, 50, 100, 250, 500] as $qty): ?>
+                            var prixAdulte<?= $qty ?> = parseFloat(document.querySelector('input[name="prix_<?= $qty ?>"]').value) || 0;
+                            if (prixAdulte<?= $qty ?> > 0) {
+                                document.getElementById('prix_enfant_<?= $qty ?>').value = (prixAdulte<?= $qty ?> * 0.90).toFixed(2);
+                            }
+                            <?php endforeach; ?>
+                        }
+                        </script>
                     </div>
                 </div>
 
