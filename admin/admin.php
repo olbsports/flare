@@ -380,15 +380,26 @@ if ($action && $pdo) {
 
                 if ($id) {
                     // Mise à jour d'un produit existant
-                    // Debug: log les valeurs reçues pour les onglets
-                    error_log("SAVE_PRODUCT ID=$id");
-                    error_log("tab_description: " . substr($_POST['tab_description'] ?? 'NULL', 0, 100));
-                    error_log("configurator_config: " . substr($_POST['configurator_config'] ?? 'NULL', 0, 100));
-                    error_log("meta_title: " . ($_POST['meta_title'] ?? 'NULL'));
-
                     $values[] = $id;
                     $stmt = $pdo->prepare("UPDATE products SET $set, etiquettes=?, related_products=?, updated_at=NOW() WHERE id=?");
-                    $result = $stmt->execute(array_merge($values, [$etiquettesStr, $relatedProductsJson]));
+                    $allValues = array_merge($values, [$etiquettesStr, $relatedProductsJson]);
+                    $result = $stmt->execute($allValues);
+                    $rowCount = $stmt->rowCount();
+
+                    // Debug: infos sur l'UPDATE
+                    $debugInfo .= "\n--- UPDATE ---\n";
+                    $debugInfo .= "Result: " . ($result ? 'OK' : 'FAIL') . "\n";
+                    $debugInfo .= "Rows affected: $rowCount\n";
+                    $debugInfo .= "ID: $id\n";
+
+                    // Vérifier ce qui est dans la BDD après
+                    $checkStmt = $pdo->prepare("SELECT tab_description, meta_title, configurator_config FROM products WHERE id = ?");
+                    $checkStmt->execute([$id]);
+                    $afterSave = $checkStmt->fetch(PDO::FETCH_ASSOC);
+                    $debugInfo .= "\n--- APRES SAVE ---\n";
+                    $debugInfo .= "tab_description en BDD: " . (empty($afterSave['tab_description']) ? 'VIDE' : strlen($afterSave['tab_description']) . ' chars') . "\n";
+                    $debugInfo .= "meta_title en BDD: " . ($afterSave['meta_title'] ?? 'NULL') . "\n";
+
                     if (!$result) {
                         $toast = 'Erreur SQL: ' . implode(', ', $stmt->errorInfo());
                         break;
