@@ -100,7 +100,8 @@ $id = $_GET['id'] ?? $_POST['id'] ?? null;
 $tab = $_GET['tab'] ?? 'general';
 
 // Sanitize inputs
-$id = $id !== null ? intval($id) : null;
+$isNew = ($id === 'new');
+$id = ($id !== null && $id !== 'new') ? intval($id) : null;
 $page = preg_replace('/[^a-z_]/', '', $page);
 
 // Auth check
@@ -321,20 +322,52 @@ if ($action && $pdo) {
                 $relatedProducts = $_POST['related_products'] ?? [];
                 $relatedProductsJson = json_encode(array_map('intval', $relatedProducts));
 
-                $values[] = $id;
-                $pdo->prepare("UPDATE products SET $set, etiquettes=?, related_products=? WHERE id=?")
-                    ->execute(array_merge($values, [$etiquettesStr, $relatedProductsJson]));
+                // Récupérer la référence (pour nouveau produit)
+                $reference = trim($_POST['reference'] ?? '');
+
+                if ($id) {
+                    // Mise à jour d'un produit existant
+                    $values[] = $id;
+                    $pdo->prepare("UPDATE products SET $set, etiquettes=?, related_products=? WHERE id=?")
+                        ->execute(array_merge($values, [$etiquettesStr, $relatedProductsJson]));
+                    $productId = $id;
+                } else {
+                    // Création d'un nouveau produit
+                    if (empty($reference)) {
+                        $reference = 'FLARE-' . strtoupper(substr(md5(uniqid()), 0, 6));
+                    }
+                    // Vérifier que la référence n'existe pas
+                    $checkRef = $pdo->prepare("SELECT id FROM products WHERE reference = ?");
+                    $checkRef->execute([$reference]);
+                    if ($checkRef->fetch()) {
+                        $toast = 'Erreur: Cette référence existe déjà';
+                        break;
+                    }
+                    // Construire la requête INSERT
+                    $insertFields = array_merge(['reference'], $fields);
+                    $insertPlaceholders = implode(', ', array_fill(0, count($insertFields) + 2, '?'));
+                    $insertFieldNames = implode(', ', $insertFields) . ', etiquettes, related_products';
+                    $insertValues = array_merge([$reference], $values, [$etiquettesStr, $relatedProductsJson]);
+
+                    $pdo->prepare("INSERT INTO products ($insertFieldNames) VALUES ($insertPlaceholders)")
+                        ->execute($insertValues);
+                    $productId = $pdo->lastInsertId();
+
+                    // Rediriger vers la page du nouveau produit
+                    header("Location: ?page=product&id=$productId&toast=created");
+                    exit;
+                }
 
                 // Sauvegarder les templates associés au produit
                 $productTemplates = $_POST['product_templates'] ?? [];
                 try {
                     // Supprimer les anciennes associations
-                    $pdo->prepare("DELETE FROM template_products WHERE product_id = ?")->execute([$id]);
+                    $pdo->prepare("DELETE FROM template_products WHERE product_id = ?")->execute([$productId]);
                     // Ajouter les nouvelles associations
                     if (!empty($productTemplates)) {
                         $stmt = $pdo->prepare("INSERT INTO template_products (template_id, product_id) VALUES (?, ?)");
                         foreach ($productTemplates as $templateId) {
-                            $stmt->execute([(int)$templateId, $id]);
+                            $stmt->execute([(int)$templateId, $productId]);
                         }
                     }
                 } catch (Exception $e) {
@@ -846,7 +879,8 @@ if ($pdo && $page !== 'login') {
                 break;
 
             case 'product':
-                if ($id) {
+                $data['isNew'] = $isNew;
+                if ($id && !$isNew) {
                     $stmt = $pdo->prepare("SELECT * FROM products WHERE id=?");
                     $stmt->execute([$id]);
                     $data['item'] = $stmt->fetch();
@@ -862,6 +896,18 @@ if ($pdo && $page !== 'login') {
                     } catch (Exception $e) {
                         $data['associated_templates'] = [];
                     }
+                } elseif ($isNew) {
+                    // Nouveau produit - valeurs par défaut
+                    $data['item'] = [
+                        'id' => null,
+                        'reference' => 'FLARE-' . strtoupper(substr(md5(uniqid()), 0, 6)),
+                        'nom' => '',
+                        'sport' => '',
+                        'famille' => '',
+                        'active' => 1
+                    ];
+                    $data['photos'] = [];
+                    $data['associated_templates'] = [];
                 }
                 $data['sports'] = $pdo->query("SELECT DISTINCT sport FROM products WHERE sport!='' ORDER BY sport")->fetchAll(PDO::FETCH_COLUMN);
                 $data['familles'] = $pdo->query("SELECT DISTINCT famille FROM products WHERE famille!='' ORDER BY famille")->fetchAll(PDO::FETCH_COLUMN);
@@ -1037,6 +1083,45 @@ if ($pdo && $page !== 'login') {
                     $stmt->execute([$id]);
                     $data['item'] = $stmt->fetch();
                 }
+                break;
+
+            case 'photos':
+                // Scanner le dossier /photos/ et ses sous-dossiers
+                $photosPath = __DIR__ . '/../photos';
+                $data['folders'] = [];
+                $data['photos'] = [];
+                $currentFolder = $_GET['folder'] ?? '';
+
+                if (is_dir($photosPath)) {
+                    // Lister les sous-dossiers
+                    $dirs = array_filter(glob($photosPath . '/*'), 'is_dir');
+                    foreach ($dirs as $dir) {
+                        $folderName = basename($dir);
+                        $fileCount = count(glob($dir . '/*.{jpg,jpeg,png,gif,webp,svg}', GLOB_BRACE));
+                        $data['folders'][] = [
+                            'name' => $folderName,
+                            'path' => $folderName,
+                            'count' => $fileCount
+                        ];
+                    }
+
+                    // Lister les photos du dossier actuel
+                    $scanPath = $currentFolder ? $photosPath . '/' . $currentFolder : $photosPath;
+                    if (is_dir($scanPath)) {
+                        $files = glob($scanPath . '/*.{jpg,jpeg,png,gif,webp,svg}', GLOB_BRACE);
+                        foreach ($files as $file) {
+                            $data['photos'][] = [
+                                'name' => basename($file),
+                                'url' => '/photos/' . ($currentFolder ? $currentFolder . '/' : '') . basename($file),
+                                'size' => filesize($file),
+                                'modified' => filemtime($file)
+                            ];
+                        }
+                        // Trier par date de modification (plus récent en premier)
+                        usort($data['photos'], fn($a, $b) => $b['modified'] - $a['modified']);
+                    }
+                }
+                $data['current_folder'] = $currentFolder;
                 break;
 
             case 'settings':
@@ -1796,6 +1881,10 @@ $user = $_SESSION['admin_user'] ?? null;
             <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
             Templates
         </a>
+        <a href="?page=photos" class="menu-item <?= $page === 'photos' ? 'active' : '' ?>">
+            <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            Photos
+        </a>
         <a href="?page=settings" class="menu-item <?= in_array($page, ['settings', 'settings_password']) ? 'active' : '' ?>">
             <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             Paramètres
@@ -1910,6 +1999,7 @@ $user = $_SESSION['admin_user'] ?? null;
         <div class="card">
             <div class="card-header">
                 <span class="card-title">Produits (<?= count($data['items'] ?? []) ?>)</span>
+                <a href="?page=product&id=new" class="btn btn-primary">+ Nouveau produit</a>
             </div>
             <div class="card-body">
                 <form class="filters" method="GET">
@@ -1940,8 +2030,9 @@ $user = $_SESSION['admin_user'] ?? null;
                                 </td>
                                 <td><span class="badge badge-primary"><?= htmlspecialchars($p['sport']) ?></span></td>
                                 <td><?= $p['prix_500'] ? number_format($p['prix_500'], 2).'€' : '-' ?></td>
-                                <td>
-                                    <a href="?page=product&id=<?= $p['id'] ?>" class="btn btn-sm btn-light">Modifier</a>
+                                <td style="white-space: nowrap;">
+                                    <a href="/produit/<?= htmlspecialchars($p['reference']) ?>" target="_blank" class="btn btn-sm btn-light" title="Voir sur le site">👁️</a>
+                                    <a href="?page=product&id=<?= $p['id'] ?>" class="btn btn-sm btn-primary">Modifier</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -1952,21 +2043,32 @@ $user = $_SESSION['admin_user'] ?? null;
         </div>
 
         <?php // ============ PRODUCT EDIT ============ ?>
-        <?php elseif ($page === 'product' && $id): ?>
-        <?php $p = $data['item'] ?? []; ?>
-        <form method="POST" action="?page=product&id=<?= $id ?>">
+        <?php elseif ($page === 'product' && ($id || $isNew)): ?>
+        <?php
+        $p = $data['item'] ?? [];
+        $productIsNew = $data['isNew'] ?? false;
+        ?>
+        <form method="POST" action="?page=product<?= $id ? '&id='.$id : '' ?>">
             <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
             <input type="hidden" name="action" value="save_product">
+
+            <?php if ($productIsNew): ?>
+            <div class="alert" style="background: #ecfdf5; border: 1px solid #10b981; color: #047857; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <strong>Nouveau produit</strong> - Remplissez les informations et cliquez sur "Créer le produit"
+            </div>
+            <?php endif; ?>
 
             <div class="card">
                 <div class="tabs-nav">
                     <button type="button" class="tab-btn <?= $tab === 'general' ? 'active' : '' ?>" onclick="switchTab('general')">Général</button>
                     <button type="button" class="tab-btn <?= $tab === 'prices' ? 'active' : '' ?>" onclick="switchTab('prices')">Prix</button>
+                    <?php if (!$productIsNew): ?>
                     <button type="button" class="tab-btn <?= $tab === 'photos' ? 'active' : '' ?>" onclick="switchTab('photos')">Photos</button>
                     <button type="button" class="tab-btn <?= $tab === 'tabs' ? 'active' : '' ?>" onclick="switchTab('tabs')">Contenu onglets</button>
                     <button type="button" class="tab-btn <?= $tab === 'configurator' ? 'active' : '' ?>" onclick="switchTab('configurator')">Configurateur</button>
                     <button type="button" class="tab-btn <?= $tab === 'seo' ? 'active' : '' ?>" onclick="switchTab('seo')">SEO</button>
                     <button type="button" class="tab-btn <?= $tab === 'settings' ? 'active' : '' ?>" onclick="switchTab('settings')">⚙️ Paramètres</button>
+                    <?php endif; ?>
                 </div>
 
                 <!-- TAB: GENERAL -->
@@ -1974,24 +2076,31 @@ $user = $_SESSION['admin_user'] ?? null;
                     <div class="card-body">
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label">Référence</label>
+                                <label class="form-label">Référence <?= $productIsNew ? '*' : '' ?></label>
+                                <?php if ($productIsNew): ?>
+                                <input type="text" name="reference" class="form-control" value="<?= htmlspecialchars($p['reference'] ?? '') ?>" required placeholder="FLARE-XXXXX">
+                                <div class="form-hint">Format: FLARE-XXXXX (unique)</div>
+                                <?php else: ?>
                                 <input type="text" class="form-control" value="<?= htmlspecialchars($p['reference'] ?? '') ?>" readonly style="background: #f4f6f9;">
+                                <?php endif; ?>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Sport</label>
-                                <select name="sport" class="form-control">
+                                <label class="form-label">Sport *</label>
+                                <input type="text" name="sport" class="form-control" value="<?= htmlspecialchars($p['sport'] ?? '') ?>" list="sports-list" required placeholder="Ex: Football, Handball...">
+                                <datalist id="sports-list">
                                     <?php foreach ($data['sports'] ?? [] as $s): ?>
-                                    <option value="<?= $s ?>" <?= ($p['sport'] ?? '') === $s ? 'selected' : '' ?>><?= $s ?></option>
+                                    <option value="<?= htmlspecialchars($s) ?>">
                                     <?php endforeach; ?>
-                                </select>
+                                </datalist>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Famille</label>
-                                <select name="famille" class="form-control">
+                                <input type="text" name="famille" class="form-control" value="<?= htmlspecialchars($p['famille'] ?? '') ?>" list="familles-list" placeholder="Ex: Maillot, Short...">
+                                <datalist id="familles-list">
                                     <?php foreach ($data['familles'] ?? [] as $f): ?>
-                                    <option value="<?= $f ?>" <?= ($p['famille'] ?? '') === $f ? 'selected' : '' ?>><?= $f ?></option>
+                                    <option value="<?= htmlspecialchars($f) ?>">
                                     <?php endforeach; ?>
-                                </select>
+                                </datalist>
                             </div>
                         </div>
                         <div class="form-group">
@@ -2838,17 +2947,14 @@ $user = $_SESSION['admin_user'] ?? null;
                 <div class="card-footer" style="display: flex; justify-content: space-between; align-items: center;">
                     <a href="?page=products" class="btn btn-light">← Retour aux produits</a>
                     <div style="display: flex; gap: 10px;">
-                        <?php
-                        $productSlug = $p['slug'] ?? '';
-                        if (empty($productSlug)) {
-                            $productSlug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $p['nom'] ?? '')));
-                        }
-                        $productUrl = '/produit/' . ($p['reference'] ?? '') . '/' . $productSlug;
-                        ?>
-                        <a href="<?= htmlspecialchars($productUrl) ?>" target="_blank" class="btn btn-light" style="display: inline-flex; align-items: center; gap: 6px;">
+                        <?php if (!$productIsNew && !empty($p['reference'])): ?>
+                        <a href="/produit/<?= htmlspecialchars($p['reference']) ?>" target="_blank" class="btn btn-light" style="display: inline-flex; align-items: center; gap: 6px;">
                             👁️ Voir le produit
                         </a>
-                        <button type="submit" class="btn btn-primary">💾 Enregistrer les modifications</button>
+                        <?php endif; ?>
+                        <button type="submit" class="btn btn-primary">
+                            <?= $productIsNew ? '✅ Créer le produit' : '💾 Enregistrer les modifications' ?>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -4330,6 +4436,146 @@ $user = $_SESSION['admin_user'] ?? null;
             </div>
         </div>
         <a href="?page=quotes" class="btn btn-light" style="margin-top: 20px;">← Retour aux devis</a>
+
+        <?php // ============ PHOTOS MANAGER ============ ?>
+        <?php elseif ($page === 'photos'): ?>
+        <?php $currentFolder = $data['current_folder'] ?? ''; ?>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">📷 Gestionnaire de photos</span>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" class="btn btn-primary" onclick="document.getElementById('uploadPhotoInput').click()">
+                        + Uploader des photos
+                    </button>
+                    <input type="file" id="uploadPhotoInput" multiple accept="image/*" style="display: none;" onchange="uploadPhotos(this.files)">
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Sélecteur de dossier -->
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;">
+                    <a href="?page=photos" class="btn <?= empty($currentFolder) ? 'btn-primary' : 'btn-light' ?>">
+                        📁 Racine /photos/
+                    </a>
+                    <?php foreach ($data['folders'] ?? [] as $folder): ?>
+                    <a href="?page=photos&folder=<?= urlencode($folder['path']) ?>" class="btn <?= $currentFolder === $folder['path'] ? 'btn-primary' : 'btn-light' ?>">
+                        📁 <?= htmlspecialchars($folder['name']) ?>
+                        <span style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 5px;"><?= $folder['count'] ?></span>
+                    </a>
+                    <?php endforeach; ?>
+                </div>
+
+                <?php if (!empty($currentFolder)): ?>
+                <div style="margin-bottom: 15px; padding: 10px 15px; background: #f8f9fa; border-radius: 6px; display: flex; align-items: center; gap: 10px;">
+                    <span>📂</span>
+                    <span><strong>/photos/<?= htmlspecialchars($currentFolder) ?>/</strong></span>
+                    <a href="?page=photos" style="margin-left: auto; color: var(--text-muted); font-size: 12px;">← Revenir à la racine</a>
+                </div>
+                <?php endif; ?>
+
+                <!-- Zone de drop -->
+                <div id="photosDropzone" style="border: 2px dashed var(--border); border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 20px; background: #fafbfc; transition: all 0.3s;">
+                    <div style="font-size: 32px; margin-bottom: 10px; opacity: 0.5;">📁</div>
+                    <div style="color: var(--text-muted);">Glissez-déposez des photos ici pour les uploader</div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">
+                        Destination: <strong>/photos/<?= htmlspecialchars($currentFolder ?: 'produits') ?>/</strong>
+                    </div>
+                </div>
+
+                <!-- Grille des photos -->
+                <div id="photosGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px;">
+                    <?php foreach ($data['photos'] ?? [] as $photo): ?>
+                    <div class="photo-manager-item" style="border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff;">
+                        <div style="height: 140px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                            <img src="<?= htmlspecialchars($photo['url']) ?>" alt="" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                        </div>
+                        <div style="padding: 10px;">
+                            <div style="font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;" title="<?= htmlspecialchars($photo['name']) ?>">
+                                <?= htmlspecialchars($photo['name']) ?>
+                            </div>
+                            <div style="font-size: 10px; color: var(--text-muted); display: flex; justify-content: space-between;">
+                                <span><?= number_format($photo['size'] / 1024, 1) ?> Ko</span>
+                                <span><?= date('d/m/Y', $photo['modified']) ?></span>
+                            </div>
+                            <div style="margin-top: 8px; display: flex; gap: 5px;">
+                                <button type="button" class="btn btn-sm btn-light" style="flex: 1; font-size: 10px;" onclick="copyPhotoUrl('<?= htmlspecialchars($photo['url']) ?>')">📋 Copier URL</button>
+                                <button type="button" class="btn btn-sm btn-danger" style="font-size: 10px;" onclick="deletePhoto('<?= htmlspecialchars($photo['url']) ?>')">🗑</button>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+
+                    <?php if (empty($data['photos'])): ?>
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">
+                        <div style="font-size: 48px; margin-bottom: 15px; opacity: 0.3;">📷</div>
+                        <p>Aucune photo dans ce dossier</p>
+                        <p style="font-size: 12px;">Uploadez des photos en cliquant sur le bouton ci-dessus ou en glissant-déposant</p>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <script>
+        (function() {
+            const dropzone = document.getElementById('photosDropzone');
+            const currentFolder = '<?= htmlspecialchars($currentFolder ?: 'produits') ?>';
+
+            // Drag & drop events
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => {
+                dropzone.addEventListener(e, ev => { ev.preventDefault(); ev.stopPropagation(); });
+            });
+            ['dragenter', 'dragover'].forEach(e => {
+                dropzone.addEventListener(e, () => { dropzone.style.borderColor = 'var(--primary)'; dropzone.style.background = '#fff5f3'; });
+            });
+            ['dragleave', 'drop'].forEach(e => {
+                dropzone.addEventListener(e, () => { dropzone.style.borderColor = 'var(--border)'; dropzone.style.background = '#fafbfc'; });
+            });
+            dropzone.addEventListener('drop', e => uploadPhotos(e.dataTransfer.files));
+
+            window.uploadPhotos = async function(files) {
+                for (const file of files) {
+                    if (!file.type.startsWith('image/')) continue;
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('folder', currentFolder);
+
+                    try {
+                        const res = await fetch('/api/photos-manager.php?action=upload', { method: 'POST', body: formData });
+                        const result = await res.json();
+                        if (result.success) {
+                            location.reload();
+                        } else {
+                            alert('Erreur: ' + result.error);
+                        }
+                    } catch(e) {
+                        alert('Erreur réseau');
+                    }
+                }
+            };
+
+            window.copyPhotoUrl = function(url) {
+                const fullUrl = window.location.origin + url;
+                navigator.clipboard.writeText(fullUrl).then(() => {
+                    alert('URL copiée: ' + fullUrl);
+                });
+            };
+
+            window.deletePhoto = async function(url) {
+                if (!confirm('Supprimer cette photo ?')) return;
+                const res = await fetch('/api/photos-manager.php?action=delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    location.reload();
+                } else {
+                    alert('Erreur: ' + result.error);
+                }
+            };
+        })();
+        </script>
 
         <?php // ============ SETTINGS ============ ?>
         <?php elseif ($page === 'settings'): ?>
