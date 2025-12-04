@@ -50,14 +50,31 @@ try {
     die("Erreur de chargement - <a href='?ref=" . htmlspecialchars($reference) . "&debug=1'>Voir détails</a>");
 }
 
-// Construire les URLs des photos
+// Construire les URLs des photos (priorité: product_photos table, puis photo_1-5, puis fallback)
 $photos = [];
-for ($i = 1; $i <= 5; $i++) {
-    if (!empty($product["photo_$i"])) {
-        $photos[] = $product["photo_$i"];
+
+// D'abord essayer de charger depuis la table product_photos
+try {
+    $stmtPhotos = $pdo->prepare("SELECT url FROM product_photos WHERE product_id = ? ORDER BY is_main DESC, ordre ASC, id ASC");
+    $stmtPhotos->execute([$product['id']]);
+    $dbPhotos = $stmtPhotos->fetchAll(PDO::FETCH_COLUMN);
+    if (!empty($dbPhotos)) {
+        $photos = $dbPhotos;
+    }
+} catch (Exception $e) {
+    // Table peut ne pas exister
+}
+
+// Si pas de photos depuis product_photos, utiliser les champs photo_1-5
+if (empty($photos)) {
+    for ($i = 1; $i <= 5; $i++) {
+        if (!empty($product["photo_$i"])) {
+            $photos[] = $product["photo_$i"];
+        }
     }
 }
-// Si pas de photos, utiliser le pattern par défaut
+
+// Si toujours pas de photos, utiliser le pattern par défaut
 if (empty($photos)) {
     for ($i = 1; $i <= 5; $i++) {
         $photos[] = "https://flare-custom.com/photos/produits/{$reference}-{$i}.webp";
