@@ -16,6 +16,7 @@ header('X-XSS-Protection: 1; mode=block');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/page-builder-modules.php';
 
 // ============ SECURITY FUNCTIONS ============
 
@@ -119,6 +120,13 @@ $pdo = null;
 $dbError = null;
 try {
     $pdo = Database::getInstance()->getConnection();
+
+    // Ensure page_blocks column exists
+    try {
+        $pdo->exec("ALTER TABLE pages ADD COLUMN page_blocks LONGTEXT AFTER content");
+    } catch (PDOException $e) {
+        // Column likely already exists, ignore
+    }
 } catch (Exception $e) {
     $dbError = $e->getMessage();
 }
@@ -243,12 +251,25 @@ if ($action && $pdo) {
                 }
                 $filtersJson = json_encode($productFilters, JSON_UNESCAPED_UNICODE);
 
+                // Récupérer les blocs du page builder
+                $pageBlocks = $_POST['page_blocks'] ?? '';
+
+                // Générer le HTML à partir des blocs si présents
+                $content = $_POST['content'] ?? '';
+                if (!empty($pageBlocks)) {
+                    $blocksData = json_decode($pageBlocks, true);
+                    if ($blocksData && isset($blocksData['blocks'])) {
+                        global $PAGE_BUILDER_MODULES;
+                        $content = generatePageHtml($blocksData['blocks'], [], $PAGE_BUILDER_MODULES);
+                    }
+                }
+
                 if ($id) {
-                    $pdo->prepare("UPDATE pages SET title=?, slug=?, content=?, excerpt=?, meta_title=?, meta_description=?, status=?, type=?, product_filters=? WHERE id=?")
-                        ->execute([$_POST['title'], $_POST['slug'], $_POST['content'], $_POST['excerpt'], $_POST['meta_title'], $_POST['meta_description'], $_POST['status'], $pageType, $filtersJson, $id]);
+                    $pdo->prepare("UPDATE pages SET title=?, slug=?, content=?, page_blocks=?, excerpt=?, meta_title=?, meta_description=?, status=?, type=?, product_filters=? WHERE id=?")
+                        ->execute([$_POST['title'], $_POST['slug'], $content, $pageBlocks, $_POST['excerpt'], $_POST['meta_title'], $_POST['meta_description'], $_POST['status'], $pageType, $filtersJson, $id]);
                 } else {
-                    $pdo->prepare("INSERT INTO pages (title, slug, content, excerpt, meta_title, meta_description, status, type, product_filters) VALUES (?,?,?,?,?,?,?,?,?)")
-                        ->execute([$_POST['title'], $_POST['slug'], $_POST['content'], $_POST['excerpt'], $_POST['meta_title'], $_POST['meta_description'], $_POST['status'], $pageType, $filtersJson]);
+                    $pdo->prepare("INSERT INTO pages (title, slug, content, page_blocks, excerpt, meta_title, meta_description, status, type, product_filters) VALUES (?,?,?,?,?,?,?,?,?,?)")
+                        ->execute([$_POST['title'], $_POST['slug'], $content, $pageBlocks, $_POST['excerpt'], $_POST['meta_title'], $_POST['meta_description'], $_POST['status'], $pageType, $filtersJson]);
                 }
                 $toast = 'Page enregistrée';
                 break;
@@ -905,6 +926,175 @@ $user = $_SESSION['admin_user'] ?? null;
             width: 100%;
             height: 500px;
             background: #fff;
+        }
+
+        /* ========== PAGE BUILDER STYLES ========== */
+        .pb-module-item:hover {
+            border-color: var(--primary);
+            background: #fff5f3;
+            transform: translateY(-1px);
+        }
+        .pb-module-item:active {
+            cursor: grabbing;
+        }
+        .pb-drop-zone {
+            transition: all 0.3s;
+        }
+        .pb-drop-zone.drag-over {
+            border-color: var(--primary);
+            background: #fff5f3;
+        }
+        .pb-block {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+        .pb-block:hover {
+            border-color: var(--primary);
+            box-shadow: 0 2px 8px rgba(255,75,38,0.1);
+        }
+        .pb-block.dragging {
+            opacity: 0.5;
+            border: 2px dashed var(--primary);
+        }
+        .pb-block-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .pb-block-handle {
+            cursor: grab;
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+        .pb-block-name {
+            font-size: 13px;
+            font-weight: 600;
+            flex: 1;
+        }
+        .pb-block-actions {
+            display: flex;
+            gap: 5px;
+        }
+        .pb-block-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .pb-block-actions button:hover {
+            background: #e2e8f0;
+        }
+        .pb-block-preview {
+            padding: 12px 15px;
+        }
+        .pb-drop-indicator {
+            height: 4px;
+            background: var(--primary);
+            border-radius: 2px;
+            margin: 5px 0;
+        }
+
+        /* Modal styles */
+        .pb-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pb-modal-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+        }
+        .pb-modal-content {
+            position: relative;
+            background: #fff;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 85vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+        }
+        .pb-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 25px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .pb-modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+        .pb-modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--text-muted);
+            line-height: 1;
+        }
+        .pb-modal-body {
+            padding: 25px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .pb-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 15px 25px;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+        .pb-field-group {
+            margin-bottom: 20px;
+        }
+        .pb-field-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #374151;
+        }
+        .pb-field-group input,
+        .pb-field-group textarea,
+        .pb-field-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        .pb-field-group input:focus,
+        .pb-field-group textarea:focus,
+        .pb-field-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .pb-field-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .pb-tab-btn.active {
+            background: var(--primary);
+            color: #fff;
         }
     </style>
     <!-- CodeMirror for HTML editing -->
@@ -1861,16 +2051,113 @@ $user = $_SESSION['admin_user'] ?? null;
                         <textarea name="excerpt" class="form-control" style="min-height: 80px;"><?= htmlspecialchars($pg['excerpt'] ?? '') ?></textarea>
                     </div>
 
+                    <!-- ========== PAGE BUILDER VISUAL EDITOR ========== -->
+                    <?php
+                    $existingBlocks = json_decode($pg['page_blocks'] ?? '{}', true);
+                    $blocks = $existingBlocks['blocks'] ?? [];
+                    $categories = getModuleCategories();
+                    ?>
+
                     <div class="form-group">
-                        <label class="form-label">Contenu HTML complet</label>
-                        <div class="html-editor-toolbar">
-                            <button type="button" class="btn btn-light" onclick="formatCode()">Formater</button>
-                            <button type="button" class="btn btn-light" onclick="toggleTheme()">Theme Sombre/Clair</button>
-                            <button type="button" class="btn btn-light" onclick="toggleFullscreen()">Plein écran</button>
-                            <button type="button" class="btn btn-light" onclick="previewPage()">Prévisualiser</button>
-                            <span class="editor-status" id="editorStatus">Prêt</span>
+                        <label class="form-label">Contenu de la page</label>
+                        <div class="page-builder-tabs" style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <button type="button" class="btn btn-primary pb-tab-btn active" data-tab="visual">Éditeur visuel</button>
+                            <button type="button" class="btn btn-light pb-tab-btn" data-tab="html">Code HTML</button>
+                        </div>
+                    </div>
+
+                    <!-- TAB: Visual Editor -->
+                    <div id="visualEditorTab" class="pb-tab-content">
+                        <div class="page-builder" style="display: flex; gap: 20px; min-height: 600px;">
+
+                            <!-- Sidebar - Modules disponibles -->
+                            <div class="pb-sidebar" style="width: 280px; flex-shrink: 0; background: #f8fafc; border-radius: 8px; padding: 15px; max-height: 700px; overflow-y: auto;">
+                                <div style="font-weight: 600; margin-bottom: 15px; color: var(--primary);">Modules</div>
+
+                                <?php foreach ($categories as $catKey => $cat): ?>
+                                <div class="pb-module-category" style="margin-bottom: 15px;">
+                                    <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; font-weight: 600;"><?= $cat['name'] ?></div>
+                                    <div class="pb-module-list" style="display: flex; flex-direction: column; gap: 6px;">
+                                        <?php foreach ($PAGE_BUILDER_MODULES as $modKey => $mod):
+                                            if (($mod['category'] ?? '') !== $catKey) continue;
+                                        ?>
+                                        <div class="pb-module-item" draggable="true" data-module="<?= $modKey ?>" style="background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; cursor: grab; display: flex; align-items: center; gap: 10px; transition: all 0.2s;">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0;"><path d="<?= $mod['icon'] ?>"/></svg>
+                                            <span style="font-size: 13px; font-weight: 500;"><?= $mod['name'] ?></span>
+                                        </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+
+                            <!-- Zone de construction -->
+                            <div class="pb-canvas" style="flex: 1; background: #fff; border: 2px dashed #e2e8f0; border-radius: 8px; min-height: 500px; position: relative;">
+                                <div id="pbDropZone" class="pb-drop-zone" style="min-height: 500px; padding: 20px;">
+                                    <?php if (empty($blocks)): ?>
+                                    <div class="pb-empty-state" style="text-align: center; padding: 100px 20px; color: var(--text-muted);">
+                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 15px; opacity: 0.5;"><path d="M12 5v14M5 12h14"/></svg>
+                                        <p style="font-size: 15px;">Glissez des modules ici pour construire votre page</p>
+                                    </div>
+                                    <?php else: ?>
+                                        <?php foreach ($blocks as $index => $block): ?>
+                                        <div class="pb-block" data-index="<?= $index ?>" data-type="<?= htmlspecialchars($block['type']) ?>">
+                                            <div class="pb-block-header">
+                                                <span class="pb-block-handle">⋮⋮</span>
+                                                <span class="pb-block-name"><?= htmlspecialchars($PAGE_BUILDER_MODULES[$block['type']]['name'] ?? $block['type']) ?></span>
+                                                <div class="pb-block-actions">
+                                                    <button type="button" class="pb-btn-edit" onclick="editBlock(<?= $index ?>)">✏️</button>
+                                                    <button type="button" class="pb-btn-duplicate" onclick="duplicateBlock(<?= $index ?>)">📋</button>
+                                                    <button type="button" class="pb-btn-delete" onclick="deleteBlock(<?= $index ?>)">🗑️</button>
+                                                </div>
+                                            </div>
+                                            <div class="pb-block-preview">
+                                                <?php
+                                                $previewData = $block['data'] ?? [];
+                                                $previewText = '';
+                                                if (isset($previewData['title'])) $previewText = $previewData['title'];
+                                                elseif (isset($previewData['eyebrow'])) $previewText = $previewData['eyebrow'];
+                                                ?>
+                                                <span style="color: var(--text-muted); font-size: 12px;"><?= htmlspecialchars(substr($previewText, 0, 50)) ?><?= strlen($previewText) > 50 ? '...' : '' ?></span>
+                                            </div>
+                                        </div>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hidden input pour stocker les blocs -->
+                        <input type="hidden" name="page_blocks" id="pageBlocksData" value="<?= htmlspecialchars(json_encode($existingBlocks)) ?>">
+                    </div>
+
+                    <!-- TAB: HTML Editor -->
+                    <div id="htmlEditorTab" class="pb-tab-content" style="display: none;">
+                        <div class="html-editor-toolbar" style="margin-bottom: 10px;">
+                            <button type="button" class="btn btn-light btn-sm" onclick="formatCode()">Formater</button>
+                            <button type="button" class="btn btn-light btn-sm" onclick="toggleTheme()">Theme</button>
+                            <button type="button" class="btn btn-light btn-sm" onclick="toggleFullscreen()">Plein écran</button>
+                            <span class="editor-status" id="editorStatus" style="margin-left: 10px; font-size: 12px; color: var(--text-muted);">Prêt</span>
                         </div>
                         <textarea name="content" id="htmlEditor" style="display:none;"><?= htmlspecialchars($pg['content'] ?? '') ?></textarea>
+                    </div>
+
+                    <!-- Modal d'édition de bloc -->
+                    <div id="blockEditModal" class="pb-modal" style="display: none;">
+                        <div class="pb-modal-overlay" onclick="closeBlockModal()"></div>
+                        <div class="pb-modal-content">
+                            <div class="pb-modal-header">
+                                <h3 id="blockModalTitle">Éditer le bloc</h3>
+                                <button type="button" onclick="closeBlockModal()" class="pb-modal-close">&times;</button>
+                            </div>
+                            <div class="pb-modal-body" id="blockModalBody">
+                                <!-- Formulaire généré dynamiquement -->
+                            </div>
+                            <div class="pb-modal-footer">
+                                <button type="button" class="btn btn-light" onclick="closeBlockModal()">Annuler</button>
+                                <button type="button" class="btn btn-primary" onclick="saveBlockChanges()">Appliquer</button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Preview modal -->
@@ -2053,6 +2340,268 @@ $user = $_SESSION['admin_user'] ?? null;
 
         // Initialize count on load
         updateSelectedCount();
+
+        // ========== PAGE BUILDER FUNCTIONS ==========
+
+        // Module definitions (from PHP)
+        var pbModules = <?= json_encode($PAGE_BUILDER_MODULES, JSON_UNESCAPED_UNICODE) ?>;
+
+        // Current blocks state
+        var pbBlocks = <?= json_encode($blocks, JSON_UNESCAPED_UNICODE) ?>;
+        var editingBlockIndex = null;
+
+        // Tab switching
+        document.querySelectorAll('.pb-tab-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var tab = this.dataset.tab;
+                document.querySelectorAll('.pb-tab-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                if (tab === 'visual') {
+                    document.getElementById('visualEditorTab').style.display = 'block';
+                    document.getElementById('htmlEditorTab').style.display = 'none';
+                } else {
+                    document.getElementById('visualEditorTab').style.display = 'none';
+                    document.getElementById('htmlEditorTab').style.display = 'block';
+                    if (pageEditor) pageEditor.refresh();
+                }
+            });
+        });
+
+        // Drag and drop from sidebar
+        document.querySelectorAll('.pb-module-item').forEach(function(item) {
+            item.addEventListener('dragstart', function(e) {
+                e.dataTransfer.setData('moduleType', this.dataset.module);
+                e.dataTransfer.effectAllowed = 'copy';
+            });
+        });
+
+        var dropZone = document.getElementById('pbDropZone');
+        if (dropZone) {
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+                this.classList.add('drag-over');
+            });
+
+            dropZone.addEventListener('dragleave', function(e) {
+                this.classList.remove('drag-over');
+            });
+
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+
+                var moduleType = e.dataTransfer.getData('moduleType');
+                if (moduleType && pbModules[moduleType]) {
+                    addBlock(moduleType);
+                }
+            });
+        }
+
+        // Add a new block
+        function addBlock(moduleType) {
+            var module = pbModules[moduleType];
+            if (!module) return;
+
+            // Create block with default values
+            var blockData = {};
+            for (var key in module.fields) {
+                var field = module.fields[key];
+                blockData[key] = field.default !== undefined ? field.default : '';
+            }
+
+            var newBlock = {
+                type: moduleType,
+                data: blockData
+            };
+
+            pbBlocks.push(newBlock);
+            renderBlocks();
+            updateBlocksData();
+        }
+
+        // Render all blocks
+        function renderBlocks() {
+            var dropZone = document.getElementById('pbDropZone');
+            if (!dropZone) return;
+
+            if (pbBlocks.length === 0) {
+                dropZone.innerHTML = '<div class="pb-empty-state" style="text-align: center; padding: 100px 20px; color: var(--text-muted);"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 15px; opacity: 0.5;"><path d="M12 5v14M5 12h14"/></svg><p style="font-size: 15px;">Glissez des modules ici pour construire votre page</p></div>';
+                return;
+            }
+
+            var html = '';
+            pbBlocks.forEach(function(block, index) {
+                var module = pbModules[block.type] || {};
+                var previewText = block.data.title || block.data.eyebrow || block.data.content || '';
+                if (previewText.length > 50) previewText = previewText.substring(0, 50) + '...';
+
+                html += '<div class="pb-block" data-index="' + index + '" data-type="' + block.type + '" draggable="true">';
+                html += '<div class="pb-block-header">';
+                html += '<span class="pb-block-handle">⋮⋮</span>';
+                html += '<span class="pb-block-name">' + (module.name || block.type) + '</span>';
+                html += '<div class="pb-block-actions">';
+                html += '<button type="button" onclick="editBlock(' + index + ')">✏️</button>';
+                html += '<button type="button" onclick="duplicateBlock(' + index + ')">📋</button>';
+                html += '<button type="button" onclick="deleteBlock(' + index + ')">🗑️</button>';
+                html += '</div></div>';
+                html += '<div class="pb-block-preview"><span style="color: var(--text-muted); font-size: 12px;">' + escapeHtml(previewText) + '</span></div>';
+                html += '</div>';
+            });
+
+            dropZone.innerHTML = html;
+            initBlockDragDrop();
+        }
+
+        // Initialize drag/drop for reordering blocks
+        function initBlockDragDrop() {
+            document.querySelectorAll('.pb-block').forEach(function(block) {
+                block.addEventListener('dragstart', function(e) {
+                    this.classList.add('dragging');
+                    e.dataTransfer.setData('blockIndex', this.dataset.index);
+                });
+
+                block.addEventListener('dragend', function() {
+                    this.classList.remove('dragging');
+                });
+
+                block.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    var dragging = document.querySelector('.pb-block.dragging');
+                    if (dragging && dragging !== this) {
+                        var rect = this.getBoundingClientRect();
+                        var midY = rect.top + rect.height / 2;
+                        if (e.clientY < midY) {
+                            this.parentNode.insertBefore(dragging, this);
+                        } else {
+                            this.parentNode.insertBefore(dragging, this.nextSibling);
+                        }
+                    }
+                });
+
+                block.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    // Reorder pbBlocks array based on DOM order
+                    var newOrder = [];
+                    document.querySelectorAll('.pb-block').forEach(function(b) {
+                        newOrder.push(pbBlocks[parseInt(b.dataset.index)]);
+                    });
+                    pbBlocks = newOrder;
+                    renderBlocks();
+                    updateBlocksData();
+                });
+            });
+        }
+
+        // Edit block
+        function editBlock(index) {
+            editingBlockIndex = index;
+            var block = pbBlocks[index];
+            var module = pbModules[block.type];
+            if (!module) return;
+
+            document.getElementById('blockModalTitle').textContent = 'Éditer: ' + module.name;
+
+            var html = '';
+            for (var key in module.fields) {
+                var field = module.fields[key];
+                var value = block.data[key] !== undefined ? block.data[key] : (field.default || '');
+
+                html += '<div class="pb-field-group">';
+                html += '<label>' + field.label + '</label>';
+
+                if (field.type === 'textarea' || field.type === 'richtext') {
+                    html += '<textarea data-field="' + key + '" rows="4">' + escapeHtml(value) + '</textarea>';
+                } else if (field.type === 'select') {
+                    html += '<select data-field="' + key + '">';
+                    for (var optKey in field.options) {
+                        var selected = value === optKey ? ' selected' : '';
+                        html += '<option value="' + optKey + '"' + selected + '>' + field.options[optKey] + '</option>';
+                    }
+                    html += '</select>';
+                } else if (field.type === 'checkbox') {
+                    var checked = value ? ' checked' : '';
+                    html += '<input type="checkbox" data-field="' + key + '"' + checked + ' style="width: auto;">';
+                } else if (field.type === 'number') {
+                    html += '<input type="number" data-field="' + key + '" value="' + value + '">';
+                } else if (field.type === 'code') {
+                    html += '<textarea data-field="' + key + '" rows="8" style="font-family: monospace; font-size: 12px;">' + escapeHtml(value) + '</textarea>';
+                } else {
+                    html += '<input type="text" data-field="' + key + '" value="' + escapeHtml(value) + '">';
+                }
+
+                html += '</div>';
+            }
+
+            document.getElementById('blockModalBody').innerHTML = html;
+            document.getElementById('blockEditModal').style.display = 'flex';
+        }
+
+        // Save block changes
+        function saveBlockChanges() {
+            if (editingBlockIndex === null) return;
+
+            document.querySelectorAll('#blockModalBody [data-field]').forEach(function(input) {
+                var field = input.dataset.field;
+                var value;
+                if (input.type === 'checkbox') {
+                    value = input.checked;
+                } else {
+                    value = input.value;
+                }
+                pbBlocks[editingBlockIndex].data[field] = value;
+            });
+
+            renderBlocks();
+            updateBlocksData();
+            closeBlockModal();
+        }
+
+        // Close modal
+        function closeBlockModal() {
+            document.getElementById('blockEditModal').style.display = 'none';
+            editingBlockIndex = null;
+        }
+
+        // Duplicate block
+        function duplicateBlock(index) {
+            var block = JSON.parse(JSON.stringify(pbBlocks[index]));
+            pbBlocks.splice(index + 1, 0, block);
+            renderBlocks();
+            updateBlocksData();
+        }
+
+        // Delete block
+        function deleteBlock(index) {
+            if (confirm('Supprimer ce bloc ?')) {
+                pbBlocks.splice(index, 1);
+                renderBlocks();
+                updateBlocksData();
+            }
+        }
+
+        // Update hidden input with blocks data
+        function updateBlocksData() {
+            var input = document.getElementById('pageBlocksData');
+            if (input) {
+                input.value = JSON.stringify({ blocks: pbBlocks });
+            }
+        }
+
+        // Helper function
+        function escapeHtml(str) {
+            if (typeof str !== 'string') return str;
+            return str.replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;');
+        }
+
+        // Initialize on load
+        if (pbBlocks.length > 0) {
+            renderBlocks();
+        }
         </script>
 
         <?php // ============ BLOG ============ ?>
