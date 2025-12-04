@@ -104,6 +104,60 @@ $productCount = count($products);
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Bebas+Neue&display=swap"></noscript>
     <link rel="preload" href="/assets/css/components.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="/assets/css/components.css"></noscript>
+
+    <style>
+    /* Product Cards - Styles complémentaires */
+    .product-title {
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1.3;
+        margin-bottom: 8px;
+        color: #1a1a1a;
+    }
+
+    .product-price {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-bottom: 12px;
+    }
+
+    .price-label {
+        font-size: 12px;
+        color: #6b7280;
+    }
+
+    .price-value {
+        font-size: 24px;
+        font-weight: 800;
+        color: #1a1a1a;
+        font-family: 'Bebas Neue', sans-serif;
+    }
+
+    .product-link {
+        display: inline-block;
+        color: #FF4B26;
+        font-weight: 600;
+        font-size: 14px;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .product-link:hover {
+        color: #E63910;
+    }
+
+    /* Badge styles */
+    .badge-genre {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .badge-tissu {
+        background: #FF4B26;
+        color: #fff;
+    }
+    </style>
 </head>
 <body>
     <div id="dynamic-header"></div>
