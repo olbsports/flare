@@ -230,12 +230,13 @@ if ($action && $pdo) {
                 break;
 
             case 'save_page':
+                $pageType = $_POST['type'] ?? 'info';
                 if ($id) {
-                    $pdo->prepare("UPDATE pages SET title=?, slug=?, content=?, excerpt=?, meta_title=?, meta_description=?, status=? WHERE id=?")
-                        ->execute([$_POST['title'], $_POST['slug'], $_POST['content'], $_POST['excerpt'], $_POST['meta_title'], $_POST['meta_description'], $_POST['status'], $id]);
+                    $pdo->prepare("UPDATE pages SET title=?, slug=?, content=?, excerpt=?, meta_title=?, meta_description=?, status=?, type=? WHERE id=?")
+                        ->execute([$_POST['title'], $_POST['slug'], $_POST['content'], $_POST['excerpt'], $_POST['meta_title'], $_POST['meta_description'], $_POST['status'], $pageType, $id]);
                 } else {
-                    $pdo->prepare("INSERT INTO pages (title, slug, content, excerpt, meta_title, meta_description, status, type) VALUES (?,?,?,?,?,?,?,'page')")
-                        ->execute([$_POST['title'], $_POST['slug'], $_POST['content'], $_POST['excerpt'], $_POST['meta_title'], $_POST['meta_description'], $_POST['status']]);
+                    $pdo->prepare("INSERT INTO pages (title, slug, content, excerpt, meta_title, meta_description, status, type) VALUES (?,?,?,?,?,?,?,?)")
+                        ->execute([$_POST['title'], $_POST['slug'], $_POST['content'], $_POST['excerpt'], $_POST['meta_title'], $_POST['meta_description'], $_POST['status'], $pageType]);
                 }
                 $toast = 'Page enregistrée';
                 break;
@@ -780,7 +781,57 @@ $user = $_SESSION['admin_user'] ?? null;
             .sidebar { transform: translateX(-100%); }
             .main { margin-left: 0; }
         }
+
+        /* CodeMirror custom styles */
+        .CodeMirror {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            height: auto;
+            min-height: 400px;
+        }
+        .CodeMirror-scroll {
+            min-height: 400px;
+        }
+        .html-editor-toolbar {
+            background: var(--body-bg);
+            border: 1px solid var(--border);
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            padding: 8px 12px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .html-editor-toolbar .btn { padding: 6px 12px; font-size: 12px; }
+        .editor-status {
+            margin-left: auto;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .preview-frame {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            width: 100%;
+            height: 500px;
+            background: #fff;
+        }
     </style>
+    <!-- CodeMirror for HTML editing -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/monokai.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closetag.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchtags.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldgutter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/xml-fold.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldgutter.min.css">
 </head>
 <body>
 
@@ -850,6 +901,10 @@ $user = $_SESSION['admin_user'] ?? null;
         <a href="?page=pages" class="menu-item <?= in_array($page, ['pages', 'page']) ? 'active' : '' ?>">
             <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             Pages
+        </a>
+        <a href="category-products.php" class="menu-item">
+            <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            Produits/Catégorie
         </a>
         <a href="?page=blog" class="menu-item <?= in_array($page, ['blog', 'blog_edit']) ? 'active' : '' ?>">
             <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
@@ -1540,18 +1595,31 @@ $user = $_SESSION['admin_user'] ?? null;
         <div class="card">
             <div class="card-header">
                 <span class="card-title">Pages</span>
-                <a href="?page=page" class="btn btn-primary">+ Nouvelle page</a>
+                <div style="display:flex; gap:10px;">
+                    <a href="category-products.php" class="btn btn-light">Gérer produits/catégorie</a>
+                    <a href="?page=page" class="btn btn-primary">+ Nouvelle page</a>
+                </div>
             </div>
             <div class="table-container">
                 <table>
-                    <thead><tr><th>Titre</th><th>Slug</th><th>Statut</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>Titre</th><th>Type</th><th>Slug</th><th>URL</th><th>Statut</th><th>Actions</th></tr></thead>
                     <tbody>
-                    <?php foreach ($data['items'] ?? [] as $pg): ?>
+                    <?php foreach ($data['items'] ?? [] as $pg):
+                        $pageType = $pg['type'] ?? 'info';
+                        $pageUrl = $pageType === 'category' ? '/categorie/' . $pg['slug'] : '/info/' . $pg['slug'];
+                    ?>
                         <tr>
                             <td><strong><?= htmlspecialchars($pg['title']) ?></strong></td>
+                            <td><span class="badge badge-<?= $pageType === 'category' ? 'info' : 'secondary' ?>"><?= $pageType === 'category' ? 'Catégorie' : 'Info' ?></span></td>
                             <td><?= htmlspecialchars($pg['slug']) ?></td>
+                            <td><a href="<?= $pageUrl ?>" target="_blank" style="color:var(--primary)"><?= $pageUrl ?></a></td>
                             <td><span class="badge badge-<?= $pg['status'] === 'published' ? 'success' : 'warning' ?>"><?= $pg['status'] ?></span></td>
-                            <td><a href="?page=page&id=<?= $pg['id'] ?>" class="btn btn-sm btn-light">Modifier</a></td>
+                            <td>
+                                <a href="?page=page&id=<?= $pg['id'] ?>" class="btn btn-sm btn-light">Modifier</a>
+                                <?php if ($pageType === 'category'): ?>
+                                <a href="category-products.php?page_id=<?= $pg['id'] ?>" class="btn btn-sm btn-light" title="Gérer les produits">Produits</a>
+                                <?php endif; ?>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                     </tbody>
@@ -1561,14 +1629,26 @@ $user = $_SESSION['admin_user'] ?? null;
 
         <?php // ============ PAGE EDIT ============ ?>
         <?php elseif ($page === 'page'): ?>
-        <?php $pg = $data['item'] ?? []; ?>
+        <?php
+        $pg = $data['item'] ?? [];
+        $currentType = $pg['type'] ?? 'info';
+        $previewUrl = $currentType === 'category' ? '/categorie/' . ($pg['slug'] ?? '') : '/info/' . ($pg['slug'] ?? '');
+        ?>
         <div class="card">
             <div class="card-header">
                 <span class="card-title"><?= $id ? 'Modifier' : 'Nouvelle' ?> page</span>
+                <?php if ($id && !empty($pg['slug'])): ?>
+                <div style="display:flex; gap:10px;">
+                    <a href="<?= $previewUrl ?>" target="_blank" class="btn btn-light">Voir la page</a>
+                    <?php if ($currentType === 'category'): ?>
+                    <a href="category-products.php?page_id=<?= $id ?>" class="btn btn-info">Gérer les produits</a>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
             </div>
-            <form method="POST">
+            <form method="POST" id="pageForm">
             <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
-            
+
                 <input type="hidden" name="action" value="save_page">
                 <div class="card-body">
                     <div class="form-row">
@@ -1577,8 +1657,18 @@ $user = $_SESSION['admin_user'] ?? null;
                             <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($pg['title'] ?? '') ?>" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Slug</label>
+                            <label class="form-label">Slug (URL)</label>
                             <input type="text" name="slug" class="form-control" value="<?= htmlspecialchars($pg['slug'] ?? '') ?>" required>
+                            <small style="color:var(--text-muted)">URL: <?= $currentType === 'category' ? '/categorie/' : '/info/' ?><span id="slugPreview"><?= htmlspecialchars($pg['slug'] ?? '') ?></span></small>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Type de page</label>
+                            <select name="type" class="form-control" id="pageType">
+                                <option value="info" <?= $currentType === 'info' ? 'selected' : '' ?>>Page Info (contact, CGV, etc.)</option>
+                                <option value="category" <?= $currentType === 'category' ? 'selected' : '' ?>>Page Catégorie (produits)</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Statut</label>
@@ -1588,31 +1678,159 @@ $user = $_SESSION['admin_user'] ?? null;
                             </select>
                         </div>
                     </div>
+
+                    <?php if ($currentType === 'category' && $id): ?>
+                    <div class="form-group" style="background: #e0f2fe; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <strong>Page Catégorie</strong> -
+                        <a href="category-products.php?page_id=<?= $id ?>" style="color: var(--primary);">Cliquez ici pour gérer les produits affichés sur cette page</a>
+                    </div>
+                    <?php endif; ?>
+
                     <div class="form-group">
-                        <label class="form-label">Extrait</label>
+                        <label class="form-label">Extrait / Description courte</label>
                         <textarea name="excerpt" class="form-control" style="min-height: 80px;"><?= htmlspecialchars($pg['excerpt'] ?? '') ?></textarea>
                     </div>
+
                     <div class="form-group">
-                        <label class="form-label">Contenu (HTML)</label>
-                        <textarea name="content" class="form-control" style="min-height: 300px; font-family: monospace;"><?= htmlspecialchars($pg['content'] ?? '') ?></textarea>
+                        <label class="form-label">Contenu HTML complet</label>
+                        <div class="html-editor-toolbar">
+                            <button type="button" class="btn btn-light" onclick="formatCode()">Formater</button>
+                            <button type="button" class="btn btn-light" onclick="toggleTheme()">Theme Sombre/Clair</button>
+                            <button type="button" class="btn btn-light" onclick="toggleFullscreen()">Plein écran</button>
+                            <button type="button" class="btn btn-light" onclick="previewPage()">Prévisualiser</button>
+                            <span class="editor-status" id="editorStatus">Prêt</span>
+                        </div>
+                        <textarea name="content" id="htmlEditor" style="display:none;"><?= htmlspecialchars($pg['content'] ?? '') ?></textarea>
                     </div>
-                    <div class="form-row">
+
+                    <!-- Preview modal -->
+                    <div id="previewModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; padding:20px;">
+                        <div style="background:#fff; height:100%; border-radius:8px; overflow:hidden; display:flex; flex-direction:column;">
+                            <div style="padding:10px 20px; background:var(--sidebar-bg); color:#fff; display:flex; justify-content:space-between; align-items:center;">
+                                <span>Prévisualisation</span>
+                                <button type="button" onclick="closePreview()" style="background:none; border:none; color:#fff; font-size:24px; cursor:pointer;">&times;</button>
+                            </div>
+                            <iframe id="previewFrame" class="preview-frame" style="flex:1; border:none;"></iframe>
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="margin-top: 20px;">
                         <div class="form-group">
-                            <label class="form-label">Meta Title</label>
+                            <label class="form-label">Meta Title (SEO)</label>
                             <input type="text" name="meta_title" class="form-control" value="<?= htmlspecialchars($pg['meta_title'] ?? '') ?>">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Meta Description</label>
+                            <label class="form-label">Meta Description (SEO)</label>
                             <textarea name="meta_description" class="form-control"><?= htmlspecialchars($pg['meta_description'] ?? '') ?></textarea>
                         </div>
                     </div>
                 </div>
                 <div class="card-footer">
                     <a href="?page=pages" class="btn btn-light">← Retour</a>
-                    <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
                 </div>
             </form>
         </div>
+
+        <script>
+        // Initialize CodeMirror
+        var pageEditor = CodeMirror.fromTextArea(document.getElementById('htmlEditor'), {
+            mode: 'htmlmixed',
+            theme: 'default',
+            lineNumbers: true,
+            lineWrapping: true,
+            autoCloseTags: true,
+            matchTags: {bothTags: true},
+            foldGutter: true,
+            gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+            extraKeys: {
+                "Ctrl-S": function(cm) { document.getElementById('pageForm').submit(); },
+                "Cmd-S": function(cm) { document.getElementById('pageForm').submit(); },
+                "F11": function(cm) { toggleFullscreen(); }
+            }
+        });
+
+        pageEditor.setSize(null, 500);
+
+        // Update status on change
+        pageEditor.on('change', function() {
+            document.getElementById('editorStatus').textContent = 'Modifié (non sauvegardé)';
+        });
+
+        // Slug preview
+        document.querySelector('input[name="slug"]').addEventListener('input', function() {
+            document.getElementById('slugPreview').textContent = this.value;
+        });
+
+        // Type change handler
+        document.getElementById('pageType').addEventListener('change', function() {
+            var urlPrefix = this.value === 'category' ? '/categorie/' : '/info/';
+            document.querySelector('small span#slugPreview').parentElement.innerHTML =
+                'URL: ' + urlPrefix + '<span id="slugPreview">' + document.querySelector('input[name="slug"]').value + '</span>';
+        });
+
+        function formatCode() {
+            var content = pageEditor.getValue();
+            // Basic HTML formatting
+            try {
+                var formatted = content
+                    .replace(/></g, '>\n<')
+                    .replace(/\n\s*\n/g, '\n');
+                pageEditor.setValue(formatted);
+                document.getElementById('editorStatus').textContent = 'Code formaté';
+            } catch(e) {
+                alert('Erreur de formatage');
+            }
+        }
+
+        var isDark = false;
+        function toggleTheme() {
+            isDark = !isDark;
+            pageEditor.setOption('theme', isDark ? 'monokai' : 'default');
+        }
+
+        var isFullscreen = false;
+        function toggleFullscreen() {
+            var wrapper = pageEditor.getWrapperElement();
+            isFullscreen = !isFullscreen;
+            if (isFullscreen) {
+                wrapper.style.position = 'fixed';
+                wrapper.style.inset = '0';
+                wrapper.style.zIndex = '9999';
+                wrapper.style.height = '100vh';
+                pageEditor.setSize('100%', '100%');
+            } else {
+                wrapper.style.position = '';
+                wrapper.style.inset = '';
+                wrapper.style.zIndex = '';
+                wrapper.style.height = '';
+                pageEditor.setSize(null, 500);
+            }
+            pageEditor.refresh();
+        }
+
+        function previewPage() {
+            var content = pageEditor.getValue();
+            var iframe = document.getElementById('previewFrame');
+            var doc = iframe.contentDocument || iframe.contentWindow.document;
+            doc.open();
+            doc.write(content);
+            doc.close();
+            document.getElementById('previewModal').style.display = 'block';
+        }
+
+        function closePreview() {
+            document.getElementById('previewModal').style.display = 'none';
+        }
+
+        // Close preview on escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closePreview();
+                if (isFullscreen) toggleFullscreen();
+            }
+        });
+        </script>
 
         <?php // ============ BLOG ============ ?>
         <?php elseif ($page === 'blog'): ?>
@@ -1623,11 +1841,14 @@ $user = $_SESSION['admin_user'] ?? null;
             </div>
             <div class="table-container">
                 <table>
-                    <thead><tr><th>Titre</th><th>Catégorie</th><th>Statut</th><th>Date</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>Titre</th><th>URL</th><th>Catégorie</th><th>Statut</th><th>Date</th><th>Actions</th></tr></thead>
                     <tbody>
-                    <?php foreach ($data['items'] ?? [] as $post): ?>
+                    <?php foreach ($data['items'] ?? [] as $post):
+                        $blogUrl = '/blog/' . $post['slug'];
+                    ?>
                         <tr>
                             <td><strong><?= htmlspecialchars($post['title']) ?></strong></td>
+                            <td><a href="<?= $blogUrl ?>" target="_blank" style="color:var(--primary)"><?= $blogUrl ?></a></td>
                             <td><span class="badge badge-info"><?= htmlspecialchars($post['category'] ?? '-') ?></span></td>
                             <td><span class="badge badge-<?= $post['status'] === 'published' ? 'success' : 'warning' ?>"><?= $post['status'] ?></span></td>
                             <td><?= date('d/m/Y', strtotime($post['created_at'])) ?></td>
@@ -1645,10 +1866,13 @@ $user = $_SESSION['admin_user'] ?? null;
         <div class="card">
             <div class="card-header">
                 <span class="card-title"><?= $id ? 'Modifier' : 'Nouvel' ?> article</span>
+                <?php if ($id && !empty($post['slug'])): ?>
+                <a href="/blog/<?= htmlspecialchars($post['slug']) ?>" target="_blank" class="btn btn-light">Voir l'article</a>
+                <?php endif; ?>
             </div>
-            <form method="POST">
+            <form method="POST" id="blogForm">
             <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
-            
+
                 <input type="hidden" name="action" value="save_blog">
                 <div class="card-body">
                     <div class="form-row">
@@ -1657,8 +1881,9 @@ $user = $_SESSION['admin_user'] ?? null;
                             <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($post['title'] ?? '') ?>" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Slug</label>
+                            <label class="form-label">Slug (URL)</label>
                             <input type="text" name="slug" class="form-control" value="<?= htmlspecialchars($post['slug'] ?? '') ?>" required>
+                            <small style="color:var(--text-muted)">URL: /blog/<span id="blogSlugPreview"><?= htmlspecialchars($post['slug'] ?? '') ?></span></small>
                         </div>
                     </div>
                     <div class="form-row">
@@ -1687,26 +1912,134 @@ $user = $_SESSION['admin_user'] ?? null;
                         <textarea name="excerpt" class="form-control" style="min-height: 80px;"><?= htmlspecialchars($post['excerpt'] ?? '') ?></textarea>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Contenu (HTML)</label>
-                        <textarea name="content" class="form-control" style="min-height: 300px; font-family: monospace;"><?= htmlspecialchars($post['content'] ?? '') ?></textarea>
+                        <label class="form-label">Contenu HTML complet</label>
+                        <div class="html-editor-toolbar">
+                            <button type="button" class="btn btn-light" onclick="formatBlogCode()">Formater</button>
+                            <button type="button" class="btn btn-light" onclick="toggleBlogTheme()">Theme Sombre/Clair</button>
+                            <button type="button" class="btn btn-light" onclick="toggleBlogFullscreen()">Plein écran</button>
+                            <button type="button" class="btn btn-light" onclick="previewBlog()">Prévisualiser</button>
+                            <span class="editor-status" id="blogEditorStatus">Prêt</span>
+                        </div>
+                        <textarea name="content" id="blogHtmlEditor" style="display:none;"><?= htmlspecialchars($post['content'] ?? '') ?></textarea>
                     </div>
-                    <div class="form-row">
+
+                    <!-- Preview modal for blog -->
+                    <div id="blogPreviewModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; padding:20px;">
+                        <div style="background:#fff; height:100%; border-radius:8px; overflow:hidden; display:flex; flex-direction:column;">
+                            <div style="padding:10px 20px; background:var(--sidebar-bg); color:#fff; display:flex; justify-content:space-between; align-items:center;">
+                                <span>Prévisualisation Article</span>
+                                <button type="button" onclick="closeBlogPreview()" style="background:none; border:none; color:#fff; font-size:24px; cursor:pointer;">&times;</button>
+                            </div>
+                            <iframe id="blogPreviewFrame" class="preview-frame" style="flex:1; border:none;"></iframe>
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="margin-top: 20px;">
                         <div class="form-group">
-                            <label class="form-label">Meta Title</label>
+                            <label class="form-label">Meta Title (SEO)</label>
                             <input type="text" name="meta_title" class="form-control" value="<?= htmlspecialchars($post['meta_title'] ?? '') ?>">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Meta Description</label>
+                            <label class="form-label">Meta Description (SEO)</label>
                             <textarea name="meta_description" class="form-control"><?= htmlspecialchars($post['meta_description'] ?? '') ?></textarea>
                         </div>
                     </div>
                 </div>
                 <div class="card-footer">
                     <a href="?page=blog" class="btn btn-light">← Retour</a>
-                    <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
                 </div>
             </form>
         </div>
+
+        <script>
+        // Initialize CodeMirror for blog
+        var blogEditor = CodeMirror.fromTextArea(document.getElementById('blogHtmlEditor'), {
+            mode: 'htmlmixed',
+            theme: 'default',
+            lineNumbers: true,
+            lineWrapping: true,
+            autoCloseTags: true,
+            matchTags: {bothTags: true},
+            foldGutter: true,
+            gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+            extraKeys: {
+                "Ctrl-S": function(cm) { document.getElementById('blogForm').submit(); },
+                "Cmd-S": function(cm) { document.getElementById('blogForm').submit(); },
+                "F11": function(cm) { toggleBlogFullscreen(); }
+            }
+        });
+
+        blogEditor.setSize(null, 500);
+
+        blogEditor.on('change', function() {
+            document.getElementById('blogEditorStatus').textContent = 'Modifié (non sauvegardé)';
+        });
+
+        // Slug preview
+        document.querySelector('input[name="slug"]')?.addEventListener('input', function() {
+            var preview = document.getElementById('blogSlugPreview');
+            if (preview) preview.textContent = this.value;
+        });
+
+        function formatBlogCode() {
+            var content = blogEditor.getValue();
+            try {
+                var formatted = content.replace(/></g, '>\n<').replace(/\n\s*\n/g, '\n');
+                blogEditor.setValue(formatted);
+                document.getElementById('blogEditorStatus').textContent = 'Code formaté';
+            } catch(e) {
+                alert('Erreur de formatage');
+            }
+        }
+
+        var blogIsDark = false;
+        function toggleBlogTheme() {
+            blogIsDark = !blogIsDark;
+            blogEditor.setOption('theme', blogIsDark ? 'monokai' : 'default');
+        }
+
+        var blogIsFullscreen = false;
+        function toggleBlogFullscreen() {
+            var wrapper = blogEditor.getWrapperElement();
+            blogIsFullscreen = !blogIsFullscreen;
+            if (blogIsFullscreen) {
+                wrapper.style.position = 'fixed';
+                wrapper.style.inset = '0';
+                wrapper.style.zIndex = '9999';
+                wrapper.style.height = '100vh';
+                blogEditor.setSize('100%', '100%');
+            } else {
+                wrapper.style.position = '';
+                wrapper.style.inset = '';
+                wrapper.style.zIndex = '';
+                wrapper.style.height = '';
+                blogEditor.setSize(null, 500);
+            }
+            blogEditor.refresh();
+        }
+
+        function previewBlog() {
+            var content = blogEditor.getValue();
+            var iframe = document.getElementById('blogPreviewFrame');
+            var doc = iframe.contentDocument || iframe.contentWindow.document;
+            doc.open();
+            doc.write(content);
+            doc.close();
+            document.getElementById('blogPreviewModal').style.display = 'block';
+        }
+
+        function closeBlogPreview() {
+            document.getElementById('blogPreviewModal').style.display = 'none';
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeBlogPreview();
+                if (blogIsFullscreen) toggleBlogFullscreen();
+            }
+        });
+        </script>
 
         <?php // ============ QUOTES ============ ?>
         <?php elseif ($page === 'quotes'): ?>
