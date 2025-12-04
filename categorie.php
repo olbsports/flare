@@ -2,6 +2,7 @@
 /**
  * PAGE CATÉGORIE DYNAMIQUE - FLARE CUSTOM
  * Template générique configurable depuis l'admin
+ * Design identique à maillots-football-personnalises.html
  */
 
 require_once __DIR__ . '/config/database.php';
@@ -52,6 +53,20 @@ try {
     $filterSports = json_decode($page['filter_sports'] ?? '[]', true) ?: [];
     $filterGenres = json_decode($page['filter_genres'] ?? '[]', true) ?: [];
 
+    // Extraire les sports/genres uniques des produits pour les filtres
+    $uniqueSports = [];
+    $uniqueGenres = [];
+    foreach ($products as $prod) {
+        if (!empty($prod['sport']) && !in_array($prod['sport'], $uniqueSports)) {
+            $uniqueSports[] = $prod['sport'];
+        }
+        if (!empty($prod['genre']) && !in_array($prod['genre'], $uniqueGenres)) {
+            $uniqueGenres[] = $prod['genre'];
+        }
+    }
+    sort($uniqueSports);
+    sort($uniqueGenres);
+
     // Paramètres du site
     $siteName = 'FLARE CUSTOM';
     $siteUrl = 'https://flare-custom.com';
@@ -63,6 +78,7 @@ try {
 
 $metaTitle = $page['meta_title'] ?: $page['title'];
 $metaDescription = $page['meta_description'] ?: '';
+$productCount = count($products);
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -79,334 +95,325 @@ $metaDescription = $page['meta_description'] ?: '';
     <meta property="og:description" content="<?= htmlspecialchars($metaDescription) ?>">
     <meta property="og:url" content="<?= $siteUrl ?>/categorie/<?= htmlspecialchars($slug) ?>">
 
-    <link rel="stylesheet" href="/assets/css/style.css">
-    <link rel="stylesheet" href="/assets/css/components.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
-
-    <style>
-        .cat-hero { background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff; padding: 80px 20px; text-align: center; }
-        .cat-hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem; margin-bottom: 20px; }
-        .cat-hero p { font-size: 1.2rem; max-width: 800px; margin: 0 auto 30px; opacity: 0.9; }
-        .cat-hero .btn-primary { background: #FF4B26; color: #fff; padding: 15px 40px; border-radius: 8px; text-decoration: none; font-weight: 700; display: inline-block; }
-
-        .trust-bar { background: #000; padding: 20px 0; }
-        .trust-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: center; gap: 60px; flex-wrap: wrap; }
-        .trust-item { text-align: center; color: #fff; }
-        .trust-value { font-size: 2rem; font-weight: 800; color: #FF4B26; }
-        .trust-label { font-size: 0.9rem; opacity: 0.8; }
-
-        .products-section { padding: 60px 20px; max-width: 1400px; margin: 0 auto; }
-        .products-header { text-align: center; margin-bottom: 40px; }
-        .products-header h2 { font-size: 2rem; margin-bottom: 10px; }
-        .products-filters { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px; }
-        .products-filters select { padding: 10px 20px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
-
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
-        .product-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); transition: transform 0.3s, box-shadow 0.3s; }
-        .product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
-        .product-card img { width: 100%; height: 220px; object-fit: cover; }
-        .product-card .info { padding: 20px; }
-        .product-card h3 { font-size: 1.1rem; margin-bottom: 8px; }
-        .product-card .price { color: #FF4B26; font-weight: 700; font-size: 1.2rem; }
-        .product-card .btn { display: block; text-align: center; background: #FF4B26; color: #fff; padding: 12px; border-radius: 6px; text-decoration: none; font-weight: 600; margin-top: 15px; }
-
-        .cta-section { background: linear-gradient(135deg, #FF4B26 0%, #ff6b4a 100%); color: #fff; padding: 80px 20px; text-align: center; }
-        .cta-section h2 { font-size: 2.5rem; margin-bottom: 20px; }
-        .cta-features { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; margin: 30px 0; }
-        .cta-feature { background: rgba(255,255,255,0.15); padding: 20px 30px; border-radius: 10px; }
-        .cta-buttons { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
-        .cta-buttons .btn-white { background: #fff; color: #FF4B26; padding: 15px 40px; border-radius: 8px; text-decoration: none; font-weight: 700; }
-        .cta-buttons .btn-outline { border: 2px solid #fff; color: #fff; padding: 15px 40px; border-radius: 8px; text-decoration: none; font-weight: 700; }
-
-        .excellence-section { padding: 80px 20px; background: #f8f9fa; }
-        .excellence-container { max-width: 1200px; margin: 0 auto; }
-        .excellence-header { text-align: center; margin-bottom: 50px; }
-        .excellence-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
-        .excellence-card { background: #fff; padding: 40px 30px; border-radius: 12px; text-align: center; }
-        .excellence-card h3 { font-size: 1.3rem; margin: 20px 0 15px; color: #FF4B26; }
-
-        .tech-section { padding: 80px 20px; background: #1a1a1a; color: #fff; }
-        .tech-container { max-width: 1000px; margin: 0 auto; text-align: center; }
-        .tech-stats { display: flex; justify-content: center; gap: 50px; flex-wrap: wrap; margin-top: 40px; }
-        .tech-stat { text-align: center; }
-        .tech-stat .value { font-size: 2.5rem; font-weight: 800; color: #FF4B26; }
-
-        .features-section { padding: 60px 20px; }
-        .features-container { max-width: 900px; margin: 0 auto; }
-        .features-block { margin-bottom: 40px; }
-        .features-block h3 { font-size: 1.5rem; margin-bottom: 15px; color: #1a1a1a; }
-        .features-block ul { list-style: none; padding: 0; }
-        .features-block li { padding: 10px 0; padding-left: 25px; position: relative; }
-        .features-block li:before { content: "✓"; position: absolute; left: 0; color: #FF4B26; font-weight: bold; }
-
-        .testimonials-section { padding: 80px 20px; background: #f8f9fa; }
-        .testimonials-container { max-width: 1200px; margin: 0 auto; }
-        .testimonials-header { text-align: center; margin-bottom: 50px; }
-        .testimonials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
-        .testimonial-card { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .testimonial-stars { color: #ffc107; margin-bottom: 15px; font-size: 1.2rem; }
-        .testimonial-text { font-style: italic; margin-bottom: 20px; line-height: 1.6; }
-        .testimonial-author { font-weight: 700; }
-        .testimonial-role { color: #666; font-size: 0.9rem; }
-
-        .faq-section { padding: 80px 20px; }
-        .faq-container { max-width: 800px; margin: 0 auto; }
-        .faq-header { text-align: center; margin-bottom: 50px; }
-        .faq-item { border-bottom: 1px solid #eee; }
-        .faq-question { padding: 20px 0; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .faq-question:after { content: "+"; font-size: 1.5rem; color: #FF4B26; }
-        .faq-item.open .faq-question:after { content: "−"; }
-        .faq-answer { padding: 0 0 20px; display: none; line-height: 1.7; color: #555; }
-        .faq-item.open .faq-answer { display: block; }
-
-        .guide-section { padding: 80px 20px; background: #f8f9fa; }
-        .guide-container { max-width: 900px; margin: 0 auto; }
-        .guide-content { line-height: 1.8; }
-        .guide-content h2, .guide-content h3 { margin-top: 30px; color: #1a1a1a; }
-
-        @media (max-width: 768px) {
-            .cat-hero h1 { font-size: 2.5rem; }
-            .trust-container { gap: 30px; }
-            .cta-features { flex-direction: column; gap: 15px; }
-        }
-    </style>
+    <link rel="preload" href="/assets/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="/assets/css/style.css"></noscript>
+    <link rel="stylesheet" href="/assets/css/style-sport.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Bebas+Neue&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Bebas+Neue&display=swap"></noscript>
+    <link rel="preload" href="/assets/css/components.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="/assets/css/components.css"></noscript>
 </head>
 <body>
     <div id="dynamic-header"></div>
 
-    <!-- HERO -->
-    <?php if (!empty($page['hero_title'])): ?>
-    <section class="cat-hero" <?php if (!empty($page['hero_image'])): ?>style="background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('<?= htmlspecialchars($page['hero_image']) ?>'); background-size: cover; background-position: center;"<?php endif; ?>>
-        <h1><?= htmlspecialchars($page['hero_title']) ?></h1>
-        <?php if (!empty($page['hero_subtitle'])): ?>
-        <p><?= $page['hero_subtitle'] ?></p>
-        <?php endif; ?>
-        <?php if (!empty($page['hero_cta_text'])): ?>
-        <a href="<?= htmlspecialchars($page['hero_cta_link'] ?: '#products') ?>" class="btn-primary"><?= htmlspecialchars($page['hero_cta_text']) ?></a>
-        <?php endif; ?>
+    <!-- HERO SECTION -->
+    <section class="hero-sport">
+        <div class="hero-sport-content">
+            <?php if (!empty($page['hero_subtitle'])): ?>
+            <span class="hero-sport-eyebrow"><?= htmlspecialchars($page['hero_subtitle']) ?></span>
+            <?php endif; ?>
+            <h1 class="hero-sport-title"><?= htmlspecialchars($page['hero_title'] ?: $page['title']) ?></h1>
+            <?php if (!empty($page['products_subtitle'])): ?>
+            <p class="hero-sport-subtitle"><?= htmlspecialchars($page['products_subtitle']) ?></p>
+            <?php endif; ?>
+        </div>
     </section>
-    <?php endif; ?>
 
     <!-- TRUST BAR -->
     <?php if (!empty($trustBar)): ?>
-    <div class="trust-bar">
-        <div class="trust-container">
-            <?php foreach ($trustBar as $item): ?>
-            <div class="trust-item">
-                <div class="trust-value"><?= htmlspecialchars($item['value'] ?? '') ?></div>
-                <div class="trust-label"><?= htmlspecialchars($item['label'] ?? '') ?></div>
+    <section class="trust-bar">
+        <div class="container">
+            <div class="trust-items">
+                <?php foreach ($trustBar as $item): ?>
+                <div class="trust-item">
+                    <strong><?= htmlspecialchars($item['value'] ?? '') ?></strong>
+                    <span><?= htmlspecialchars($item['label'] ?? '') ?></span>
+                </div>
+                <?php endforeach; ?>
             </div>
-            <?php endforeach; ?>
         </div>
-    </div>
+    </section>
     <?php endif; ?>
 
     <!-- PRODUCTS SECTION -->
     <section class="products-section" id="products">
-        <div class="products-header">
-            <?php if (!empty($page['products_title'])): ?>
-            <h2><?= htmlspecialchars($page['products_title']) ?></h2>
-            <?php endif; ?>
-            <?php if (!empty($page['products_subtitle'])): ?>
-            <p><?= htmlspecialchars($page['products_subtitle']) ?></p>
-            <?php endif; ?>
-        </div>
+        <div class="container">
+            <div class="section-header">
+                <div class="section-eyebrow"><?= htmlspecialchars($page['products_title'] ?: 'Catalogue') ?></div>
+                <h2 class="section-title">Nos produits personnalisés</h2>
+                <p class="section-description">
+                    <?= $productCount ?> modèles disponibles. Tissus techniques haute performance,<br>
+                    Personnalisation illimitée, fabrication européenne certifiée.
+                </p>
+            </div>
 
-        <?php if ($page['show_filters'] && (!empty($filterSports) || !empty($filterGenres))): ?>
-        <div class="products-filters">
-            <?php if (!empty($filterSports)): ?>
-            <select id="filterSport" onchange="filterProducts()">
-                <option value="">Tous les sports</option>
-                <?php foreach ($filterSports as $sport): ?>
-                <option value="<?= htmlspecialchars($sport) ?>"><?= htmlspecialchars($sport) ?></option>
-                <?php endforeach; ?>
-            </select>
-            <?php endif; ?>
-            <?php if (!empty($filterGenres)): ?>
-            <select id="filterGenre" onchange="filterProducts()">
-                <option value="">Tous les genres</option>
-                <?php foreach ($filterGenres as $genre): ?>
-                <option value="<?= htmlspecialchars($genre) ?>"><?= htmlspecialchars($genre) ?></option>
-                <?php endforeach; ?>
-            </select>
-            <?php endif; ?>
-            <select id="sortProducts" onchange="sortProducts()">
-                <option value="default">Tri par défaut</option>
-                <option value="price_asc">Prix croissant</option>
-                <option value="price_desc">Prix décroissant</option>
-                <option value="name">Alphabétique</option>
-            </select>
-        </div>
-        <?php endif; ?>
+            <?php if ($page['show_filters'] && (!empty($uniqueSports) || !empty($uniqueGenres))): ?>
+            <div class="filters-bar">
+                <?php if (!empty($uniqueSports)): ?>
+                <div class="filter-group">
+                    <label for="filterSport">Sport</label>
+                    <select id="filterSport" class="filter-select">
+                        <option value="">Tous</option>
+                        <?php foreach ($uniqueSports as $sport): ?>
+                        <option value="<?= htmlspecialchars($sport) ?>"><?= htmlspecialchars($sport) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <?php endif; ?>
 
-        <div class="products-grid" id="productsGrid">
-            <?php foreach ($products as $prod):
-                $prodName = !empty($prod['meta_title']) ? $prod['meta_title'] : $prod['nom'];
-                $prodPrice = $prod['prix_500'] ? number_format($prod['prix_500'], 2, ',', ' ') : '';
-            ?>
-            <div class="product-card" data-sport="<?= htmlspecialchars($prod['sport']) ?>" data-genre="<?= htmlspecialchars($prod['genre'] ?? '') ?>" data-price="<?= floatval($prod['prix_500'] ?? 0) ?>" data-name="<?= htmlspecialchars($prodName) ?>">
-                <a href="/produit/<?= htmlspecialchars($prod['reference']) ?>">
-                    <img src="<?= htmlspecialchars($prod['photo_1'] ?: '/photos/placeholder.webp') ?>" alt="<?= htmlspecialchars($prodName) ?>">
-                </a>
-                <div class="info">
-                    <h3><?= htmlspecialchars($prodName) ?></h3>
-                    <p style="color: #666; font-size: 0.9rem;"><?= htmlspecialchars($prod['sport'] . ' • ' . $prod['famille']) ?></p>
-                    <?php if ($prodPrice): ?>
-                    <div class="price">Dès <?= $prodPrice ?> €</div>
-                    <?php endif; ?>
-                    <a href="/produit/<?= htmlspecialchars($prod['reference']) ?>" class="btn">Voir le produit</a>
+                <?php if (!empty($uniqueGenres)): ?>
+                <div class="filter-group">
+                    <label for="filterGenre">Genre</label>
+                    <select id="filterGenre" class="filter-select">
+                        <option value="">Tous</option>
+                        <?php foreach ($uniqueGenres as $genre): ?>
+                        <option value="<?= htmlspecialchars($genre) ?>"><?= htmlspecialchars($genre) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <?php endif; ?>
+
+                <div class="filter-group">
+                    <label for="sortProducts">Trier par</label>
+                    <select id="sortProducts" class="filter-select">
+                        <option value="default">Par défaut</option>
+                        <option value="price-asc">Prix croissant</option>
+                        <option value="price-desc">Prix décroissant</option>
+                        <option value="name">Nom A-Z</option>
+                    </select>
                 </div>
             </div>
-            <?php endforeach; ?>
-
-            <?php if (empty($products)): ?>
-            <p style="grid-column: 1/-1; text-align: center; padding: 60px; color: #666;">Aucun produit dans cette catégorie pour le moment.</p>
             <?php endif; ?>
+
+            <div class="products-count">
+                <span id="productsCount"><?= $productCount ?> produit<?= $productCount > 1 ? 's' : '' ?></span>
+            </div>
+
+            <div class="products-grid" id="productsGrid">
+                <?php foreach ($products as $prod):
+                    $prodName = !empty($prod['meta_title']) ? $prod['meta_title'] : $prod['nom'];
+                    $prodPrice = $prod['prix_500'] ? number_format($prod['prix_500'], 2, '.', '') : '';
+                    $photos = [];
+                    for ($i = 1; $i <= 5; $i++) {
+                        if (!empty($prod["photo_$i"])) {
+                            $photos[] = $prod["photo_$i"];
+                        }
+                    }
+                    if (empty($photos)) {
+                        $photos[] = '/photos/placeholder.webp';
+                    }
+                ?>
+                <div class="product-card" data-sport="<?= htmlspecialchars($prod['sport'] ?? '') ?>" data-genre="<?= htmlspecialchars($prod['genre'] ?? '') ?>" data-famille="<?= htmlspecialchars($prod['famille'] ?? '') ?>" data-price="<?= floatval($prod['prix_500'] ?? 0) ?>" data-name="<?= htmlspecialchars($prodName) ?>">
+                    <div class="product-image-wrapper">
+                        <div class="product-slider">
+                            <?php foreach ($photos as $idx => $photo): ?>
+                            <div class="product-slide <?= $idx === 0 ? 'active' : '' ?>">
+                                <img src="<?= htmlspecialchars($photo) ?>" alt="<?= htmlspecialchars($prodName) ?> - Photo <?= $idx + 1 ?>" class="product-image" loading="lazy" width="420" height="560" decoding="async">
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php if (count($photos) > 1): ?>
+                        <div class="slider-controls">
+                            <div class="slider-dots">
+                                <?php foreach ($photos as $idx => $photo): ?>
+                                <button class="slider-dot <?= $idx === 0 ? 'active' : '' ?>" data-slide="<?= $idx ?>" aria-label="Photo <?= $idx + 1 ?>"></button>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+                        <div class="product-badges">
+                            <?php if (!empty($prod['genre'])): ?>
+                            <span class="product-badge badge-genre"><?= htmlspecialchars($prod['genre']) ?></span>
+                            <?php endif; ?>
+                            <?php if (!empty($prod['tissu'])): ?>
+                            <span class="product-badge badge-tissu"><?= htmlspecialchars($prod['tissu']) ?></span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title"><?= htmlspecialchars($prodName) ?></h3>
+                        <div class="product-specs">
+                            <span class="product-spec">Réf: <?= htmlspecialchars($prod['reference']) ?></span>
+                            <?php if (!empty($prod['grammage'])): ?>
+                            <span class="product-spec"><?= htmlspecialchars($prod['grammage']) ?> gr/m²</span>
+                            <?php endif; ?>
+                        </div>
+                        <?php if ($prodPrice): ?>
+                        <div class="product-price">
+                            <span class="price-label">À partir de</span>
+                            <span class="price-value"><?= $prodPrice ?>€</span>
+                        </div>
+                        <?php endif; ?>
+                        <a href="/produit/<?= htmlspecialchars($prod['reference']) ?>" class="product-link">Voir le produit →</a>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+
+                <?php if (empty($products)): ?>
+                <p style="grid-column: 1/-1; text-align: center; padding: 60px; color: #666;">Aucun produit dans cette catégorie pour le moment.</p>
+                <?php endif; ?>
+            </div>
         </div>
     </section>
 
     <!-- CTA SECTION -->
     <?php if (!empty($page['cta_title'])): ?>
-    <section class="cta-section">
-        <h2><?= htmlspecialchars($page['cta_title']) ?></h2>
-        <?php if (!empty($page['cta_subtitle'])): ?>
-        <p style="max-width: 600px; margin: 0 auto 30px; font-size: 1.1rem;"><?= htmlspecialchars($page['cta_subtitle']) ?></p>
-        <?php endif; ?>
-
-        <?php if (!empty($ctaFeatures)): ?>
-        <div class="cta-features">
-            <?php foreach ($ctaFeatures as $feature): ?>
-            <div class="cta-feature"><?= htmlspecialchars($feature) ?></div>
-            <?php endforeach; ?>
-        </div>
-        <?php endif; ?>
-
-        <div class="cta-buttons">
-            <?php if (!empty($page['cta_button_text'])): ?>
-            <a href="<?= htmlspecialchars($page['cta_button_link'] ?: '/pages/info/devis.html') ?>" class="btn-white"><?= htmlspecialchars($page['cta_button_text']) ?></a>
+    <section class="cta-redesign">
+        <div class="cta-redesign-container">
+            <h2 class="cta-redesign-title"><?= htmlspecialchars($page['cta_title']) ?></h2>
+            <?php if (!empty($page['cta_subtitle'])): ?>
+            <p class="cta-redesign-subtitle"><?= htmlspecialchars($page['cta_subtitle']) ?></p>
             <?php endif; ?>
-            <?php if (!empty($page['cta_whatsapp'])): ?>
-            <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $page['cta_whatsapp']) ?>" class="btn-outline">WhatsApp Direct</a>
+
+            <?php if (!empty($ctaFeatures)): ?>
+            <div class="cta-redesign-features">
+                <?php foreach ($ctaFeatures as $feature): ?>
+                <div class="cta-feature">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 12L11 14L15 10M21 12C21 16.971 16.971 21 12 21C7.029 21 3 16.971 3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12Z"/>
+                    </svg>
+                    <span><?= htmlspecialchars($feature) ?></span>
+                </div>
+                <?php endforeach; ?>
+            </div>
             <?php endif; ?>
+
+            <div class="cta-redesign-buttons">
+                <?php if (!empty($page['cta_button_text'])): ?>
+                <a href="<?= htmlspecialchars($page['cta_button_link'] ?: '/pages/info/contact.html') ?>" class="btn-cta-main">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 8L10.89 13.26C11.24 13.48 11.62 13.59 12 13.59C12.38 13.59 12.76 13.48 13.11 13.26L21 8M5 19H19C20.1 19 21 18.1 21 17V7C21 5.9 20.1 5 19 5H5C3.9 5 3 5.9 3 7V17C3 18.1 3.9 19 5 19Z"/>
+                    </svg>
+                    <span><?= htmlspecialchars($page['cta_button_text']) ?></span>
+                </a>
+                <?php endif; ?>
+                <?php if (!empty($page['cta_whatsapp'])): ?>
+                <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $page['cta_whatsapp']) ?>" class="btn-cta-secondary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                    </svg>
+                    <span>WhatsApp Direct</span>
+                </a>
+                <?php endif; ?>
+            </div>
         </div>
     </section>
     <?php endif; ?>
 
-    <!-- EXCELLENCE SECTION -->
-    <?php if (!empty($page['excellence_title']) && !empty($excellenceColumns)): ?>
-    <section class="excellence-section">
-        <div class="excellence-container">
-            <div class="excellence-header">
-                <h2><?= htmlspecialchars($page['excellence_title']) ?></h2>
-                <?php if (!empty($page['excellence_subtitle'])): ?>
-                <p><?= htmlspecialchars($page['excellence_subtitle']) ?></p>
+    <!-- SEO MEGA SECTION -->
+    <?php if (!empty($page['excellence_title']) || !empty($testimonials) || !empty($faqItems)): ?>
+    <section class="seo-mega">
+        <div class="container">
+
+            <?php if (!empty($page['excellence_title'])): ?>
+            <div class="seo-hero">
+                <div class="seo-hero-badge"><?= htmlspecialchars($page['excellence_subtitle'] ?: 'Excellence') ?></div>
+                <h2 class="seo-hero-title"><?= htmlspecialchars($page['excellence_title']) ?></h2>
+                <?php if (!empty($page['tech_content'])): ?>
+                <p class="seo-hero-intro"><?= htmlspecialchars(strip_tags($page['tech_content'])) ?></p>
                 <?php endif; ?>
             </div>
-            <div class="excellence-grid">
+            <?php endif; ?>
+
+            <?php if (!empty($excellenceColumns)): ?>
+            <div class="seo-cards-3">
                 <?php foreach ($excellenceColumns as $col): ?>
-                <div class="excellence-card">
+                <div class="seo-card">
                     <?php if (!empty($col['icon'])): ?>
-                    <div style="font-size: 3rem;"><?= $col['icon'] ?></div>
+                    <div class="seo-card-icon"><?= $col['icon'] ?></div>
                     <?php endif; ?>
                     <h3><?= htmlspecialchars($col['title'] ?? '') ?></h3>
                     <p><?= $col['content'] ?? '' ?></p>
                 </div>
                 <?php endforeach; ?>
             </div>
-        </div>
-    </section>
-    <?php endif; ?>
-
-    <!-- TECHNOLOGY SECTION -->
-    <?php if (!empty($page['tech_title'])): ?>
-    <section class="tech-section">
-        <div class="tech-container">
-            <h2><?= htmlspecialchars($page['tech_title']) ?></h2>
-            <?php if (!empty($page['tech_content'])): ?>
-            <div style="margin-top: 20px; line-height: 1.8;"><?= $page['tech_content'] ?></div>
             <?php endif; ?>
 
             <?php if (!empty($techStats)): ?>
-            <div class="tech-stats">
-                <?php foreach ($techStats as $stat): ?>
-                <div class="tech-stat">
-                    <div class="value"><?= htmlspecialchars($stat['value'] ?? '') ?></div>
-                    <div><?= htmlspecialchars($stat['label'] ?? '') ?></div>
+            <div class="seo-stats">
+                <div class="seo-stats-grid">
+                    <?php foreach ($techStats as $stat): ?>
+                    <div class="seo-stat">
+                        <div class="seo-stat-number"><?= htmlspecialchars($stat['value'] ?? '') ?></div>
+                        <div class="seo-stat-label"><?= htmlspecialchars($stat['label'] ?? '') ?></div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <?php if (!empty($featuresSections)): ?>
+            <div class="seo-alternating">
+                <?php foreach ($featuresSections as $section): ?>
+                <div class="seo-alt-block">
+                    <div class="seo-alt-content">
+                        <h3><?= htmlspecialchars($section['title'] ?? '') ?></h3>
+                        <?php if (!empty($section['intro'])): ?>
+                        <p><?= $section['intro'] ?></p>
+                        <?php endif; ?>
+                    </div>
+                    <?php if (!empty($section['items'])): ?>
+                    <div class="seo-alt-visual">
+                        <ul>
+                            <?php foreach ($section['items'] as $item): ?>
+                            <li><?= htmlspecialchars($item) ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                    <?php endif; ?>
                 </div>
                 <?php endforeach; ?>
             </div>
             <?php endif; ?>
-        </div>
-    </section>
-    <?php endif; ?>
 
-    <!-- FEATURES SECTIONS -->
-    <?php if (!empty($featuresSections)): ?>
-    <section class="features-section">
-        <div class="features-container">
-            <?php foreach ($featuresSections as $section): ?>
-            <div class="features-block">
-                <h3><?= htmlspecialchars($section['title'] ?? '') ?></h3>
-                <?php if (!empty($section['intro'])): ?>
-                <p><?= $section['intro'] ?></p>
-                <?php endif; ?>
-                <?php if (!empty($section['items'])): ?>
-                <ul>
-                    <?php foreach ($section['items'] as $item): ?>
-                    <li><?= htmlspecialchars($item) ?></li>
-                    <?php endforeach; ?>
-                </ul>
-                <?php endif; ?>
-            </div>
-            <?php endforeach; ?>
-        </div>
-    </section>
-    <?php endif; ?>
-
-    <!-- TESTIMONIALS -->
-    <?php if (!empty($testimonials)): ?>
-    <section class="testimonials-section">
-        <div class="testimonials-container">
-            <div class="testimonials-header">
+            <?php if (!empty($testimonials)): ?>
+            <div class="seo-testimonials">
                 <h2>Ils nous font confiance</h2>
+                <div class="seo-testimonials-grid">
+                    <?php foreach ($testimonials as $testimonial): ?>
+                    <div class="seo-testimonial">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <p class="testimonial-text"><?= htmlspecialchars($testimonial['text'] ?? '') ?></p>
+                        <div class="testimonial-author"><?= htmlspecialchars($testimonial['author'] ?? '') ?><?php if (!empty($testimonial['role'])): ?> - <?= htmlspecialchars($testimonial['role']) ?><?php endif; ?></div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
             </div>
-            <div class="testimonials-grid">
-                <?php foreach ($testimonials as $testimonial): ?>
-                <div class="testimonial-card">
-                    <div class="testimonial-stars">★★★★★</div>
-                    <div class="testimonial-text">"<?= htmlspecialchars($testimonial['text'] ?? '') ?>"</div>
-                    <div class="testimonial-author"><?= htmlspecialchars($testimonial['author'] ?? '') ?></div>
-                    <div class="testimonial-role"><?= htmlspecialchars($testimonial['role'] ?? '') ?></div>
+            <?php endif; ?>
+
+            <?php if (!empty($page['faq_title']) && !empty($faqItems)): ?>
+            <div class="seo-faq">
+                <h2><?= htmlspecialchars($page['faq_title']) ?></h2>
+
+                <?php foreach ($faqItems as $faq): ?>
+                <div class="faq-accordion-item">
+                    <button class="faq-accordion-question" onclick="this.parentElement.classList.toggle('active')">
+                        <span><?= htmlspecialchars($faq['question'] ?? '') ?></span>
+                        <span class="faq-accordion-icon">+</span>
+                    </button>
+                    <div class="faq-accordion-answer">
+                        <p><?= $faq['answer'] ?? '' ?></p>
+                    </div>
                 </div>
                 <?php endforeach; ?>
             </div>
-        </div>
-    </section>
-    <?php endif; ?>
+            <?php endif; ?>
 
-    <!-- FAQ -->
-    <?php if (!empty($page['faq_title']) && !empty($faqItems)): ?>
-    <section class="faq-section">
-        <div class="faq-container">
-            <div class="faq-header">
-                <h2><?= htmlspecialchars($page['faq_title']) ?></h2>
-            </div>
-            <?php foreach ($faqItems as $faq): ?>
-            <div class="faq-item">
-                <div class="faq-question"><?= htmlspecialchars($faq['question'] ?? '') ?></div>
-                <div class="faq-answer"><?= $faq['answer'] ?? '' ?></div>
-            </div>
-            <?php endforeach; ?>
         </div>
     </section>
     <?php endif; ?>
 
     <!-- GUIDE SEO CONTENT -->
     <?php if (!empty($page['guide_title']) && !empty($page['guide_content'])): ?>
-    <section class="guide-section">
-        <div class="guide-container">
-            <h2><?= htmlspecialchars($page['guide_title']) ?></h2>
-            <div class="guide-content">
+    <section class="seo-longtail-mega">
+        <div class="seo-longtail-container">
+            <div class="seo-longtail-header">
+                <span class="seo-longtail-badge">Guide complet</span>
+                <h2 class="seo-longtail-title"><?= htmlspecialchars($page['guide_title']) ?></h2>
+            </div>
+            <div class="seo-longtail-content">
                 <?= $page['guide_content'] ?>
             </div>
         </div>
@@ -417,17 +424,15 @@ $metaDescription = $page['meta_description'] ?: '';
 
     <script src="/assets/js/components-loader.js"></script>
     <script>
-        // FAQ Toggle
-        document.querySelectorAll('.faq-question').forEach(q => {
-            q.addEventListener('click', () => {
-                q.parentElement.classList.toggle('open');
-            });
-        });
-
         // Product filtering
+        document.getElementById('filterSport')?.addEventListener('change', filterProducts);
+        document.getElementById('filterGenre')?.addEventListener('change', filterProducts);
+        document.getElementById('sortProducts')?.addEventListener('change', sortProducts);
+
         function filterProducts() {
             const sport = document.getElementById('filterSport')?.value || '';
             const genre = document.getElementById('filterGenre')?.value || '';
+            let visibleCount = 0;
 
             document.querySelectorAll('.product-card').forEach(card => {
                 const cardSport = card.dataset.sport || '';
@@ -438,10 +443,12 @@ $metaDescription = $page['meta_description'] ?: '';
                 if (genre && cardGenre !== genre) show = false;
 
                 card.style.display = show ? 'block' : 'none';
+                if (show) visibleCount++;
             });
+
+            document.getElementById('productsCount').textContent = visibleCount + ' produit' + (visibleCount > 1 ? 's' : '');
         }
 
-        // Product sorting
         function sortProducts() {
             const sort = document.getElementById('sortProducts')?.value || 'default';
             const grid = document.getElementById('productsGrid');
@@ -449,9 +456,9 @@ $metaDescription = $page['meta_description'] ?: '';
 
             cards.sort((a, b) => {
                 switch (sort) {
-                    case 'price_asc':
+                    case 'price-asc':
                         return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
-                    case 'price_desc':
+                    case 'price-desc':
                         return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
                     case 'name':
                         return a.dataset.name.localeCompare(b.dataset.name);
@@ -462,6 +469,45 @@ $metaDescription = $page['meta_description'] ?: '';
 
             cards.forEach(card => grid.appendChild(card));
         }
+
+        // Product image slider
+        document.querySelectorAll('.product-card').forEach(card => {
+            const slides = card.querySelectorAll('.product-slide');
+            const dots = card.querySelectorAll('.slider-dot');
+
+            if (slides.length <= 1) return;
+
+            let currentSlide = 0;
+
+            function showSlide(index) {
+                slides.forEach((slide, i) => {
+                    slide.classList.toggle('active', i === index);
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === index);
+                });
+                currentSlide = index;
+            }
+
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showSlide(index);
+                });
+            });
+
+            // Auto-slide on hover
+            card.addEventListener('mouseenter', () => {
+                if (slides.length > 1) {
+                    showSlide((currentSlide + 1) % slides.length);
+                }
+            });
+
+            card.addEventListener('mouseleave', () => {
+                showSlide(0);
+            });
+        });
     </script>
 </body>
 </html>
