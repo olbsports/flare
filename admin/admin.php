@@ -160,6 +160,73 @@ try {
             // Column likely already exists
         }
     }
+
+    // Create category_pages table for dynamic category pages
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS category_pages (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            slug VARCHAR(255) NOT NULL UNIQUE,
+            title VARCHAR(255) NOT NULL,
+            meta_title VARCHAR(255),
+            meta_description TEXT,
+
+            -- Hero section
+            hero_title VARCHAR(255),
+            hero_subtitle TEXT,
+            hero_image VARCHAR(500),
+            hero_cta_text VARCHAR(100),
+            hero_cta_link VARCHAR(255),
+
+            -- Trust bar (JSON: [{icon, value, label}])
+            trust_bar JSON,
+
+            -- Products section
+            products_title VARCHAR(255),
+            products_subtitle TEXT,
+            show_filters BOOLEAN DEFAULT TRUE,
+            filter_sports JSON,
+            filter_genres JSON,
+
+            -- CTA section (Créons ensemble)
+            cta_title VARCHAR(255),
+            cta_subtitle TEXT,
+            cta_features JSON,
+            cta_button_text VARCHAR(100),
+            cta_button_link VARCHAR(255),
+            cta_whatsapp VARCHAR(50),
+
+            -- Excellence section (3 columns)
+            excellence_title VARCHAR(255),
+            excellence_subtitle TEXT,
+            excellence_columns JSON,
+
+            -- Technology section
+            tech_title VARCHAR(255),
+            tech_content TEXT,
+            tech_stats JSON,
+
+            -- Features section (tissus, service, etc.)
+            features_sections JSON,
+
+            -- Testimonials
+            testimonials JSON,
+
+            -- FAQ
+            faq_title VARCHAR(255),
+            faq_items JSON,
+
+            -- Guide/SEO content
+            guide_title VARCHAR(255),
+            guide_content LONGTEXT,
+
+            -- Settings
+            active BOOLEAN DEFAULT TRUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    } catch (PDOException $e) {
+        // Table likely already exists
+    }
 } catch (Exception $e) {
     $dbError = $e->getMessage();
 }
@@ -299,6 +366,108 @@ if ($action && $pdo) {
                 }
                 $toast = 'Catégorie enregistrée';
                 break;
+
+            case 'save_category_page':
+                $slug = preg_replace('/[^a-z0-9\-]/', '', strtolower($_POST['slug'] ?? ''));
+                if (empty($slug)) {
+                    $toast = 'Erreur: Slug requis';
+                    break;
+                }
+
+                // Préparer les données JSON
+                $trustBar = json_encode($_POST['trust_bar'] ?? [], JSON_UNESCAPED_UNICODE);
+                $ctaFeatures = json_encode(array_filter(array_map('trim', explode("\n", $_POST['cta_features'] ?? ''))), JSON_UNESCAPED_UNICODE);
+                $excellenceColumns = json_encode($_POST['excellence_columns'] ?? [], JSON_UNESCAPED_UNICODE);
+                $techStats = json_encode($_POST['tech_stats'] ?? [], JSON_UNESCAPED_UNICODE);
+                $featuresSections = json_encode($_POST['features_sections'] ?? [], JSON_UNESCAPED_UNICODE);
+                $testimonials = json_encode($_POST['testimonials'] ?? [], JSON_UNESCAPED_UNICODE);
+                $faqItems = json_encode($_POST['faq_items'] ?? [], JSON_UNESCAPED_UNICODE);
+                $filterSports = json_encode(array_filter(array_map('trim', explode("\n", $_POST['filter_sports'] ?? ''))), JSON_UNESCAPED_UNICODE);
+                $filterGenres = json_encode(array_filter(array_map('trim', explode("\n", $_POST['filter_genres'] ?? ''))), JSON_UNESCAPED_UNICODE);
+
+                $fields = [
+                    'slug', 'title', 'meta_title', 'meta_description',
+                    'hero_title', 'hero_subtitle', 'hero_image', 'hero_cta_text', 'hero_cta_link',
+                    'products_title', 'products_subtitle', 'show_filters',
+                    'cta_title', 'cta_subtitle', 'cta_button_text', 'cta_button_link', 'cta_whatsapp',
+                    'excellence_title', 'excellence_subtitle',
+                    'tech_title', 'tech_content',
+                    'faq_title', 'guide_title', 'guide_content', 'active'
+                ];
+
+                $values = [
+                    $slug,
+                    $_POST['title'] ?? '',
+                    $_POST['meta_title'] ?? '',
+                    $_POST['meta_description'] ?? '',
+                    $_POST['hero_title'] ?? '',
+                    $_POST['hero_subtitle'] ?? '',
+                    $_POST['hero_image'] ?? '',
+                    $_POST['hero_cta_text'] ?? '',
+                    $_POST['hero_cta_link'] ?? '',
+                    $_POST['products_title'] ?? '',
+                    $_POST['products_subtitle'] ?? '',
+                    isset($_POST['show_filters']) ? 1 : 0,
+                    $_POST['cta_title'] ?? '',
+                    $_POST['cta_subtitle'] ?? '',
+                    $_POST['cta_button_text'] ?? '',
+                    $_POST['cta_button_link'] ?? '',
+                    $_POST['cta_whatsapp'] ?? '',
+                    $_POST['excellence_title'] ?? '',
+                    $_POST['excellence_subtitle'] ?? '',
+                    $_POST['tech_title'] ?? '',
+                    $_POST['tech_content'] ?? '',
+                    $_POST['faq_title'] ?? '',
+                    $_POST['guide_title'] ?? '',
+                    $_POST['guide_content'] ?? '',
+                    isset($_POST['active']) ? 1 : 0
+                ];
+
+                // Ajouter les champs JSON
+                $jsonFields = ['trust_bar', 'filter_sports', 'filter_genres', 'cta_features', 'excellence_columns', 'tech_stats', 'features_sections', 'testimonials', 'faq_items'];
+                $jsonValues = [$trustBar, $filterSports, $filterGenres, $ctaFeatures, $excellenceColumns, $techStats, $featuresSections, $testimonials, $faqItems];
+
+                if ($id) {
+                    $set = implode('=?, ', $fields) . '=?, ' . implode('=?, ', $jsonFields) . '=?';
+                    $allValues = array_merge($values, $jsonValues, [$id]);
+                    $pdo->prepare("UPDATE category_pages SET $set WHERE id=?")->execute($allValues);
+                    $savedSlug = $slug;
+                } else {
+                    $allFields = array_merge($fields, $jsonFields);
+                    $placeholders = implode(',', array_fill(0, count($allFields), '?'));
+                    $pdo->prepare("INSERT INTO category_pages (" . implode(',', $allFields) . ") VALUES ($placeholders)")
+                        ->execute(array_merge($values, $jsonValues));
+                    $id = $pdo->lastInsertId();
+                    $savedSlug = $slug;
+                }
+
+                // Sauvegarder les produits associés
+                $pdo->prepare("DELETE FROM page_products WHERE page_type='category_page' AND page_slug=?")->execute([$savedSlug]);
+                $productIds = $_POST['page_products'] ?? [];
+                if (!empty($productIds)) {
+                    $insertStmt = $pdo->prepare("INSERT INTO page_products (page_type, page_slug, product_id, position) VALUES ('category_page', ?, ?, ?)");
+                    foreach ($productIds as $pos => $prodId) {
+                        $insertStmt->execute([$savedSlug, intval($prodId), $pos]);
+                    }
+                }
+
+                $toast = 'Page catégorie enregistrée';
+                header("Location: ?page=category_page&id=$id&toast=" . urlencode($toast));
+                exit;
+
+            case 'delete_category_page':
+                if ($id) {
+                    $stmt = $pdo->prepare("SELECT slug FROM category_pages WHERE id=?");
+                    $stmt->execute([$id]);
+                    $row = $stmt->fetch();
+                    if ($row) {
+                        $pdo->prepare("DELETE FROM page_products WHERE page_type='category_page' AND page_slug=?")->execute([$row['slug']]);
+                        $pdo->prepare("DELETE FROM category_pages WHERE id=?")->execute([$id]);
+                        $toast = 'Page supprimée';
+                    }
+                }
+                header("Location: ?page=category_pages&toast=" . urlencode($toast));
+                exit;
 
             case 'save_page':
                 // Sauvegarder directement dans le fichier HTML via type et slug
@@ -685,6 +854,37 @@ if ($pdo && $page !== 'login') {
                     $stmt->execute([$id]);
                     $data['item'] = $stmt->fetch();
                 }
+                break;
+
+            case 'category_pages':
+                // Liste des pages catégorie dynamiques
+                try {
+                    $data['items'] = $pdo->query("SELECT * FROM category_pages ORDER BY title")->fetchAll();
+                } catch (Exception $e) {
+                    $data['items'] = [];
+                }
+                break;
+
+            case 'category_page':
+                // Édition d'une page catégorie
+                if ($id) {
+                    $stmt = $pdo->prepare("SELECT * FROM category_pages WHERE id=?");
+                    $stmt->execute([$id]);
+                    $data['item'] = $stmt->fetch();
+
+                    // Charger les produits sélectionnés
+                    if ($data['item']) {
+                        $stmt = $pdo->prepare("SELECT product_id FROM page_products WHERE page_type='category_page' AND page_slug=? ORDER BY position");
+                        $stmt->execute([$data['item']['slug']]);
+                        $data['selected_products'] = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                    }
+                }
+                // Tous les produits pour le sélecteur
+                $data['all_products'] = $pdo->query("
+                    SELECT id, reference, nom, meta_title, sport, famille, photo_1, prix_500
+                    FROM products WHERE active=1
+                    ORDER BY sport, famille, nom
+                ")->fetchAll();
                 break;
 
             case 'pages':
@@ -1332,7 +1532,11 @@ $user = $_SESSION['admin_user'] ?? null;
         </a>
         <a href="?page=pages&filter=category" class="menu-item <?= ($page === 'pages' && ($_GET['filter'] ?? '') === 'category') || ($page === 'page' && ($data['item']['type'] ?? '') === 'category') ? 'active' : '' ?>">
             <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-            Pages Catégories
+            Pages Catégories (HTML)
+        </a>
+        <a href="?page=category_pages" class="menu-item <?= in_array($page, ['category_pages', 'category_page']) ? 'active' : '' ?>">
+            <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+            Pages Catégories (DB)
         </a>
         <a href="?page=blog" class="menu-item <?= in_array($page, ['blog', 'blog_edit']) ? 'active' : '' ?>">
             <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
@@ -2924,6 +3128,516 @@ $user = $_SESSION['admin_user'] ?? null;
         document.querySelector('input[name="slug"]')?.addEventListener('input', function() {
             this.dataset.edited = 'true';
         });
+        </script>
+
+        <?php // ============ CATEGORY PAGES LIST ============ ?>
+        <?php elseif ($page === 'category_pages'): ?>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Pages Catégorie Dynamiques (<?= count($data['items'] ?? []) ?>)</span>
+                <a href="?page=category_page" class="btn btn-primary">+ Nouvelle page</a>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Titre</th><th>Slug</th><th>Produits</th><th>Statut</th><th>Actions</th></tr></thead>
+                    <tbody>
+                    <?php if (empty($data['items'])): ?>
+                    <tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--text-muted);">Aucune page catégorie. Créez-en une !</td></tr>
+                    <?php else: ?>
+                    <?php foreach ($data['items'] as $cp): ?>
+                        <tr>
+                            <td><strong><?= htmlspecialchars($cp['title']) ?></strong></td>
+                            <td><code>/categorie/<?= htmlspecialchars($cp['slug']) ?></code></td>
+                            <td>
+                                <?php
+                                $countStmt = $pdo->prepare("SELECT COUNT(*) FROM page_products WHERE page_type='category_page' AND page_slug=?");
+                                $countStmt->execute([$cp['slug']]);
+                                echo $countStmt->fetchColumn();
+                                ?> produits
+                            </td>
+                            <td>
+                                <span class="badge badge-<?= $cp['active'] ? 'success' : 'secondary' ?>"><?= $cp['active'] ? 'Actif' : 'Inactif' ?></span>
+                            </td>
+                            <td>
+                                <a href="?page=category_page&id=<?= $cp['id'] ?>" class="btn btn-sm btn-primary">Modifier</a>
+                                <a href="/categorie/<?= htmlspecialchars($cp['slug']) ?>" target="_blank" class="btn btn-sm btn-light">Voir</a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <?php // ============ CATEGORY PAGE EDIT ============ ?>
+        <?php elseif ($page === 'category_page'): ?>
+        <?php
+        $cp = $data['item'] ?? [];
+        $selectedProducts = $data['selected_products'] ?? [];
+        $allProducts = $data['all_products'] ?? [];
+        ?>
+        <form method="POST" action="?page=category_page<?= $id ? "&id=$id" : '' ?>">
+            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+            <input type="hidden" name="action" value="save_category_page">
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title"><?= $id ? 'Modifier' : 'Nouvelle' ?> page catégorie</span>
+                    <div>
+                        <?php if ($id): ?>
+                        <a href="/categorie/<?= htmlspecialchars($cp['slug'] ?? '') ?>" target="_blank" class="btn btn-light">Voir la page</a>
+                        <?php endif; ?>
+                        <a href="?page=category_pages" class="btn btn-light">← Retour</a>
+                    </div>
+                </div>
+
+                <div class="tabs-nav">
+                    <button type="button" class="tab-btn active" onclick="switchCatTab('general')">Général</button>
+                    <button type="button" class="tab-btn" onclick="switchCatTab('hero')">Hero</button>
+                    <button type="button" class="tab-btn" onclick="switchCatTab('products')">Produits</button>
+                    <button type="button" class="tab-btn" onclick="switchCatTab('cta')">CTA</button>
+                    <button type="button" class="tab-btn" onclick="switchCatTab('content')">Contenu</button>
+                    <button type="button" class="tab-btn" onclick="switchCatTab('testimonials')">Témoignages</button>
+                    <button type="button" class="tab-btn" onclick="switchCatTab('faq')">FAQ</button>
+                    <button type="button" class="tab-btn" onclick="switchCatTab('seo')">SEO</button>
+                </div>
+
+                <!-- TAB GENERAL -->
+                <div class="tab-content active" id="cat-tab-general">
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Titre de la page *</label>
+                                <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($cp['title'] ?? '') ?>" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Slug (URL) *</label>
+                                <div style="display: flex; align-items: center; gap: 5px;">
+                                    <span style="color: var(--text-muted);">/categorie/</span>
+                                    <input type="text" name="slug" class="form-control" value="<?= htmlspecialchars($cp['slug'] ?? '') ?>" required pattern="[a-z0-9\-]+" style="flex: 1;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" name="active" value="1" <?= ($cp['active'] ?? 1) ? 'checked' : '' ?>>
+                                Page active (visible sur le site)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB HERO -->
+                <div class="tab-content" id="cat-tab-hero">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Titre Hero</label>
+                            <input type="text" name="hero_title" class="form-control" value="<?= htmlspecialchars($cp['hero_title'] ?? '') ?>" placeholder="Ex: MAILLOTS FOOTBALL PERSONNALISÉS">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Sous-titre Hero</label>
+                            <textarea name="hero_subtitle" class="form-control" rows="3" placeholder="Description affichée sous le titre"><?= htmlspecialchars($cp['hero_subtitle'] ?? '') ?></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Image de fond (URL)</label>
+                                <input type="text" name="hero_image" class="form-control" value="<?= htmlspecialchars($cp['hero_image'] ?? '') ?>" placeholder="https://...">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Texte du bouton CTA</label>
+                                <input type="text" name="hero_cta_text" class="form-control" value="<?= htmlspecialchars($cp['hero_cta_text'] ?? '') ?>" placeholder="Ex: Voir le catalogue">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Lien du bouton CTA</label>
+                                <input type="text" name="hero_cta_link" class="form-control" value="<?= htmlspecialchars($cp['hero_cta_link'] ?? '') ?>" placeholder="#products">
+                            </div>
+                        </div>
+
+                        <hr style="margin: 30px 0;">
+                        <h4>Barre de confiance (Trust Bar)</h4>
+                        <p style="color: var(--text-muted); margin-bottom: 15px;">Statistiques affichées sous le hero (ex: 500+ clubs, 4.9/5 satisfaction)</p>
+                        <div id="trustBarItems">
+                            <?php
+                            $trustBar = json_decode($cp['trust_bar'] ?? '[]', true) ?: [];
+                            if (empty($trustBar)) $trustBar = [['value' => '', 'label' => '']];
+                            foreach ($trustBar as $i => $item): ?>
+                            <div class="form-row trust-item" style="margin-bottom: 10px;">
+                                <div class="form-group" style="flex: 1;">
+                                    <input type="text" name="trust_bar[<?= $i ?>][value]" class="form-control" value="<?= htmlspecialchars($item['value'] ?? '') ?>" placeholder="500+">
+                                </div>
+                                <div class="form-group" style="flex: 2;">
+                                    <input type="text" name="trust_bar[<?= $i ?>][label]" class="form-control" value="<?= htmlspecialchars($item['label'] ?? '') ?>" placeholder="Clubs équipés">
+                                </div>
+                                <button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.remove()">✕</button>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-light" onclick="addTrustItem()">+ Ajouter un élément</button>
+                    </div>
+                </div>
+
+                <!-- TAB PRODUCTS -->
+                <div class="tab-content" id="cat-tab-products">
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Titre section produits</label>
+                                <input type="text" name="products_title" class="form-control" value="<?= htmlspecialchars($cp['products_title'] ?? '') ?>" placeholder="Nos produits">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Sous-titre</label>
+                                <input type="text" name="products_subtitle" class="form-control" value="<?= htmlspecialchars($cp['products_subtitle'] ?? '') ?>">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" name="show_filters" value="1" <?= ($cp['show_filters'] ?? 1) ? 'checked' : '' ?>>
+                                Afficher les filtres (sport, genre, tri)
+                            </label>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Sports à filtrer (un par ligne)</label>
+                                <textarea name="filter_sports" class="form-control" rows="4" placeholder="Football&#10;Rugby&#10;Basketball"><?= htmlspecialchars(implode("\n", json_decode($cp['filter_sports'] ?? '[]', true) ?: [])) ?></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Genres à filtrer (un par ligne)</label>
+                                <textarea name="filter_genres" class="form-control" rows="4" placeholder="Homme&#10;Femme&#10;Enfant"><?= htmlspecialchars(implode("\n", json_decode($cp['filter_genres'] ?? '[]', true) ?: [])) ?></textarea>
+                            </div>
+                        </div>
+
+                        <hr style="margin: 30px 0;">
+                        <h4>Produits à afficher</h4>
+                        <p style="color: var(--text-muted); margin-bottom: 15px;">Sélectionnez les produits qui apparaîtront sur cette page catégorie.</p>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div>
+                                <label class="form-label">Produits sélectionnés (<?= count($selectedProducts) ?>)</label>
+                                <div id="selectedCatProducts" style="min-height: 200px; max-height: 400px; overflow-y: auto; border: 2px dashed #e2e8f0; border-radius: 8px; padding: 10px;">
+                                    <?php foreach ($selectedProducts as $prodId):
+                                        $prod = array_filter($allProducts, fn($p) => $p['id'] == $prodId);
+                                        $prod = reset($prod);
+                                        if ($prod):
+                                            $prodName = !empty($prod['meta_title']) ? $prod['meta_title'] : $prod['nom'];
+                                    ?>
+                                    <div class="cat-prod-item" data-id="<?= $prod['id'] ?>" style="display: flex; align-items: center; gap: 10px; padding: 8px; background: #fff5f3; border: 1px solid #FF4B26; border-radius: 6px; margin-bottom: 8px;">
+                                        <img src="<?= htmlspecialchars($prod['photo_1'] ?: '/photos/placeholder.webp') ?>" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                        <div style="flex: 1; overflow: hidden;">
+                                            <div style="font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= htmlspecialchars($prodName) ?></div>
+                                            <div style="font-size: 10px; color: #666;"><?= htmlspecialchars($prod['sport']) ?></div>
+                                        </div>
+                                        <input type="hidden" name="page_products[]" value="<?= $prod['id'] ?>">
+                                        <button type="button" class="btn btn-sm" style="color: #ef4444;" onclick="removeCatProduct(this)">✕</button>
+                                    </div>
+                                    <?php endif; endforeach; ?>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label">Tous les produits</label>
+                                <input type="text" id="catProductSearch" class="form-control" placeholder="Rechercher..." style="margin-bottom: 10px;" oninput="filterCatProducts()">
+                                <div id="availableCatProducts" style="max-height: 400px; overflow-y: auto;">
+                                    <?php foreach ($allProducts as $prod):
+                                        $prodName = !empty($prod['meta_title']) ? $prod['meta_title'] : $prod['nom'];
+                                        $isSelected = in_array($prod['id'], $selectedProducts);
+                                    ?>
+                                    <div class="cat-prod-avail <?= $isSelected ? 'selected' : '' ?>" data-id="<?= $prod['id'] ?>" data-name="<?= htmlspecialchars(strtolower($prodName)) ?>" style="display: flex; align-items: center; gap: 10px; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 6px; cursor: pointer; <?= $isSelected ? 'opacity: 0.5;' : '' ?>" onclick="addCatProduct(this, <?= $prod['id'] ?>, <?= htmlspecialchars(json_encode($prod)) ?>)">
+                                        <img src="<?= htmlspecialchars($prod['photo_1'] ?: '/photos/placeholder.webp') ?>" style="width: 36px; height: 36px; object-fit: cover; border-radius: 4px;">
+                                        <div style="flex: 1; overflow: hidden;">
+                                            <div style="font-size: 12px; font-weight: 600;"><?= htmlspecialchars($prodName) ?></div>
+                                            <div style="font-size: 10px; color: #666;"><?= htmlspecialchars($prod['sport'] . ' • ' . ($prod['prix_500'] ? number_format($prod['prix_500'], 2) . '€' : '-')) ?></div>
+                                        </div>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB CTA -->
+                <div class="tab-content" id="cat-tab-cta">
+                    <div class="card-body">
+                        <h4>Section CTA (Créons ensemble)</h4>
+                        <div class="form-group">
+                            <label class="form-label">Titre CTA</label>
+                            <input type="text" name="cta_title" class="form-control" value="<?= htmlspecialchars($cp['cta_title'] ?? '') ?>" placeholder="Créons ensemble votre équipement">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Sous-titre CTA</label>
+                            <input type="text" name="cta_subtitle" class="form-control" value="<?= htmlspecialchars($cp['cta_subtitle'] ?? '') ?>">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Points forts (un par ligne)</label>
+                            <textarea name="cta_features" class="form-control" rows="4" placeholder="Devis gratuit sous 24h&#10;Design professionnel inclus&#10;Prix dégressifs garantis"><?= htmlspecialchars(implode("\n", json_decode($cp['cta_features'] ?? '[]', true) ?: [])) ?></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Texte bouton principal</label>
+                                <input type="text" name="cta_button_text" class="form-control" value="<?= htmlspecialchars($cp['cta_button_text'] ?? '') ?>" placeholder="Demander un devis">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Lien bouton</label>
+                                <input type="text" name="cta_button_link" class="form-control" value="<?= htmlspecialchars($cp['cta_button_link'] ?? '') ?>" placeholder="/pages/info/devis.html">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Numéro WhatsApp (optionnel)</label>
+                            <input type="text" name="cta_whatsapp" class="form-control" value="<?= htmlspecialchars($cp['cta_whatsapp'] ?? '') ?>" placeholder="+33612345678">
+                        </div>
+
+                        <hr style="margin: 30px 0;">
+                        <h4>Section Excellence (3 colonnes)</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Titre section</label>
+                                <input type="text" name="excellence_title" class="form-control" value="<?= htmlspecialchars($cp['excellence_title'] ?? '') ?>" placeholder="Excellence de nos produits">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Sous-titre</label>
+                                <input type="text" name="excellence_subtitle" class="form-control" value="<?= htmlspecialchars($cp['excellence_subtitle'] ?? '') ?>">
+                            </div>
+                        </div>
+                        <div id="excellenceColumns">
+                            <?php
+                            $excCols = json_decode($cp['excellence_columns'] ?? '[]', true) ?: [];
+                            if (empty($excCols)) $excCols = [['icon' => '', 'title' => '', 'content' => '']];
+                            foreach ($excCols as $i => $col): ?>
+                            <div class="exc-col" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                                <div class="form-row">
+                                    <div class="form-group" style="width: 80px;">
+                                        <label class="form-label">Icône</label>
+                                        <input type="text" name="excellence_columns[<?= $i ?>][icon]" class="form-control" value="<?= htmlspecialchars($col['icon'] ?? '') ?>" placeholder="🎨">
+                                    </div>
+                                    <div class="form-group" style="flex: 1;">
+                                        <label class="form-label">Titre</label>
+                                        <input type="text" name="excellence_columns[<?= $i ?>][title]" class="form-control" value="<?= htmlspecialchars($col['title'] ?? '') ?>">
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.parentElement.remove()" style="align-self: flex-end;">✕</button>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Contenu</label>
+                                    <textarea name="excellence_columns[<?= $i ?>][content]" class="form-control" rows="3"><?= htmlspecialchars($col['content'] ?? '') ?></textarea>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-light" onclick="addExcellenceCol()">+ Ajouter une colonne</button>
+                    </div>
+                </div>
+
+                <!-- TAB CONTENT -->
+                <div class="tab-content" id="cat-tab-content">
+                    <div class="card-body">
+                        <h4>Section Technologie</h4>
+                        <div class="form-group">
+                            <label class="form-label">Titre</label>
+                            <input type="text" name="tech_title" class="form-control" value="<?= htmlspecialchars($cp['tech_title'] ?? '') ?>" placeholder="Sublimation Intégrale">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Contenu (HTML autorisé)</label>
+                            <textarea name="tech_content" class="form-control" rows="5"><?= htmlspecialchars($cp['tech_content'] ?? '') ?></textarea>
+                        </div>
+                        <div id="techStats">
+                            <label class="form-label">Statistiques</label>
+                            <?php
+                            $techStats = json_decode($cp['tech_stats'] ?? '[]', true) ?: [];
+                            if (empty($techStats)) $techStats = [['value' => '', 'label' => '']];
+                            foreach ($techStats as $i => $stat): ?>
+                            <div class="form-row" style="margin-bottom: 10px;">
+                                <div class="form-group" style="flex: 1;">
+                                    <input type="text" name="tech_stats[<?= $i ?>][value]" class="form-control" value="<?= htmlspecialchars($stat['value'] ?? '') ?>" placeholder="500+">
+                                </div>
+                                <div class="form-group" style="flex: 2;">
+                                    <input type="text" name="tech_stats[<?= $i ?>][label]" class="form-control" value="<?= htmlspecialchars($stat['label'] ?? '') ?>" placeholder="Clubs équipés">
+                                </div>
+                                <button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.remove()">✕</button>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-light" onclick="addTechStat()">+ Ajouter une stat</button>
+
+                        <hr style="margin: 30px 0;">
+                        <h4>Guide SEO (contenu long)</h4>
+                        <div class="form-group">
+                            <label class="form-label">Titre du guide</label>
+                            <input type="text" name="guide_title" class="form-control" value="<?= htmlspecialchars($cp['guide_title'] ?? '') ?>" placeholder="Tout savoir sur nos produits">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Contenu du guide (HTML autorisé)</label>
+                            <textarea name="guide_content" class="form-control" rows="10"><?= htmlspecialchars($cp['guide_content'] ?? '') ?></textarea>
+                            <div class="form-hint">Contenu SEO détaillé. Utilisez H2, H3, listes, etc.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB TESTIMONIALS -->
+                <div class="tab-content" id="cat-tab-testimonials">
+                    <div class="card-body">
+                        <h4>Témoignages clients</h4>
+                        <div id="testimonialsList">
+                            <?php
+                            $testimonials = json_decode($cp['testimonials'] ?? '[]', true) ?: [];
+                            if (empty($testimonials)) $testimonials = [['text' => '', 'author' => '', 'role' => '']];
+                            foreach ($testimonials as $i => $t): ?>
+                            <div class="testimonial-item" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                                <div class="form-group">
+                                    <label class="form-label">Texte du témoignage</label>
+                                    <textarea name="testimonials[<?= $i ?>][text]" class="form-control" rows="2"><?= htmlspecialchars($t['text'] ?? '') ?></textarea>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Auteur</label>
+                                        <input type="text" name="testimonials[<?= $i ?>][author]" class="form-control" value="<?= htmlspecialchars($t['author'] ?? '') ?>" placeholder="Club XYZ">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Rôle / Info</label>
+                                        <input type="text" name="testimonials[<?= $i ?>][role]" class="form-control" value="<?= htmlspecialchars($t['role'] ?? '') ?>" placeholder="Président du club">
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.parentElement.remove()" style="align-self: flex-end;">✕</button>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-light" onclick="addTestimonial()">+ Ajouter un témoignage</button>
+                    </div>
+                </div>
+
+                <!-- TAB FAQ -->
+                <div class="tab-content" id="cat-tab-faq">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Titre section FAQ</label>
+                            <input type="text" name="faq_title" class="form-control" value="<?= htmlspecialchars($cp['faq_title'] ?? '') ?>" placeholder="Questions fréquentes">
+                        </div>
+                        <div id="faqList">
+                            <?php
+                            $faqItems = json_decode($cp['faq_items'] ?? '[]', true) ?: [];
+                            if (empty($faqItems)) $faqItems = [['question' => '', 'answer' => '']];
+                            foreach ($faqItems as $i => $faq): ?>
+                            <div class="faq-item-edit" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                                <div class="form-group">
+                                    <label class="form-label">Question</label>
+                                    <input type="text" name="faq_items[<?= $i ?>][question]" class="form-control" value="<?= htmlspecialchars($faq['question'] ?? '') ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Réponse (HTML autorisé)</label>
+                                    <textarea name="faq_items[<?= $i ?>][answer]" class="form-control" rows="3"><?= htmlspecialchars($faq['answer'] ?? '') ?></textarea>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.remove()">✕ Supprimer</button>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-light" onclick="addFaqItem()">+ Ajouter une question</button>
+                    </div>
+                </div>
+
+                <!-- TAB SEO -->
+                <div class="tab-content" id="cat-tab-seo">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Meta Title</label>
+                            <input type="text" name="meta_title" class="form-control" value="<?= htmlspecialchars($cp['meta_title'] ?? '') ?>">
+                            <div class="form-hint">Recommandé: 50-60 caractères</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Meta Description</label>
+                            <textarea name="meta_description" class="form-control" rows="3"><?= htmlspecialchars($cp['meta_description'] ?? '') ?></textarea>
+                            <div class="form-hint">Recommandé: 150-160 caractères</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer" style="display: flex; justify-content: space-between;">
+                    <div>
+                        <?php if ($id): ?>
+                        <a href="?page=category_pages&action=delete_category_page&id=<?= $id ?>&csrf_token=<?= generateCsrfToken() ?>" class="btn btn-danger" onclick="return confirm('Supprimer cette page ?')">Supprimer</a>
+                        <?php endif; ?>
+                    </div>
+                    <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+                </div>
+            </div>
+        </form>
+
+        <script>
+        function switchCatTab(tabId) {
+            document.querySelectorAll('.tabs-nav .tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('cat-tab-' + tabId).classList.add('active');
+        }
+
+        var trustIdx = <?= count($trustBar) ?>;
+        function addTrustItem() {
+            var html = '<div class="form-row trust-item" style="margin-bottom: 10px;"><div class="form-group" style="flex: 1;"><input type="text" name="trust_bar[' + trustIdx + '][value]" class="form-control" placeholder="500+"></div><div class="form-group" style="flex: 2;"><input type="text" name="trust_bar[' + trustIdx + '][label]" class="form-control" placeholder="Clubs équipés"></div><button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.remove()">✕</button></div>';
+            document.getElementById('trustBarItems').insertAdjacentHTML('beforeend', html);
+            trustIdx++;
+        }
+
+        var excIdx = <?= count($excCols) ?>;
+        function addExcellenceCol() {
+            var html = '<div class="exc-col" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;"><div class="form-row"><div class="form-group" style="width: 80px;"><label class="form-label">Icône</label><input type="text" name="excellence_columns[' + excIdx + '][icon]" class="form-control" placeholder="🎨"></div><div class="form-group" style="flex: 1;"><label class="form-label">Titre</label><input type="text" name="excellence_columns[' + excIdx + '][title]" class="form-control"></div><button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.parentElement.remove()" style="align-self: flex-end;">✕</button></div><div class="form-group"><label class="form-label">Contenu</label><textarea name="excellence_columns[' + excIdx + '][content]" class="form-control" rows="3"></textarea></div></div>';
+            document.getElementById('excellenceColumns').insertAdjacentHTML('beforeend', html);
+            excIdx++;
+        }
+
+        var techIdx = <?= count($techStats) ?>;
+        function addTechStat() {
+            var html = '<div class="form-row" style="margin-bottom: 10px;"><div class="form-group" style="flex: 1;"><input type="text" name="tech_stats[' + techIdx + '][value]" class="form-control" placeholder="500+"></div><div class="form-group" style="flex: 2;"><input type="text" name="tech_stats[' + techIdx + '][label]" class="form-control" placeholder="Label"></div><button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.remove()">✕</button></div>';
+            document.getElementById('techStats').insertAdjacentHTML('beforeend', html);
+            techIdx++;
+        }
+
+        var testIdx = <?= count($testimonials) ?>;
+        function addTestimonial() {
+            var html = '<div class="testimonial-item" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;"><div class="form-group"><label class="form-label">Texte du témoignage</label><textarea name="testimonials[' + testIdx + '][text]" class="form-control" rows="2"></textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Auteur</label><input type="text" name="testimonials[' + testIdx + '][author]" class="form-control" placeholder="Club XYZ"></div><div class="form-group"><label class="form-label">Rôle / Info</label><input type="text" name="testimonials[' + testIdx + '][role]" class="form-control" placeholder="Président"></div><button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.parentElement.remove()" style="align-self: flex-end;">✕</button></div></div>';
+            document.getElementById('testimonialsList').insertAdjacentHTML('beforeend', html);
+            testIdx++;
+        }
+
+        var faqIdx = <?= count($faqItems) ?>;
+        function addFaqItem() {
+            var html = '<div class="faq-item-edit" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;"><div class="form-group"><label class="form-label">Question</label><input type="text" name="faq_items[' + faqIdx + '][question]" class="form-control"></div><div class="form-group"><label class="form-label">Réponse (HTML autorisé)</label><textarea name="faq_items[' + faqIdx + '][answer]" class="form-control" rows="3"></textarea></div><button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.remove()">✕ Supprimer</button></div>';
+            document.getElementById('faqList').insertAdjacentHTML('beforeend', html);
+            faqIdx++;
+        }
+
+        // Product selection
+        function addCatProduct(el, id, prod) {
+            if (el.classList.contains('selected')) return;
+            el.classList.add('selected');
+            el.style.opacity = '0.5';
+
+            var prodName = prod.meta_title || prod.nom;
+            var html = '<div class="cat-prod-item" data-id="' + id + '" style="display: flex; align-items: center; gap: 10px; padding: 8px; background: #fff5f3; border: 1px solid #FF4B26; border-radius: 6px; margin-bottom: 8px;"><img src="' + (prod.photo_1 || '/photos/placeholder.webp') + '" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;"><div style="flex: 1; overflow: hidden;"><div style="font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + escapeHtml(prodName) + '</div><div style="font-size: 10px; color: #666;">' + escapeHtml(prod.sport) + '</div></div><input type="hidden" name="page_products[]" value="' + id + '"><button type="button" class="btn btn-sm" style="color: #ef4444;" onclick="removeCatProduct(this)">✕</button></div>';
+            document.getElementById('selectedCatProducts').insertAdjacentHTML('beforeend', html);
+        }
+
+        function removeCatProduct(btn) {
+            var item = btn.closest('.cat-prod-item');
+            var id = item.dataset.id;
+            item.remove();
+            var avail = document.querySelector('.cat-prod-avail[data-id="' + id + '"]');
+            if (avail) {
+                avail.classList.remove('selected');
+                avail.style.opacity = '1';
+            }
+        }
+
+        function filterCatProducts() {
+            var search = document.getElementById('catProductSearch').value.toLowerCase();
+            document.querySelectorAll('.cat-prod-avail').forEach(function(el) {
+                var name = el.dataset.name || '';
+                el.style.display = name.includes(search) ? 'flex' : 'none';
+            });
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
         </script>
 
         <?php // ============ QUOTES ============ ?>
