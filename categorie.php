@@ -115,25 +115,6 @@ $productCount = count($products);
         color: #1a1a1a;
     }
 
-    .product-price {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        margin-bottom: 12px;
-    }
-
-    .price-label {
-        font-size: 12px;
-        color: #6b7280;
-    }
-
-    .price-value {
-        font-size: 24px;
-        font-weight: 800;
-        color: #1a1a1a;
-        font-family: 'Bebas Neue', sans-serif;
-    }
-
     .product-link {
         display: inline-block;
         color: #FF4B26;
@@ -294,10 +275,19 @@ $productCount = count($products);
                             <span class="product-spec"><?= htmlspecialchars($prod['grammage']) ?> gr/m²</span>
                             <?php endif; ?>
                         </div>
-                        <?php if ($prodPrice): ?>
-                        <div class="product-price">
-                            <span class="price-label">À partir de</span>
-                            <span class="price-value"><?= $prodPrice ?>€</span>
+                        <?php if ($prodPrice):
+                            $prixEnfant = number_format(floatval($prod['prix_500']) * 0.90, 2, '.', '');
+                        ?>
+                        <div class="product-pricing">
+                            <div class="product-price-label">À partir de</div>
+                            <div class="product-price-adulte">
+                                <span class="product-price-type">Adulte</span>
+                                <span class="product-price"><?= $prodPrice ?>€</span>
+                            </div>
+                            <div class="product-price-enfant">
+                                <span class="product-price-type">Enfant</span>
+                                <span class="product-price-small"><?= $prixEnfant ?>€</span>
+                            </div>
                         </div>
                         <?php endif; ?>
                         <a href="/produit/<?= htmlspecialchars($prod['reference']) ?>" class="product-link">Voir le produit →</a>
