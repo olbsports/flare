@@ -2094,7 +2094,7 @@ $user = $_SESSION['admin_user'] ?? null;
 
         <!-- Stocker le HTML initial -->
         <script>
-        var initialHtml = <?= json_encode($htmlContent, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+        var initialHtml = <?= json_encode(str_replace('</script>', '<\\/script>', $htmlContent), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) ?>;
         var currentHtml = initialHtml;
         var historyStack = [initialHtml];
         var historyIndex = 0;
