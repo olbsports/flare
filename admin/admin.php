@@ -238,40 +238,37 @@ if ($action && $pdo) {
                 break;
 
             case 'save_page':
-                $pageType = $_POST['type'] ?? 'info';
-                // Construire les filtres produits pour les pages catégories
-                $productFilters = [];
-                if ($pageType === 'category') {
-                    $productFilters = [
-                        'sport' => $_POST['filter_sport'] ?? '',
-                        'famille' => $_POST['filter_famille'] ?? '',
-                        'included_ids' => !empty($_POST['selected_products']) ? array_map('intval', $_POST['selected_products']) : [],
-                        'excluded_ids' => []
-                    ];
-                }
-                $filtersJson = json_encode($productFilters, JSON_UNESCAPED_UNICODE);
-
-                // Récupérer les blocs du page builder
-                $pageBlocks = $_POST['page_blocks'] ?? '';
-
-                // Générer le HTML à partir des blocs si présents
+                // Sauvegarder directement dans le fichier HTML
+                $filePath = $_POST['file_path'] ?? '';
                 $content = $_POST['content'] ?? '';
-                if (!empty($pageBlocks)) {
-                    $blocksData = json_decode($pageBlocks, true);
-                    if ($blocksData && isset($blocksData['blocks'])) {
-                        global $PAGE_BUILDER_MODULES;
-                        $content = generatePageHtml($blocksData['blocks'], [], $PAGE_BUILDER_MODULES);
+
+                // Validation du chemin (sécurité)
+                $allowedDirs = [
+                    realpath(__DIR__ . '/../pages/info/'),
+                    realpath(__DIR__ . '/../pages/products/'),
+                    realpath(__DIR__ . '/../pages/blog/')
+                ];
+
+                $realPath = realpath(dirname($filePath));
+                $isAllowed = false;
+                foreach ($allowedDirs as $dir) {
+                    if ($dir && strpos($realPath, $dir) === 0) {
+                        $isAllowed = true;
+                        break;
                     }
                 }
 
-                if ($id) {
-                    $pdo->prepare("UPDATE pages SET title=?, slug=?, content=?, page_blocks=?, excerpt=?, meta_title=?, meta_description=?, status=?, type=?, product_filters=? WHERE id=?")
-                        ->execute([$_POST['title'], $_POST['slug'], $content, $pageBlocks, $_POST['excerpt'], $_POST['meta_title'], $_POST['meta_description'], $_POST['status'], $pageType, $filtersJson, $id]);
-                } else {
-                    $pdo->prepare("INSERT INTO pages (title, slug, content, page_blocks, excerpt, meta_title, meta_description, status, type, product_filters) VALUES (?,?,?,?,?,?,?,?,?,?)")
-                        ->execute([$_POST['title'], $_POST['slug'], $content, $pageBlocks, $_POST['excerpt'], $_POST['meta_title'], $_POST['meta_description'], $_POST['status'], $pageType, $filtersJson]);
+                if (!$isAllowed || !file_exists($filePath)) {
+                    $toast = 'Erreur: Chemin de fichier invalide';
+                    break;
                 }
-                $toast = 'Page enregistrée';
+
+                // Sauvegarder le fichier
+                if (file_put_contents($filePath, $content) !== false) {
+                    $toast = 'Page HTML sauvegardée avec succès !';
+                } else {
+                    $toast = 'Erreur: Impossible de sauvegarder le fichier';
+                }
                 break;
 
             case 'import_html_pages':
@@ -604,19 +601,72 @@ if ($pdo && $page !== 'login') {
                 break;
 
             case 'pages':
-                $data['items'] = $pdo->query("SELECT * FROM pages ORDER BY title")->fetchAll();
+                // Lister les fichiers HTML directement
+                $data['items'] = [];
+                $directories = [
+                    'info' => __DIR__ . '/../pages/info/',
+                    'category' => __DIR__ . '/../pages/products/',
+                    'blog' => __DIR__ . '/../pages/blog/'
+                ];
+                foreach ($directories as $type => $dir) {
+                    if (is_dir($dir)) {
+                        $files = glob($dir . '*.html');
+                        foreach ($files as $file) {
+                            $filename = basename($file);
+                            $slug = basename($file, '.html');
+                            // Extraire le titre depuis le HTML
+                            $html = file_get_contents($file);
+                            preg_match('/<title>([^<]+)<\/title>/i', $html, $titleMatch);
+                            $title = $titleMatch[1] ?? ucwords(str_replace('-', ' ', $slug));
+                            $data['items'][] = [
+                                'file' => $file,
+                                'filename' => $filename,
+                                'slug' => $slug,
+                                'title' => $title,
+                                'type' => $type,
+                                'size' => filesize($file),
+                                'modified' => filemtime($file)
+                            ];
+                        }
+                    }
+                }
+                // Trier par titre
+                usort($data['items'], fn($a, $b) => strcmp($a['title'], $b['title']));
                 break;
 
             case 'page':
-                if ($id) {
-                    $stmt = $pdo->prepare("SELECT * FROM pages WHERE id=?");
-                    $stmt->execute([$id]);
-                    $data['item'] = $stmt->fetch();
+                // Charger un fichier HTML pour édition
+                $filePath = $_GET['file'] ?? '';
+                if ($filePath && file_exists($filePath)) {
+                    // Vérifier que le fichier est dans un répertoire autorisé
+                    $allowedDirs = [
+                        realpath(__DIR__ . '/../pages/info/'),
+                        realpath(__DIR__ . '/../pages/products/'),
+                        realpath(__DIR__ . '/../pages/blog/')
+                    ];
+                    $realPath = realpath(dirname($filePath));
+                    $isAllowed = false;
+                    foreach ($allowedDirs as $dir) {
+                        if ($dir && strpos($realPath, $dir) === 0) {
+                            $isAllowed = true;
+                            break;
+                        }
+                    }
+                    if ($isAllowed) {
+                        $data['file_path'] = $filePath;
+                        $data['content'] = file_get_contents($filePath);
+                        $data['filename'] = basename($filePath);
+                        $data['slug'] = basename($filePath, '.html');
+                        // Déterminer le type
+                        if (strpos($filePath, '/products/') !== false) {
+                            $data['type'] = 'category';
+                        } elseif (strpos($filePath, '/blog/') !== false) {
+                            $data['type'] = 'blog';
+                        } else {
+                            $data['type'] = 'info';
+                        }
+                    }
                 }
-                // Charger sports, familles et produits pour la sélection
-                $data['sports'] = $pdo->query("SELECT DISTINCT sport FROM products WHERE sport IS NOT NULL AND sport != '' ORDER BY sport")->fetchAll(PDO::FETCH_COLUMN);
-                $data['familles'] = $pdo->query("SELECT DISTINCT famille FROM products WHERE famille IS NOT NULL AND famille != '' ORDER BY famille")->fetchAll(PDO::FETCH_COLUMN);
-                $data['products'] = $pdo->query("SELECT id, reference, nom, photo_1, sport, famille FROM products WHERE active = 1 ORDER BY sport, famille, nom LIMIT 500")->fetchAll(PDO::FETCH_ASSOC);
                 break;
 
             case 'blog':
@@ -1869,69 +1919,49 @@ $user = $_SESSION['admin_user'] ?? null;
             </form>
         </div>
 
-        <?php // ============ PAGES ============ ?>
+        <?php // ============ PAGES HTML ============ ?>
         <?php elseif ($page === 'pages'): ?>
         <?php $filterType = $_GET['filter'] ?? ''; ?>
 
-        <!-- Boutons d'import -->
-        <div class="card" style="margin-bottom: 20px;">
-            <div class="card-body" style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
-                <span style="font-weight: 600;">Importer depuis fichiers HTML :</span>
-                <form method="POST" style="display: inline;">
-                    <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
-                    <input type="hidden" name="action" value="import_html_pages">
-                    <input type="hidden" name="import_type" value="info">
-                    <button type="submit" class="btn btn-light">Importer Pages Info</button>
-                </form>
-                <form method="POST" style="display: inline;">
-                    <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
-                    <input type="hidden" name="action" value="import_html_pages">
-                    <input type="hidden" name="import_type" value="category">
-                    <button type="submit" class="btn btn-light">Importer Pages Catégories</button>
-                </form>
-                <a href="?page=page" class="btn btn-primary" style="margin-left: auto;">+ Nouvelle page</a>
-            </div>
-        </div>
-
         <!-- Filtres -->
         <div class="filters" style="margin-bottom: 20px;">
-            <a href="?page=pages" class="btn <?= $filterType === '' ? 'btn-primary' : 'btn-light' ?>">Toutes</a>
-            <a href="?page=pages&filter=info" class="btn <?= $filterType === 'info' ? 'btn-primary' : 'btn-light' ?>">Info</a>
-            <a href="?page=pages&filter=category" class="btn <?= $filterType === 'category' ? 'btn-primary' : 'btn-light' ?>">Catégories</a>
+            <a href="?page=pages" class="btn <?= $filterType === '' ? 'btn-primary' : 'btn-light' ?>">Toutes (<?= count($data['items'] ?? []) ?>)</a>
+            <a href="?page=pages&filter=info" class="btn <?= $filterType === 'info' ? 'btn-primary' : 'btn-light' ?>">Info (<?= count(array_filter($data['items'] ?? [], fn($p) => $p['type'] === 'info')) ?>)</a>
+            <a href="?page=pages&filter=category" class="btn <?= $filterType === 'category' ? 'btn-primary' : 'btn-light' ?>">Catégories (<?= count(array_filter($data['items'] ?? [], fn($p) => $p['type'] === 'category')) ?>)</a>
+            <a href="?page=pages&filter=blog" class="btn <?= $filterType === 'blog' ? 'btn-primary' : 'btn-light' ?>">Blog (<?= count(array_filter($data['items'] ?? [], fn($p) => $p['type'] === 'blog')) ?>)</a>
         </div>
 
         <div class="card">
             <div class="card-header">
-                <span class="card-title">Pages (<?= count(array_filter($data['items'] ?? [], fn($p) => $filterType === '' || ($p['type'] ?? 'info') === $filterType)) ?>)</span>
+                <span class="card-title">Pages HTML</span>
+                <span style="font-size: 12px; color: var(--text-muted);">Édition directe des fichiers HTML</span>
             </div>
             <div class="table-container">
                 <table>
-                    <thead><tr><th>Titre</th><th>Type</th><th>URL</th><th>Filtres</th><th>Statut</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>Titre</th><th>Type</th><th>Fichier</th><th>URL</th><th>Modifié</th><th>Actions</th></tr></thead>
                     <tbody>
                     <?php foreach ($data['items'] ?? [] as $pg):
                         $pageType = $pg['type'] ?? 'info';
                         if ($filterType !== '' && $pageType !== $filterType) continue;
-                        $pageUrl = $pageType === 'category' ? '/categorie/' . $pg['slug'] : '/info/' . $pg['slug'];
-                        $filters = json_decode($pg['product_filters'] ?? '{}', true);
+                        if ($pageType === 'category') {
+                            $pageUrl = '/categorie/' . $pg['slug'];
+                        } elseif ($pageType === 'blog') {
+                            $pageUrl = '/blog/' . $pg['slug'];
+                        } else {
+                            $pageUrl = '/info/' . $pg['slug'];
+                        }
+                        $badgeClass = $pageType === 'category' ? 'info' : ($pageType === 'blog' ? 'warning' : 'secondary');
+                        $typeLabel = $pageType === 'category' ? 'Catégorie' : ($pageType === 'blog' ? 'Blog' : 'Info');
                     ?>
                         <tr>
                             <td><strong><?= htmlspecialchars($pg['title']) ?></strong></td>
-                            <td><span class="badge badge-<?= $pageType === 'category' ? 'info' : 'secondary' ?>"><?= $pageType === 'category' ? 'Catégorie' : 'Info' ?></span></td>
-                            <td><a href="<?= $pageUrl ?>" target="_blank" style="color:var(--primary)"><?= $pageUrl ?></a></td>
+                            <td><span class="badge badge-<?= $badgeClass ?>"><?= $typeLabel ?></span></td>
+                            <td><code style="font-size: 11px; background: #f1f5f9; padding: 2px 6px; border-radius: 3px;"><?= htmlspecialchars($pg['filename']) ?></code></td>
+                            <td><a href="<?= $pageUrl ?>" target="_blank" style="color:var(--primary); font-size: 12px;"><?= $pageUrl ?></a></td>
+                            <td style="font-size: 12px; color: var(--text-muted);"><?= date('d/m/Y H:i', $pg['modified']) ?></td>
                             <td>
-                                <?php if (!empty($filters['sport'])): ?>
-                                    <span class="badge badge-info"><?= htmlspecialchars($filters['sport']) ?></span>
-                                <?php endif; ?>
-                                <?php if (!empty($filters['famille'])): ?>
-                                    <span class="badge badge-info"><?= htmlspecialchars($filters['famille']) ?></span>
-                                <?php endif; ?>
-                                <?php if (!empty($filters['included_ids'])): ?>
-                                    <span class="badge badge-success"><?= count($filters['included_ids']) ?> produits</span>
-                                <?php endif; ?>
-                            </td>
-                            <td><span class="badge badge-<?= $pg['status'] === 'published' ? 'success' : 'warning' ?>"><?= $pg['status'] ?></span></td>
-                            <td>
-                                <a href="?page=page&id=<?= $pg['id'] ?>" class="btn btn-sm btn-light">Modifier</a>
+                                <a href="?page=page&file=<?= urlencode($pg['file']) ?>" class="btn btn-sm btn-primary">Modifier</a>
+                                <a href="<?= $pageUrl ?>" target="_blank" class="btn btn-sm btn-light">Voir</a>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -1940,161 +1970,115 @@ $user = $_SESSION['admin_user'] ?? null;
             </div>
         </div>
 
-        <?php // ============ PAGE EDIT ============ ?>
+        <?php // ============ PAGE EDIT - FICHIER HTML ============ ?>
         <?php elseif ($page === 'page'): ?>
         <?php
-        $pg = $data['item'] ?? [];
-        $currentType = $pg['type'] ?? 'info';
-        $previewUrl = $currentType === 'category' ? '/categorie/' . ($pg['slug'] ?? '') : '/info/' . ($pg['slug'] ?? '');
-        $currentFilters = json_decode($pg['product_filters'] ?? '{}', true);
-        $selectedIds = $currentFilters['included_ids'] ?? [];
+        $filePath = $data['file_path'] ?? '';
+        $htmlContent = $data['content'] ?? '';
+        $filename = $data['filename'] ?? '';
+        $slug = $data['slug'] ?? '';
+        $pageType = $data['type'] ?? 'info';
 
-        // Charger le contenu HTML (depuis fichier statique ou BDD)
-        $htmlContent = $pg['content'] ?? '';
-        if (empty($htmlContent) && !empty($pg['slug'])) {
-            $staticDir = $currentType === 'category' ? 'products' : 'info';
-            $staticFile = __DIR__ . '/../pages/' . $staticDir . '/' . $pg['slug'] . '.html';
-            if (file_exists($staticFile)) {
-                $htmlContent = file_get_contents($staticFile);
-            }
+        // Déterminer l'URL de preview
+        if ($pageType === 'category') {
+            $previewUrl = '/categorie/' . $slug;
+        } elseif ($pageType === 'blog') {
+            $previewUrl = '/blog/' . $slug;
+        } else {
+            $previewUrl = '/info/' . $slug;
         }
-        ?>
 
-        <!-- ========== ÉDITEUR VISUEL LIVE STYLE ELEMENTOR ========== -->
+        // Extraire le titre du HTML
+        preg_match('/<title>([^<]+)<\/title>/i', $htmlContent, $titleMatch);
+        $pageTitle = $titleMatch[1] ?? ucwords(str_replace('-', ' ', $slug));
+
+        if (empty($filePath)): ?>
+        <div class="card">
+            <div class="card-body" style="text-align: center; padding: 60px;">
+                <p style="color: var(--text-muted);">Aucun fichier sélectionné.</p>
+                <a href="?page=pages" class="btn btn-primary">← Retour à la liste des pages</a>
+            </div>
+        </div>
+        <?php else: ?>
+
+        <!-- ========== ÉDITEUR VISUEL HTML COMPLET ========== -->
         <div class="visual-editor-container" style="display: flex; height: calc(100vh - 80px); margin: -30px; gap: 0;">
 
-            <!-- SIDEBAR GAUCHE - Paramètres -->
-            <div class="ve-sidebar" style="width: 350px; background: #fff; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; flex-shrink: 0;">
-                <div style="padding: 20px; border-bottom: 1px solid #e2e8f0;">
-                    <h2 style="margin: 0 0 5px; font-size: 18px;"><?= $id ? 'Modifier' : 'Nouvelle' ?> Page</h2>
-                    <span style="font-size: 12px; color: var(--text-muted);"><?= $currentType === 'category' ? 'Page Catégorie' : 'Page Info' ?></span>
+            <!-- SIDEBAR GAUCHE - Infos & Style -->
+            <div class="ve-sidebar" style="width: 320px; background: #fff; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; flex-shrink: 0;">
+                <div style="padding: 15px 20px; border-bottom: 1px solid #e2e8f0;">
+                    <h2 style="margin: 0 0 5px; font-size: 16px;"><?= htmlspecialchars($pageTitle) ?></h2>
+                    <code style="font-size: 11px; background: #f1f5f9; padding: 2px 6px; border-radius: 3px;"><?= htmlspecialchars($filename) ?></code>
                 </div>
 
                 <form method="POST" id="pageForm" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
                     <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
                     <input type="hidden" name="action" value="save_page">
+                    <input type="hidden" name="file_path" value="<?= htmlspecialchars($filePath) ?>">
                     <input type="hidden" name="content" id="htmlContent">
-                    <input type="hidden" name="type" value="<?= $currentType ?>">
 
                     <!-- Onglets sidebar -->
                     <div class="ve-tabs" style="display: flex; border-bottom: 1px solid #e2e8f0;">
-                        <button type="button" class="ve-tab active" data-tab="settings" style="flex:1; padding: 12px; border: none; background: #fff; cursor: pointer; font-weight: 600; border-bottom: 2px solid var(--primary);">Paramètres</button>
-                        <button type="button" class="ve-tab" data-tab="style" style="flex:1; padding: 12px; border: none; background: #f8fafc; cursor: pointer;">Style</button>
-                        <?php if ($currentType === 'category'): ?>
-                        <button type="button" class="ve-tab" data-tab="products" style="flex:1; padding: 12px; border: none; background: #f8fafc; cursor: pointer;">Produits</button>
-                        <?php endif; ?>
+                        <button type="button" class="ve-tab active" data-tab="style" style="flex:1; padding: 10px; border: none; background: #fff; cursor: pointer; font-weight: 600; font-size: 12px; border-bottom: 2px solid var(--primary);">Style</button>
+                        <button type="button" class="ve-tab" data-tab="info" style="flex:1; padding: 10px; border: none; background: #f8fafc; cursor: pointer; font-size: 12px;">Info</button>
                     </div>
 
                     <div style="flex: 1; overflow-y: auto;">
-                        <!-- TAB: Paramètres -->
-                        <div class="ve-tab-content active" data-tab="settings" style="padding: 20px;">
-                            <div class="form-group" style="margin-bottom: 15px;">
-                                <label class="form-label">Titre de la page</label>
-                                <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($pg['title'] ?? '') ?>" required>
-                            </div>
-                            <div class="form-group" style="margin-bottom: 15px;">
-                                <label class="form-label">Slug (URL)</label>
-                                <input type="text" name="slug" class="form-control" value="<?= htmlspecialchars($pg['slug'] ?? '') ?>" required>
-                                <small style="color:var(--text-muted); font-size: 11px;"><?= $currentType === 'category' ? '/categorie/' : '/info/' ?><?= htmlspecialchars($pg['slug'] ?? '') ?></small>
-                            </div>
-                            <div class="form-group" style="margin-bottom: 15px;">
-                                <label class="form-label">Statut</label>
-                                <select name="status" class="form-control">
-                                    <option value="published" <?= ($pg['status'] ?? '') === 'published' ? 'selected' : '' ?>>Publié</option>
-                                    <option value="draft" <?= ($pg['status'] ?? '') === 'draft' ? 'selected' : '' ?>>Brouillon</option>
-                                </select>
-                            </div>
-                            <div class="form-group" style="margin-bottom: 15px;">
-                                <label class="form-label">Meta Title (SEO)</label>
-                                <input type="text" name="meta_title" class="form-control" value="<?= htmlspecialchars($pg['meta_title'] ?? '') ?>">
-                            </div>
-                            <div class="form-group" style="margin-bottom: 15px;">
-                                <label class="form-label">Meta Description (SEO)</label>
-                                <textarea name="meta_description" class="form-control" rows="3"><?= htmlspecialchars($pg['meta_description'] ?? '') ?></textarea>
-                            </div>
-                            <div class="form-group" style="margin-bottom: 15px;">
-                                <label class="form-label">Extrait</label>
-                                <textarea name="excerpt" class="form-control" rows="2"><?= htmlspecialchars($pg['excerpt'] ?? '') ?></textarea>
-                            </div>
-                        </div>
-
-                        <!-- TAB: Style -->
-                        <div class="ve-tab-content" data-tab="style" style="padding: 20px; display: none;">
+                        <!-- TAB: Style (élément sélectionné) -->
+                        <div class="ve-tab-content active" data-tab="style" style="padding: 15px;">
                             <div id="elementStylePanel">
                                 <p style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 40px 0;">
-                                    Cliquez sur un élément dans la preview pour le modifier
+                                    Cliquez sur un élément<br>pour le modifier
                                 </p>
                             </div>
                         </div>
 
-                        <!-- TAB: Produits (pour catégories) -->
-                        <?php if ($currentType === 'category'): ?>
-                        <div class="ve-tab-content" data-tab="products" style="padding: 20px; display: none;">
-                            <div class="form-group" style="margin-bottom: 15px;">
-                                <label class="form-label">Filtrer par Sport</label>
-                                <select name="filter_sport" class="form-control">
-                                    <option value="">-- Tous --</option>
-                                    <?php foreach ($data['sports'] ?? [] as $sport): ?>
-                                    <option value="<?= htmlspecialchars($sport) ?>" <?= ($currentFilters['sport'] ?? '') === $sport ? 'selected' : '' ?>><?= htmlspecialchars($sport) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
+                        <!-- TAB: Info -->
+                        <div class="ve-tab-content" data-tab="info" style="padding: 15px; display: none;">
+                            <div class="form-group" style="margin-bottom: 12px;">
+                                <label style="font-size: 11px; font-weight: 600;">Type</label>
+                                <div><span class="badge badge-<?= $pageType === 'category' ? 'info' : ($pageType === 'blog' ? 'warning' : 'secondary') ?>"><?= ucfirst($pageType) ?></span></div>
                             </div>
-                            <div class="form-group" style="margin-bottom: 15px;">
-                                <label class="form-label">Filtrer par Famille</label>
-                                <select name="filter_famille" class="form-control">
-                                    <option value="">-- Toutes --</option>
-                                    <?php foreach ($data['familles'] ?? [] as $famille): ?>
-                                    <option value="<?= htmlspecialchars($famille) ?>" <?= ($currentFilters['famille'] ?? '') === $famille ? 'selected' : '' ?>><?= htmlspecialchars($famille) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
+                            <div class="form-group" style="margin-bottom: 12px;">
+                                <label style="font-size: 11px; font-weight: 600;">URL</label>
+                                <div><a href="<?= $previewUrl ?>" target="_blank" style="font-size: 12px; color: var(--primary);"><?= $previewUrl ?></a></div>
                             </div>
-                            <div style="margin-bottom: 10px;">
-                                <input type="text" id="productSearch" class="form-control" placeholder="Rechercher..." style="font-size: 13px;">
-                            </div>
-                            <div id="productsGrid" style="max-height: 300px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px;">
-                                <?php foreach ($data['products'] ?? [] as $prod): ?>
-                                <label class="product-select-item" data-name="<?= htmlspecialchars(strtolower($prod['nom'] ?? '')) ?>" style="display: flex; align-items: center; gap: 8px; padding: 8px; border-bottom: 1px solid #f1f5f9; cursor: pointer; font-size: 12px;">
-                                    <input type="checkbox" name="selected_products[]" value="<?= $prod['id'] ?>" <?= in_array($prod['id'], $selectedIds) ? 'checked' : '' ?>>
-                                    <img src="<?= htmlspecialchars($prod['photo_1'] ?? '/assets/images/placeholder.jpg') ?>" style="width: 30px; height: 30px; object-fit: cover; border-radius: 3px;">
-                                    <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?= htmlspecialchars($prod['nom']) ?></span>
-                                </label>
-                                <?php endforeach; ?>
+                            <div class="form-group" style="margin-bottom: 12px;">
+                                <label style="font-size: 11px; font-weight: 600;">Chemin fichier</label>
+                                <div style="font-size: 10px; color: var(--text-muted); word-break: break-all;"><?= htmlspecialchars($filePath) ?></div>
                             </div>
                         </div>
-                        <?php endif; ?>
                     </div>
 
                     <!-- Footer avec boutons -->
-                    <div style="padding: 15px 20px; border-top: 1px solid #e2e8f0; background: #f8fafc;">
-                        <div style="display: flex; gap: 10px;">
-                            <a href="?page=pages" class="btn btn-light" style="flex: 1;">← Retour</a>
-                            <button type="submit" class="btn btn-primary" style="flex: 2;">💾 Enregistrer</button>
+                    <div style="padding: 15px; border-top: 1px solid #e2e8f0; background: #f8fafc;">
+                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 8px;">💾 Enregistrer le fichier HTML</button>
+                        <div style="display: flex; gap: 8px;">
+                            <a href="?page=pages" class="btn btn-light" style="flex: 1; font-size: 12px;">← Retour</a>
+                            <a href="<?= $previewUrl ?>" target="_blank" class="btn btn-light" style="flex: 1; font-size: 12px;">Voir →</a>
                         </div>
-                        <?php if ($id && !empty($pg['slug'])): ?>
-                        <a href="<?= $previewUrl ?>" target="_blank" style="display: block; text-align: center; margin-top: 10px; font-size: 12px; color: var(--primary);">Voir la page en ligne →</a>
-                        <?php endif; ?>
                     </div>
                 </form>
             </div>
 
-            <!-- ZONE CENTRALE - Preview Live -->
+            <!-- ZONE CENTRALE - Preview Live Éditable -->
             <div class="ve-preview-area" style="flex: 1; background: #f1f5f9; display: flex; flex-direction: column; overflow: hidden;">
                 <!-- Toolbar preview -->
-                <div class="ve-toolbar" style="background: #fff; border-bottom: 1px solid #e2e8f0; padding: 10px 20px; display: flex; align-items: center; gap: 15px;">
+                <div class="ve-toolbar" style="background: #fff; border-bottom: 1px solid #e2e8f0; padding: 8px 15px; display: flex; align-items: center; gap: 10px;">
                     <div style="display: flex; gap: 5px;">
                         <button type="button" class="btn btn-light btn-sm ve-device-btn active" data-device="desktop" title="Desktop">🖥️</button>
                         <button type="button" class="btn btn-light btn-sm ve-device-btn" data-device="tablet" title="Tablet">📱</button>
                         <button type="button" class="btn btn-light btn-sm ve-device-btn" data-device="mobile" title="Mobile">📲</button>
                     </div>
                     <div style="flex: 1;"></div>
-                    <button type="button" class="btn btn-light btn-sm" onclick="undoChange()">↩️ Annuler</button>
-                    <button type="button" class="btn btn-light btn-sm" onclick="redoChange()">↪️ Rétablir</button>
+                    <button type="button" class="btn btn-light btn-sm" onclick="undoChange()">↩️</button>
+                    <button type="button" class="btn btn-light btn-sm" onclick="redoChange()">↪️</button>
                     <button type="button" class="btn btn-light btn-sm" onclick="toggleCodeView()">{"} Code</button>
-                    <button type="button" class="btn btn-info btn-sm" onclick="refreshPreview()">🔄 Actualiser</button>
+                    <button type="button" class="btn btn-info btn-sm" onclick="refreshPreview()">🔄</button>
                 </div>
 
                 <!-- Iframe Preview -->
-                <div class="ve-iframe-container" style="flex: 1; padding: 20px; overflow: auto; display: flex; justify-content: center;">
+                <div class="ve-iframe-container" style="flex: 1; padding: 15px; overflow: auto; display: flex; justify-content: center;">
                     <div id="previewWrapper" style="width: 100%; max-width: 100%; background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; transition: all 0.3s;">
                         <iframe id="livePreview" style="width: 100%; height: 100%; border: none; min-height: 800px;"></iframe>
                     </div>
@@ -2103,16 +2087,16 @@ $user = $_SESSION['admin_user'] ?? null;
         </div>
 
         <!-- Modal Code HTML -->
-        <div id="codeModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 10000; padding: 30px;">
+        <div id="codeModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 10000; padding: 20px;">
             <div style="background: #fff; height: 100%; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden;">
-                <div style="padding: 15px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-weight: 600;">Code HTML</span>
+                <div style="padding: 12px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 600;">Code HTML - <?= htmlspecialchars($filename) ?></span>
                     <button onclick="closeCodeView()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
                 </div>
-                <textarea id="codeEditor" style="flex: 1; border: none; padding: 20px; font-family: monospace; font-size: 13px; resize: none;"></textarea>
-                <div style="padding: 15px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px;">
+                <textarea id="codeEditor" style="flex: 1; border: none; padding: 15px; font-family: 'Monaco', 'Consolas', monospace; font-size: 12px; resize: none; line-height: 1.5;"></textarea>
+                <div style="padding: 12px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px;">
                     <button class="btn btn-light" onclick="closeCodeView()">Annuler</button>
-                    <button class="btn btn-primary" onclick="applyCodeChanges()">Appliquer</button>
+                    <button class="btn btn-primary" onclick="applyCodeChanges()">Appliquer les modifications</button>
                 </div>
             </div>
         </div>
@@ -2483,6 +2467,7 @@ $user = $_SESSION['admin_user'] ?? null;
         // Initialize count on load
         updateSelectedCount();
         </script>
+        <?php endif; ?>
 
         <?php // ============ BLOG ============ ?>
         <?php elseif ($page === 'blog'): ?>
