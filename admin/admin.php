@@ -334,12 +334,18 @@ if ($action && $pdo) {
                     $values[$idx] = $values[$idx] === '' ? null : intval($values[$idx]);
                 }
 
-                // Convertir les booléens
-                foreach (['active', 'featured', 'is_new', 'on_sale'] as $boolField) {
+                // Convertir les booléens (checkboxes)
+                foreach (['featured', 'is_new', 'on_sale'] as $boolField) {
                     $idx = array_search($boolField, $fields);
                     if ($idx !== false) {
                         $values[$idx] = isset($_POST[$boolField]) ? 1 : 0;
                     }
+                }
+
+                // Traiter 'active' séparément (c'est un radio button, pas checkbox)
+                $idx = array_search('active', $fields);
+                if ($idx !== false) {
+                    $values[$idx] = ($_POST['active'] ?? '1') === '1' ? 1 : 0;
                 }
 
                 // Convertir sort_order en int
@@ -366,8 +372,12 @@ if ($action && $pdo) {
                 if ($id) {
                     // Mise à jour d'un produit existant
                     $values[] = $id;
-                    $pdo->prepare("UPDATE products SET $set, etiquettes=?, related_products=? WHERE id=?")
-                        ->execute(array_merge($values, [$etiquettesStr, $relatedProductsJson]));
+                    $stmt = $pdo->prepare("UPDATE products SET $set, etiquettes=?, related_products=?, updated_at=NOW() WHERE id=?");
+                    $result = $stmt->execute(array_merge($values, [$etiquettesStr, $relatedProductsJson]));
+                    if (!$result) {
+                        $toast = 'Erreur SQL: ' . implode(', ', $stmt->errorInfo());
+                        break;
+                    }
                     $productId = $id;
                 } else {
                     // Création d'un nouveau produit
