@@ -1016,6 +1016,86 @@ if ($pdo && $page !== 'login') {
                 $data['total_products'] = $pdo->query("SELECT COUNT(*) FROM products")->fetchColumn();
                 $data['last_import'] = $pdo->query("SELECT MAX(created_at) FROM products")->fetchColumn();
                 break;
+
+            case 'templates':
+                // Liste des templates avec filtres
+                $where = "WHERE 1=1";
+                $params = [];
+                if (!empty($_GET['search'])) {
+                    $where .= " AND (t.nom LIKE ? OR t.description LIKE ? OR t.tags LIKE ?)";
+                    $searchTerm = '%'.$_GET['search'].'%';
+                    $params[] = $searchTerm;
+                    $params[] = $searchTerm;
+                    $params[] = $searchTerm;
+                }
+                if (!empty($_GET['sport'])) {
+                    $where .= " AND t.sport = ?";
+                    $params[] = $_GET['sport'];
+                }
+                if (!empty($_GET['famille'])) {
+                    $where .= " AND t.famille = ?";
+                    $params[] = $_GET['famille'];
+                }
+                if (!empty($_GET['category'])) {
+                    $where .= " AND t.category_id = ?";
+                    $params[] = $_GET['category'];
+                }
+                if (isset($_GET['active']) && $_GET['active'] !== '') {
+                    $where .= " AND t.active = ?";
+                    $params[] = (int)$_GET['active'];
+                }
+                try {
+                    $stmt = $pdo->prepare("
+                        SELECT t.*, tc.nom as category_name
+                        FROM templates t
+                        LEFT JOIN template_categories tc ON t.category_id = tc.id
+                        $where
+                        ORDER BY t.ordre ASC, t.created_at DESC
+                    ");
+                    $stmt->execute($params);
+                    $data['items'] = $stmt->fetchAll();
+                    $data['sports'] = $pdo->query("SELECT DISTINCT sport FROM templates WHERE sport IS NOT NULL AND sport != '' ORDER BY sport")->fetchAll(PDO::FETCH_COLUMN);
+                    $data['familles'] = $pdo->query("SELECT DISTINCT famille FROM templates WHERE famille IS NOT NULL AND famille != '' ORDER BY famille")->fetchAll(PDO::FETCH_COLUMN);
+                    $data['categories'] = $pdo->query("SELECT * FROM template_categories ORDER BY nom")->fetchAll();
+                } catch (Exception $e) {
+                    $data['items'] = [];
+                    $data['sports'] = [];
+                    $data['familles'] = [];
+                    $data['categories'] = [];
+                }
+                break;
+
+            case 'template':
+                // Édition d'un template
+                if ($id) {
+                    $stmt = $pdo->prepare("SELECT * FROM templates WHERE id = ?");
+                    $stmt->execute([$id]);
+                    $data['item'] = $stmt->fetch();
+                }
+                try {
+                    $data['categories'] = $pdo->query("SELECT * FROM template_categories ORDER BY nom")->fetchAll();
+                    $data['sports'] = $pdo->query("SELECT DISTINCT sport FROM products WHERE sport IS NOT NULL AND sport != '' ORDER BY sport")->fetchAll(PDO::FETCH_COLUMN);
+                    $data['familles'] = $pdo->query("SELECT DISTINCT famille FROM products WHERE famille IS NOT NULL AND famille != '' ORDER BY famille")->fetchAll(PDO::FETCH_COLUMN);
+                    // Produits associés à ce template
+                    if ($id) {
+                        $stmt = $pdo->prepare("SELECT product_id FROM template_products WHERE template_id = ?");
+                        $stmt->execute([$id]);
+                        $data['associated_products'] = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                    }
+                    // Tous les produits pour le sélecteur
+                    $data['all_products'] = $pdo->query("
+                        SELECT id, reference, nom, meta_title, sport, famille, photo_1
+                        FROM products WHERE active=1
+                        ORDER BY sport, famille, nom
+                    ")->fetchAll();
+                } catch (Exception $e) {
+                    $data['categories'] = [];
+                    $data['sports'] = [];
+                    $data['familles'] = [];
+                    $data['associated_products'] = [];
+                    $data['all_products'] = [];
+                }
+                break;
         }
     } catch (Exception $e) {
         $dbError = $e->getMessage();
@@ -1566,6 +1646,10 @@ $user = $_SESSION['admin_user'] ?? null;
         <a href="?page=import" class="menu-item <?= $page === 'import' ? 'active' : '' ?>">
             <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
             Import CSV
+        </a>
+        <a href="?page=templates" class="menu-item <?= in_array($page, ['templates', 'template']) ? 'active' : '' ?>">
+            <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+            Templates
         </a>
         <a href="?page=settings" class="menu-item <?= in_array($page, ['settings', 'settings_password']) ? 'active' : '' ?>">
             <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -4224,6 +4308,368 @@ $user = $_SESSION['admin_user'] ?? null;
                 </div>
             </div>
         </div>
+
+        <?php // ============ TEMPLATES LIST ============ ?>
+        <?php elseif ($page === 'templates'): ?>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Templates de design (<?= count($data['items'] ?? []) ?>)</span>
+                <div style="display: flex; gap: 10px;">
+                    <a href="?page=template" class="btn btn-primary">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Nouveau template
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Filtres -->
+                <form method="get" class="form-row" style="margin-bottom: 20px; gap: 10px;">
+                    <input type="hidden" name="page" value="templates">
+                    <div style="flex: 2;">
+                        <input type="text" name="search" class="form-control" placeholder="Rechercher..." value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
+                    </div>
+                    <div>
+                        <select name="sport" class="form-control">
+                            <option value="">Tous les sports</option>
+                            <?php foreach ($data['sports'] ?? [] as $sport): ?>
+                            <option value="<?= htmlspecialchars($sport) ?>" <?= ($_GET['sport'] ?? '') === $sport ? 'selected' : '' ?>><?= htmlspecialchars($sport) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <select name="famille" class="form-control">
+                            <option value="">Toutes les familles</option>
+                            <?php foreach ($data['familles'] ?? [] as $famille): ?>
+                            <option value="<?= htmlspecialchars($famille) ?>" <?= ($_GET['famille'] ?? '') === $famille ? 'selected' : '' ?>><?= htmlspecialchars($famille) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <select name="active" class="form-control">
+                            <option value="">Tous</option>
+                            <option value="1" <?= ($_GET['active'] ?? '') === '1' ? 'selected' : '' ?>>Actifs</option>
+                            <option value="0" <?= ($_GET['active'] ?? '') === '0' ? 'selected' : '' ?>>Inactifs</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-light">Filtrer</button>
+                        <?php if (!empty($_GET['search']) || !empty($_GET['sport']) || !empty($_GET['famille']) || isset($_GET['active'])): ?>
+                        <a href="?page=templates" class="btn btn-light" style="margin-left: 5px;">Reset</a>
+                        <?php endif; ?>
+                    </div>
+                </form>
+
+                <?php if (empty($data['items'])): ?>
+                <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+                    <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-bottom: 15px; opacity: 0.5;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+                    <p>Aucun template trouvé</p>
+                    <p style="font-size: 13px; margin-top: 10px;">
+                        <a href="?page=template" class="btn btn-primary">Créer un template</a>
+                    </p>
+                </div>
+                <?php else: ?>
+                <!-- Grille de templates -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;" id="templates-grid">
+                    <?php foreach ($data['items'] as $tpl): ?>
+                    <div class="template-card" data-id="<?= $tpl['id'] ?>" style="background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: all 0.2s ease; <?= !$tpl['active'] ? 'opacity: 0.6;' : '' ?>">
+                        <div style="aspect-ratio: 3/4; background: #f8f9fa; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                            <?php if (!empty($tpl['path'])): ?>
+                            <img src="<?= htmlspecialchars($tpl['path']) ?>" alt="<?= htmlspecialchars($tpl['nom'] ?? 'Template') ?>" style="width: 100%; height: 100%; object-fit: contain;">
+                            <?php else: ?>
+                            <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="opacity: 0.3;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <?php endif; ?>
+                            <?php if (!$tpl['active']): ?>
+                            <span style="position: absolute; top: 8px; right: 8px; background: #6b7280; color: #fff; padding: 4px 8px; font-size: 10px; border-radius: 4px;">Inactif</span>
+                            <?php endif; ?>
+                            <span style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.6); color: #fff; padding: 4px 8px; font-size: 10px; border-radius: 4px; font-weight: 600;">#<?= $tpl['id'] ?></span>
+                        </div>
+                        <div style="padding: 15px;">
+                            <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= htmlspecialchars($tpl['nom'] ?: 'Sans nom') ?></h4>
+                            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">
+                                <?php if (!empty($tpl['sport'])): ?><span style="margin-right: 8px;"><?= htmlspecialchars($tpl['sport']) ?></span><?php endif; ?>
+                                <?php if (!empty($tpl['famille'])): ?><span><?= htmlspecialchars($tpl['famille']) ?></span><?php endif; ?>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <a href="?page=template&id=<?= $tpl['id'] ?>" class="btn btn-sm btn-light" style="flex: 1; text-align: center;">Modifier</a>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="deleteTemplate(<?= $tpl['id'] ?>)" title="Supprimer">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <script>
+        function deleteTemplate(id) {
+            if (!confirm('Supprimer ce template ?')) return;
+            fetch('/api/templates-manager.php?id=' + id, { method: 'DELETE' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        document.querySelector('.template-card[data-id="' + id + '"]').remove();
+                    } else {
+                        alert('Erreur: ' + (data.error || 'Impossible de supprimer'));
+                    }
+                })
+                .catch(e => alert('Erreur: ' + e.message));
+        }
+        </script>
+
+        <?php // ============ TEMPLATE EDIT ============ ?>
+        <?php elseif ($page === 'template'): ?>
+        <?php $t = $data['item'] ?? []; $isNew = empty($t['id']); ?>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title"><?= $isNew ? 'Nouveau template' : 'Modifier le template' ?></span>
+                <a href="?page=templates" class="btn btn-light">← Retour</a>
+            </div>
+            <div class="card-body">
+                <form id="template-form" enctype="multipart/form-data">
+                    <input type="hidden" name="id" value="<?= $t['id'] ?? '' ?>">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Nom du template *</label>
+                            <input type="text" name="nom" class="form-control" value="<?= htmlspecialchars($t['nom'] ?? '') ?>" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Fichier SVG</label>
+                            <input type="file" name="svg_file" class="form-control" accept=".svg">
+                            <?php if (!empty($t['path'])): ?>
+                            <div class="form-hint">Actuel: <?= htmlspecialchars($t['filename'] ?? basename($t['path'])) ?></div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Sport</label>
+                            <select name="sport" class="form-control">
+                                <option value="">-- Sélectionner --</option>
+                                <?php foreach ($data['sports'] ?? [] as $sport): ?>
+                                <option value="<?= htmlspecialchars($sport) ?>" <?= ($t['sport'] ?? '') === $sport ? 'selected' : '' ?>><?= htmlspecialchars($sport) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Famille produit</label>
+                            <select name="famille" class="form-control">
+                                <option value="">-- Sélectionner --</option>
+                                <?php foreach ($data['familles'] ?? [] as $famille): ?>
+                                <option value="<?= htmlspecialchars($famille) ?>" <?= ($t['famille'] ?? '') === $famille ? 'selected' : '' ?>><?= htmlspecialchars($famille) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Catégorie</label>
+                            <select name="category_id" class="form-control">
+                                <option value="">-- Aucune --</option>
+                                <?php foreach ($data['categories'] ?? [] as $cat): ?>
+                                <option value="<?= $cat['id'] ?>" <?= ($t['category_id'] ?? '') == $cat['id'] ? 'selected' : '' ?>><?= htmlspecialchars($cat['nom']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" rows="3"><?= htmlspecialchars($t['description'] ?? '') ?></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Tags (séparés par virgule)</label>
+                            <input type="text" name="tags" class="form-control" value="<?= htmlspecialchars($t['tags'] ?? '') ?>" placeholder="moderne, rayures, gradient...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Ordre d'affichage</label>
+                            <input type="number" name="ordre" class="form-control" value="<?= intval($t['ordre'] ?? 0) ?>" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Statut</label>
+                            <select name="active" class="form-control">
+                                <option value="1" <?= ($t['active'] ?? 1) ? 'selected' : '' ?>>Actif</option>
+                                <option value="0" <?= !($t['active'] ?? 1) ? 'selected' : '' ?>>Inactif</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <?php if (!empty($t['path'])): ?>
+                    <div class="form-group">
+                        <label class="form-label">Aperçu</label>
+                        <div style="max-width: 300px; padding: 20px; background: #f8f9fa; border-radius: 8px; text-align: center;">
+                            <img src="<?= htmlspecialchars($t['path']) ?>" alt="Preview" style="max-width: 100%; height: auto;">
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
+                    <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
+
+                    <h4 style="margin-bottom: 20px;">Produits associés</h4>
+                    <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 13px;">
+                        Sélectionnez les produits pour lesquels ce template sera disponible. Si aucun produit n'est sélectionné, le template sera disponible pour tous.
+                    </p>
+
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <input type="text" id="product-search" class="form-control" placeholder="Rechercher un produit..." style="max-width: 300px;">
+                        <button type="button" class="btn btn-light" onclick="selectAllProducts()">Tout sélectionner</button>
+                        <button type="button" class="btn btn-light" onclick="deselectAllProducts()">Tout désélectionner</button>
+                    </div>
+
+                    <div style="max-height: 300px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 10px;">
+                        <?php
+                        $currentSport = '';
+                        $associatedProducts = $data['associated_products'] ?? [];
+                        foreach ($data['all_products'] ?? [] as $prod):
+                            if ($prod['sport'] !== $currentSport):
+                                $currentSport = $prod['sport'];
+                        ?>
+                        <div class="product-sport-group" style="font-weight: 600; color: var(--primary); margin: 15px 0 10px; border-bottom: 1px solid var(--border); padding-bottom: 5px;"><?= htmlspecialchars($currentSport ?: 'Sans sport') ?></div>
+                        <?php endif; ?>
+                        <label class="product-checkbox" style="display: flex; align-items: center; gap: 10px; padding: 8px; margin: 2px 0; border-radius: 6px; cursor: pointer; transition: background 0.2s;" data-name="<?= htmlspecialchars(strtolower($prod['nom'])) ?>">
+                            <input type="checkbox" name="products[]" value="<?= $prod['id'] ?>" <?= in_array($prod['id'], $associatedProducts) ? 'checked' : '' ?>>
+                            <?php if (!empty($prod['photo_1'])): ?>
+                            <img src="<?= htmlspecialchars($prod['photo_1']) ?>" alt="" style="width: 30px; height: 40px; object-fit: cover; border-radius: 4px;">
+                            <?php endif; ?>
+                            <span style="flex: 1;"><?= htmlspecialchars($prod['nom']) ?></span>
+                            <span style="font-size: 11px; color: var(--text-muted);"><?= htmlspecialchars($prod['reference']) ?></span>
+                        </label>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <div style="margin-top: 30px; display: flex; gap: 15px;">
+                        <button type="submit" class="btn btn-primary" id="save-btn">
+                            <?= $isNew ? 'Créer le template' : 'Enregistrer les modifications' ?>
+                        </button>
+                        <a href="?page=templates" class="btn btn-light">Annuler</a>
+                        <?php if (!$isNew): ?>
+                        <button type="button" class="btn btn-danger" style="margin-left: auto;" onclick="deleteTemplate(<?= $t['id'] ?>)">Supprimer</button>
+                        <?php endif; ?>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+        // Recherche de produits
+        document.getElementById('product-search')?.addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase();
+            document.querySelectorAll('.product-checkbox').forEach(el => {
+                const name = el.dataset.name || '';
+                el.style.display = name.includes(term) ? 'flex' : 'none';
+            });
+        });
+
+        function selectAllProducts() {
+            document.querySelectorAll('.product-checkbox input[type="checkbox"]').forEach(cb => cb.checked = true);
+        }
+
+        function deselectAllProducts() {
+            document.querySelectorAll('.product-checkbox input[type="checkbox"]').forEach(cb => cb.checked = false);
+        }
+
+        // Soumission du formulaire
+        document.getElementById('template-form')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const btn = document.getElementById('save-btn');
+            btn.disabled = true;
+            btn.textContent = 'Enregistrement...';
+
+            const formData = new FormData(this);
+            const id = formData.get('id');
+            const isNew = !id;
+
+            // Upload du fichier SVG si présent
+            const svgFile = formData.get('svg_file');
+            let uploadedPath = null;
+
+            if (svgFile && svgFile.size > 0) {
+                const uploadData = new FormData();
+                uploadData.append('file', svgFile);
+
+                const uploadRes = await fetch('/api/templates-manager.php?action=upload', {
+                    method: 'POST',
+                    body: uploadData
+                });
+                const uploadResult = await uploadRes.json();
+
+                if (uploadResult.success) {
+                    uploadedPath = uploadResult.file.path;
+                } else {
+                    alert('Erreur upload: ' + (uploadResult.error || 'Impossible de télécharger le fichier'));
+                    btn.disabled = false;
+                    btn.textContent = isNew ? 'Créer le template' : 'Enregistrer les modifications';
+                    return;
+                }
+            }
+
+            // Préparer les données JSON
+            const data = {
+                nom: formData.get('nom'),
+                description: formData.get('description'),
+                sport: formData.get('sport'),
+                famille: formData.get('famille'),
+                category_id: formData.get('category_id') || null,
+                tags: formData.get('tags'),
+                ordre: parseInt(formData.get('ordre')) || 0,
+                active: parseInt(formData.get('active'))
+            };
+
+            if (uploadedPath) {
+                data.path = uploadedPath;
+                data.filename = uploadedPath.split('/').pop();
+            }
+
+            // Sauvegarder le template
+            const method = isNew ? 'POST' : 'PUT';
+            const url = '/api/templates-manager.php' + (isNew ? '' : '?id=' + id);
+
+            const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+
+            if (result.success) {
+                const templateId = isNew ? result.id : id;
+
+                // Sauvegarder les produits associés
+                const products = [];
+                formData.getAll('products[]').forEach(p => products.push(parseInt(p)));
+
+                await fetch('/api/template-products.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ template_id: templateId, products: products })
+                });
+
+                window.location.href = '?page=templates&saved=1';
+            } else {
+                alert('Erreur: ' + (result.error || 'Impossible de sauvegarder'));
+                btn.disabled = false;
+                btn.textContent = isNew ? 'Créer le template' : 'Enregistrer les modifications';
+            }
+        });
+
+        function deleteTemplate(id) {
+            if (!confirm('Supprimer ce template définitivement ?')) return;
+            fetch('/api/templates-manager.php?id=' + id, { method: 'DELETE' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = '?page=templates&deleted=1';
+                    } else {
+                        alert('Erreur: ' + (data.error || 'Impossible de supprimer'));
+                    }
+                });
+        }
+        </script>
 
         <?php endif; ?>
     </div>
