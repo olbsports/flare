@@ -2541,14 +2541,30 @@ $user = $_SESSION['admin_user'] ?? null;
                     </div>
                     <div class="form-group">
                         <label class="form-label">Contenu de l'article</label>
-                        <textarea name="content" class="form-control" rows="15" style="font-size: 14px; line-height: 1.6;" placeholder="Écrivez votre article ici...
-
-Vous pouvez utiliser du HTML simple :
-<h2>Titre de section</h2>
-<p>Paragraphe de texte.</p>
-<ul><li>Liste à puces</li></ul>
-<strong>Texte en gras</strong>"><?= htmlspecialchars($post['content'] ?? '') ?></textarea>
-                        <small style="color:var(--text-muted)">Vous pouvez utiliser du HTML basique (h2, p, ul, li, strong, em, a, img)</small>
+                        <!-- WYSIWYG Toolbar -->
+                        <div class="wysiwyg-toolbar" style="background: #f8fafc; border: 1px solid #e2e8f0; border-bottom: none; border-radius: 6px 6px 0 0; padding: 8px; display: flex; gap: 5px; flex-wrap: wrap;">
+                            <button type="button" onclick="formatDoc('bold')" title="Gras" style="width: 32px; height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; font-weight: bold;">B</button>
+                            <button type="button" onclick="formatDoc('italic')" title="Italique" style="width: 32px; height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; font-style: italic;">I</button>
+                            <button type="button" onclick="formatDoc('underline')" title="Souligné" style="width: 32px; height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; text-decoration: underline;">U</button>
+                            <span style="width: 1px; background: #e2e8f0; margin: 0 5px;"></span>
+                            <button type="button" onclick="formatDoc('formatBlock', 'h2')" title="Titre H2" style="height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; padding: 0 10px; font-weight: bold;">H2</button>
+                            <button type="button" onclick="formatDoc('formatBlock', 'h3')" title="Titre H3" style="height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; padding: 0 10px; font-weight: bold;">H3</button>
+                            <button type="button" onclick="formatDoc('formatBlock', 'p')" title="Paragraphe" style="height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; padding: 0 10px;">P</button>
+                            <span style="width: 1px; background: #e2e8f0; margin: 0 5px;"></span>
+                            <button type="button" onclick="formatDoc('insertUnorderedList')" title="Liste à puces" style="width: 32px; height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer;">•</button>
+                            <button type="button" onclick="formatDoc('insertOrderedList')" title="Liste numérotée" style="width: 32px; height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer;">1.</button>
+                            <span style="width: 1px; background: #e2e8f0; margin: 0 5px;"></span>
+                            <button type="button" onclick="insertLink()" title="Insérer un lien" style="height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; padding: 0 10px;">🔗 Lien</button>
+                            <button type="button" onclick="insertImage()" title="Insérer une image" style="height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; padding: 0 10px;">🖼️ Image</button>
+                            <span style="flex: 1;"></span>
+                            <button type="button" onclick="toggleHtmlView()" id="htmlViewBtn" title="Voir HTML" style="height: 32px; border: 1px solid #e2e8f0; background: #fff; border-radius: 4px; cursor: pointer; padding: 0 10px;">{"} HTML</button>
+                        </div>
+                        <!-- WYSIWYG Editor -->
+                        <div id="wysiwygEditor" contenteditable="true" style="border: 1px solid #e2e8f0; border-radius: 0 0 6px 6px; min-height: 400px; padding: 20px; background: #fff; font-size: 15px; line-height: 1.7; outline: none;"><?= $post['content'] ?? '' ?></div>
+                        <!-- Hidden textarea for form submission -->
+                        <textarea name="content" id="blogContentHidden" style="display: none;"><?= htmlspecialchars($post['content'] ?? '') ?></textarea>
+                        <!-- HTML View (hidden by default) -->
+                        <textarea id="htmlViewEditor" style="display: none; width: 100%; min-height: 400px; border: 1px solid #e2e8f0; border-radius: 0 0 6px 6px; padding: 15px; font-family: monospace; font-size: 13px;"><?= htmlspecialchars($post['content'] ?? '') ?></textarea>
                     </div>
                     <div class="form-row" style="margin-top: 15px;">
                         <div class="form-group">
@@ -2569,6 +2585,58 @@ Vous pouvez utiliser du HTML simple :
         </div>
 
         <script>
+        // WYSIWYG Editor Functions
+        var isHtmlView = false;
+        var editor = document.getElementById('wysiwygEditor');
+        var htmlView = document.getElementById('htmlViewEditor');
+        var hiddenContent = document.getElementById('blogContentHidden');
+
+        function formatDoc(command, value) {
+            document.execCommand(command, false, value || null);
+            editor.focus();
+        }
+
+        function insertLink() {
+            var url = prompt('URL du lien:', 'https://');
+            if (url) {
+                document.execCommand('createLink', false, url);
+            }
+        }
+
+        function insertImage() {
+            var url = prompt('URL de l\'image:', '/assets/images/');
+            if (url) {
+                document.execCommand('insertImage', false, url);
+            }
+        }
+
+        function toggleHtmlView() {
+            isHtmlView = !isHtmlView;
+            var btn = document.getElementById('htmlViewBtn');
+            if (isHtmlView) {
+                htmlView.value = editor.innerHTML;
+                editor.style.display = 'none';
+                htmlView.style.display = 'block';
+                btn.style.background = 'var(--primary)';
+                btn.style.color = '#fff';
+            } else {
+                editor.innerHTML = htmlView.value;
+                editor.style.display = 'block';
+                htmlView.style.display = 'none';
+                btn.style.background = '#fff';
+                btn.style.color = 'inherit';
+            }
+        }
+
+        // Sync content to hidden field before submit
+        document.getElementById('blogForm').addEventListener('submit', function() {
+            if (isHtmlView) {
+                hiddenContent.value = htmlView.value;
+            } else {
+                hiddenContent.value = editor.innerHTML;
+            }
+        });
+
         // Auto-generate slug from title
         document.querySelector('input[name="title"]')?.addEventListener('input', function() {
             var slugInput = document.querySelector('input[name="slug"]');
