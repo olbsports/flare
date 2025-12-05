@@ -94,7 +94,8 @@ body {
 
 .main-image {
     width: 100%;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 9 / 16;
+    max-height: 600px;
     background: #fafafa;
     margin-bottom: 15px;
     overflow: hidden;
@@ -136,7 +137,7 @@ body {
 }
 
 .thumbnail {
-    aspect-ratio: 1;
+    aspect-ratio: 9 / 16;
     background: #fafafa;
     cursor: pointer;
     border: 2px solid transparent;
@@ -144,8 +145,8 @@ body {
     border-radius: 4px;
     overflow: hidden;
     flex-shrink: 0;
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: auto;
 }
 
 /* En mode grille, laisser les thumbnails s'adapter */
@@ -1140,60 +1141,56 @@ body {
     border-collapse: collapse;
     margin: 32px 0;
     background: #fff;
-}
-
-/* Style specs-table pour tableaux à 2 colonnes (label/valeur) */
-.wysiwyg-content table:not(.size-table) tr {
-    border-bottom: 1px solid #e0e0e0;
-}
-
-.wysiwyg-content table:not(.size-table) td {
-    padding: 16px;
-    border: none;
-    border-bottom: 1px solid #e0e0e0;
-}
-
-.wysiwyg-content table:not(.size-table) td:first-child {
-    font-weight: 700;
-    color: #1a1a1a;
-    width: 40%;
-}
-
-.wysiwyg-content table:not(.size-table) td:last-child {
-    color: #666;
-}
-
-/* Style size-table pour tableaux de tailles (avec headers) */
-.wysiwyg-content table th,
-.wysiwyg-content table thead td {
-    padding: 16px;
-    text-align: left;
-    background: #000 !important;
-    color: #fff !important;
-    font-weight: 700;
-    border: 1px solid #000;
-}
-
-.wysiwyg-content table.size-table td,
-.wysiwyg-content table tbody td {
-    padding: 16px;
-    text-align: left;
     border: 1px solid #e0e0e0;
 }
 
-.wysiwyg-content table tr:nth-child(even) td {
-    background: #fafafa;
+/* TABLEAUX DE TAILLES - avec <th> ou <thead> */
+.wysiwyg-content table th {
+    padding: 14px 16px;
+    text-align: left;
+    background: #1a1a1a !important;
+    color: #fff !important;
+    font-weight: 700;
+    font-size: 14px;
+    border: 1px solid #333;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
+.wysiwyg-content table thead td,
+.wysiwyg-content table tr:first-child th {
+    background: #1a1a1a !important;
+    color: #fff !important;
+}
+
+.wysiwyg-content table td {
+    padding: 14px 16px;
+    text-align: left;
+    border: 1px solid #e0e0e0;
+    font-size: 14px;
+}
+
+.wysiwyg-content table tbody tr:nth-child(even) td,
+.wysiwyg-content table tr:nth-child(even) td {
+    background: #f8f8f8;
+}
+
+.wysiwyg-content table tbody tr:nth-child(odd) td,
 .wysiwyg-content table tr:nth-child(odd) td {
     background: #fff;
 }
 
-/* Assurer que les headers gardent leur style */
+/* Première colonne en gras pour les tableaux de tailles */
+.wysiwyg-content table td:first-child {
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+/* S'assurer que les <th> ne sont jamais alternés */
 .wysiwyg-content table th,
-.wysiwyg-content table thead td,
-.wysiwyg-content table tr:first-child th {
-    background: #000 !important;
+.wysiwyg-content table thead th,
+.wysiwyg-content table thead td {
+    background: #1a1a1a !important;
     color: #fff !important;
 }
 
@@ -1226,9 +1223,90 @@ body {
 }
 
 /* ==============================================
-   PRODUITS ASSOCIÉS - 4 colonnes + slider
+   BLOC DETAILS/SUMMARY - Informations dépliables
    ============================================== */
-.related-products-section {
+.llm-context {
+    padding: 1rem;
+    background: #fafafa;
+    border: 1px solid #f0f0f0;
+    margin: 1.5rem 0;
+    font-size: 0.9rem;
+    color: #666;
+    border-radius: 8px;
+}
+
+.llm-context details {
+    cursor: pointer;
+}
+
+.llm-context summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+    padding: 8px 0;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.llm-context summary::before {
+    content: '▶';
+    font-size: 10px;
+    transition: transform 0.2s ease;
+}
+
+.llm-context details[open] summary::before {
+    transform: rotate(90deg);
+}
+
+.llm-context summary::-webkit-details-marker {
+    display: none;
+}
+
+.llm-context details > div {
+    line-height: 1.6;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.llm-context p {
+    margin: 0.5em 0 !important;
+    font-size: 14px !important;
+    color: #555 !important;
+}
+
+/* ==============================================
+   PRODUITS ASSOCIÉS - Section séparée après onglets
+   ============================================== */
+section.related-products-section {
+    max-width: 1400px;
+    margin: 40px auto;
+    padding: 40px 5%;
+    background: linear-gradient(135deg, #f8f8f8 0%, #fff 100%);
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+
+.related-products-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+section.related-products-section .related-products-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    margin-bottom: 24px;
+    color: #1a1a1a;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-align: center;
+}
+
+/* Legacy pour dans les onglets */
+.tab-content .related-products-section {
     margin: 2rem 0;
     padding: 1.5rem;
     background: linear-gradient(135deg, #f8f8f8 0%, #fff 100%);
@@ -1236,7 +1314,7 @@ body {
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-.related-products-title {
+.tab-content .related-products-title {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 1.4rem;
     margin-bottom: 1.25rem;
