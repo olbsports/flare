@@ -361,19 +361,26 @@ $tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
                 </div>
                 <?php endif; ?>
 
-                <div class="main-image" id="mainImage" style="position: relative;">
+                <div class="main-image" id="mainImage" onclick="openImageZoom(this.querySelector('img').src)">
                     <img src="<?php echo htmlspecialchars($photos[0]); ?>" alt="<?php echo htmlspecialchars($nom); ?>">
+                    <button class="zoom-btn" title="Agrandir">🔍</button>
                 </div>
                 <div class="thumbnail-wrapper">
                     <button class="gallery-nav gallery-prev" onclick="scrollGallery(-1)">‹</button>
                     <div class="thumbnail-grid" id="thumbnailGrid">
                         <?php foreach ($photos as $i => $photo): ?>
                         <div class="thumbnail<?php echo $i === 0 ? ' active' : ''; ?>">
-                            <img src="<?php echo htmlspecialchars($photo); ?>" alt="<?php echo htmlspecialchars($nom); ?> - Photo <?php echo $i + 1; ?>">
+                            <img src="<?php echo htmlspecialchars($photo); ?>" alt="<?php echo htmlspecialchars($nom); ?> - Photo <?php echo $i + 1; ?>"<?php echo $i > 0 ? ' loading="lazy"' : ''; ?>>
                         </div>
                         <?php endforeach; ?>
                     </div>
                     <button class="gallery-nav gallery-next" onclick="scrollGallery(1)">›</button>
+                </div>
+
+                <!-- ZOOM MODAL -->
+                <div id="imageZoomModal" class="zoom-modal" onclick="closeImageZoom()">
+                    <span class="zoom-close">&times;</span>
+                    <img class="zoom-modal-content" id="zoomImage" src="" alt="Zoom">
                 </div>
             </div>
 
@@ -711,40 +718,102 @@ $tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
     <?php endif; ?>
 
     <!-- REVIEWS -->
+    <?php
+    // Avis personnalisés ou par défaut
+    $customReviews = json_decode($product['reviews_custom'] ?? '', true);
+    $defaultReviews = [
+        ['stars' => 5, 'text' => 'Excellente qualité, les couleurs sont éclatantes même après plusieurs lavages. Très satisfait du résultat.', 'author' => 'Club ' . $sport . ' - J. Martin', 'meta' => 'Commande de 45 pièces · Décembre 2024'],
+        ['stars' => 5, 'text' => 'Délais respectés, design parfait, prix compétitifs. Je recommande vivement !', 'author' => 'Association Sportive - T. Dubois', 'meta' => 'Commande de 45 pièces · Mai 2024'],
+        ['stars' => 5, 'text' => 'Le tissu est vraiment respirant et confortable. Rendu professionnel. Merci FLARE CUSTOM !', 'author' => 'Équipe Locale - M. Dupont', 'meta' => 'Commande de 45 pièces · Septembre 2024']
+    ];
+    $reviews = !empty($customReviews) ? $customReviews : $defaultReviews;
+    $reviewsCount = $product['reviews_count'] ?? 127;
+    $reviewsRating = $product['reviews_rating'] ?? 4.8;
+    ?>
     <section class="reviews-section">
         <div class="reviews-container">
             <div class="section-header">
                 <h2>ILS NOUS FONT CONFIANCE</h2>
-                <p>127 avis vérifiés · Note moyenne 4.8/5</p>
+                <p><?php echo (int)$reviewsCount; ?> avis vérifiés · Note moyenne <?php echo number_format((float)$reviewsRating, 1, ',', ''); ?>/5</p>
             </div>
             <div class="reviews-grid">
+                <?php foreach ($reviews as $review): ?>
                 <div class="review-card">
-                    <div class="review-stars">★★★★★</div>
-                    <div class="review-text">"Excellente qualité, les couleurs sont éclatantes même après plusieurs lavages. Très satisfait du résultat."</div>
-                    <div class="review-author">Club <?php echo htmlspecialchars($sport); ?> - J. Martin</div>
-                    <div class="review-meta">Commande de 45 pièces · Décembre 2024</div>
+                    <div class="review-stars"><?php echo str_repeat('★', $review['stars'] ?? 5); ?><?php echo str_repeat('☆', 5 - ($review['stars'] ?? 5)); ?></div>
+                    <div class="review-text">"<?php echo htmlspecialchars($review['text']); ?>"</div>
+                    <div class="review-author"><?php echo htmlspecialchars($review['author']); ?></div>
+                    <div class="review-meta"><?php echo htmlspecialchars($review['meta']); ?></div>
                 </div>
-                <div class="review-card">
-                    <div class="review-stars">★★★★★</div>
-                    <div class="review-text">"Délais respectés, design parfait, prix compétitifs. Je recommande vivement !"</div>
-                    <div class="review-author">Association Sportive - T. Dubois</div>
-                    <div class="review-meta">Commande de 45 pièces · Mai 2024</div>
-                </div>
-                <div class="review-card">
-                    <div class="review-stars">★★★★★</div>
-                    <div class="review-text">"Le tissu est vraiment respirant et confortable. Rendu professionnel. Merci FLARE CUSTOM !"</div>
-                    <div class="review-author">Équipe Locale - M. Dupont</div>
-                    <div class="review-meta">Commande de 45 pièces · Septembre 2024</div>
-                </div>
+                <?php endforeach; ?>
             </div>
         </div>
     </section>
+
+    <!-- SCHEMA.ORG - Structured Data pour SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": <?php echo json_encode($nom); ?>,
+        "description": <?php echo json_encode($metaDescription); ?>,
+        "sku": <?php echo json_encode($reference); ?>,
+        "image": <?php echo json_encode(array_filter($photos)); ?>,
+        "brand": {
+            "@type": "Brand",
+            "name": "FLARE Custom"
+        },
+        "manufacturer": {
+            "@type": "Organization",
+            "name": "FLARE Custom"
+        },
+        "category": <?php echo json_encode($famille . ' ' . $sport); ?>,
+        "material": <?php echo json_encode($tissu); ?>,
+        "offers": {
+            "@type": "AggregateOffer",
+            "priceCurrency": "EUR",
+            "lowPrice": <?php echo json_encode($priceLow); ?>,
+            "highPrice": <?php echo json_encode($priceHigh); ?>,
+            "availability": "https://schema.org/InStock",
+            "seller": {
+                "@type": "Organization",
+                "name": "FLARE Custom"
+            }
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": <?php echo json_encode((float)$reviewsRating); ?>,
+            "reviewCount": <?php echo json_encode((int)$reviewsCount); ?>,
+            "bestRating": 5,
+            "worstRating": 1
+        }<?php if (!empty($reviews)): ?>,
+        "review": [
+            <?php foreach ($reviews as $idx => $rev): ?>
+            {
+                "@type": "Review",
+                "reviewRating": {
+                    "@type": "Rating",
+                    "ratingValue": <?php echo json_encode($rev['stars'] ?? 5); ?>
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": <?php echo json_encode($rev['author'] ?? 'Client vérifié'); ?>
+                },
+                "reviewBody": <?php echo json_encode($rev['text'] ?? ''); ?>
+            }<?php echo $idx < count($reviews) - 1 ? ',' : ''; ?>
+            <?php endforeach; ?>
+        ]
+        <?php endif; ?>
+    }
+    </script>
 
     <!-- CONTENU STRUCTURÉ POUR LLM/SEO - Tout à la fin -->
     <div class="llm-context">
         <details>
             <summary>Informations détaillées produit</summary>
             <div>
+                <?php if (!empty($product['llm_content'])): ?>
+                    <?php echo $product['llm_content']; ?>
+                <?php else: ?>
                 <p><strong>Produit:</strong> <?php echo htmlspecialchars($nom); ?></p>
                 <p><strong>Référence:</strong> <?php echo htmlspecialchars($reference); ?></p>
                 <p><strong>Catégorie:</strong> <?php echo htmlspecialchars($famille . ' ' . $sport); ?> personnalisé</p>
@@ -758,6 +827,7 @@ $tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
                 <p><strong>Personnalisation:</strong> Illimitée - logos, noms, numéros, sponsors, dégradés</p>
                 <p><strong>Cas d'usage:</strong> Clubs sportifs, écoles, entreprises, événements, équipes amateurs et professionnelles</p>
                 <p><strong>Avantages:</strong> Durabilité exceptionnelle, design unique, couleurs illimitées, fabrication européenne</p>
+                <?php endif; ?>
             </div>
         </details>
     </div>
@@ -825,6 +895,26 @@ $tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
         function scrollToConfigurator() {
             document.getElementById('configurator-container').scrollIntoView({behavior: 'smooth'});
         }
+
+        // ZOOM IMAGE
+        function openImageZoom(src) {
+            const modal = document.getElementById('imageZoomModal');
+            const zoomImg = document.getElementById('zoomImage');
+            zoomImg.src = src;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageZoom() {
+            const modal = document.getElementById('imageZoomModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Fermer avec Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeImageZoom();
+        });
     </script>
 </body>
 </html>
