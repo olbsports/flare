@@ -16,7 +16,6 @@ if (empty($slug)) {
 }
 
 try {
-    // Utiliser la connexion existante si disponible (quand inclus depuis page.php)
     if (!isset($pdo) || !$pdo) {
         $pdo = getConnection();
     }
@@ -31,7 +30,7 @@ try {
         die("Sport non trouvé: " . htmlspecialchars($slug));
     }
 
-    // Charger les produits associés à cette page
+    // Charger les produits associés
     $stmt = $pdo->prepare("
         SELECT p.*, pp.position
         FROM products p
@@ -49,7 +48,7 @@ try {
     $faqItems = json_decode($page['faq_items'] ?? '[]', true) ?: [];
     $seoSections = json_decode($page['seo_sections'] ?? '[]', true) ?: [];
 
-    // Extraire les familles/genres uniques des produits pour les filtres
+    // Extraire les familles/genres uniques
     $uniqueFamilles = [];
     $uniqueGenres = [];
     foreach ($products as $prod) {
@@ -63,7 +62,6 @@ try {
     sort($uniqueFamilles);
     sort($uniqueGenres);
 
-    // Paramètres du site
     $siteName = 'FLARE CUSTOM';
     $siteUrl = 'https://flare-custom.com';
 
@@ -75,6 +73,8 @@ try {
 $metaTitle = $page['meta_title'] ?: $page['title'];
 $metaDescription = $page['meta_description'] ?: '';
 $productCount = count($products);
+$sportName = $page['sport_name'] ?: $page['title'];
+$sportNameLower = strtolower($sportName);
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -84,6 +84,8 @@ $productCount = count($products);
     <title><?= htmlspecialchars($metaTitle) ?> | <?= $siteName ?></title>
     <meta name="description" content="<?= htmlspecialchars($metaDescription) ?>">
     <meta name="robots" content="index, follow">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <link rel="canonical" href="<?= $siteUrl ?>/sport/<?= htmlspecialchars($slug) ?>">
 
     <meta property="og:type" content="website">
@@ -100,44 +102,12 @@ $productCount = count($products);
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Bebas+Neue&display=swap"></noscript>
     <link rel="preload" href="/assets/css/components.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="/assets/css/components.css"></noscript>
-
-    <style>
-    /* Product Cards */
-    .product-title {
-        font-size: 16px;
-        font-weight: 700;
-        line-height: 1.3;
-        margin-bottom: 8px;
-        color: #1a1a1a;
-    }
-    .product-link {
-        display: inline-block;
-        color: #FF4B26;
-        font-weight: 600;
-        font-size: 14px;
-        text-decoration: none;
-        transition: color 0.2s;
-    }
-    .product-link:hover { color: #E63910; }
-    .product-card {
-        position: relative;
-    }
-    .product-card-link {
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        z-index: 1;
-    }
-    .product-card .slider-controls,
-    .product-card .slider-dot {
-        position: relative;
-        z-index: 2;
-    }
-    </style>
 </head>
 <body>
+    <!-- 🔥 HEADER DYNAMIQUE -->
     <div id="dynamic-header"></div>
 
-    <!-- HERO SECTION -->
+    <!-- Hero Sport -->
     <section class="hero-sport">
         <div class="hero-sport-content">
             <?php if (!empty($page['hero_eyebrow'])): ?>
@@ -150,7 +120,7 @@ $productCount = count($products);
         </div>
     </section>
 
-    <!-- TRUST BAR -->
+    <!-- Trust Bar -->
     <?php if (!empty($trustBar)): ?>
     <section class="trust-bar">
         <div class="container">
@@ -166,33 +136,30 @@ $productCount = count($products);
     </section>
     <?php endif; ?>
 
-    <!-- PRODUCTS SECTION -->
+    <!-- Products Section -->
     <section class="products-section" id="products">
         <div class="container">
             <div class="section-header">
                 <?php if (!empty($page['products_eyebrow'])): ?>
                 <div class="section-eyebrow"><?= htmlspecialchars($page['products_eyebrow']) ?></div>
                 <?php endif; ?>
-                <h2 class="section-title"><?= htmlspecialchars($page['products_title'] ?: 'Nos équipements') ?></h2>
-                <?php if (!empty($page['products_description'])): ?>
-                <p class="section-description"><?= htmlspecialchars($page['products_description']) ?></p>
-                <?php else: ?>
+                <h2 class="section-title"><?= htmlspecialchars($page['products_title'] ?: 'Nos équipements ' . $sportNameLower) ?></h2>
                 <p class="section-description">
-                    <?= $productCount ?> modèles disponibles. Tissus techniques haute performance,<br>
-                    Personnalisation illimitée, fabrication européenne certifiée.
+                    <?= htmlspecialchars($page['products_description'] ?: "Plus de $productCount modèles disponibles. Tissus techniques respirants, coutures renforcées, personnalisation illimitée en sublimation.") ?>
                 </p>
-                <?php endif; ?>
             </div>
 
+            <!-- Filters -->
             <?php if ($page['show_filters'] && (!empty($uniqueFamilles) || !empty($uniqueGenres))): ?>
             <div class="filters-bar">
                 <?php if (!empty($uniqueFamilles)): ?>
                 <div class="filter-group">
-                    <label for="filterFamily">Famille</label>
+                    <label>Famille</label>
+                    <label for="filterFamily" class="sr-only">Filtrer par famille de produit</label>
                     <select id="filterFamily" class="filter-select">
-                        <option value="">Tous</option>
+                        <option value="">Tous les produits</option>
                         <?php foreach ($uniqueFamilles as $fam): ?>
-                        <option value="<?= htmlspecialchars($fam) ?>"><?= htmlspecialchars($fam) ?></option>
+                        <option value="<?= htmlspecialchars($fam) ?>"><?= htmlspecialchars($fam) ?>s</option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -200,7 +167,8 @@ $productCount = count($products);
 
                 <?php if (!empty($uniqueGenres)): ?>
                 <div class="filter-group">
-                    <label for="filterGenre">Genre</label>
+                    <label>Genre</label>
+                    <label for="filterGenre" class="sr-only">Filtrer par genre</label>
                     <select id="filterGenre" class="filter-select">
                         <option value="">Tous</option>
                         <?php foreach ($uniqueGenres as $genre): ?>
@@ -211,7 +179,8 @@ $productCount = count($products);
                 <?php endif; ?>
 
                 <div class="filter-group">
-                    <label for="sortProducts">Trier par</label>
+                    <label>Trier par</label>
+                    <label for="sortProducts" class="sr-only">Trier les produits</label>
                     <select id="sortProducts" class="filter-select">
                         <option value="default">Par défaut</option>
                         <option value="price-asc">Prix croissant</option>
@@ -222,10 +191,12 @@ $productCount = count($products);
             </div>
             <?php endif; ?>
 
+            <!-- Products Count -->
             <div class="products-count">
                 <span id="productsCount"><?= $productCount ?> produit<?= $productCount > 1 ? 's' : '' ?></span>
             </div>
 
+            <!-- Products Grid -->
             <div class="products-grid" id="productsGrid">
                 <?php foreach ($products as $prod):
                     $prodName = !empty($prod['meta_title']) ? $prod['meta_title'] : $prod['nom'];
@@ -239,9 +210,9 @@ $productCount = count($products);
                     if (empty($photos)) {
                         $photos[] = '/photos/placeholder.webp';
                     }
+                    $isEco = stripos($prodName, 'eco') !== false || stripos($prod['tissu'] ?? '', 'eco') !== false;
                 ?>
                 <div class="product-card" data-famille="<?= htmlspecialchars($prod['famille'] ?? '') ?>" data-genre="<?= htmlspecialchars($prod['genre'] ?? '') ?>" data-price="<?= floatval($prod['prix_500'] ?? 0) ?>" data-name="<?= htmlspecialchars($prodName) ?>">
-                    <a href="/produit/<?= htmlspecialchars($prod['reference']) ?>" class="product-card-link"></a>
                     <div class="product-image-wrapper">
                         <div class="product-slider">
                             <?php foreach ($photos as $idx => $photo): ?>
@@ -266,6 +237,9 @@ $productCount = count($products);
                             <button class="slider-dot <?= $idx === 0 ? 'active' : '' ?>" data-slide="<?= $idx ?>" aria-label="Voir photo <?= $idx + 1 ?>"></button>
                             <?php endforeach; ?>
                         </div>
+                        <?php endif; ?>
+                        <?php if ($isEco): ?>
+                        <div class="product-badges"><div class="product-badge eco">ÉCO</div></div>
                         <?php endif; ?>
                     </div>
                     <div class="product-info">
@@ -293,7 +267,7 @@ $productCount = count($products);
                         </div>
                         <?php endif; ?>
                         <?php if ($prodPrice):
-                            $prixEnfant = number_format(floatval($prod['prix_500']) * 0.90, 2, '.', '');
+                            $prixEnfant = number_format(floatval($prod['prix_500']) * 0.80, 2, '.', '');
                         ?>
                         <div class="product-pricing">
                             <div class="product-price-label">À partir de</div>
@@ -307,7 +281,6 @@ $productCount = count($products);
                             </div>
                         </div>
                         <?php endif; ?>
-                        <span class="product-link">Voir le produit →</span>
                     </div>
                 </div>
                 <?php endforeach; ?>
@@ -319,71 +292,69 @@ $productCount = count($products);
         </div>
     </section>
 
-    <!-- WHY US SECTION -->
+    <!-- Why Us Section -->
     <?php if (!empty($page['why_title']) || !empty($whyItems)): ?>
     <section class="why-us-section" id="why-us">
         <div class="container">
             <div class="section-header">
+                <div class="section-eyebrow">Nos engagements</div>
                 <h2 class="section-title"><?= htmlspecialchars($page['why_title'] ?: 'Pourquoi choisir Flare Custom') ?></h2>
                 <?php if (!empty($page['why_subtitle'])): ?>
-                <p class="section-description"><?= htmlspecialchars($page['why_subtitle']) ?></p>
+                <p class="section-desc"><?= htmlspecialchars($page['why_subtitle']) ?></p>
+                <?php else: ?>
+                <p class="section-desc">La référence européenne en équipements sportifs personnalisés</p>
                 <?php endif; ?>
             </div>
-            <?php if (!empty($whyItems)): ?>
-            <div class="why-grid">
-                <?php foreach ($whyItems as $item): ?>
-                <div class="why-item">
-                    <?php if (!empty($item['icon'])): ?>
-                    <div class="why-icon"><?= $item['icon'] ?></div>
-                    <?php endif; ?>
+
+            <div class="why-us-grid-redesign">
+                <?php
+                $defaultWhyItems = [
+                    ['icon' => '⭐', 'title' => 'Design 100% personnalisé', 'description' => "Aucune limite de couleurs, motifs ou logos. Notre équipe de designers professionnels vous accompagne gratuitement pour créer un design unique."],
+                    ['icon' => '✅', 'title' => 'Fabrication européenne certifiée', 'description' => "Production dans nos ateliers partenaires certifiés en Europe. Tissus techniques haute performance testés et approuvés."],
+                    ['icon' => '⚡', 'title' => 'Livraison rapide garantie', 'description' => "Délai standard 3-4 semaines, option express 10-15 jours disponible. Livraison suivie dans toute l'Europe."],
+                    ['icon' => 'ℹ️', 'title' => 'Accompagnement expert complet', 'description' => "Service client dédié du devis à la livraison. BAT détaillé pour validation avant production."],
+                    ['icon' => '💰', 'title' => 'Prix dégressifs ultra-compétitifs', 'description' => "Tarifs agressifs dès 1 pièce. Prix dégressifs jusqu'à -60% selon la quantité. Pas de frais cachés."],
+                    ['icon' => '🎨', 'title' => 'Sublimation durable premium', 'description' => "Technique de sublimation intégrale garantissant des couleurs éclatantes qui ne se délavent jamais."]
+                ];
+                $displayWhyItems = !empty($whyItems) ? $whyItems : $defaultWhyItems;
+                $num = 1;
+                foreach ($displayWhyItems as $item):
+                ?>
+                <div class="why-us-card-redesign">
+                    <div class="why-us-number">0<?= $num++ ?></div>
+                    <div class="why-us-icon-redesign">
+                        <?= $item['icon'] ?? '✓' ?>
+                    </div>
                     <h3><?= htmlspecialchars($item['title'] ?? '') ?></h3>
                     <p><?= htmlspecialchars($item['description'] ?? '') ?></p>
                 </div>
                 <?php endforeach; ?>
             </div>
-            <?php endif; ?>
         </div>
     </section>
     <?php endif; ?>
 
-    <!-- CTA SECTION -->
+    <!-- CTA Section -->
     <?php if (!empty($page['cta_title'])): ?>
     <section class="cta-section" id="contact">
-        <div class="container">
+        <div class="cta-container">
             <div class="cta-content">
-                <h2 class="cta-title"><?= htmlspecialchars($page['cta_title']) ?></h2>
+                <h2 class="cta-title"><?= nl2br(htmlspecialchars($page['cta_title'])) ?></h2>
                 <?php if (!empty($page['cta_subtitle'])): ?>
-                <p class="cta-subtitle"><?= htmlspecialchars($page['cta_subtitle']) ?></p>
+                <p class="cta-text"><?= htmlspecialchars($page['cta_subtitle']) ?></p>
+                <?php else: ?>
+                <p class="cta-text">Devis gratuit sous 24h • Designer dédié • Prix dégressifs • Livraison 3-4 semaines</p>
                 <?php endif; ?>
-
-                <?php if (!empty($ctaFeatures)): ?>
-                <div class="cta-features">
-                    <?php foreach ($ctaFeatures as $feature): ?>
-                    <div class="cta-feature">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                            <path d="M9 12L11 14L15 10M21 12C21 16.971 16.971 21 12 21C7.029 21 3 16.971 3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12Z"/>
-                        </svg>
-                        <span><?= htmlspecialchars($feature) ?></span>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-                <?php endif; ?>
-
                 <div class="cta-buttons">
-                    <?php if (!empty($page['cta_button_text'])): ?>
-                    <a href="<?= htmlspecialchars($page['cta_button_link'] ?: '/pages/info/contact.html') ?>" class="btn-cta-main">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M3 8L10.89 13.26C11.24 13.48 11.62 13.59 12 13.59C12.38 13.59 12.76 13.48 13.11 13.26L21 8M5 19H19C20.1 19 21 18.1 21 17V7C21 5.9 20.1 5 19 5H5C3.9 5 3 5.9 3 7V17C3 18.1 3.9 19 5 19Z"/>
+                    <a href="<?= htmlspecialchars($page['cta_button_link'] ?: '/pages/info/contact.html') ?>" class="btn-cta-primary">
+                        <?= htmlspecialchars($page['cta_button_text'] ?: 'Demander un devis ' . $sportNameLower) ?>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                            <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                         </svg>
-                        <span><?= htmlspecialchars($page['cta_button_text']) ?></span>
                     </a>
-                    <?php endif; ?>
                     <?php if (!empty($page['cta_whatsapp'])): ?>
                     <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $page['cta_whatsapp']) ?>" class="btn-cta-secondary">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                        </svg>
-                        <span>WhatsApp Direct</span>
+                        <?= htmlspecialchars($page['cta_whatsapp']) ?>
                     </a>
                     <?php endif; ?>
                 </div>
@@ -392,23 +363,23 @@ $productCount = count($products);
     </section>
     <?php endif; ?>
 
-    <!-- FAQ SECTION -->
+    <!-- FAQ Sport-Specific Section -->
     <?php if (!empty($faqItems) && !empty(array_filter($faqItems, fn($f) => !empty($f['question'])))): ?>
     <section class="faq-sport-section">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title"><?= htmlspecialchars($page['faq_title'] ?: 'Questions fréquentes') ?></h2>
+                <div class="section-eyebrow">Questions fréquentes</div>
+                <h2 class="section-title"><?= htmlspecialchars($page['faq_title'] ?: 'FAQ ' . $sportName) ?></h2>
+                <p class="section-description">
+                    Toutes les réponses à vos questions sur nos équipements <?= htmlspecialchars($sportNameLower) ?> personnalisés.
+                </p>
             </div>
-            <div class="faq-accordion">
+
+            <div class="faq-grid">
                 <?php foreach ($faqItems as $faq): ?>
                 <?php if (!empty($faq['question'])): ?>
                 <div class="faq-item">
-                    <button class="faq-question" onclick="this.parentElement.classList.toggle('active')">
-                        <span><?= htmlspecialchars($faq['question']) ?></span>
-                        <svg class="faq-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </button>
+                    <div class="faq-question"><?= htmlspecialchars($faq['question']) ?></div>
                     <div class="faq-answer">
                         <p><?= $faq['answer'] ?? '' ?></p>
                     </div>
@@ -416,11 +387,27 @@ $productCount = count($products);
                 <?php endif; ?>
                 <?php endforeach; ?>
             </div>
+
+            <div class="faq-cta">
+                <h3>Besoin de plus d'informations ?</h3>
+                <p>Consultez notre FAQ complète ou contactez-nous directement pour un conseil personnalisé.</p>
+                <div class="faq-cta-buttons">
+                    <a href="/#faq" class="btn-primary">
+                        Voir toutes les FAQ
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                            <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </a>
+                    <a href="/pages/info/contact.html" class="btn-secondary">
+                        Contactez-nous
+                    </a>
+                </div>
+            </div>
         </div>
     </section>
     <?php endif; ?>
 
-    <!-- SEO SECTIONS -->
+    <!-- SEO Footer Sections -->
     <?php if (!empty($seoSections)): ?>
     <?php foreach ($seoSections as $sec): ?>
     <?php if (!empty($sec['title']) || !empty($sec['content'])): ?>
@@ -440,95 +427,98 @@ $productCount = count($products);
     <?php endforeach; ?>
     <?php endif; ?>
 
+    <!-- 🔥 FOOTER DYNAMIQUE -->
     <div id="dynamic-footer"></div>
 
-    <script src="/assets/js/components.js" defer></script>
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Product slider
-        document.querySelectorAll('.product-card').forEach(function(card) {
-            var slides = card.querySelectorAll('.product-slide');
-            var dots = card.querySelectorAll('.slider-dot');
-            var prevBtn = card.querySelector('.slider-nav.prev');
-            var nextBtn = card.querySelector('.slider-nav.next');
-            var currentSlide = 0;
+    <!-- Components Loader (Header/Footer + Interactions) -->
+    <script src="/assets/js/components-loader.js" defer></script>
+    <script src="/assets/js/script.js" defer></script>
+    <script src="/assets/js/product-cards-linker.js" defer></script>
 
-            function showSlide(n) {
-                currentSlide = (n + slides.length) % slides.length;
-                slides.forEach(function(s, i) {
-                    s.classList.toggle('active', i === currentSlide);
+    <script>
+        // Filters for products
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterFamily = document.getElementById('filterFamily');
+            const filterGenre = document.getElementById('filterGenre');
+            const sortProducts = document.getElementById('sortProducts');
+            const productsGrid = document.getElementById('productsGrid');
+            const productsCount = document.getElementById('productsCount');
+
+            function filterAndSortProducts() {
+                const cards = Array.from(productsGrid.querySelectorAll('.product-card'));
+                let visibleCount = 0;
+
+                cards.forEach(card => {
+                    const famille = card.dataset.famille || '';
+                    const genre = card.dataset.genre || '';
+
+                    let show = true;
+
+                    if (filterFamily && filterFamily.value && !famille.includes(filterFamily.value)) show = false;
+                    if (filterGenre && filterGenre.value && !genre.includes(filterGenre.value)) show = false;
+
+                    card.style.display = show ? 'block' : 'none';
+                    if (show) visibleCount++;
                 });
-                dots.forEach(function(d, i) {
-                    d.classList.toggle('active', i === currentSlide);
-                });
+
+                // Sort
+                if (sortProducts && sortProducts.value !== 'default') {
+                    const sortedCards = cards.filter(c => c.style.display !== 'none');
+                    sortedCards.sort((a, b) => {
+                        switch (sortProducts.value) {
+                            case 'price-asc': return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+                            case 'price-desc': return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+                            case 'name': return a.dataset.name.localeCompare(b.dataset.name);
+                            default: return 0;
+                        }
+                    });
+                    sortedCards.forEach(card => productsGrid.appendChild(card));
+                }
+
+                if (productsCount) {
+                    productsCount.textContent = visibleCount + ' produit' + (visibleCount > 1 ? 's' : '');
+                }
             }
 
-            if (prevBtn) prevBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                showSlide(currentSlide - 1);
-            });
+            if (filterFamily) filterFamily.addEventListener('change', filterAndSortProducts);
+            if (filterGenre) filterGenre.addEventListener('change', filterAndSortProducts);
+            if (sortProducts) sortProducts.addEventListener('change', filterAndSortProducts);
 
-            if (nextBtn) nextBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                showSlide(currentSlide + 1);
-            });
+            // Product slider
+            document.querySelectorAll('.product-card').forEach(function(card) {
+                const slides = card.querySelectorAll('.product-slide');
+                const dots = card.querySelectorAll('.slider-dot');
+                const prevBtn = card.querySelector('.slider-nav.prev');
+                const nextBtn = card.querySelector('.slider-nav.next');
+                let currentSlide = 0;
 
-            dots.forEach(function(dot, i) {
-                dot.addEventListener('click', function(e) {
+                function showSlide(n) {
+                    currentSlide = (n + slides.length) % slides.length;
+                    slides.forEach((s, i) => s.classList.toggle('active', i === currentSlide));
+                    dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+                }
+
+                if (prevBtn) prevBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    showSlide(i);
+                    showSlide(currentSlide - 1);
+                });
+
+                if (nextBtn) nextBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showSlide(currentSlide + 1);
+                });
+
+                dots.forEach(function(dot, i) {
+                    dot.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        showSlide(i);
+                    });
                 });
             });
         });
-
-        // Filters
-        var filterFamily = document.getElementById('filterFamily');
-        var filterGenre = document.getElementById('filterGenre');
-        var sortProducts = document.getElementById('sortProducts');
-        var productsGrid = document.getElementById('productsGrid');
-        var productsCount = document.getElementById('productsCount');
-
-        function applyFilters() {
-            var family = filterFamily ? filterFamily.value : '';
-            var genre = filterGenre ? filterGenre.value : '';
-            var sort = sortProducts ? sortProducts.value : 'default';
-            var cards = Array.from(productsGrid.querySelectorAll('.product-card'));
-            var visible = 0;
-
-            cards.forEach(function(card) {
-                var matchFamily = !family || card.dataset.famille === family;
-                var matchGenre = !genre || card.dataset.genre === genre;
-                var show = matchFamily && matchGenre;
-                card.style.display = show ? '' : 'none';
-                if (show) visible++;
-            });
-
-            // Sort
-            if (sort !== 'default') {
-                var sortedCards = cards.filter(function(c) { return c.style.display !== 'none'; });
-                sortedCards.sort(function(a, b) {
-                    if (sort === 'price-asc') return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
-                    if (sort === 'price-desc') return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
-                    if (sort === 'name') return a.dataset.name.localeCompare(b.dataset.name);
-                    return 0;
-                });
-                sortedCards.forEach(function(card) {
-                    productsGrid.appendChild(card);
-                });
-            }
-
-            if (productsCount) {
-                productsCount.textContent = visible + ' produit' + (visible > 1 ? 's' : '');
-            }
-        }
-
-        if (filterFamily) filterFamily.addEventListener('change', applyFilters);
-        if (filterGenre) filterGenre.addEventListener('change', applyFilters);
-        if (sortProducts) sortProducts.addEventListener('change', applyFilters);
-    });
     </script>
 </body>
 </html>
