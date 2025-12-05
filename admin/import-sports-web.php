@@ -1,75 +1,47 @@
 <?php
 /**
  * IMPORT SPORTS HTML → DATABASE (VERSION WEB)
- * Accessible via navigateur pour exécution sur serveur O2Switch
+ * Extrait EXACTEMENT le contenu des pages HTML sports
  */
 
 require_once __DIR__ . '/../config/database.php';
 
-// Sécurité basique
 session_start();
 
 $sportsDir = __DIR__ . '/../pages/products/';
 
-// Configuration des sports à importer
+// Actions
+$resetDone = false;
+$resetCount = 0;
+if (isset($_POST['reset']) && $_POST['reset'] === '1') {
+    try {
+        $pdo = getConnection();
+        $stmt = $pdo->query("SELECT COUNT(*) FROM sport_pages");
+        $resetCount = $stmt->fetchColumn();
+        $pdo->exec("DELETE FROM sport_pages");
+        $pdo->exec("ALTER TABLE sport_pages AUTO_INCREMENT = 1");
+        $resetDone = true;
+    } catch (Exception $e) {
+        // Table n'existe pas encore
+    }
+}
+
+// Configuration des sports
 $sportsConfig = [
-    [
-        'file' => 'equipement-football-personnalise-sublimation.html',
-        'slug' => 'football',
-        'sport_name' => 'Football',
-        'sport_icon' => '⚽'
-    ],
-    [
-        'file' => 'equipement-rugby-personnalise-sublimation.html',
-        'slug' => 'rugby',
-        'sport_name' => 'Rugby',
-        'sport_icon' => '🏉'
-    ],
-    [
-        'file' => 'equipement-basketball-personnalise-sublimation.html',
-        'slug' => 'basketball',
-        'sport_name' => 'Basketball',
-        'sport_icon' => '🏀'
-    ],
-    [
-        'file' => 'equipement-cyclisme-velo-personnalise-sublimation.html',
-        'slug' => 'cyclisme',
-        'sport_name' => 'Cyclisme',
-        'sport_icon' => '🚴'
-    ],
-    [
-        'file' => 'equipement-running-course-pied-personnalise.html',
-        'slug' => 'running',
-        'sport_name' => 'Running',
-        'sport_icon' => '🏃'
-    ],
-    [
-        'file' => 'equipement-handball-personnalise-sublimation.html',
-        'slug' => 'handball',
-        'sport_name' => 'Handball',
-        'sport_icon' => '🤾'
-    ],
-    [
-        'file' => 'equipement-volleyball-personnalise-sublimation.html',
-        'slug' => 'volleyball',
-        'sport_name' => 'Volleyball',
-        'sport_icon' => '🏐'
-    ],
-    [
-        'file' => 'equipement-triathlon-personnalise-sublimation.html',
-        'slug' => 'triathlon',
-        'sport_name' => 'Triathlon',
-        'sport_icon' => '🏊'
-    ],
-    [
-        'file' => 'equipement-petanque-personnalise-club.html',
-        'slug' => 'petanque',
-        'sport_name' => 'Pétanque',
-        'sport_icon' => '⚾'
-    ]
+    ['file' => 'equipement-football-personnalise-sublimation.html', 'slug' => 'football', 'sport_name' => 'Football', 'sport_icon' => '⚽'],
+    ['file' => 'equipement-rugby-personnalise-sublimation.html', 'slug' => 'rugby', 'sport_name' => 'Rugby', 'sport_icon' => '🏉'],
+    ['file' => 'equipement-basketball-personnalise-sublimation.html', 'slug' => 'basketball', 'sport_name' => 'Basketball', 'sport_icon' => '🏀'],
+    ['file' => 'equipement-cyclisme-velo-personnalise-sublimation.html', 'slug' => 'cyclisme', 'sport_name' => 'Cyclisme', 'sport_icon' => '🚴'],
+    ['file' => 'equipement-running-course-pied-personnalise.html', 'slug' => 'running', 'sport_name' => 'Running', 'sport_icon' => '🏃'],
+    ['file' => 'equipement-handball-personnalise-sublimation.html', 'slug' => 'handball', 'sport_name' => 'Handball', 'sport_icon' => '🤾'],
+    ['file' => 'equipement-volleyball-personnalise-sublimation.html', 'slug' => 'volleyball', 'sport_name' => 'Volleyball', 'sport_icon' => '🏐'],
+    ['file' => 'equipement-triathlon-personnalise-sublimation.html', 'slug' => 'triathlon', 'sport_name' => 'Triathlon', 'sport_icon' => '🏊'],
+    ['file' => 'equipement-petanque-personnalise-club.html', 'slug' => 'petanque', 'sport_name' => 'Pétanque', 'sport_icon' => '⚾']
 ];
 
-// Fonctions d'extraction
+/**
+ * Extraction COMPLETE du contenu HTML
+ */
 function extractAllContent($html, $config) {
     $data = [
         'slug' => $config['slug'],
@@ -80,20 +52,19 @@ function extractAllContent($html, $config) {
     // ========== META ==========
     if (preg_match('/<title>([^<]+)<\/title>/i', $html, $m)) {
         $data['meta_title'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
-        $data['title'] = explode('|', $data['meta_title'])[0];
-        $data['title'] = trim($data['title']);
+        $data['title'] = trim(explode('|', $data['meta_title'])[0]);
     } else {
         $data['title'] = 'Équipements ' . $config['sport_name'];
         $data['meta_title'] = $data['title'] . ' | FLARE CUSTOM';
     }
 
-    if (preg_match('/<meta\s+name=["\']description["\']\s+content=["\']([^"\']+)["\']/', $html, $m)) {
+    if (preg_match('/<meta\s+name=["\']description["\']\s+content=["\']([^"\']+)["\']/i', $html, $m)) {
         $data['meta_description'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
     } else {
-        $data['meta_description'] = "Équipements {$config['sport_name']} personnalisés sublimation. Devis gratuit sous 24h.";
+        $data['meta_description'] = '';
     }
 
-    // ========== HERO SECTION ==========
+    // ========== HERO ==========
     if (preg_match('/<span class=["\']hero-sport-eyebrow["\']>([^<]+)<\/span>/i', $html, $m)) {
         $data['hero_eyebrow'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
     } else {
@@ -114,7 +85,7 @@ function extractAllContent($html, $config) {
 
     // ========== TRUST BAR ==========
     $data['trust_bar'] = [];
-    if (preg_match_all('/<div class=["\']trust-item["\']>\s*<strong>([^<]+)<\/strong>\s*<span>([^<]+)<\/span>/is', $html, $matches, PREG_SET_ORDER)) {
+    if (preg_match_all('/<div class=["\']trust-item["\']>\s*<strong>([^<]+)<\/strong>\s*<span>([^<]+)<\/span>\s*<\/div>/is', $html, $matches, PREG_SET_ORDER)) {
         foreach ($matches as $m) {
             $data['trust_bar'][] = [
                 'value' => trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8')),
@@ -124,23 +95,70 @@ function extractAllContent($html, $config) {
     }
 
     // ========== PRODUCTS SECTION ==========
-    if (preg_match('/<section class=["\']products-section["\'][^>]*>.*?<div class=["\']section-eyebrow["\']>([^<]+)<\/div>/is', $html, $m)) {
+    if (preg_match('/<section[^>]*class=["\'][^"\']*products-section[^"\']*["\'][^>]*>.*?<div class=["\']section-eyebrow["\']>([^<]+)<\/div>/is', $html, $m)) {
         $data['products_eyebrow'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
     } else {
         $data['products_eyebrow'] = 'Catalogue ' . strtolower($config['sport_name']);
     }
 
-    if (preg_match('/<section class=["\']products-section["\'][^>]*>.*?<h2 class=["\']section-title["\']>([^<]+)<\/h2>/is', $html, $m)) {
+    if (preg_match('/<section[^>]*class=["\'][^"\']*products-section[^"\']*["\'][^>]*>.*?<h2 class=["\']section-title["\']>([^<]+)<\/h2>/is', $html, $m)) {
         $data['products_title'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
     } else {
         $data['products_title'] = 'Nos équipements ' . strtolower($config['sport_name']);
     }
 
-    if (preg_match('/<section class=["\']products-section["\'][^>]*>.*?<p class=["\']section-description["\']>\s*(.*?)\s*<\/p>/is', $html, $m)) {
+    if (preg_match('/<section[^>]*class=["\'][^"\']*products-section[^"\']*["\'][^>]*>.*?<p class=["\']section-description["\']>(.*?)<\/p>/is', $html, $m)) {
         $desc = preg_replace('/<br\s*\/?>/i', ' ', $m[1]);
         $data['products_description'] = trim(strip_tags(html_entity_decode($desc, ENT_QUOTES, 'UTF-8')));
     } else {
-        $data['products_description'] = "Découvrez notre gamme complète d'équipements {$config['sport_name']} personnalisés.";
+        $data['products_description'] = '';
+    }
+
+    // ========== WHY US - Extraire EXACTEMENT le contenu ==========
+    $data['why_title'] = 'Pourquoi choisir Flare Custom';
+    $data['why_subtitle'] = '';
+    $data['why_items'] = [];
+
+    // Trouver la section why-us
+    if (preg_match('/<section[^>]*class=["\'][^"\']*why-us-section[^"\']*["\'][^>]*>(.*?)<\/section>/is', $html, $whySection)) {
+        $whyHtml = $whySection[1];
+
+        // Titre
+        if (preg_match('/<h2 class=["\']section-title["\']>([^<]+)<\/h2>/i', $whyHtml, $m)) {
+            $data['why_title'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
+        }
+
+        // Sous-titre
+        if (preg_match('/<p class=["\']section-desc["\']>([^<]+)<\/p>/i', $whyHtml, $m)) {
+            $data['why_subtitle'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
+        }
+
+        // Cards - extraire chaque carte avec son SVG, titre et description
+        if (preg_match_all('/<div class=["\']why-us-card-redesign["\']>(.*?)<\/div>\s*<\/div>/is', $whyHtml, $cards, PREG_SET_ORDER)) {
+            foreach ($cards as $card) {
+                $cardHtml = $card[1];
+                $item = ['icon' => '', 'title' => '', 'description' => ''];
+
+                // Extraire le SVG complet
+                if (preg_match('/<svg[^>]*>.*?<\/svg>/is', $cardHtml, $svg)) {
+                    $item['icon'] = trim($svg[0]);
+                }
+
+                // Titre
+                if (preg_match('/<h3>([^<]+)<\/h3>/i', $cardHtml, $m)) {
+                    $item['title'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
+                }
+
+                // Description
+                if (preg_match('/<p>([^<]+)<\/p>/i', $cardHtml, $m)) {
+                    $item['description'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
+                }
+
+                if (!empty($item['title'])) {
+                    $data['why_items'][] = $item;
+                }
+            }
+        }
     }
 
     // ========== CTA SECTION ==========
@@ -157,41 +175,34 @@ function extractAllContent($html, $config) {
         $data['cta_subtitle'] = '';
     }
 
-    $data['cta_button_text'] = 'Demander un devis ' . strtolower($config['sport_name']);
+    $data['cta_button_text'] = 'Demander un devis';
     $data['cta_button_link'] = '/pages/info/contact.html';
     $data['cta_whatsapp'] = '+33612345678';
 
-    // ========== WHY US SECTION ==========
-    $data['why_title'] = 'Pourquoi choisir Flare Custom';
-    $data['why_subtitle'] = 'La référence européenne en équipements sportifs personnalisés';
-    $data['why_items'] = [];
-
-    // Pattern pour extraire les why-us cards
-    if (preg_match_all('/<div class=["\']why-us-card-redesign["\']>.*?<h3>([^<]+)<\/h3>.*?<p>([^<]+)<\/p>/is', $html, $matches, PREG_SET_ORDER)) {
-        $icons = ['⭐', '✅', '⚡', 'ℹ️', '💰', '🎨'];
-        foreach ($matches as $i => $m) {
-            $data['why_items'][] = [
-                'icon' => $icons[$i] ?? '✓',
-                'title' => trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8')),
-                'description' => trim(html_entity_decode($m[2], ENT_QUOTES, 'UTF-8'))
-            ];
-        }
-    }
-
-    // ========== FAQ SECTION ==========
+    // ========== FAQ - Extraire EXACTEMENT chaque Q/R ==========
     $data['faq_title'] = 'FAQ ' . $config['sport_name'];
     $data['faq_items'] = [];
 
-    if (preg_match_all('/<div class=["\']faq-item["\']>\s*<div class=["\']faq-question["\']>([^<]+)<\/div>\s*<div class=["\']faq-answer["\']>\s*<p>(.*?)<\/p>/is', $html, $matches, PREG_SET_ORDER)) {
-        foreach ($matches as $m) {
-            $data['faq_items'][] = [
-                'question' => trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8')),
-                'answer' => trim(html_entity_decode(strip_tags($m[2]), ENT_QUOTES, 'UTF-8'))
-            ];
+    if (preg_match('/<section[^>]*class=["\'][^"\']*faq-sport-section[^"\']*["\'][^>]*>(.*?)<\/section>/is', $html, $faqSection)) {
+        $faqHtml = $faqSection[1];
+
+        // Titre FAQ
+        if (preg_match('/<h2 class=["\']section-title["\']>([^<]+)<\/h2>/i', $faqHtml, $m)) {
+            $data['faq_title'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
+        }
+
+        // Chaque FAQ item
+        if (preg_match_all('/<div class=["\']faq-item["\']>\s*<div class=["\']faq-question["\']>([^<]+)<\/div>\s*<div class=["\']faq-answer["\']>\s*<p>(.*?)<\/p>\s*<\/div>\s*<\/div>/is', $faqHtml, $faqs, PREG_SET_ORDER)) {
+            foreach ($faqs as $faq) {
+                $data['faq_items'][] = [
+                    'question' => trim(html_entity_decode($faq[1], ENT_QUOTES, 'UTF-8')),
+                    'answer' => trim(html_entity_decode(strip_tags($faq[2]), ENT_QUOTES, 'UTF-8'))
+                ];
+            }
         }
     }
 
-    // ========== SEO SECTIONS ==========
+    // ========== SEO SECTIONS - Extraire EXACTEMENT le HTML ==========
     $data['seo_sections'] = [];
 
     // Trouver toutes les sections seo-footer-section
@@ -215,33 +226,33 @@ function extractAllContent($html, $config) {
                 $section['title'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
             }
 
-            // Content blocks
-            if (preg_match_all('/<div class=["\']seo-content-block["\']>(.*?)<\/div>\s*(?=<div class=["\']seo-content-block|<div class=["\']seo-keywords|<\/div>\s*<\/div>)/is', $seoHtml, $blockMatches)) {
-                foreach ($blockMatches[1] as $blockHtml) {
-                    $block = ['title' => '', 'content' => ''];
+            // Content blocks - extraire TOUT le contenu HTML
+            if (preg_match('/<div class=["\']seo-content-grid["\']>(.*?)<\/div>\s*<div class=["\']seo-keywords/is', $seoHtml, $gridMatch)) {
+                $gridHtml = $gridMatch[1];
 
-                    if (preg_match('/<h3>([^<]+)<\/h3>/i', $blockHtml, $m)) {
-                        $block['title'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
-                    }
+                // Séparer les blocs
+                if (preg_match_all('/<div class=["\']seo-content-block["\']>(.*?)<\/div>\s*(?=<div class=["\']seo-content-block|$)/is', $gridHtml, $blockMatches)) {
+                    foreach ($blockMatches[1] as $blockHtml) {
+                        $block = ['title' => '', 'content' => ''];
 
-                    // Get paragraphs and lists
-                    $content = '';
-                    if (preg_match_all('/<p>(.*?)<\/p>/is', $blockHtml, $pMatches)) {
-                        foreach ($pMatches[1] as $p) {
-                            $content .= '<p>' . trim($p) . '</p>';
+                        // Titre du bloc
+                        if (preg_match('/<h3>([^<]+)<\/h3>/i', $blockHtml, $m)) {
+                            $block['title'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
+                        }
+
+                        // Tout le contenu après le h3 (paragraphes, listes)
+                        $content = preg_replace('/<h3>[^<]+<\/h3>/i', '', $blockHtml);
+                        $block['content'] = trim($content);
+
+                        if (!empty($block['title']) || !empty($block['content'])) {
+                            $section['blocks'][] = $block;
                         }
                     }
-                    if (preg_match('/<ul>(.*?)<\/ul>/is', $blockHtml, $m)) {
-                        $content .= '<ul>' . $m[1] . '</ul>';
-                    }
-
-                    $block['content'] = $content;
-                    $section['blocks'][] = $block;
                 }
             }
 
             // Keywords
-            if (preg_match('/<div class=["\']seo-keywords["\']>.*?<h4>([^<]+)<\/h4>.*?<p>([^<]+)<\/p>/is', $seoHtml, $m)) {
+            if (preg_match('/<div class=["\']seo-keywords["\']>\s*<h4>([^<]+)<\/h4>\s*<p>([^<]+)<\/p>/is', $seoHtml, $m)) {
                 $section['keywords_title'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
                 $section['keywords'] = trim(html_entity_decode($m[2], ENT_QUOTES, 'UTF-8'));
             }
@@ -255,14 +266,14 @@ function extractAllContent($html, $config) {
     return $data;
 }
 
-// Traitement de l'import
+// Traitement
 $results = [];
 $doImport = isset($_POST['import']) && $_POST['import'] === '1';
 
 try {
     $pdo = getConnection();
 
-    // Créer/vérifier la table
+    // Créer la table
     $pdo->exec("CREATE TABLE IF NOT EXISTS sport_pages (
         id INT AUTO_INCREMENT PRIMARY KEY,
         slug VARCHAR(255) NOT NULL UNIQUE,
@@ -301,6 +312,10 @@ try {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
+    // Compter les entrées existantes
+    $stmt = $pdo->query("SELECT COUNT(*) FROM sport_pages");
+    $existingCount = $stmt->fetchColumn();
+
     foreach ($sportsConfig as $config) {
         $result = [
             'sport' => $config['sport_name'],
@@ -323,12 +338,12 @@ try {
         $data = extractAllContent($html, $config);
 
         $result['extracted'] = [
-            'meta_title' => mb_substr($data['meta_title'], 0, 60) . '...',
-            'hero' => $data['hero_eyebrow'] . ' | ' . $data['hero_title'],
-            'trust_bar' => count($data['trust_bar']),
-            'faq' => count($data['faq_items']),
-            'seo_sections' => count($data['seo_sections']),
-            'why_items' => count($data['why_items'])
+            'meta_title' => mb_substr($data['meta_title'] ?? '', 0, 50) . '...',
+            'hero_title' => $data['hero_title'] ?? '',
+            'trust_bar' => count($data['trust_bar'] ?? []),
+            'why_items' => count($data['why_items'] ?? []),
+            'faq_items' => count($data['faq_items'] ?? []),
+            'seo_sections' => count($data['seo_sections'] ?? [])
         ];
 
         if ($doImport) {
@@ -426,7 +441,7 @@ try {
             }
         } else {
             $result['status'] = 'preview';
-            $result['message'] = 'Prêt pour import';
+            $result['message'] = 'Prêt';
         }
 
         $results[] = $result;
@@ -443,230 +458,130 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Import Sports HTML → BDD | FLARE Admin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Import Sports HTML → BDD</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            min-height: 100vh;
-            color: #fff;
-            padding: 2rem;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .subtitle {
-            color: rgba(255,255,255,0.6);
-            margin-bottom: 2rem;
-        }
-        .card {
-            background: rgba(255,255,255,0.1);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            backdrop-filter: blur(10px);
-        }
-        .sport-grid {
-            display: grid;
-            gap: 1rem;
-        }
-        .sport-item {
-            background: rgba(255,255,255,0.05);
-            border-radius: 0.75rem;
-            padding: 1rem;
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            gap: 1rem;
-            align-items: center;
-        }
-        .sport-icon {
-            font-size: 2rem;
-            background: rgba(255,255,255,0.1);
-            width: 50px;
-            height: 50px;
-            border-radius: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .sport-info h3 {
-            font-size: 1.1rem;
-            margin-bottom: 0.25rem;
-        }
-        .sport-info .file {
-            font-size: 0.8rem;
-            color: rgba(255,255,255,0.5);
-            font-family: monospace;
-        }
-        .sport-extracted {
-            font-size: 0.8rem;
-            color: rgba(255,255,255,0.7);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-        .badge {
-            background: rgba(255,255,255,0.1);
-            padding: 0.2rem 0.5rem;
-            border-radius: 0.25rem;
-        }
-        .status {
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            font-weight: 500;
-            text-align: center;
-            min-width: 120px;
-        }
-        .status.preview { background: #3b82f6; }
-        .status.inserted { background: #10b981; }
-        .status.updated { background: #f59e0b; }
-        .status.error { background: #ef4444; }
-        .btn {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-radius: 0.75rem;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(16,185,129,0.3);
-        }
-        .btn-secondary {
-            background: rgba(255,255,255,0.1);
-        }
-        .actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-            justify-content: center;
-        }
-        .summary {
-            display: flex;
-            gap: 2rem;
-            justify-content: center;
-            margin-bottom: 2rem;
-        }
-        .summary-item {
-            text-align: center;
-        }
-        .summary-item .value {
-            font-size: 2rem;
-            font-weight: 700;
-        }
-        .summary-item .label {
-            font-size: 0.9rem;
-            color: rgba(255,255,255,0.6);
-        }
-        .success-msg {
-            background: rgba(16,185,129,0.2);
-            border: 1px solid #10b981;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            text-align: center;
-            margin-bottom: 1rem;
-        }
-        .error-box {
-            background: rgba(239,68,68,0.2);
-            border: 1px solid #ef4444;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            text-align: center;
-        }
-        a { color: #60a5fa; text-decoration: none; }
-        a:hover { text-decoration: underline; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: #0f172a; color: #fff; padding: 2rem; min-height: 100vh; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .subtitle { color: #94a3b8; margin-bottom: 2rem; }
+        .alert { padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
+        .alert-success { background: rgba(34,197,94,0.2); border: 1px solid #22c55e; }
+        .alert-warning { background: rgba(234,179,8,0.2); border: 1px solid #eab308; }
+        .alert-error { background: rgba(239,68,68,0.2); border: 1px solid #ef4444; }
+        .card { background: rgba(255,255,255,0.05); border-radius: 1rem; padding: 1.5rem; margin-bottom: 1rem; }
+        .sport-item { display: grid; grid-template-columns: 50px 1fr 200px 120px; gap: 1rem; align-items: center; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 0.5rem; margin-bottom: 0.5rem; }
+        .sport-icon { font-size: 1.5rem; text-align: center; }
+        .sport-name { font-weight: 600; }
+        .sport-file { font-size: 0.75rem; color: #64748b; font-family: monospace; }
+        .sport-stats { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .stat { background: rgba(255,255,255,0.1); padding: 0.2rem 0.5rem; border-radius: 0.25rem; font-size: 0.7rem; }
+        .status { padding: 0.4rem 0.8rem; border-radius: 0.3rem; font-size: 0.8rem; text-align: center; font-weight: 500; }
+        .status-preview { background: #3b82f6; }
+        .status-inserted { background: #22c55e; }
+        .status-updated { background: #f59e0b; }
+        .status-error { background: #ef4444; }
+        .actions { display: flex; gap: 1rem; margin-top: 2rem; justify-content: center; }
+        .btn { padding: 0.8rem 1.5rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer; border: none; font-size: 1rem; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; }
+        .btn-primary { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
+        .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
+        .btn-secondary { background: rgba(255,255,255,0.1); color: #fff; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .summary { display: flex; gap: 2rem; justify-content: center; margin-bottom: 2rem; }
+        .summary-item { text-align: center; }
+        .summary-value { font-size: 2rem; font-weight: 700; }
+        .summary-label { font-size: 0.8rem; color: #94a3b8; }
+        a { color: #60a5fa; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🏆 Import Sports HTML → BDD</h1>
-        <p class="subtitle">Extrait le contenu complet des pages sports HTML pour l'insérer en base de données</p>
+        <h1>Import Sports HTML → BDD</h1>
+        <p class="subtitle">Extrait le contenu EXACT des pages HTML vers la base de données</p>
 
         <?php if (!$dbConnected): ?>
-            <div class="error-box">
-                <h3>❌ Erreur de connexion BDD</h3>
-                <p><?= htmlspecialchars($dbError ?? 'Connexion impossible') ?></p>
+            <div class="alert alert-error">
+                <strong>Erreur BDD:</strong> <?= htmlspecialchars($dbError ?? 'Connexion impossible') ?>
             </div>
         <?php else: ?>
 
+            <?php if ($resetDone): ?>
+                <div class="alert alert-warning">
+                    <?= $resetCount ?> entrée(s) supprimée(s). La table sport_pages est maintenant vide.
+                </div>
+            <?php endif; ?>
+
             <?php if ($doImport): ?>
-                <div class="success-msg">
-                    ✅ Import terminé ! Les pages sports ont été importées dans la base de données.
+                <div class="alert alert-success">
+                    Import terminé ! Contenu HTML extrait et importé dans la base de données.
                 </div>
             <?php endif; ?>
 
             <div class="summary">
                 <div class="summary-item">
-                    <div class="value"><?= count($results) ?></div>
-                    <div class="label">Sports détectés</div>
+                    <div class="summary-value"><?= count($results) ?></div>
+                    <div class="summary-label">Sports</div>
                 </div>
                 <div class="summary-item">
-                    <div class="value"><?= count(array_filter($results, fn($r) => $r['status'] === 'inserted')) ?></div>
-                    <div class="label">Nouveaux</div>
+                    <div class="summary-value"><?= count(array_filter($results, fn($r) => $r['status'] === 'inserted')) ?></div>
+                    <div class="summary-label">Nouveaux</div>
                 </div>
                 <div class="summary-item">
-                    <div class="value"><?= count(array_filter($results, fn($r) => $r['status'] === 'updated')) ?></div>
-                    <div class="label">Mis à jour</div>
+                    <div class="summary-value"><?= count(array_filter($results, fn($r) => $r['status'] === 'updated')) ?></div>
+                    <div class="summary-label">Mis à jour</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value"><?= $existingCount ?? 0 ?></div>
+                    <div class="summary-label">En BDD</div>
                 </div>
             </div>
 
             <div class="card">
-                <div class="sport-grid">
-                    <?php foreach ($results as $result): ?>
-                        <div class="sport-item">
-                            <div class="sport-icon"><?= $result['icon'] ?></div>
-                            <div class="sport-info">
-                                <h3><?= htmlspecialchars($result['sport']) ?></h3>
-                                <div class="file"><?= htmlspecialchars($result['file']) ?></div>
-                                <?php if (isset($result['extracted'])): ?>
-                                    <div class="sport-extracted">
-                                        <span class="badge">Trust: <?= $result['extracted']['trust_bar'] ?></span>
-                                        <span class="badge">FAQ: <?= $result['extracted']['faq'] ?></span>
-                                        <span class="badge">SEO: <?= $result['extracted']['seo_sections'] ?></span>
-                                        <span class="badge">Why: <?= $result['extracted']['why_items'] ?></span>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                            <div class="status <?= $result['status'] ?>">
-                                <?= $result['message'] ?>
-                            </div>
+                <?php foreach ($results as $result): ?>
+                    <div class="sport-item">
+                        <div class="sport-icon"><?= $result['icon'] ?></div>
+                        <div>
+                            <div class="sport-name"><?= htmlspecialchars($result['sport']) ?></div>
+                            <div class="sport-file"><?= htmlspecialchars($result['file']) ?></div>
                         </div>
-                    <?php endforeach; ?>
-                </div>
+                        <div class="sport-stats">
+                            <?php if (isset($result['extracted'])): ?>
+                                <span class="stat">Trust: <?= $result['extracted']['trust_bar'] ?></span>
+                                <span class="stat">Why: <?= $result['extracted']['why_items'] ?></span>
+                                <span class="stat">FAQ: <?= $result['extracted']['faq_items'] ?></span>
+                                <span class="stat">SEO: <?= $result['extracted']['seo_sections'] ?></span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="status status-<?= $result['status'] ?>">
+                            <?= $result['message'] ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
             </div>
 
             <div class="actions">
                 <?php if (!$doImport): ?>
-                    <form method="POST">
+                    <form method="POST" style="display:inline;">
+                        <input type="hidden" name="reset" value="1">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Supprimer toutes les pages sports existantes ?')">
+                            🗑️ Vider la table
+                        </button>
+                    </form>
+                    <form method="POST" style="display:inline;">
                         <input type="hidden" name="import" value="1">
-                        <button type="submit" class="btn">🚀 Lancer l'import</button>
+                        <button type="submit" class="btn btn-primary">
+                            🚀 Importer le contenu HTML
+                        </button>
                     </form>
                 <?php else: ?>
-                    <a href="admin.php?page=sport_pages" class="btn">📋 Voir les pages sports</a>
+                    <a href="admin.php?page=sport_pages" class="btn btn-primary">📋 Voir les pages sports</a>
                     <a href="import-sports-web.php" class="btn btn-secondary">🔄 Relancer</a>
                 <?php endif; ?>
             </div>
 
         <?php endif; ?>
 
-        <div style="text-align: center; margin-top: 3rem; color: rgba(255,255,255,0.4);">
+        <div style="text-align: center; margin-top: 2rem;">
             <a href="admin.php">← Retour à l'admin</a>
         </div>
     </div>
