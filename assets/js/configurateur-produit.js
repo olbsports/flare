@@ -685,42 +685,56 @@ class ConfigurateurProduit {
     }
 
     /**
-     * ÉTAPE 3 : Genre
+     * ÉTAPE 3 : Genre (configurable depuis admin)
      */
     renderStep3Genre() {
+        // Genres disponibles depuis la config admin
+        const gendersConfig = this.productConfig.genders || { homme: true, femme: true, mixte: true, enfant: true };
+        const gendersCustom = this.productConfig.genders_custom || [];
+
+        // Définition des genres de base avec icônes et descriptions
+        const baseGenders = [
+            { key: 'homme', label: 'Homme', icon: '👔', desc: 'Coupe masculine', enabled: gendersConfig.homme !== false },
+            { key: 'femme', label: 'Femme', icon: '👗', desc: 'Coupe féminine', enabled: gendersConfig.femme !== false },
+            { key: 'mixte', label: 'Mixte', icon: '👕', desc: 'Coupe unisexe', enabled: gendersConfig.mixte !== false },
+            { key: 'enfant', label: 'Enfant', icon: '🧒', desc: 'Coupe enfant', enabled: gendersConfig.enfant !== false }
+        ];
+
+        // Filtrer les genres activés
+        let enabledGenders = baseGenders.filter(g => g.enabled);
+
+        // Ajouter les genres personnalisés
+        gendersCustom.forEach(customGender => {
+            if (customGender && customGender.trim()) {
+                enabledGenders.push({
+                    key: customGender.toLowerCase().replace(/\s+/g, '_'),
+                    label: customGender.trim(),
+                    icon: '👤',
+                    desc: customGender.trim(),
+                    enabled: true
+                });
+            }
+        });
+
+        // Si aucun genre n'est activé, afficher tous les genres de base
+        if (enabledGenders.length === 0) {
+            enabledGenders = baseGenders;
+        }
+
         return `
             <div class="config-step-content">
                 <h3 class="config-step-title">Pour quel genre ?</h3>
                 <p class="config-step-description">Sélectionnez le genre pour adapter les coupes et tailles</p>
 
                 <div class="config-genre-options">
-                    <div class="config-genre-card ${this.configuration.genre === 'homme' ? 'selected' : ''}"
-                         onclick="configurateurProduitInstance.selectGenre('homme')">
-                        <div class="config-genre-icon">👔</div>
-                        <h4>Homme</h4>
-                        <p>Coupe masculine</p>
-                    </div>
-
-                    <div class="config-genre-card ${this.configuration.genre === 'femme' ? 'selected' : ''}"
-                         onclick="configurateurProduitInstance.selectGenre('femme')">
-                        <div class="config-genre-icon">👗</div>
-                        <h4>Femme</h4>
-                        <p>Coupe féminine</p>
-                    </div>
-
-                    <div class="config-genre-card ${this.configuration.genre === 'mixte' ? 'selected' : ''}"
-                         onclick="configurateurProduitInstance.selectGenre('mixte')">
-                        <div class="config-genre-icon">👕</div>
-                        <h4>Mixte</h4>
-                        <p>Coupe unisexe</p>
-                    </div>
-
-                    <div class="config-genre-card ${this.configuration.genre === 'enfants' ? 'selected' : ''}"
-                         onclick="configurateurProduitInstance.selectGenre('enfants')">
-                        <div class="config-genre-icon">🧒</div>
-                        <h4>Enfants</h4>
-                        <p>Coupe enfant</p>
-                    </div>
+                    ${enabledGenders.map(gender => `
+                        <div class="config-genre-card ${this.configuration.genre === gender.key ? 'selected' : ''}"
+                             onclick="configurateurProduitInstance.selectGenre('${gender.key}')">
+                            <div class="config-genre-icon">${gender.icon}</div>
+                            <h4>${gender.label}</h4>
+                            <p>${gender.desc}</p>
+                        </div>
+                    `).join('')}
                 </div>
             </div>
         `;
@@ -730,13 +744,14 @@ class ConfigurateurProduit {
      * ÉTAPE 4 : Tailles et quantités
      */
     renderStep4Tailles() {
-        // Utiliser les tailles enfants si genre=enfants
-        const tailles = this.configuration.genre === 'enfants' ? this.taillesEnfants : this.taillesDisponibles;
+        // Utiliser les tailles enfants si genre=enfant ou enfants
+        const isEnfant = this.configuration.genre === 'enfant' || this.configuration.genre === 'enfants';
+        const tailles = isEnfant ? this.taillesEnfants : this.taillesDisponibles;
 
         return `
             <div class="config-step-content">
                 <h3 class="config-step-title">Tailles et quantités</h3>
-                <p class="config-step-description">Indiquez le nombre de pièces par taille ${this.configuration.genre === 'enfants' ? '(tailles enfants)' : ''}</p>
+                <p class="config-step-description">Indiquez le nombre de pièces par taille ${isEnfant ? '(tailles enfants)' : ''}</p>
 
                 <div class="config-tailles-grid">
                     ${tailles.map(taille => `
