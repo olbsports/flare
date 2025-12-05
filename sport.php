@@ -420,7 +420,55 @@ if (empty($faqItems) || empty(array_filter($faqItems, fn($f) => !empty($f['quest
         </div>
     </section>
 
-    <!-- SEO Footer Section 1 -->
+    <?php
+    // ========== SECTIONS SEO ==========
+    // Utiliser les sections de la BDD si disponibles, sinon les sections par défaut
+    $hasSeoFromDB = !empty($seoSections) && count($seoSections) >= 2;
+
+    if ($hasSeoFromDB):
+        // Afficher les sections SEO importées depuis la BDD
+        foreach ($seoSections as $sec):
+            if (!empty($sec['title']) || !empty($sec['blocks'])):
+    ?>
+    <section class="seo-footer-section">
+        <div class="container">
+            <div class="section-header">
+                <?php if (!empty($sec['eyebrow'])): ?>
+                <div class="section-eyebrow"><?= htmlspecialchars($sec['eyebrow']) ?></div>
+                <?php endif; ?>
+                <?php if (!empty($sec['title'])): ?>
+                <h2 class="section-title"><?= htmlspecialchars($sec['title']) ?></h2>
+                <?php endif; ?>
+            </div>
+
+            <?php if (!empty($sec['blocks'])): ?>
+            <div class="seo-content-grid">
+                <?php foreach ($sec['blocks'] as $block): ?>
+                <div class="seo-content-block">
+                    <?php if (!empty($block['title'])): ?>
+                    <h3><?= htmlspecialchars($block['title']) ?></h3>
+                    <?php endif; ?>
+                    <?= $block['content'] ?? '' ?>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+
+            <?php if (!empty($sec['keywords'])): ?>
+            <div class="seo-keywords">
+                <h4><?= htmlspecialchars($sec['keywords_title'] ?: 'Mots-clés') ?></h4>
+                <p><?= htmlspecialchars($sec['keywords']) ?></p>
+            </div>
+            <?php endif; ?>
+        </div>
+    </section>
+    <?php
+            endif;
+        endforeach;
+    else:
+        // Sections SEO par défaut si pas de données dans la BDD
+    ?>
+    <!-- SEO Footer Section 1 (Default) -->
     <section class="seo-footer-section">
         <div class="container">
             <div class="section-header">
@@ -473,7 +521,7 @@ if (empty($faqItems) || empty(array_filter($faqItems, fn($f) => !empty($f['quest
         </div>
     </section>
 
-    <!-- SEO Content Section 2 -->
+    <!-- SEO Content Section 2 (Default) -->
     <section class="seo-footer-section">
         <div class="container">
             <div class="section-header">
@@ -526,29 +574,6 @@ if (empty($faqItems) || empty(array_filter($faqItems, fn($f) => !empty($f['quest
             </div>
         </div>
     </section>
-
-    <?php // Sections SEO personnalisées depuis l'admin ?>
-    <?php if (!empty($seoSections)): ?>
-    <?php foreach ($seoSections as $sec): ?>
-    <?php if (!empty($sec['title']) || !empty($sec['content'])): ?>
-    <section class="seo-footer-section">
-        <div class="container">
-            <?php if (!empty($sec['title'])): ?>
-            <div class="section-header">
-                <h2 class="section-title"><?= htmlspecialchars($sec['title']) ?></h2>
-            </div>
-            <?php endif; ?>
-            <?php if (!empty($sec['content'])): ?>
-            <div class="seo-content-grid">
-                <div class="seo-content-block" style="grid-column: 1/-1;">
-                    <?= $sec['content'] ?>
-                </div>
-            </div>
-            <?php endif; ?>
-        </div>
-    </section>
-    <?php endif; ?>
-    <?php endforeach; ?>
     <?php endif; ?>
 
     <!-- 🔥 FOOTER DYNAMIQUE -->
