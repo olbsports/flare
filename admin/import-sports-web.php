@@ -183,9 +183,22 @@ function extractAllContent($html, $config) {
         $data['cta_subtitle'] = '';
     }
 
-    $data['cta_button_text'] = 'Demander un devis';
-    $data['cta_button_link'] = '/pages/info/contact.html';
-    $data['cta_whatsapp'] = '+33612345678';
+    // Extraire le bouton CTA principal
+    if (preg_match('/<a[^>]*class=["\']btn-cta-primary["\'][^>]*href=["\']([^"\']+)["\'][^>]*>(.*?)<\/a>/is', $html, $m)) {
+        $data['cta_button_link'] = trim($m[1]);
+        $btnText = preg_replace('/<svg.*?<\/svg>/is', '', $m[2]);
+        $data['cta_button_text'] = trim(strip_tags(html_entity_decode($btnText, ENT_QUOTES, 'UTF-8')));
+    } else {
+        $data['cta_button_text'] = 'Demander un devis ' . strtolower($config['sport_name']);
+        $data['cta_button_link'] = '/pages/info/contact.html';
+    }
+
+    // Extraire le numéro WhatsApp
+    if (preg_match('/<a[^>]*class=["\']btn-cta-secondary["\'][^>]*href=["\']https:\/\/wa\.me\/(\d+)["\'][^>]*>([^<]+)<\/a>/is', $html, $m)) {
+        $data['cta_whatsapp'] = trim(html_entity_decode($m[2], ENT_QUOTES, 'UTF-8'));
+    } else {
+        $data['cta_whatsapp'] = '+33 1 23 45 67 89';
+    }
 
     // ========== FAQ - Extraire EXACTEMENT chaque Q/R ==========
     $data['faq_title'] = 'FAQ ' . $config['sport_name'];
