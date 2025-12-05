@@ -995,3 +995,124 @@ body {
         white-space: nowrap;
     }
 }
+
+/* ==============================================
+   WYSIWYG CONTENT - Styles pour contenu admin
+   ============================================== */
+.wysiwyg-content {
+    /* Reset des styles Quill */
+    font-family: 'Inter', sans-serif !important;
+    color: #333 !important;
+    line-height: 1.8 !important;
+}
+
+.wysiwyg-content * {
+    font-family: inherit !important;
+}
+
+.wysiwyg-content h1,
+.wysiwyg-content h2,
+.wysiwyg-content h3,
+.wysiwyg-content h4,
+.wysiwyg-content h5,
+.wysiwyg-content h6 {
+    font-family: 'Bebas Neue', sans-serif !important;
+    letter-spacing: 1px;
+    margin-top: 1.5em;
+    margin-bottom: 0.75em;
+    color: #1a1a1a !important;
+}
+
+.wysiwyg-content h2 {
+    font-size: 36px;
+    margin-bottom: 24px;
+}
+
+.wysiwyg-content h3 {
+    font-size: 28px;
+    margin: 40px 0 16px;
+}
+
+.wysiwyg-content h4 {
+    font-size: 22px;
+}
+
+.wysiwyg-content p {
+    font-size: 16px;
+    line-height: 1.8;
+    margin-bottom: 1.25em;
+    color: #495057 !important;
+}
+
+.wysiwyg-content ul,
+.wysiwyg-content ol {
+    margin: 1em 0 1.5em 1.5em;
+    padding: 0;
+}
+
+.wysiwyg-content li {
+    margin-bottom: 0.5em;
+    line-height: 1.7;
+}
+
+.wysiwyg-content a {
+    color: #FF4B26;
+    text-decoration: underline;
+}
+
+.wysiwyg-content a:hover {
+    color: #E63910;
+}
+
+.wysiwyg-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 1em 0;
+}
+
+.wysiwyg-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5em 0;
+}
+
+.wysiwyg-content table th,
+.wysiwyg-content table td {
+    padding: 12px 16px;
+    border: 1px solid #e0e0e0;
+    text-align: left;
+}
+
+.wysiwyg-content table th {
+    background: #f5f5f5;
+    font-weight: 600;
+}
+
+.wysiwyg-content table tr:nth-child(even) {
+    background: #fafafa;
+}
+
+/* Supprimer styles Quill inline */
+.wysiwyg-content .ql-align-center { text-align: center; }
+.wysiwyg-content .ql-align-right { text-align: right; }
+.wysiwyg-content .ql-align-justify { text-align: justify; }
+
+/* Reset couleurs Quill */
+.wysiwyg-content [style*="color"] {
+    color: inherit !important;
+}
+
+.wysiwyg-content [style*="background"] {
+    background: transparent !important;
+}
+
+/* Premier élément sans marge top */
+.wysiwyg-content > *:first-child {
+    margin-top: 0;
+}
+
+/* Dernier élément sans marge bottom */
+.wysiwyg-content > *:last-child {
+    margin-bottom: 0;
+}

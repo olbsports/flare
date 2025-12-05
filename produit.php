@@ -449,7 +449,7 @@ $tabFaq = $product['tab_faq'] ?? '';
         <!-- TAB: DESCRIPTION -->
         <div class="tab-content active" id="tab-description">
             <?php if (!empty($tabDescription)): ?>
-                <?php echo $tabDescription; ?>
+                <div class="wysiwyg-content"><?php echo $tabDescription; ?></div>
             <?php else: ?>
             <h2><?php echo htmlspecialchars($nom); ?> - Équipement <?php echo htmlspecialchars($sportLower); ?> personnalisé</h2>
 
@@ -534,7 +534,7 @@ $tabFaq = $product['tab_faq'] ?? '';
         <!-- TAB: SPECIFICATIONS -->
         <div class="tab-content" id="tab-specifications">
             <?php if (!empty($tabSpecifications)): ?>
-                <?php echo $tabSpecifications; ?>
+                <div class="wysiwyg-content"><?php echo $tabSpecifications; ?></div>
             <?php else: ?>
             <h2>Fiche Technique Complète</h2>
             <h3>Spécifications Produit</h3>
@@ -589,7 +589,7 @@ $tabFaq = $product['tab_faq'] ?? '';
                 <h2><?php echo htmlspecialchars($sizeChart['nom']); ?></h2>
                 <?php echo $sizeChart['html_content']; ?>
             <?php elseif (!empty($tabSizes)): ?>
-                <?php echo $tabSizes; ?>
+                <div class="wysiwyg-content"><?php echo $tabSizes; ?></div>
             <?php else: ?>
             <h2>Guide des Tailles</h2>
 
@@ -624,7 +624,7 @@ $tabFaq = $product['tab_faq'] ?? '';
         <!-- TAB: FAQ -->
         <div class="tab-content" id="tab-faq">
             <?php if (!empty($tabFaq)): ?>
-                <?php echo $tabFaq; ?>
+                <div class="wysiwyg-content"><?php echo $tabFaq; ?></div>
             <?php else: ?>
             <h2>Questions Fréquentes - <?php echo htmlspecialchars($nom); ?></h2>
 
