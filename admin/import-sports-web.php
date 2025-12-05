@@ -133,10 +133,16 @@ function extractAllContent($html, $config) {
             $data['why_subtitle'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
         }
 
-        // Cards - extraire chaque carte avec son SVG, titre et description
-        if (preg_match_all('/<div class=["\']why-us-card-redesign["\']>(.*?)<\/div>\s*<\/div>/is', $whyHtml, $cards, PREG_SET_ORDER)) {
-            foreach ($cards as $card) {
-                $cardHtml = $card[1];
+        // Extraire la grille why-us
+        if (preg_match('/<div class=["\']why-us-grid-redesign["\']>(.*?)<\/div>\s*<\/div>\s*<\/section>/is', $whyHtml, $gridMatch)) {
+            $gridHtml = $gridMatch[1];
+
+            // Trouver chaque carte - utiliser split sur le début de chaque carte
+            $cardParts = preg_split('/<div class=["\']why-us-card-redesign["\']>/is', $gridHtml);
+
+            foreach ($cardParts as $cardHtml) {
+                if (empty(trim($cardHtml))) continue;
+
                 $item = ['icon' => '', 'title' => '', 'description' => ''];
 
                 // Extraire le SVG complet
@@ -144,14 +150,16 @@ function extractAllContent($html, $config) {
                     $item['icon'] = trim($svg[0]);
                 }
 
-                // Titre
+                // Titre h3
                 if (preg_match('/<h3>([^<]+)<\/h3>/i', $cardHtml, $m)) {
                     $item['title'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
                 }
 
-                // Description
-                if (preg_match('/<p>([^<]+)<\/p>/i', $cardHtml, $m)) {
-                    $item['description'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
+                // Description - prendre le dernier <p> qui contient le texte
+                if (preg_match_all('/<p>([^<]+)<\/p>/i', $cardHtml, $pMatches)) {
+                    // Prendre le dernier paragraphe (celui avec la description)
+                    $lastP = end($pMatches[1]);
+                    $item['description'] = trim(html_entity_decode($lastP, ENT_QUOTES, 'UTF-8'));
                 }
 
                 if (!empty($item['title'])) {
@@ -294,6 +302,13 @@ try {
         products_eyebrow VARCHAR(100),
         products_description TEXT,
         show_filters BOOLEAN DEFAULT TRUE,
+        filter_famille BOOLEAN DEFAULT TRUE,
+        filter_genre BOOLEAN DEFAULT TRUE,
+        filter_sport BOOLEAN DEFAULT FALSE,
+        filter_sort BOOLEAN DEFAULT TRUE,
+        products_source ENUM('manual', 'sport', 'famille') DEFAULT 'manual',
+        products_sport_filter VARCHAR(100),
+        products_famille_filter VARCHAR(100),
         cta_title VARCHAR(255),
         cta_subtitle TEXT,
         cta_features JSON,
@@ -311,6 +326,19 @@ try {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    // Migration: ajouter les colonnes si elles n'existent pas
+    try {
+        $pdo->exec("ALTER TABLE sport_pages ADD COLUMN IF NOT EXISTS filter_famille BOOLEAN DEFAULT TRUE");
+        $pdo->exec("ALTER TABLE sport_pages ADD COLUMN IF NOT EXISTS filter_genre BOOLEAN DEFAULT TRUE");
+        $pdo->exec("ALTER TABLE sport_pages ADD COLUMN IF NOT EXISTS filter_sport BOOLEAN DEFAULT FALSE");
+        $pdo->exec("ALTER TABLE sport_pages ADD COLUMN IF NOT EXISTS filter_sort BOOLEAN DEFAULT TRUE");
+        $pdo->exec("ALTER TABLE sport_pages ADD COLUMN IF NOT EXISTS products_source ENUM('manual', 'sport', 'famille') DEFAULT 'manual'");
+        $pdo->exec("ALTER TABLE sport_pages ADD COLUMN IF NOT EXISTS products_sport_filter VARCHAR(100)");
+        $pdo->exec("ALTER TABLE sport_pages ADD COLUMN IF NOT EXISTS products_famille_filter VARCHAR(100)");
+    } catch (Exception $e) {
+        // Colonnes existent déjà ou autre erreur non bloquante
+    }
 
     // Compter les entrées existantes
     $stmt = $pdo->query("SELECT COUNT(*) FROM sport_pages");

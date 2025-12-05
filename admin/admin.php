@@ -670,7 +670,9 @@ if ($action && $pdo) {
                 $fields = [
                     'slug', 'title', 'sport_name', 'sport_icon', 'meta_title', 'meta_description',
                     'hero_title', 'hero_subtitle', 'hero_eyebrow', 'hero_image', 'hero_cta_text', 'hero_cta_link',
-                    'products_title', 'products_subtitle', 'products_eyebrow', 'products_description', 'show_filters',
+                    'products_title', 'products_subtitle', 'products_eyebrow', 'products_description',
+                    'show_filters', 'filter_famille', 'filter_genre', 'filter_sport', 'filter_sort',
+                    'products_source', 'products_sport_filter', 'products_famille_filter',
                     'cta_title', 'cta_subtitle', 'cta_button_text', 'cta_button_link', 'cta_whatsapp',
                     'why_title', 'why_subtitle',
                     'faq_title', 'active', 'sort_order'
@@ -694,6 +696,13 @@ if ($action && $pdo) {
                     $_POST['products_eyebrow'] ?? '',
                     $_POST['products_description'] ?? '',
                     isset($_POST['show_filters']) ? 1 : 0,
+                    isset($_POST['filter_famille']) ? 1 : 0,
+                    isset($_POST['filter_genre']) ? 1 : 0,
+                    isset($_POST['filter_sport']) ? 1 : 0,
+                    isset($_POST['filter_sort']) ? 1 : 0,
+                    $_POST['products_source'] ?? 'manual',
+                    $_POST['products_sport_filter'] ?? '',
+                    $_POST['products_famille_filter'] ?? '',
                     $_POST['cta_title'] ?? '',
                     $_POST['cta_subtitle'] ?? '',
                     $_POST['cta_button_text'] ?? '',
@@ -5170,20 +5179,83 @@ $user = $_SESSION['admin_user'] ?? null;
                             <label class="form-label">Description</label>
                             <textarea name="products_description" class="form-control" rows="2"><?= htmlspecialchars($sp['products_description'] ?? '') ?></textarea>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">
+
+                        <hr style="margin: 30px 0;">
+                        <h4>Configuration des filtres frontend</h4>
+                        <p style="color: var(--text-muted); margin-bottom: 15px;">Choisissez quels filtres afficher sur la page</p>
+                        <div class="form-row" style="flex-wrap: wrap; gap: 20px;">
+                            <label class="form-label" style="display: flex; align-items: center; gap: 8px; margin: 0; cursor: pointer;">
                                 <input type="checkbox" name="show_filters" value="1" <?= ($sp['show_filters'] ?? 1) ? 'checked' : '' ?>>
                                 Afficher les filtres
+                            </label>
+                            <label class="form-label" style="display: flex; align-items: center; gap: 8px; margin: 0; cursor: pointer;">
+                                <input type="checkbox" name="filter_famille" value="1" <?= ($sp['filter_famille'] ?? 1) ? 'checked' : '' ?>>
+                                Filtre par Famille
+                            </label>
+                            <label class="form-label" style="display: flex; align-items: center; gap: 8px; margin: 0; cursor: pointer;">
+                                <input type="checkbox" name="filter_genre" value="1" <?= ($sp['filter_genre'] ?? 1) ? 'checked' : '' ?>>
+                                Filtre par Genre
+                            </label>
+                            <label class="form-label" style="display: flex; align-items: center; gap: 8px; margin: 0; cursor: pointer;">
+                                <input type="checkbox" name="filter_sport" value="1" <?= ($sp['filter_sport'] ?? 0) ? 'checked' : '' ?>>
+                                Filtre par Sport
+                            </label>
+                            <label class="form-label" style="display: flex; align-items: center; gap: 8px; margin: 0; cursor: pointer;">
+                                <input type="checkbox" name="filter_sort" value="1" <?= ($sp['filter_sort'] ?? 1) ? 'checked' : '' ?>>
+                                Tri (prix, nom)
                             </label>
                         </div>
 
                         <hr style="margin: 30px 0;">
-                        <h4>Produits à afficher</h4>
-                        <p style="color: var(--text-muted); margin-bottom: 15px;">Sélectionnez les produits de ce sport.</p>
+                        <h4>Source des produits</h4>
+                        <p style="color: var(--text-muted); margin-bottom: 15px;">Choisissez comment afficher les produits</p>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Mode d'affichage</label>
+                                <select name="products_source" class="form-control" id="productsSourceSelect" onchange="toggleProductsSource()">
+                                    <option value="manual" <?= ($sp['products_source'] ?? 'manual') === 'manual' ? 'selected' : '' ?>>Sélection manuelle</option>
+                                    <option value="sport" <?= ($sp['products_source'] ?? '') === 'sport' ? 'selected' : '' ?>>Tous les produits d'un sport</option>
+                                    <option value="famille" <?= ($sp['products_source'] ?? '') === 'famille' ? 'selected' : '' ?>>Tous les produits d'une famille</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="sportFilterGroup" style="<?= ($sp['products_source'] ?? 'manual') !== 'sport' ? 'display:none;' : '' ?>">
+                                <label class="form-label">Filtrer par sport</label>
+                                <select name="products_sport_filter" class="form-control">
+                                    <option value="">-- Choisir --</option>
+                                    <?php
+                                    $sports = array_unique(array_column($allProducts, 'sport'));
+                                    sort($sports);
+                                    foreach ($sports as $sport):
+                                        if (empty($sport)) continue;
+                                    ?>
+                                    <option value="<?= htmlspecialchars($sport) ?>" <?= ($sp['products_sport_filter'] ?? '') === $sport ? 'selected' : '' ?>><?= htmlspecialchars($sport) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="form-group" id="familleFilterGroup" style="<?= ($sp['products_source'] ?? 'manual') !== 'famille' ? 'display:none;' : '' ?>">
+                                <label class="form-label">Filtrer par famille</label>
+                                <select name="products_famille_filter" class="form-control">
+                                    <option value="">-- Choisir --</option>
+                                    <?php
+                                    $familles = array_unique(array_column($allProducts, 'famille'));
+                                    sort($familles);
+                                    foreach ($familles as $fam):
+                                        if (empty($fam)) continue;
+                                    ?>
+                                    <option value="<?= htmlspecialchars($fam) ?>" <?= ($sp['products_famille_filter'] ?? '') === $fam ? 'selected' : '' ?>><?= htmlspecialchars($fam) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="manualProductsSection" style="<?= ($sp['products_source'] ?? 'manual') !== 'manual' ? 'display:none;' : '' ?>">
+                        <hr style="margin: 30px 0;">
+                        <h4>Sélection manuelle des produits</h4>
+                        <p style="color: var(--text-muted); margin-bottom: 15px;">Glissez-déposez pour réorganiser l'ordre d'affichage. Cliquez pour ajouter/retirer.</p>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                             <div>
-                                <label class="form-label">Produits sélectionnés (<?= count($selectedProducts) ?>)</label>
+                                <label class="form-label">Produits sélectionnés (<span id="selectedCount"><?= count($selectedProducts) ?></span>)</label>
                                 <div id="selectedSportProducts" style="min-height: 200px; max-height: 400px; overflow-y: auto; border: 2px dashed #e2e8f0; border-radius: 8px; padding: 10px;">
                                     <?php foreach ($selectedProducts as $prodId):
                                         $prod = array_filter($allProducts, fn($p) => $p['id'] == $prodId);
@@ -5191,11 +5263,12 @@ $user = $_SESSION['admin_user'] ?? null;
                                         if ($prod):
                                             $prodName = !empty($prod['meta_title']) ? $prod['meta_title'] : $prod['nom'];
                                     ?>
-                                    <div class="sport-prod-item" data-id="<?= $prod['id'] ?>" style="display: flex; align-items: center; gap: 10px; padding: 8px; background: #fff5f3; border: 1px solid #FF4B26; border-radius: 6px; margin-bottom: 8px;">
+                                    <div class="sport-prod-item" data-id="<?= $prod['id'] ?>" draggable="true" style="display: flex; align-items: center; gap: 10px; padding: 8px; background: #fff5f3; border: 1px solid #FF4B26; border-radius: 6px; margin-bottom: 8px; cursor: grab;">
+                                        <span class="drag-handle" style="color: #ccc; cursor: grab;">⋮⋮</span>
                                         <img src="<?= htmlspecialchars($prod['photo_1'] ?: '/photos/placeholder.webp') ?>" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
                                         <div style="flex: 1; overflow: hidden;">
                                             <div style="font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= htmlspecialchars($prodName) ?></div>
-                                            <div style="font-size: 10px; color: #666;"><?= htmlspecialchars($prod['sport']) ?></div>
+                                            <div style="font-size: 10px; color: #666;"><?= htmlspecialchars($prod['sport']) ?> • <?= htmlspecialchars($prod['famille'] ?? '') ?></div>
                                         </div>
                                         <input type="hidden" name="page_products[]" value="<?= $prod['id'] ?>">
                                         <button type="button" class="btn btn-sm" style="color: #ef4444;" onclick="removeSportProduct(this)">✕</button>
@@ -5211,17 +5284,18 @@ $user = $_SESSION['admin_user'] ?? null;
                                         $prodName = !empty($prod['meta_title']) ? $prod['meta_title'] : $prod['nom'];
                                         $isSelected = in_array($prod['id'], $selectedProducts);
                                     ?>
-                                    <div class="sport-prod-avail <?= $isSelected ? 'selected' : '' ?>" data-id="<?= $prod['id'] ?>" data-name="<?= htmlspecialchars(strtolower($prodName)) ?>" style="display: flex; align-items: center; gap: 10px; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 6px; cursor: pointer; <?= $isSelected ? 'opacity: 0.5;' : '' ?>" onclick="addSportProduct(this, <?= $prod['id'] ?>, <?= htmlspecialchars(json_encode($prod)) ?>)">
+                                    <div class="sport-prod-avail <?= $isSelected ? 'selected' : '' ?>" data-id="<?= $prod['id'] ?>" data-name="<?= htmlspecialchars(strtolower($prodName)) ?>" data-sport="<?= htmlspecialchars(strtolower($prod['sport'] ?? '')) ?>" data-famille="<?= htmlspecialchars(strtolower($prod['famille'] ?? '')) ?>" style="display: flex; align-items: center; gap: 10px; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 6px; cursor: pointer; <?= $isSelected ? 'opacity: 0.5;' : '' ?>" onclick="addSportProduct(this, <?= $prod['id'] ?>, <?= htmlspecialchars(json_encode($prod)) ?>)">
                                         <img src="<?= htmlspecialchars($prod['photo_1'] ?: '/photos/placeholder.webp') ?>" style="width: 36px; height: 36px; object-fit: cover; border-radius: 4px;">
                                         <div style="flex: 1; overflow: hidden;">
                                             <div style="font-size: 12px; font-weight: 600;"><?= htmlspecialchars($prodName) ?></div>
-                                            <div style="font-size: 10px; color: #666;"><?= htmlspecialchars($prod['sport'] . ' • ' . ($prod['prix_500'] ? number_format($prod['prix_500'], 2) . '€' : '-')) ?></div>
+                                            <div style="font-size: 10px; color: #666;"><?= htmlspecialchars($prod['sport'] . ' • ' . $prod['famille'] . ' • ' . ($prod['prix_500'] ? number_format($prod['prix_500'], 2) . '€' : '-')) ?></div>
                                         </div>
                                     </div>
                                     <?php endforeach; ?>
                                 </div>
                             </div>
                         </div>
+                        </div><!-- end manualProductsSection -->
                     </div>
                 </div>
 
@@ -5422,8 +5496,9 @@ $user = $_SESSION['admin_user'] ?? null;
             el.style.opacity = '0.5';
 
             var prodName = prod.meta_title || prod.nom;
-            var html = '<div class="sport-prod-item" data-id="' + id + '" style="display: flex; align-items: center; gap: 10px; padding: 8px; background: #fff5f3; border: 1px solid #FF4B26; border-radius: 6px; margin-bottom: 8px;"><img src="' + (prod.photo_1 || '/photos/placeholder.webp') + '" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;"><div style="flex: 1; overflow: hidden;"><div style="font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + escapeHtmlSport(prodName) + '</div><div style="font-size: 10px; color: #666;">' + escapeHtmlSport(prod.sport) + '</div></div><input type="hidden" name="page_products[]" value="' + id + '"><button type="button" class="btn btn-sm" style="color: #ef4444;" onclick="removeSportProduct(this)">✕</button></div>';
+            var html = '<div class="sport-prod-item" data-id="' + id + '" draggable="true" style="display: flex; align-items: center; gap: 10px; padding: 8px; background: #fff5f3; border: 1px solid #FF4B26; border-radius: 6px; margin-bottom: 8px; cursor: grab;"><span class="drag-handle" style="color: #ccc; cursor: grab;">⋮⋮</span><img src="' + (prod.photo_1 || '/photos/placeholder.webp') + '" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;"><div style="flex: 1; overflow: hidden;"><div style="font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + escapeHtmlSport(prodName) + '</div><div style="font-size: 10px; color: #666;">' + escapeHtmlSport(prod.sport) + ' • ' + escapeHtmlSport(prod.famille || '') + '</div></div><input type="hidden" name="page_products[]" value="' + id + '"><button type="button" class="btn btn-sm" style="color: #ef4444;" onclick="removeSportProduct(this)">✕</button></div>';
             document.getElementById('selectedSportProducts').insertAdjacentHTML('beforeend', html);
+            updateSelectedCount();
         }
 
         function removeSportProduct(btn) {
@@ -5435,6 +5510,13 @@ $user = $_SESSION['admin_user'] ?? null;
                 avail.classList.remove('selected');
                 avail.style.opacity = '1';
             }
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            var count = document.querySelectorAll('#selectedSportProducts .sport-prod-item').length;
+            var countEl = document.getElementById('selectedCount');
+            if (countEl) countEl.textContent = count;
         }
 
         function filterSportProducts() {
@@ -5449,6 +5531,67 @@ $user = $_SESSION['admin_user'] ?? null;
             if (!str) return '';
             return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
         }
+
+        // Toggle products source visibility
+        function toggleProductsSource() {
+            var source = document.getElementById('productsSourceSelect').value;
+            document.getElementById('sportFilterGroup').style.display = source === 'sport' ? '' : 'none';
+            document.getElementById('familleFilterGroup').style.display = source === 'famille' ? '' : 'none';
+            // Show/hide manual selection
+            var manualSection = document.getElementById('manualProductsSection');
+            if (manualSection) {
+                manualSection.style.display = source === 'manual' ? '' : 'none';
+            }
+        }
+
+        // Drag and drop for product reordering
+        var draggedProduct = null;
+        function initDragDrop() {
+            var container = document.getElementById('selectedSportProducts');
+            if (!container) return;
+
+            container.addEventListener('dragstart', function(e) {
+                if (e.target.classList.contains('sport-prod-item')) {
+                    draggedProduct = e.target;
+                    e.target.style.opacity = '0.5';
+                }
+            });
+
+            container.addEventListener('dragend', function(e) {
+                if (e.target.classList.contains('sport-prod-item')) {
+                    e.target.style.opacity = '1';
+                    draggedProduct = null;
+                }
+            });
+
+            container.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                var afterElement = getDragAfterElement(container, e.clientY);
+                if (draggedProduct) {
+                    if (afterElement == null) {
+                        container.appendChild(draggedProduct);
+                    } else {
+                        container.insertBefore(draggedProduct, afterElement);
+                    }
+                }
+            });
+        }
+
+        function getDragAfterElement(container, y) {
+            var draggableElements = [...container.querySelectorAll('.sport-prod-item:not([style*="opacity: 0.5"])')];
+            return draggableElements.reduce((closest, child) => {
+                var box = child.getBoundingClientRect();
+                var offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        // Initialize drag and drop on page load
+        document.addEventListener('DOMContentLoaded', initDragDrop);
         </script>
 
         <?php // ============ QUOTES ============ ?>
