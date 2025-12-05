@@ -1074,23 +1074,63 @@ body {
 .wysiwyg-content table {
     width: 100%;
     border-collapse: collapse;
-    margin: 1.5em 0;
+    margin: 32px 0;
+    background: #fff;
 }
 
+/* Style specs-table pour tableaux à 2 colonnes (label/valeur) */
+.wysiwyg-content table:not(.size-table) tr {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.wysiwyg-content table:not(.size-table) td {
+    padding: 16px;
+    border: none;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.wysiwyg-content table:not(.size-table) td:first-child {
+    font-weight: 700;
+    color: #1a1a1a;
+    width: 40%;
+}
+
+.wysiwyg-content table:not(.size-table) td:last-child {
+    color: #666;
+}
+
+/* Style size-table pour tableaux de tailles (avec headers) */
 .wysiwyg-content table th,
-.wysiwyg-content table td {
-    padding: 12px 16px;
-    border: 1px solid #e0e0e0;
+.wysiwyg-content table thead td {
+    padding: 16px;
     text-align: left;
+    background: #000 !important;
+    color: #fff !important;
+    font-weight: 700;
+    border: 1px solid #000;
 }
 
-.wysiwyg-content table th {
-    background: #f5f5f5;
-    font-weight: 600;
+.wysiwyg-content table.size-table td,
+.wysiwyg-content table tbody td {
+    padding: 16px;
+    text-align: left;
+    border: 1px solid #e0e0e0;
 }
 
-.wysiwyg-content table tr:nth-child(even) {
+.wysiwyg-content table tr:nth-child(even) td {
     background: #fafafa;
+}
+
+.wysiwyg-content table tr:nth-child(odd) td {
+    background: #fff;
+}
+
+/* Assurer que les headers gardent leur style */
+.wysiwyg-content table th,
+.wysiwyg-content table thead td,
+.wysiwyg-content table tr:first-child th {
+    background: #000 !important;
+    color: #fff !important;
 }
 
 /* Supprimer styles Quill inline */
@@ -1098,12 +1138,16 @@ body {
 .wysiwyg-content .ql-align-right { text-align: right; }
 .wysiwyg-content .ql-align-justify { text-align: justify; }
 
-/* Reset couleurs Quill */
-.wysiwyg-content [style*="color"] {
+/* Reset couleurs Quill (sauf tableaux) */
+.wysiwyg-content p[style*="color"],
+.wysiwyg-content span[style*="color"],
+.wysiwyg-content div[style*="color"] {
     color: inherit !important;
 }
 
-.wysiwyg-content [style*="background"] {
+.wysiwyg-content p[style*="background"],
+.wysiwyg-content span[style*="background"],
+.wysiwyg-content div[style*="background"] {
     background: transparent !important;
 }
 
@@ -1115,4 +1159,21 @@ body {
 /* Dernier élément sans marge bottom */
 .wysiwyg-content > *:last-child {
     margin-bottom: 0;
+}
+
+/* ==============================================
+   PRODUITS ASSOCIÉS - Complétez votre équipement
+   ============================================== */
+.related-product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    border-color: #FF4B26 !important;
+}
+
+.related-product-card img {
+    transition: transform 0.3s ease;
+}
+
+.related-product-card:hover img {
+    transform: scale(1.05);
 }

@@ -119,13 +119,50 @@ $isNew = !empty($product['is_new']);
 $onSale = !empty($product['on_sale']);
 $relatedProductIds = json_decode($product['related_products'] ?? '[]', true) ?: [];
 
-// Charger les produits liés
+// Charger les produits liés (ou produits par défaut si aucun sélectionné)
 $relatedProducts = [];
 if (!empty($relatedProductIds)) {
+    // Produits sélectionnés manuellement dans l'admin
     $placeholders = implode(',', array_fill(0, count($relatedProductIds), '?'));
     $stmt = $pdo->prepare("SELECT id, reference, nom, meta_title, photo_1, prix_500, sport, famille FROM products WHERE id IN ($placeholders) AND active = 1");
     $stmt->execute($relatedProductIds);
     $relatedProducts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    // Charger des produits par défaut basés sur le sport et la famille du produit
+    // Stratégie: produits complémentaires de la même catégorie sportive
+    $defaultRelatedQuery = "
+        SELECT id, reference, nom, meta_title, photo_1, prix_500, sport, famille
+        FROM products
+        WHERE active = 1
+        AND id != ?
+        AND sport = ?
+        AND famille != ?
+        ORDER BY RAND()
+        LIMIT 4
+    ";
+    $stmt = $pdo->prepare($defaultRelatedQuery);
+    $stmt->execute([$product['id'], $sport, $famille]);
+    $relatedProducts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Si pas assez de produits du même sport, prendre d'autres produits
+    if (count($relatedProducts) < 4) {
+        $excludeIds = array_column($relatedProducts, 'id');
+        $excludeIds[] = $product['id'];
+        $placeholders = implode(',', array_fill(0, count($excludeIds), '?'));
+
+        $moreQuery = "
+            SELECT id, reference, nom, meta_title, photo_1, prix_500, sport, famille
+            FROM products
+            WHERE active = 1
+            AND id NOT IN ($placeholders)
+            ORDER BY RAND()
+            LIMIT ?
+        ";
+        $stmtMore = $pdo->prepare($moreQuery);
+        $params = array_merge($excludeIds, [4 - count($relatedProducts)]);
+        $stmtMore->execute($params);
+        $relatedProducts = array_merge($relatedProducts, $stmtMore->fetchAll(PDO::FETCH_ASSOC));
+    }
 }
 
 // Mapper stock_status vers schema.org
@@ -525,45 +562,33 @@ $tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
                 </details>
             </div>
 
-            <!-- PRODUITS LIÉS / VENTE CROISÉE -->
+            <!-- PRODUITS LIÉS / COMPLÉTEZ VOTRE ÉQUIPEMENT -->
             <?php if (!empty($relatedProducts)): ?>
             <div style="margin: 2rem 0; padding: 2rem; background: linear-gradient(135deg, #f8f8f8 0%, #fff 100%); border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                <h3 style="font-size: 1.4rem; margin-bottom: 1.25rem; color: #1a1a1a; font-weight: 700;">Produits associés</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
+                <h3 style="font-size: 1.4rem; margin-bottom: 1.25rem; color: #1a1a1a; font-weight: 700;">Complétez votre équipement</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem;">
                     <?php foreach ($relatedProducts as $related):
                         $relatedName = !empty($related['meta_title']) ? $related['meta_title'] : $related['nom'];
                         $relatedPrice = $related['prix_500'] ? number_format($related['prix_500'], 2, ',', ' ') . ' €' : '';
                     ?>
-                    <a href="/produit/<?php echo htmlspecialchars($related['reference']); ?>" style="display: block; background: #fff; border-radius: 8px; overflow: hidden; text-decoration: none; border: 1px solid #e8e8e8; transition: all 0.3s ease;">
-                        <img src="<?php echo htmlspecialchars($related['photo_1'] ?: '/photos/placeholder.webp'); ?>" alt="<?php echo htmlspecialchars($relatedName); ?>" style="width: 100%; height: 150px; object-fit: cover;">
+                    <a href="/produit/<?php echo htmlspecialchars($related['reference']); ?>" class="related-product-card" style="display: block; background: #fff; border-radius: 8px; overflow: hidden; text-decoration: none; border: 1px solid #e8e8e8; transition: all 0.3s ease;">
+                        <div style="position: relative; height: 140px; overflow: hidden; background: #f5f5f5;">
+                            <img src="<?php echo htmlspecialchars($related['photo_1'] ?: '/photos/placeholder.webp'); ?>" alt="<?php echo htmlspecialchars($relatedName); ?>" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">
+                            <span style="position: absolute; top: 8px; left: 8px; background: #000; color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 3px; text-transform: uppercase;"><?php echo htmlspecialchars($related['famille']); ?></span>
+                        </div>
                         <div style="padding: 12px;">
-                            <div style="color: #1a1a1a; font-weight: 600; font-size: 14px; margin-bottom: 4px;"><?php echo htmlspecialchars($relatedName); ?></div>
-                            <div style="color: #666; font-size: 12px;"><?php echo htmlspecialchars($related['sport']); ?></div>
+                            <div style="color: #666; font-size: 11px; text-transform: uppercase; margin-bottom: 4px;"><?php echo htmlspecialchars($related['sport']); ?></div>
+                            <div style="color: #1a1a1a; font-weight: 600; font-size: 13px; line-height: 1.3; margin-bottom: 8px; min-height: 34px;"><?php echo htmlspecialchars($relatedName); ?></div>
                             <?php if ($relatedPrice): ?>
-                            <div style="color: #FF4B26; font-weight: 700; margin-top: 8px;">Dès <?php echo $relatedPrice; ?></div>
+                            <div style="color: #FF4B26; font-weight: 700; font-size: 14px;">Dès <?php echo $relatedPrice; ?></div>
+                            <?php else: ?>
+                            <div style="color: #FF4B26; font-weight: 600; font-size: 12px;">Demander un devis</div>
                             <?php endif; ?>
                         </div>
                     </a>
                     <?php endforeach; ?>
                 </div>
             </div>
-            <?php else: ?>
-            <!-- MAILLAGE INTERNE PAR DÉFAUT -->
-            <div style="margin: 2rem 0; padding: 2rem; background: linear-gradient(135deg, #f8f8f8 0%, #fff 100%); border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                <h3 style="font-size: 1.4rem; margin-bottom: 1.25rem; color: #1a1a1a; font-weight: 700;">Complétez votre équipement</h3>
-                <p style="margin-bottom: 1.5rem; color: #666; font-size: 1rem;">Produits complémentaires pour votre <?php echo htmlspecialchars($famille . ' ' . $sport); ?> :</p>
-                <div style="display: grid; gap: 0.75rem;">
-                    <a href="/pages/products/equipement-<?php echo $sportLower; ?>-personnalise-sublimation.html" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: #fff; border-radius: 6px; text-decoration: none; transition: all 0.3s ease; border: 1px solid #e8e8e8;">
-                        <span style="color: #FF4B26; font-size: 1.25rem;">→</span>
-                        <span style="color: #1a1a1a; font-weight: 600;">Tout l'équipement <?php echo htmlspecialchars($sport); ?></span>
-                    </a>
-                    <a href="/pages/info/devis.html" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: #fff; border-radius: 6px; text-decoration: none; transition: all 0.3s ease; border: 1px solid #e8e8e8;">
-                        <span style="color: #FF4B26; font-size: 1.25rem;">✉️</span>
-                        <span style="color: #1a1a1a; font-weight: 600;">Demander un devis gratuit</span>
-                    </a>
-                </div>
-            </div>
-            <?php endif; ?>
             <?php endif; ?>
         </div>
 
