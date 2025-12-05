@@ -711,6 +711,16 @@ $tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
     <?php endif; ?>
 
     <!-- REVIEWS -->
+    <?php
+    // Avis personnalisés ou par défaut
+    $customReviews = json_decode($product['reviews_custom'] ?? '', true);
+    $defaultReviews = [
+        ['stars' => 5, 'text' => 'Excellente qualité, les couleurs sont éclatantes même après plusieurs lavages. Très satisfait du résultat.', 'author' => 'Club ' . $sport . ' - J. Martin', 'meta' => 'Commande de 45 pièces · Décembre 2024'],
+        ['stars' => 5, 'text' => 'Délais respectés, design parfait, prix compétitifs. Je recommande vivement !', 'author' => 'Association Sportive - T. Dubois', 'meta' => 'Commande de 45 pièces · Mai 2024'],
+        ['stars' => 5, 'text' => 'Le tissu est vraiment respirant et confortable. Rendu professionnel. Merci FLARE CUSTOM !', 'author' => 'Équipe Locale - M. Dupont', 'meta' => 'Commande de 45 pièces · Septembre 2024']
+    ];
+    $reviews = !empty($customReviews) ? $customReviews : $defaultReviews;
+    ?>
     <section class="reviews-section">
         <div class="reviews-container">
             <div class="section-header">
@@ -718,24 +728,14 @@ $tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
                 <p>127 avis vérifiés · Note moyenne 4.8/5</p>
             </div>
             <div class="reviews-grid">
+                <?php foreach ($reviews as $review): ?>
                 <div class="review-card">
-                    <div class="review-stars">★★★★★</div>
-                    <div class="review-text">"Excellente qualité, les couleurs sont éclatantes même après plusieurs lavages. Très satisfait du résultat."</div>
-                    <div class="review-author">Club <?php echo htmlspecialchars($sport); ?> - J. Martin</div>
-                    <div class="review-meta">Commande de 45 pièces · Décembre 2024</div>
+                    <div class="review-stars"><?php echo str_repeat('★', $review['stars'] ?? 5); ?><?php echo str_repeat('☆', 5 - ($review['stars'] ?? 5)); ?></div>
+                    <div class="review-text">"<?php echo htmlspecialchars($review['text']); ?>"</div>
+                    <div class="review-author"><?php echo htmlspecialchars($review['author']); ?></div>
+                    <div class="review-meta"><?php echo htmlspecialchars($review['meta']); ?></div>
                 </div>
-                <div class="review-card">
-                    <div class="review-stars">★★★★★</div>
-                    <div class="review-text">"Délais respectés, design parfait, prix compétitifs. Je recommande vivement !"</div>
-                    <div class="review-author">Association Sportive - T. Dubois</div>
-                    <div class="review-meta">Commande de 45 pièces · Mai 2024</div>
-                </div>
-                <div class="review-card">
-                    <div class="review-stars">★★★★★</div>
-                    <div class="review-text">"Le tissu est vraiment respirant et confortable. Rendu professionnel. Merci FLARE CUSTOM !"</div>
-                    <div class="review-author">Équipe Locale - M. Dupont</div>
-                    <div class="review-meta">Commande de 45 pièces · Septembre 2024</div>
-                </div>
+                <?php endforeach; ?>
             </div>
         </div>
     </section>
@@ -745,6 +745,9 @@ $tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
         <details>
             <summary>Informations détaillées produit</summary>
             <div>
+                <?php if (!empty($product['llm_content'])): ?>
+                    <?php echo $product['llm_content']; ?>
+                <?php else: ?>
                 <p><strong>Produit:</strong> <?php echo htmlspecialchars($nom); ?></p>
                 <p><strong>Référence:</strong> <?php echo htmlspecialchars($reference); ?></p>
                 <p><strong>Catégorie:</strong> <?php echo htmlspecialchars($famille . ' ' . $sport); ?> personnalisé</p>
@@ -758,6 +761,7 @@ $tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
                 <p><strong>Personnalisation:</strong> Illimitée - logos, noms, numéros, sponsors, dégradés</p>
                 <p><strong>Cas d'usage:</strong> Clubs sportifs, écoles, entreprises, événements, équipes amateurs et professionnelles</p>
                 <p><strong>Avantages:</strong> Durabilité exceptionnelle, design unique, couleurs illimitées, fabrication européenne</p>
+                <?php endif; ?>
             </div>
         </details>
     </div>

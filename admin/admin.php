@@ -189,6 +189,8 @@ try {
         'tab_sizes' => 'LONGTEXT DEFAULT NULL',
         'tab_templates' => 'LONGTEXT DEFAULT NULL',
         'tab_faq' => 'LONGTEXT DEFAULT NULL',
+        'llm_content' => 'LONGTEXT DEFAULT NULL',
+        'reviews_custom' => 'JSON',
         'configurator_config' => 'LONGTEXT DEFAULT NULL',
         'size_chart_id' => 'INT DEFAULT NULL',
         // Prix enfants par quantité (-10% du prix adulte par défaut)
@@ -323,7 +325,8 @@ if ($action && $pdo) {
                     'prix_enfant_1', 'prix_enfant_5', 'prix_enfant_10', 'prix_enfant_20', 'prix_enfant_50', 'prix_enfant_100', 'prix_enfant_250', 'prix_enfant_500',
                     'photo_1', 'photo_2', 'photo_3', 'photo_4', 'photo_5', 'genre', 'finition',
                     'meta_title', 'meta_description', 'tab_description', 'tab_specifications',
-                    'tab_sizes', 'tab_templates', 'tab_faq', 'configurator_config', 'size_chart_id',
+                    'tab_sizes', 'tab_templates', 'tab_faq', 'llm_content', 'reviews_custom',
+                    'configurator_config', 'size_chart_id',
                     'active', 'stock_status', 'slug', 'url', 'featured', 'is_new', 'on_sale', 'sort_order'];
                 $set = implode('=?, ', $fields) . '=?';
                 $values = array_map(fn($f) => $_POST[$f] ?? null, $fields);
@@ -2670,8 +2673,79 @@ $user = $_SESSION['admin_user'] ?? null;
                             <textarea name="tab_faq" class="form-control wysiwyg"><?= htmlspecialchars($p['tab_faq'] ?? '') ?></textarea>
                             <div class="form-hint">Éditeur visuel. Questions fréquentes sur ce produit.</div>
                         </div>
+
+                        <hr style="margin: 30px 0; border: none; border-top: 2px solid var(--primary); opacity: 0.3;">
+
+                        <div class="form-group">
+                            <label class="form-label">🤖 Contenu LLM / SEO (Informations détaillées)</label>
+                            <textarea name="llm_content" id="llm_content" class="form-control wysiwyg-table" style="min-height: 250px;"><?= htmlspecialchars($p['llm_content'] ?? '') ?></textarea>
+                            <div class="form-hint">
+                                Bloc "Informations détaillées produit" en bas de page. Format HTML libre.<br>
+                                <strong>Si vide</strong>, utilise les infos par défaut du produit (nom, référence, tissu, etc.)
+                            </div>
+                        </div>
+
+                        <hr style="margin: 30px 0; border: none; border-top: 2px solid var(--primary); opacity: 0.3;">
+
+                        <div class="form-group">
+                            <label class="form-label">⭐ Avis Clients Personnalisés</label>
+                            <?php
+                            $defaultReviews = [
+                                ['stars' => 5, 'text' => '', 'author' => '', 'meta' => ''],
+                                ['stars' => 5, 'text' => '', 'author' => '', 'meta' => ''],
+                                ['stars' => 5, 'text' => '', 'author' => '', 'meta' => '']
+                            ];
+                            $reviews = json_decode($p['reviews_custom'] ?? '', true) ?: $defaultReviews;
+                            ?>
+                            <div id="reviews-editor" style="display: flex; flex-direction: column; gap: 20px;">
+                                <?php foreach ($reviews as $i => $review): ?>
+                                <div class="review-item" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid var(--border);">
+                                    <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                                        <strong>Avis <?= $i + 1 ?></strong>
+                                        <select class="form-control" style="width: 100px;" name="review_stars_<?= $i ?>">
+                                            <?php for ($s = 5; $s >= 1; $s--): ?>
+                                            <option value="<?= $s ?>" <?= ($review['stars'] ?? 5) == $s ? 'selected' : '' ?>><?= str_repeat('★', $s) ?></option>
+                                            <?php endfor; ?>
+                                        </select>
+                                    </div>
+                                    <textarea name="review_text_<?= $i ?>" class="form-control" rows="2" placeholder="Texte de l'avis..." style="margin-bottom: 8px;"><?= htmlspecialchars($review['text'] ?? '') ?></textarea>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                        <input type="text" name="review_author_<?= $i ?>" class="form-control" placeholder="Auteur (ex: Club Football - J. Martin)" value="<?= htmlspecialchars($review['author'] ?? '') ?>">
+                                        <input type="text" name="review_meta_<?= $i ?>" class="form-control" placeholder="Méta (ex: Commande 45 pièces · Dec 2024)" value="<?= htmlspecialchars($review['meta'] ?? '') ?>">
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <div class="form-hint">
+                                <strong>Si tous vides</strong>, utilise les avis génériques par défaut.
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                <script>
+                // Compiler les avis en JSON avant submit
+                document.querySelector('form')?.addEventListener('submit', function() {
+                    var reviews = [];
+                    for (var i = 0; i < 3; i++) {
+                        var text = document.querySelector('[name="review_text_' + i + '"]')?.value || '';
+                        if (text.trim()) {
+                            reviews.push({
+                                stars: parseInt(document.querySelector('[name="review_stars_' + i + '"]')?.value || 5),
+                                text: text,
+                                author: document.querySelector('[name="review_author_' + i + '"]')?.value || '',
+                                meta: document.querySelector('[name="review_meta_' + i + '"]')?.value || ''
+                            });
+                        }
+                    }
+                    // Créer un champ hidden avec le JSON
+                    var hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = 'reviews_custom';
+                    hidden.value = reviews.length > 0 ? JSON.stringify(reviews) : '';
+                    this.appendChild(hidden);
+                });
+                </script>
 
                 <script>
                 function toggleCustomSizes(select) {
