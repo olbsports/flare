@@ -28,16 +28,67 @@ try {
         die("Sport non trouvé: " . htmlspecialchars($slug));
     }
 
-    // Charger les produits associés
-    $stmt = $pdo->prepare("
-        SELECT p.*, pp.position
-        FROM products p
-        INNER JOIN page_products pp ON p.id = pp.product_id
-        WHERE pp.page_type = 'sport_page' AND pp.page_slug = ? AND p.active = 1
-        ORDER BY pp.position, p.nom
-    ");
-    $stmt->execute([$slug]);
-    $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // Charger les produits selon le mode (manuel, sport ou famille)
+    $productsSource = $page['products_source'] ?? 'manual';
+
+    if ($productsSource === 'sport' && !empty($page['products_sport_filter'])) {
+        // Mode: filtrer par sport
+        // D'abord récupérer l'ordre personnalisé s'il existe
+        $orderStmt = $pdo->prepare("SELECT product_id, position FROM page_products WHERE page_type = 'sport_page' AND page_slug = ?");
+        $orderStmt->execute([$slug]);
+        $positions = [];
+        while ($row = $orderStmt->fetch()) {
+            $positions[$row['product_id']] = $row['position'];
+        }
+
+        $stmt = $pdo->prepare("SELECT p.* FROM products p WHERE p.sport = ? AND p.active = 1 ORDER BY p.nom");
+        $stmt->execute([$page['products_sport_filter']]);
+        $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Appliquer l'ordre personnalisé si défini
+        if (!empty($positions)) {
+            usort($products, function($a, $b) use ($positions) {
+                $posA = $positions[$a['id']] ?? 9999;
+                $posB = $positions[$b['id']] ?? 9999;
+                return $posA - $posB;
+            });
+        }
+
+    } elseif ($productsSource === 'famille' && !empty($page['products_famille_filter'])) {
+        // Mode: filtrer par famille
+        // D'abord récupérer l'ordre personnalisé s'il existe
+        $orderStmt = $pdo->prepare("SELECT product_id, position FROM page_products WHERE page_type = 'sport_page' AND page_slug = ?");
+        $orderStmt->execute([$slug]);
+        $positions = [];
+        while ($row = $orderStmt->fetch()) {
+            $positions[$row['product_id']] = $row['position'];
+        }
+
+        $stmt = $pdo->prepare("SELECT p.* FROM products p WHERE p.famille = ? AND p.active = 1 ORDER BY p.nom");
+        $stmt->execute([$page['products_famille_filter']]);
+        $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Appliquer l'ordre personnalisé si défini
+        if (!empty($positions)) {
+            usort($products, function($a, $b) use ($positions) {
+                $posA = $positions[$a['id']] ?? 9999;
+                $posB = $positions[$b['id']] ?? 9999;
+                return $posA - $posB;
+            });
+        }
+
+    } else {
+        // Mode: sélection manuelle via page_products
+        $stmt = $pdo->prepare("
+            SELECT p.*, pp.position
+            FROM products p
+            INNER JOIN page_products pp ON p.id = pp.product_id
+            WHERE pp.page_type = 'sport_page' AND pp.page_slug = ? AND p.active = 1
+            ORDER BY pp.position, p.nom
+        ");
+        $stmt->execute([$slug]);
+        $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     // Décoder les champs JSON
     $trustBar = json_decode($page['trust_bar'] ?? '[]', true) ?: [];
@@ -75,45 +126,7 @@ $sportName = $page['sport_name'] ?: $page['title'];
 $sportNameLower = strtolower($sportName);
 $sportIcon = $page['sport_icon'] ?? '🏆';
 
-// ============ VALEURS PAR DEFAUT ============
-
-// Trust bar par défaut
-if (empty($trustBar)) {
-    $trustBar = [
-        ['value' => '500+', 'label' => 'Clubs équipés'],
-        ['value' => '4.9/5', 'label' => 'Satisfaction client'],
-        ['value' => '48h', 'label' => 'Devis sous 48h'],
-        ['value' => '100%', 'label' => 'Sublimation française']
-    ];
-}
-
-// Why items par défaut
-if (empty($whyItems)) {
-    $whyItems = [
-        ['icon' => '⭐', 'title' => 'Design 100% personnalisé', 'description' => "Aucune limite de couleurs, motifs ou logos. Notre équipe de designers professionnels vous accompagne gratuitement pour créer un design unique qui correspond parfaitement à votre identité. Révisions illimitées jusqu'à satisfaction complète."],
-        ['icon' => '✅', 'title' => 'Fabrication européenne certifiée', 'description' => "Production dans nos ateliers partenaires certifiés en Europe. Tissus techniques haute performance testés et approuvés. Contrôle qualité rigoureux à chaque étape. Garantie 1 an contre les défauts de fabrication sur tous nos produits."],
-        ['icon' => '⚡', 'title' => 'Livraison rapide garantie', 'description' => "Délai standard 3-4 semaines, option express 10-15 jours disponible. Livraison suivie dans toute l'Europe. Nous respectons scrupuleusement nos engagements ou vous êtes remboursé. Emballage soigné et protection optimale."],
-        ['icon' => 'ℹ️', 'title' => 'Accompagnement expert complet', 'description' => "Service client dédié du devis à la livraison. BAT (Bon à Tirer) détaillé pour validation avant production. Guide des tailles personnalisé. Conseils techniques gratuits. Suivi en temps réel de votre commande."],
-        ['icon' => '💰', 'title' => 'Prix dégressifs ultra-compétitifs', 'description' => "Tarifs agressifs dès 1 pièce. Prix dégressifs jusqu'à -60% selon la quantité. Pas de frais cachés. Devis gratuit et détaillé sous 24h. Facilités de paiement pour les clubs et associations."],
-        ['icon' => '🎨', 'title' => 'Sublimation durable premium', 'description' => "Technique de sublimation intégrale garantissant des couleurs éclatantes qui ne se délavent jamais. Impression dans la fibre du tissu pour une durabilité maximale. Résistance aux lavages répétés (50+ cycles testés)."]
-    ];
-}
-
-// FAQ par défaut
-if (empty($faqItems) || empty(array_filter($faqItems, fn($f) => !empty($f['question'])))) {
-    $faqItems = [
-        ['question' => "Quel est le délai de fabrication pour des équipements $sportNameLower personnalisés ?", 'answer' => "Le délai standard est de 3 à 4 semaines après validation du BAT. Nous proposons également un service express en 10-15 jours pour les commandes urgentes."],
-        ['question' => "Puis-je commander des tailles mixtes (adultes et enfants) ?", 'answer' => "Oui, vous pouvez mélanger librement les tailles adultes et enfants dans votre commande. Les prix sont calculés selon le barème correspondant à chaque type."],
-        ['question' => "Le flocage des numéros et noms est-il inclus dans le prix ?", 'answer' => "Les numéros classiques sont inclus dans le prix de base. Pour des noms ou numéros personnalisés spécifiques, comptez +2€ par pièce."],
-        ['question' => "Quelle est la différence entre les tissus ÉCO et PRO ?", 'answer' => "Les tissus ÉCO (130-160g/m²) offrent un excellent rapport qualité-prix pour l'entraînement. Les tissus PRO sont plus techniques et recommandés pour la compétition."],
-        ['question' => "Peut-on ajouter plusieurs logos de sponsors ?", 'answer' => "Oui, vous pouvez intégrer autant de logos que vous le souhaitez sans frais supplémentaires. La sublimation permet un nombre illimité d'éléments graphiques."],
-        ['question' => "Les couleurs seront-elles fidèles à notre charte graphique ?", 'answer' => "Oui, nous travaillons avec des codes couleurs Pantone ou RVB pour garantir une reproduction fidèle. Vous recevrez un BAT détaillé pour validation avant production."],
-        ['question' => "Les équipements résistent-ils au lavage en machine ?", 'answer' => "Oui, nos équipements passent en machine à 30°C sans problème. Les couleurs restent éclatantes même après des dizaines de lavages."],
-        ['question' => "Quelle est la quantité minimum pour bénéficier des prix dégressifs ?", 'answer' => "Les prix dégressifs commencent dès 5 pièces et augmentent par paliers (10, 20, 50, 100, 250, 500). Plus vous commandez, plus le prix unitaire baisse."],
-        ['question' => "Fournissez-vous un tableau des tailles détaillé ?", 'answer' => "Oui, nous fournissons un guide des tailles complet avec toutes les mesures en cm pour chaque modèle, disponible avant commande."],
-        ['question' => "Proposez-vous des designs spécifiques pour gardiens ?", 'answer' => "Oui, nous créons des équipements gardien avec designs différenciés, couleurs distinctes et options de protections rembourrées."]
-    ];
-}
+// Pas de valeurs par défaut - tout vient de la BDD
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -180,10 +193,10 @@ if (empty($faqItems) || empty(array_filter($faqItems, fn($f) => !empty($f['quest
                 </p>
             </div>
 
-            <!-- Filters -->
+            <!-- Filters (configurables depuis l'admin) -->
             <?php if ($page['show_filters'] ?? true): ?>
             <div class="filters-bar">
-                <?php if (!empty($uniqueFamilles)): ?>
+                <?php if (($page['filter_famille'] ?? 1) && !empty($uniqueFamilles)): ?>
                 <div class="filter-group">
                     <label>Famille</label>
                     <label for="filterFamily" class="sr-only">Filtrer par famille de produit</label>
@@ -196,7 +209,7 @@ if (empty($faqItems) || empty(array_filter($faqItems, fn($f) => !empty($f['quest
                 </div>
                 <?php endif; ?>
 
-                <?php if (!empty($uniqueGenres)): ?>
+                <?php if (($page['filter_genre'] ?? 1) && !empty($uniqueGenres)): ?>
                 <div class="filter-group">
                     <label>Genre</label>
                     <label for="filterGenre" class="sr-only">Filtrer par genre</label>
@@ -209,6 +222,7 @@ if (empty($faqItems) || empty(array_filter($faqItems, fn($f) => !empty($f['quest
                 </div>
                 <?php endif; ?>
 
+                <?php if ($page['filter_sort'] ?? 1): ?>
                 <div class="filter-group">
                     <label>Trier par</label>
                     <label for="sortProducts" class="sr-only">Trier les produits</label>
@@ -219,6 +233,7 @@ if (empty($faqItems) || empty(array_filter($faqItems, fn($f) => !empty($f['quest
                         <option value="name">Nom A-Z</option>
                     </select>
                 </div>
+                <?php endif; ?>
             </div>
             <?php endif; ?>
 
@@ -421,14 +436,9 @@ if (empty($faqItems) || empty(array_filter($faqItems, fn($f) => !empty($f['quest
     </section>
 
     <?php
-    // ========== SECTIONS SEO ==========
-    // Utiliser les sections de la BDD si disponibles, sinon les sections par défaut
-    $hasSeoFromDB = !empty($seoSections) && count($seoSections) >= 2;
-
-    if ($hasSeoFromDB):
-        // Afficher les sections SEO importées depuis la BDD
-        foreach ($seoSections as $sec):
-            if (!empty($sec['title']) || !empty($sec['blocks'])):
+    // ========== SECTIONS SEO (tout vient de la BDD) ==========
+    foreach ($seoSections as $sec):
+        if (!empty($sec['title']) || !empty($sec['blocks'])):
     ?>
     <section class="seo-footer-section">
         <div class="container">
@@ -463,118 +473,9 @@ if (empty($faqItems) || empty(array_filter($faqItems, fn($f) => !empty($f['quest
         </div>
     </section>
     <?php
-            endif;
-        endforeach;
-    else:
-        // Sections SEO par défaut si pas de données dans la BDD
+        endif;
+    endforeach;
     ?>
-    <!-- SEO Footer Section 1 (Default) -->
-    <section class="seo-footer-section">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-eyebrow">Expertise <?= htmlspecialchars($sportName) ?></div>
-                <h2 class="section-title">FLARE CUSTOM - Équipements <?= htmlspecialchars($sportName) ?> Personnalisés Sublimation</h2>
-            </div>
-
-            <div class="seo-content-grid">
-                <div class="seo-content-block">
-                    <h3>Maillots <?= htmlspecialchars($sportName) ?> Sublimation Haute Qualité</h3>
-                    <p>Spécialiste français des <strong>équipements de <?= htmlspecialchars($sportNameLower) ?> personnalisés</strong>, FLARE CUSTOM produit vos <strong>maillots, shorts et kits complets</strong> en sublimation haute définition. Notre technologie garantit des <strong>couleurs éclatantes qui ne s'effacent jamais</strong>, même après des dizaines de lavages.</p>
-                    <p>Nous proposons des <strong>tissus techniques respirants</strong> de 130g/m² à 160g/m², parfaitement adaptés à l'intensité du <?= htmlspecialchars($sportNameLower) ?>. Performance Mesh et Reversible Pro offrent <strong>évacuation optimale de la transpiration</strong> et confort maximal pendant les matchs.</p>
-                </div>
-
-                <div class="seo-content-block">
-                    <h3>Personnalisation illimitée pour Votre Club</h3>
-                    <p>Design 100% sur-mesure sans limite de couleurs, logos ou sponsors. Notre <strong>service design gratuit</strong> transforme vos idées en équipements professionnels. <strong>BAT détaillé avant production</strong> pour validation complète.</p>
-                    <ul>
-                        <li>Numéros classiques inclus (noms/numéros spécifiques +2€/pcs)</li>
-                        <li>Tous logos vectorisés acceptés</li>
-                        <li>Dégradés et effets complexes</li>
-                        <li>Reproduction fidèle de vos couleurs</li>
-                        <li>Marquages sponsors illimités</li>
-                    </ul>
-                </div>
-
-                <div class="seo-content-block">
-                    <h3>Prix dégressifs & livraison Europe</h3>
-                    <p><strong>Tarifs compétitifs dès 22.90€</strong> avec prix dégressifs selon quantité. Production française dans ateliers certifiés, <strong>livraison Europe entière</strong> sous 3-4 semaines standard ou 10-15 jours en express.</p>
-                    <ul>
-                        <li>À partir de 1 pièce minimum</li>
-                        <li>Garantie 1 an défauts fabrication</li>
-                        <li>Devis gratuit sous 24h</li>
-                        <li>Tableau de tailles détaillé</li>
-                        <li>Support client réactif 7j/7</li>
-                    </ul>
-                </div>
-
-                <div class="seo-content-block">
-                    <h3>Gamme Complète <?= htmlspecialchars($sportName) ?> Club</h3>
-                    <p>Équipez entièrement votre club avec notre <strong>catalogue complet</strong> : maillots manches courtes/longues, shorts joueurs, maillots gardien avec protections, kits complets économiques, débardeurs entraînement.</p>
-                    <p><strong>Options Homme et Femme</strong> avec coupes anatomiques adaptées. Finitions professionnelles : coutures renforcées, ourlets élastiqués, cordons de serrage, étiquettes personnalisées possibles.</p>
-                </div>
-            </div>
-
-            <div class="seo-keywords">
-                <h4>Recherches populaires <?= htmlspecialchars($sportName) ?></h4>
-                <p>Maillot <?= htmlspecialchars($sportNameLower) ?> personnalisé sublimation • Kit <?= htmlspecialchars($sportNameLower) ?> club sur mesure • Equipement <?= htmlspecialchars($sportNameLower) ?> personnalisé pas cher • Tenue <?= htmlspecialchars($sportNameLower) ?> complète personnalisée • Maillot <?= htmlspecialchars($sportNameLower) ?> avec sponsors • Short <?= htmlspecialchars($sportNameLower) ?> personnalisé • Equipement <?= htmlspecialchars($sportNameLower) ?> écologique • Tenue <?= htmlspecialchars($sportNameLower) ?> respirante • Kit <?= htmlspecialchars($sportNameLower) ?> fabrication française • Equipement sportif <?= htmlspecialchars($sportNameLower) ?> club • Maillot <?= htmlspecialchars($sportNameLower) ?> sublimation HD • Tenue <?= htmlspecialchars($sportNameLower) ?> professionnelle club</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- SEO Content Section 2 (Default) -->
-    <section class="seo-footer-section">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-eyebrow"><?= htmlspecialchars($sportName) ?> Excellence</div>
-                <h2 class="section-title"><?= htmlspecialchars($sportName) ?> : L'Excellence de l'Équipement Personnalisé</h2>
-            </div>
-
-            <div class="seo-content-grid">
-                <div class="seo-content-block">
-                    <h3>Des Équipements <?= htmlspecialchars($sportName) ?> Personnalisés de Haute Performance</h3>
-                    <p>
-                        Chez Flare Custom, nous comprenons que chaque équipe, chaque club, chaque athlète mérite des équipements <?= htmlspecialchars($sportName) ?> qui reflètent leur identité unique et leur niveau d'exigence. C'est pourquoi nous avons développé une expertise pointue dans la conception et la fabrication d'équipements sportifs personnalisés en sublimation intégrale, une technique qui garantit des couleurs éclatantes, une durabilité exceptionnelle et un confort optimal.
-                    </p>
-                    <p>
-                        Notre processus de personnalisation est simple et efficace : vous nous partagez votre vision, nos designers créent le design parfait pour vous, vous validez le BAT (Bon à Tirer), et nous lançons la production dans nos ateliers partenaires certifiés en Europe. Du premier contact à la livraison, nous sommes à vos côtés pour garantir un résultat qui dépasse vos attentes.
-                    </p>
-                </div>
-                <div class="seo-content-block">
-                    <h3>Pourquoi la Sublimation pour vos Équipements <?= htmlspecialchars($sportName) ?> ?</h3>
-                    <p>
-                        La sublimation est une technique d'impression révolutionnaire qui offre des avantages incomparables pour les équipements sportifs. Contrairement aux méthodes traditionnelles de sérigraphie ou de flocage, la sublimation intègre directement les couleurs dans les fibres du tissu. Résultat : des designs complexes avec un nombre illimité de couleurs, des dégradés parfaits, des logos ultra-précis, et tout cela sans aucun surcoût ni limite créative.
-                    </p>
-                    <p>
-                        Vos équipements <?= htmlspecialchars($sportName) ?> sublimés conservent leur souplesse naturelle, leur respirabilité optimale et leur légèreté. Pas de zones rigides, pas de risque de craquelage ou de décollement. Les couleurs restent éclatantes même après des dizaines de lavages en machine. C'est la garantie d'équipements qui durent et qui gardent leur aspect neuf saison après saison.
-                    </p>
-                </div>
-                <div class="seo-content-block">
-                    <h3>Une Gamme Complète pour Tous vos Besoins <?= htmlspecialchars($sportName) ?></h3>
-                    <p>
-                        Notre catalogue <?= htmlspecialchars($sportName) ?> propose une large sélection de produits adaptés à tous les niveaux de pratique : maillots manches courtes et manches longues, shorts et cuissards, débardeurs et tops, vestes et survêtements, accessoires coordonnés. Chaque produit est disponible en version homme, femme et enfant, avec des coupes adaptées (slim, regular, large) et un large choix de tailles (du XS au 4XL).
-                    </p>
-                    <p>
-                        Nous proposons différentes qualités de tissus techniques selon vos besoins et votre budget : notre gamme ÉCO en 130g/m² et 160g/m² offre un excellent rapport qualité-prix pour l'entraînement et les matchs amicaux, tandis que notre gamme PRO avec des tissus plus techniques est idéale pour la compétition de haut niveau. Tous nos tissus sont respirants, évacuent efficacement la transpiration et sèchent rapidement.
-                    </p>
-                </div>
-                <div class="seo-content-block">
-                    <h3>Personnalisation illimitée sans Contraintes</h3>
-                    <p>
-                        Avec Flare Custom, la personnalisation de vos équipements <?= htmlspecialchars($sportName) ?> ne connaît aucune limite. Vous pouvez intégrer autant de couleurs que vous le souhaitez, ajouter tous vos sponsors et partenaires, créer des motifs complexes, des dégradés sophistiqués, des effets graphiques modernes. Noms et numéros des joueurs sont inclus dans le prix de base, sans supplément, et chaque équipement peut être personnalisé individuellement.
-                    </p>
-                    <p>
-                        Vous n'avez pas de maquette ? Aucun problème ! Notre équipe de designers professionnels créera pour vous des propositions graphiques sur mesure, gratuitement. Vous avez déjà votre design ? Parfait, nous l'adaptons et l'optimisons pour la sublimation. Dans tous les cas, vous recevrez un BAT détaillé à valider avant toute production, garantissant un résultat 100% conforme à vos attentes.
-                    </p>
-                </div>
-            </div>
-
-            <div class="seo-keywords">
-                <h4>En savoir plus sur <?= htmlspecialchars($sportName) ?></h4>
-                <p>Équipement <?= htmlspecialchars($sportNameLower) ?> personnalisé • Maillot <?= htmlspecialchars($sportNameLower) ?> sublimation • Kit <?= htmlspecialchars($sportNameLower) ?> sur mesure • Tenue <?= htmlspecialchars($sportNameLower) ?> club personnalisée • Equipement sportif <?= htmlspecialchars($sportNameLower) ?> • Personnalisation textile <?= htmlspecialchars($sportNameLower) ?> • Maillot <?= htmlspecialchars($sportNameLower) ?> pas cher • Kit complet <?= htmlspecialchars($sportNameLower) ?> personnalisé • Fabrication européenne <?= htmlspecialchars($sportNameLower) ?> • Livraison rapide équipement <?= htmlspecialchars($sportNameLower) ?></p>
-            </div>
-        </div>
-    </section>
-    <?php endif; ?>
 
     <!-- 🔥 FOOTER DYNAMIQUE -->
     <div id="dynamic-footer"></div>

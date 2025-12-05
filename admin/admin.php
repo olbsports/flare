@@ -5296,6 +5296,58 @@ $user = $_SESSION['admin_user'] ?? null;
                             </div>
                         </div>
                         </div><!-- end manualProductsSection -->
+
+                        <!-- Section réorganisation pour modes sport/famille -->
+                        <div id="filteredProductsSection" style="<?= ($sp['products_source'] ?? 'manual') === 'manual' ? 'display:none;' : '' ?>">
+                        <hr style="margin: 30px 0;">
+                        <h4>Réorganiser les produits filtrés</h4>
+                        <p style="color: var(--text-muted); margin-bottom: 15px;">Glissez-déposez pour définir l'ordre d'affichage des produits filtrés.</p>
+
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <button type="button" class="btn btn-sm btn-primary" onclick="loadFilteredProducts()">🔄 Charger les produits filtrés</button>
+                            <span id="filteredProductsInfo" style="color: var(--text-muted); align-self: center;"></span>
+                        </div>
+
+                        <div id="filteredProductsList" style="min-height: 100px; max-height: 500px; overflow-y: auto; border: 2px dashed #e2e8f0; border-radius: 8px; padding: 10px;">
+                            <?php
+                            // Pré-charger les produits filtrés si mode sport ou famille
+                            $productsSource = $sp['products_source'] ?? 'manual';
+                            $filteredProds = [];
+                            if ($productsSource === 'sport' && !empty($sp['products_sport_filter'])) {
+                                $filteredProds = array_filter($allProducts, fn($p) => $p['sport'] === $sp['products_sport_filter']);
+                            } elseif ($productsSource === 'famille' && !empty($sp['products_famille_filter'])) {
+                                $filteredProds = array_filter($allProducts, fn($p) => $p['famille'] === $sp['products_famille_filter']);
+                            }
+
+                            // Trier par position si déjà enregistrée
+                            if (!empty($filteredProds) && !empty($selectedProducts)) {
+                                usort($filteredProds, function($a, $b) use ($selectedProducts) {
+                                    $posA = array_search($a['id'], $selectedProducts);
+                                    $posB = array_search($b['id'], $selectedProducts);
+                                    if ($posA === false) $posA = 9999;
+                                    if ($posB === false) $posB = 9999;
+                                    return $posA - $posB;
+                                });
+                            }
+
+                            foreach ($filteredProds as $prod):
+                                $prodName = !empty($prod['meta_title']) ? $prod['meta_title'] : $prod['nom'];
+                            ?>
+                            <div class="filtered-prod-item" data-id="<?= $prod['id'] ?>" draggable="true" style="display: flex; align-items: center; gap: 10px; padding: 8px; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 6px; margin-bottom: 8px; cursor: grab;">
+                                <span class="drag-handle" style="color: #ccc; cursor: grab;">⋮⋮</span>
+                                <img src="<?= htmlspecialchars($prod['photo_1'] ?: '/photos/placeholder.webp') ?>" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                <div style="flex: 1; overflow: hidden;">
+                                    <div style="font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= htmlspecialchars($prodName) ?></div>
+                                    <div style="font-size: 10px; color: #666;"><?= htmlspecialchars($prod['sport']) ?> • <?= htmlspecialchars($prod['famille'] ?? '') ?></div>
+                                </div>
+                                <input type="hidden" name="page_products[]" value="<?= $prod['id'] ?>">
+                            </div>
+                            <?php endforeach; ?>
+                            <?php if (empty($filteredProds) && $productsSource !== 'manual'): ?>
+                            <p style="color: #666; text-align: center; padding: 20px;">Cliquez sur "Charger les produits filtrés" après avoir sélectionné un filtre.</p>
+                            <?php endif; ?>
+                        </div>
+                        </div><!-- end filteredProductsSection -->
                     </div>
                 </div>
 
@@ -5542,6 +5594,118 @@ $user = $_SESSION['admin_user'] ?? null;
             if (manualSection) {
                 manualSection.style.display = source === 'manual' ? '' : 'none';
             }
+            // Show/hide filtered products section
+            var filteredSection = document.getElementById('filteredProductsSection');
+            if (filteredSection) {
+                filteredSection.style.display = source === 'manual' ? 'none' : '';
+            }
+        }
+
+        // All products data for filtering
+        var allProductsData = <?= json_encode(array_map(function($p) {
+            return [
+                'id' => $p['id'],
+                'nom' => $p['nom'],
+                'meta_title' => $p['meta_title'] ?? '',
+                'sport' => $p['sport'] ?? '',
+                'famille' => $p['famille'] ?? '',
+                'photo_1' => $p['photo_1'] ?? ''
+            ];
+        }, $allProducts)) ?>;
+
+        function loadFilteredProducts() {
+            var source = document.getElementById('productsSourceSelect').value;
+            var filterValue = '';
+            var filterField = '';
+
+            if (source === 'sport') {
+                filterValue = document.querySelector('select[name="products_sport_filter"]').value;
+                filterField = 'sport';
+            } else if (source === 'famille') {
+                filterValue = document.querySelector('select[name="products_famille_filter"]').value;
+                filterField = 'famille';
+            }
+
+            if (!filterValue) {
+                alert('Veuillez sélectionner un filtre');
+                return;
+            }
+
+            // Filter products
+            var filtered = allProductsData.filter(function(p) {
+                return p[filterField] === filterValue;
+            });
+
+            // Build HTML
+            var container = document.getElementById('filteredProductsList');
+            container.innerHTML = '';
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">Aucun produit trouvé pour ce filtre.</p>';
+            } else {
+                filtered.forEach(function(prod) {
+                    var prodName = prod.meta_title || prod.nom;
+                    var html = '<div class="filtered-prod-item" data-id="' + prod.id + '" draggable="true" style="display: flex; align-items: center; gap: 10px; padding: 8px; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 6px; margin-bottom: 8px; cursor: grab;">' +
+                        '<span class="drag-handle" style="color: #ccc; cursor: grab;">⋮⋮</span>' +
+                        '<img src="' + (prod.photo_1 || '/photos/placeholder.webp') + '" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">' +
+                        '<div style="flex: 1; overflow: hidden;">' +
+                        '<div style="font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + escapeHtmlSport(prodName) + '</div>' +
+                        '<div style="font-size: 10px; color: #666;">' + escapeHtmlSport(prod.sport) + ' • ' + escapeHtmlSport(prod.famille || '') + '</div>' +
+                        '</div>' +
+                        '<input type="hidden" name="page_products[]" value="' + prod.id + '">' +
+                        '</div>';
+                    container.insertAdjacentHTML('beforeend', html);
+                });
+            }
+
+            document.getElementById('filteredProductsInfo').textContent = filtered.length + ' produit(s) trouvé(s)';
+            initFilteredDragDrop();
+        }
+
+        // Drag and drop for filtered products
+        var draggedFilteredProduct = null;
+        function initFilteredDragDrop() {
+            var container = document.getElementById('filteredProductsList');
+            if (!container) return;
+
+            container.addEventListener('dragstart', function(e) {
+                if (e.target.classList.contains('filtered-prod-item')) {
+                    draggedFilteredProduct = e.target;
+                    e.target.style.opacity = '0.5';
+                }
+            });
+
+            container.addEventListener('dragend', function(e) {
+                if (e.target.classList.contains('filtered-prod-item')) {
+                    e.target.style.opacity = '1';
+                    draggedFilteredProduct = null;
+                }
+            });
+
+            container.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                var afterElement = getDragAfterElementFiltered(container, e.clientY);
+                if (draggedFilteredProduct) {
+                    if (afterElement == null) {
+                        container.appendChild(draggedFilteredProduct);
+                    } else {
+                        container.insertBefore(draggedFilteredProduct, afterElement);
+                    }
+                }
+            });
+        }
+
+        function getDragAfterElementFiltered(container, y) {
+            var draggableElements = [...container.querySelectorAll('.filtered-prod-item:not([style*="opacity: 0.5"])')];
+            return draggableElements.reduce((closest, child) => {
+                var box = child.getBoundingClientRect();
+                var offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
 
         // Drag and drop for product reordering
@@ -5591,7 +5755,10 @@ $user = $_SESSION['admin_user'] ?? null;
         }
 
         // Initialize drag and drop on page load
-        document.addEventListener('DOMContentLoaded', initDragDrop);
+        document.addEventListener('DOMContentLoaded', function() {
+            initDragDrop();
+            initFilteredDragDrop();
+        });
         </script>
 
         <?php // ============ QUOTES ============ ?>
