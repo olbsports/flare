@@ -279,6 +279,65 @@ try {
     } catch (PDOException $e) {
         // Table likely already exists
     }
+
+    // Create sport_pages table for dynamic sport pages
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS sport_pages (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            slug VARCHAR(255) NOT NULL UNIQUE,
+            title VARCHAR(255) NOT NULL,
+            sport_name VARCHAR(100),
+            sport_icon VARCHAR(50),
+            meta_title VARCHAR(255),
+            meta_description TEXT,
+
+            -- Hero section
+            hero_title VARCHAR(255),
+            hero_subtitle TEXT,
+            hero_eyebrow VARCHAR(100),
+            hero_image VARCHAR(500),
+            hero_cta_text VARCHAR(100),
+            hero_cta_link VARCHAR(255),
+
+            -- Trust bar (JSON: [{value, label}])
+            trust_bar JSON,
+
+            -- Products section
+            products_title VARCHAR(255),
+            products_subtitle TEXT,
+            products_eyebrow VARCHAR(100),
+            products_description TEXT,
+            show_filters BOOLEAN DEFAULT TRUE,
+
+            -- CTA section (Équipez votre club)
+            cta_title VARCHAR(255),
+            cta_subtitle TEXT,
+            cta_features JSON,
+            cta_button_text VARCHAR(100),
+            cta_button_link VARCHAR(255),
+            cta_whatsapp VARCHAR(50),
+
+            -- Why Us section (Pourquoi choisir)
+            why_title VARCHAR(255),
+            why_subtitle TEXT,
+            why_items JSON,
+
+            -- FAQ
+            faq_title VARCHAR(255),
+            faq_items JSON,
+
+            -- SEO Content sections (JSON array of {title, content})
+            seo_sections JSON,
+
+            -- Settings
+            active BOOLEAN DEFAULT TRUE,
+            sort_order INT DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    } catch (PDOException $e) {
+        // Table likely already exists
+    }
 } catch (Exception $e) {
     $dbError = $e->getMessage();
 }
@@ -592,6 +651,105 @@ if ($action && $pdo) {
                     }
                 }
                 header("Location: ?page=category_pages&toast=" . urlencode($toast));
+                exit;
+
+            case 'save_sport_page':
+                $slug = preg_replace('/[^a-z0-9\-]/', '', strtolower($_POST['slug'] ?? ''));
+                if (empty($slug)) {
+                    $toast = 'Erreur: Slug requis';
+                    break;
+                }
+
+                // Préparer les données JSON
+                $trustBar = json_encode($_POST['trust_bar'] ?? [], JSON_UNESCAPED_UNICODE);
+                $ctaFeatures = json_encode(array_filter(array_map('trim', explode("\n", $_POST['cta_features'] ?? ''))), JSON_UNESCAPED_UNICODE);
+                $whyItems = json_encode($_POST['why_items'] ?? [], JSON_UNESCAPED_UNICODE);
+                $faqItems = json_encode($_POST['faq_items'] ?? [], JSON_UNESCAPED_UNICODE);
+                $seoSections = json_encode($_POST['seo_sections'] ?? [], JSON_UNESCAPED_UNICODE);
+
+                $fields = [
+                    'slug', 'title', 'sport_name', 'sport_icon', 'meta_title', 'meta_description',
+                    'hero_title', 'hero_subtitle', 'hero_eyebrow', 'hero_image', 'hero_cta_text', 'hero_cta_link',
+                    'products_title', 'products_subtitle', 'products_eyebrow', 'products_description', 'show_filters',
+                    'cta_title', 'cta_subtitle', 'cta_button_text', 'cta_button_link', 'cta_whatsapp',
+                    'why_title', 'why_subtitle',
+                    'faq_title', 'active', 'sort_order'
+                ];
+
+                $values = [
+                    $slug,
+                    $_POST['title'] ?? '',
+                    $_POST['sport_name'] ?? '',
+                    $_POST['sport_icon'] ?? '',
+                    $_POST['meta_title'] ?? '',
+                    $_POST['meta_description'] ?? '',
+                    $_POST['hero_title'] ?? '',
+                    $_POST['hero_subtitle'] ?? '',
+                    $_POST['hero_eyebrow'] ?? '',
+                    $_POST['hero_image'] ?? '',
+                    $_POST['hero_cta_text'] ?? '',
+                    $_POST['hero_cta_link'] ?? '',
+                    $_POST['products_title'] ?? '',
+                    $_POST['products_subtitle'] ?? '',
+                    $_POST['products_eyebrow'] ?? '',
+                    $_POST['products_description'] ?? '',
+                    isset($_POST['show_filters']) ? 1 : 0,
+                    $_POST['cta_title'] ?? '',
+                    $_POST['cta_subtitle'] ?? '',
+                    $_POST['cta_button_text'] ?? '',
+                    $_POST['cta_button_link'] ?? '',
+                    $_POST['cta_whatsapp'] ?? '',
+                    $_POST['why_title'] ?? '',
+                    $_POST['why_subtitle'] ?? '',
+                    $_POST['faq_title'] ?? '',
+                    isset($_POST['active']) ? 1 : 0,
+                    intval($_POST['sort_order'] ?? 0)
+                ];
+
+                // Ajouter les champs JSON
+                $jsonFields = ['trust_bar', 'cta_features', 'why_items', 'faq_items', 'seo_sections'];
+                $jsonValues = [$trustBar, $ctaFeatures, $whyItems, $faqItems, $seoSections];
+
+                if ($id) {
+                    $set = implode('=?, ', $fields) . '=?, ' . implode('=?, ', $jsonFields) . '=?';
+                    $allValues = array_merge($values, $jsonValues, [$id]);
+                    $pdo->prepare("UPDATE sport_pages SET $set WHERE id=?")->execute($allValues);
+                    $savedSlug = $slug;
+                } else {
+                    $allFields = array_merge($fields, $jsonFields);
+                    $placeholders = implode(',', array_fill(0, count($allFields), '?'));
+                    $pdo->prepare("INSERT INTO sport_pages (" . implode(',', $allFields) . ") VALUES ($placeholders)")
+                        ->execute(array_merge($values, $jsonValues));
+                    $id = $pdo->lastInsertId();
+                    $savedSlug = $slug;
+                }
+
+                // Sauvegarder les produits associés
+                $pdo->prepare("DELETE FROM page_products WHERE page_type='sport_page' AND page_slug=?")->execute([$savedSlug]);
+                $productIds = $_POST['page_products'] ?? [];
+                if (!empty($productIds)) {
+                    $insertStmt = $pdo->prepare("INSERT INTO page_products (page_type, page_slug, product_id, position) VALUES ('sport_page', ?, ?, ?)");
+                    foreach ($productIds as $pos => $prodId) {
+                        $insertStmt->execute([$savedSlug, intval($prodId), $pos]);
+                    }
+                }
+
+                $toast = 'Page sport enregistrée';
+                header("Location: ?page=sport_page&id=$id&toast=" . urlencode($toast));
+                exit;
+
+            case 'delete_sport_page':
+                if ($id) {
+                    $stmt = $pdo->prepare("SELECT slug FROM sport_pages WHERE id=?");
+                    $stmt->execute([$id]);
+                    $row = $stmt->fetch();
+                    if ($row) {
+                        $pdo->prepare("DELETE FROM page_products WHERE page_type='sport_page' AND page_slug=?")->execute([$row['slug']]);
+                        $pdo->prepare("DELETE FROM sport_pages WHERE id=?")->execute([$id]);
+                        $toast = 'Page supprimée';
+                    }
+                }
+                header("Location: ?page=sport_pages&toast=" . urlencode($toast));
                 exit;
 
             case 'save_page':
@@ -1045,6 +1203,37 @@ if ($pdo && $page !== 'login') {
                     // Charger les produits sélectionnés
                     if ($data['item']) {
                         $stmt = $pdo->prepare("SELECT product_id FROM page_products WHERE page_type='category_page' AND page_slug=? ORDER BY position");
+                        $stmt->execute([$data['item']['slug']]);
+                        $data['selected_products'] = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                    }
+                }
+                // Tous les produits pour le sélecteur
+                $data['all_products'] = $pdo->query("
+                    SELECT id, reference, nom, meta_title, sport, famille, photo_1, prix_500
+                    FROM products WHERE active=1
+                    ORDER BY sport, famille, nom
+                ")->fetchAll();
+                break;
+
+            case 'sport_pages':
+                // Liste des pages sport dynamiques
+                try {
+                    $data['items'] = $pdo->query("SELECT * FROM sport_pages ORDER BY sort_order, title")->fetchAll();
+                } catch (Exception $e) {
+                    $data['items'] = [];
+                }
+                break;
+
+            case 'sport_page':
+                // Édition d'une page sport
+                if ($id) {
+                    $stmt = $pdo->prepare("SELECT * FROM sport_pages WHERE id=?");
+                    $stmt->execute([$id]);
+                    $data['item'] = $stmt->fetch();
+
+                    // Charger les produits sélectionnés
+                    if ($data['item']) {
+                        $stmt = $pdo->prepare("SELECT product_id FROM page_products WHERE page_type='sport_page' AND page_slug=? ORDER BY position");
                         $stmt->execute([$data['item']['slug']]);
                         $data['selected_products'] = $stmt->fetchAll(PDO::FETCH_COLUMN);
                     }
@@ -1981,6 +2170,10 @@ $user = $_SESSION['admin_user'] ?? null;
         <a href="?page=category_pages" class="menu-item <?= in_array($page, ['category_pages', 'category_page']) ? 'active' : '' ?>">
             <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
             Pages Catégories (DB)
+        </a>
+        <a href="?page=sport_pages" class="menu-item <?= in_array($page, ['sport_pages', 'sport_page']) ? 'active' : '' ?>">
+            <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Pages Sports (DB)
         </a>
         <a href="?page=blog" class="menu-item <?= in_array($page, ['blog', 'blog_edit']) ? 'active' : '' ?>">
             <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
@@ -4784,6 +4977,475 @@ $user = $_SESSION['admin_user'] ?? null;
         }
 
         function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+        </script>
+
+        <?php // ============ SPORT PAGES LIST ============ ?>
+        <?php elseif ($page === 'sport_pages'): ?>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Pages Sport Dynamiques (<?= count($data['items'] ?? []) ?>)</span>
+                <a href="?page=sport_page" class="btn btn-primary">+ Nouvelle page sport</a>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Sport</th><th>Titre</th><th>Slug</th><th>Produits</th><th>Statut</th><th>Actions</th></tr></thead>
+                    <tbody>
+                    <?php if (empty($data['items'])): ?>
+                    <tr><td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">Aucune page sport. Créez-en une !</td></tr>
+                    <?php else: ?>
+                    <?php foreach ($data['items'] as $sp): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($sp['sport_icon'] . ' ' . ($sp['sport_name'] ?: $sp['title'])) ?></td>
+                            <td><strong><?= htmlspecialchars($sp['title']) ?></strong></td>
+                            <td><code>/sport/<?= htmlspecialchars($sp['slug']) ?></code></td>
+                            <td>
+                                <?php
+                                $countStmt = $pdo->prepare("SELECT COUNT(*) FROM page_products WHERE page_type='sport_page' AND page_slug=?");
+                                $countStmt->execute([$sp['slug']]);
+                                echo $countStmt->fetchColumn();
+                                ?> produits
+                            </td>
+                            <td>
+                                <span class="badge badge-<?= $sp['active'] ? 'success' : 'secondary' ?>"><?= $sp['active'] ? 'Actif' : 'Inactif' ?></span>
+                            </td>
+                            <td>
+                                <a href="?page=sport_page&id=<?= $sp['id'] ?>" class="btn btn-sm btn-primary">Modifier</a>
+                                <a href="/sport/<?= htmlspecialchars($sp['slug']) ?>" target="_blank" class="btn btn-sm btn-light">Voir</a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <?php // ============ SPORT PAGE EDIT ============ ?>
+        <?php elseif ($page === 'sport_page'): ?>
+        <?php
+        $sp = $data['item'] ?? [];
+        $selectedProducts = $data['selected_products'] ?? [];
+        $allProducts = $data['all_products'] ?? [];
+        ?>
+        <form method="POST" action="?page=sport_page<?= $id ? "&id=$id" : '' ?>">
+            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+            <input type="hidden" name="action" value="save_sport_page">
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title"><?= $id ? 'Modifier' : 'Nouvelle' ?> page sport</span>
+                    <div>
+                        <?php if ($id): ?>
+                        <a href="/sport/<?= htmlspecialchars($sp['slug'] ?? '') ?>" target="_blank" class="btn btn-light">Voir la page</a>
+                        <?php endif; ?>
+                        <a href="?page=sport_pages" class="btn btn-light">← Retour</a>
+                    </div>
+                </div>
+
+                <div class="tabs-nav">
+                    <button type="button" class="tab-btn active" onclick="switchSportTab('general')">Général</button>
+                    <button type="button" class="tab-btn" onclick="switchSportTab('hero')">Hero</button>
+                    <button type="button" class="tab-btn" onclick="switchSportTab('products')">Produits</button>
+                    <button type="button" class="tab-btn" onclick="switchSportTab('cta')">CTA</button>
+                    <button type="button" class="tab-btn" onclick="switchSportTab('why')">Pourquoi nous</button>
+                    <button type="button" class="tab-btn" onclick="switchSportTab('faq')">FAQ</button>
+                    <button type="button" class="tab-btn" onclick="switchSportTab('seo')">SEO</button>
+                </div>
+
+                <!-- TAB GENERAL -->
+                <div class="tab-content active" id="sport-tab-general">
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Titre de la page *</label>
+                                <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($sp['title'] ?? '') ?>" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Slug (URL) *</label>
+                                <div style="display: flex; align-items: center; gap: 5px;">
+                                    <span style="color: var(--text-muted);">/sport/</span>
+                                    <input type="text" name="slug" class="form-control" value="<?= htmlspecialchars($sp['slug'] ?? '') ?>" required pattern="[a-z0-9\-]+" style="flex: 1;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Nom du sport</label>
+                                <input type="text" name="sport_name" class="form-control" value="<?= htmlspecialchars($sp['sport_name'] ?? '') ?>" placeholder="Ex: Football">
+                            </div>
+                            <div class="form-group" style="width: 100px;">
+                                <label class="form-label">Icône</label>
+                                <input type="text" name="sport_icon" class="form-control" value="<?= htmlspecialchars($sp['sport_icon'] ?? '') ?>" placeholder="⚽">
+                            </div>
+                            <div class="form-group" style="width: 100px;">
+                                <label class="form-label">Ordre</label>
+                                <input type="number" name="sort_order" class="form-control" value="<?= htmlspecialchars($sp['sort_order'] ?? 0) ?>">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" name="active" value="1" <?= ($sp['active'] ?? 1) ? 'checked' : '' ?>>
+                                Page active (visible sur le site)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB HERO -->
+                <div class="tab-content" id="sport-tab-hero">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Eyebrow (ex: ⚽ Football)</label>
+                            <input type="text" name="hero_eyebrow" class="form-control" value="<?= htmlspecialchars($sp['hero_eyebrow'] ?? '') ?>" placeholder="⚽ Football">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Titre Hero</label>
+                            <input type="text" name="hero_title" class="form-control" value="<?= htmlspecialchars($sp['hero_title'] ?? '') ?>" placeholder="Équipements Football">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Sous-titre Hero</label>
+                            <input type="text" name="hero_subtitle" class="form-control" value="<?= htmlspecialchars($sp['hero_subtitle'] ?? '') ?>" placeholder="Personnalisés Sublimation">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Image de fond (URL)</label>
+                                <input type="text" name="hero_image" class="form-control" value="<?= htmlspecialchars($sp['hero_image'] ?? '') ?>" placeholder="https://...">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Texte bouton CTA</label>
+                                <input type="text" name="hero_cta_text" class="form-control" value="<?= htmlspecialchars($sp['hero_cta_text'] ?? '') ?>" placeholder="Voir le catalogue">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Lien bouton</label>
+                                <input type="text" name="hero_cta_link" class="form-control" value="<?= htmlspecialchars($sp['hero_cta_link'] ?? '') ?>" placeholder="#products">
+                            </div>
+                        </div>
+
+                        <hr style="margin: 30px 0;">
+                        <h4>Barre de confiance (Trust Bar)</h4>
+                        <p style="color: var(--text-muted); margin-bottom: 15px;">Ex: 500+ clubs, 4.9/5 satisfaction</p>
+                        <div id="sportTrustBarItems">
+                            <?php
+                            $trustBar = json_decode($sp['trust_bar'] ?? '[]', true) ?: [];
+                            if (empty($trustBar)) $trustBar = [['value' => '', 'label' => '']];
+                            foreach ($trustBar as $i => $item): ?>
+                            <div class="form-row trust-item" style="margin-bottom: 10px;">
+                                <div class="form-group" style="flex: 1;">
+                                    <input type="text" name="trust_bar[<?= $i ?>][value]" class="form-control" value="<?= htmlspecialchars($item['value'] ?? '') ?>" placeholder="500+">
+                                </div>
+                                <div class="form-group" style="flex: 2;">
+                                    <input type="text" name="trust_bar[<?= $i ?>][label]" class="form-control" value="<?= htmlspecialchars($item['label'] ?? '') ?>" placeholder="Clubs équipés">
+                                </div>
+                                <button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.remove()">✕</button>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-light" onclick="addSportTrustItem()">+ Ajouter</button>
+                    </div>
+                </div>
+
+                <!-- TAB PRODUCTS -->
+                <div class="tab-content" id="sport-tab-products">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Eyebrow section (ex: Catalogue football)</label>
+                            <input type="text" name="products_eyebrow" class="form-control" value="<?= htmlspecialchars($sp['products_eyebrow'] ?? '') ?>">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Titre section</label>
+                                <input type="text" name="products_title" class="form-control" value="<?= htmlspecialchars($sp['products_title'] ?? '') ?>" placeholder="Nos équipements football">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Sous-titre</label>
+                                <input type="text" name="products_subtitle" class="form-control" value="<?= htmlspecialchars($sp['products_subtitle'] ?? '') ?>">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <textarea name="products_description" class="form-control" rows="2"><?= htmlspecialchars($sp['products_description'] ?? '') ?></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" name="show_filters" value="1" <?= ($sp['show_filters'] ?? 1) ? 'checked' : '' ?>>
+                                Afficher les filtres
+                            </label>
+                        </div>
+
+                        <hr style="margin: 30px 0;">
+                        <h4>Produits à afficher</h4>
+                        <p style="color: var(--text-muted); margin-bottom: 15px;">Sélectionnez les produits de ce sport.</p>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div>
+                                <label class="form-label">Produits sélectionnés (<?= count($selectedProducts) ?>)</label>
+                                <div id="selectedSportProducts" style="min-height: 200px; max-height: 400px; overflow-y: auto; border: 2px dashed #e2e8f0; border-radius: 8px; padding: 10px;">
+                                    <?php foreach ($selectedProducts as $prodId):
+                                        $prod = array_filter($allProducts, fn($p) => $p['id'] == $prodId);
+                                        $prod = reset($prod);
+                                        if ($prod):
+                                            $prodName = !empty($prod['meta_title']) ? $prod['meta_title'] : $prod['nom'];
+                                    ?>
+                                    <div class="sport-prod-item" data-id="<?= $prod['id'] ?>" style="display: flex; align-items: center; gap: 10px; padding: 8px; background: #fff5f3; border: 1px solid #FF4B26; border-radius: 6px; margin-bottom: 8px;">
+                                        <img src="<?= htmlspecialchars($prod['photo_1'] ?: '/photos/placeholder.webp') ?>" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                        <div style="flex: 1; overflow: hidden;">
+                                            <div style="font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= htmlspecialchars($prodName) ?></div>
+                                            <div style="font-size: 10px; color: #666;"><?= htmlspecialchars($prod['sport']) ?></div>
+                                        </div>
+                                        <input type="hidden" name="page_products[]" value="<?= $prod['id'] ?>">
+                                        <button type="button" class="btn btn-sm" style="color: #ef4444;" onclick="removeSportProduct(this)">✕</button>
+                                    </div>
+                                    <?php endif; endforeach; ?>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label">Tous les produits</label>
+                                <input type="text" id="sportProductSearch" class="form-control" placeholder="Rechercher..." style="margin-bottom: 10px;" oninput="filterSportProducts()">
+                                <div id="availableSportProducts" style="max-height: 400px; overflow-y: auto;">
+                                    <?php foreach ($allProducts as $prod):
+                                        $prodName = !empty($prod['meta_title']) ? $prod['meta_title'] : $prod['nom'];
+                                        $isSelected = in_array($prod['id'], $selectedProducts);
+                                    ?>
+                                    <div class="sport-prod-avail <?= $isSelected ? 'selected' : '' ?>" data-id="<?= $prod['id'] ?>" data-name="<?= htmlspecialchars(strtolower($prodName)) ?>" style="display: flex; align-items: center; gap: 10px; padding: 8px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 6px; cursor: pointer; <?= $isSelected ? 'opacity: 0.5;' : '' ?>" onclick="addSportProduct(this, <?= $prod['id'] ?>, <?= htmlspecialchars(json_encode($prod)) ?>)">
+                                        <img src="<?= htmlspecialchars($prod['photo_1'] ?: '/photos/placeholder.webp') ?>" style="width: 36px; height: 36px; object-fit: cover; border-radius: 4px;">
+                                        <div style="flex: 1; overflow: hidden;">
+                                            <div style="font-size: 12px; font-weight: 600;"><?= htmlspecialchars($prodName) ?></div>
+                                            <div style="font-size: 10px; color: #666;"><?= htmlspecialchars($prod['sport'] . ' • ' . ($prod['prix_500'] ? number_format($prod['prix_500'], 2) . '€' : '-')) ?></div>
+                                        </div>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB CTA -->
+                <div class="tab-content" id="sport-tab-cta">
+                    <div class="card-body">
+                        <h4>Section CTA (Équipez votre club)</h4>
+                        <div class="form-group">
+                            <label class="form-label">Titre CTA</label>
+                            <input type="text" name="cta_title" class="form-control" value="<?= htmlspecialchars($sp['cta_title'] ?? '') ?>" placeholder="Équipez votre club de football">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Sous-titre CTA</label>
+                            <textarea name="cta_subtitle" class="form-control" rows="2"><?= htmlspecialchars($sp['cta_subtitle'] ?? '') ?></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Points forts (un par ligne)</label>
+                            <textarea name="cta_features" class="form-control" rows="4" placeholder="Devis gratuit sous 24h&#10;Design professionnel&#10;Prix dégressifs"><?= htmlspecialchars(implode("\n", json_decode($sp['cta_features'] ?? '[]', true) ?: [])) ?></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Texte bouton</label>
+                                <input type="text" name="cta_button_text" class="form-control" value="<?= htmlspecialchars($sp['cta_button_text'] ?? '') ?>" placeholder="Demander un devis">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Lien bouton</label>
+                                <input type="text" name="cta_button_link" class="form-control" value="<?= htmlspecialchars($sp['cta_button_link'] ?? '') ?>">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Numéro WhatsApp</label>
+                            <input type="text" name="cta_whatsapp" class="form-control" value="<?= htmlspecialchars($sp['cta_whatsapp'] ?? '') ?>" placeholder="+33612345678">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB WHY US -->
+                <div class="tab-content" id="sport-tab-why">
+                    <div class="card-body">
+                        <h4>Section "Pourquoi choisir Flare Custom"</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Titre</label>
+                                <input type="text" name="why_title" class="form-control" value="<?= htmlspecialchars($sp['why_title'] ?? '') ?>" placeholder="Pourquoi choisir Flare Custom">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Sous-titre</label>
+                                <input type="text" name="why_subtitle" class="form-control" value="<?= htmlspecialchars($sp['why_subtitle'] ?? '') ?>">
+                            </div>
+                        </div>
+                        <div id="whyItemsList">
+                            <?php
+                            $whyItems = json_decode($sp['why_items'] ?? '[]', true) ?: [];
+                            if (empty($whyItems)) $whyItems = [['icon' => '', 'title' => '', 'description' => '']];
+                            foreach ($whyItems as $i => $item): ?>
+                            <div class="why-item" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                                <div class="form-row">
+                                    <div class="form-group" style="width: 80px;">
+                                        <label class="form-label">Icône</label>
+                                        <input type="text" name="why_items[<?= $i ?>][icon]" class="form-control" value="<?= htmlspecialchars($item['icon'] ?? '') ?>" placeholder="🎨">
+                                    </div>
+                                    <div class="form-group" style="flex: 1;">
+                                        <label class="form-label">Titre</label>
+                                        <input type="text" name="why_items[<?= $i ?>][title]" class="form-control" value="<?= htmlspecialchars($item['title'] ?? '') ?>">
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.parentElement.remove()" style="align-self: flex-end;">✕</button>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Description</label>
+                                    <textarea name="why_items[<?= $i ?>][description]" class="form-control" rows="2"><?= htmlspecialchars($item['description'] ?? '') ?></textarea>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-light" onclick="addWhyItem()">+ Ajouter un point</button>
+                    </div>
+                </div>
+
+                <!-- TAB FAQ -->
+                <div class="tab-content" id="sport-tab-faq">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Titre section FAQ</label>
+                            <input type="text" name="faq_title" class="form-control" value="<?= htmlspecialchars($sp['faq_title'] ?? '') ?>" placeholder="FAQ Football">
+                        </div>
+                        <div id="sportFaqList">
+                            <?php
+                            $faqItems = json_decode($sp['faq_items'] ?? '[]', true) ?: [];
+                            if (empty($faqItems)) $faqItems = [['question' => '', 'answer' => '']];
+                            foreach ($faqItems as $i => $faq): ?>
+                            <div class="faq-item-edit" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                                <div class="form-group">
+                                    <label class="form-label">Question</label>
+                                    <input type="text" name="faq_items[<?= $i ?>][question]" class="form-control" value="<?= htmlspecialchars($faq['question'] ?? '') ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Réponse</label>
+                                    <textarea name="faq_items[<?= $i ?>][answer]" class="form-control" rows="3"><?= htmlspecialchars($faq['answer'] ?? '') ?></textarea>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.remove()">✕ Supprimer</button>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-light" onclick="addSportFaqItem()">+ Ajouter une question</button>
+                    </div>
+                </div>
+
+                <!-- TAB SEO -->
+                <div class="tab-content" id="sport-tab-seo">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Meta Title</label>
+                            <input type="text" name="meta_title" class="form-control" value="<?= htmlspecialchars($sp['meta_title'] ?? '') ?>">
+                            <div class="form-hint">Recommandé: 50-60 caractères</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Meta Description</label>
+                            <textarea name="meta_description" class="form-control" rows="3"><?= htmlspecialchars($sp['meta_description'] ?? '') ?></textarea>
+                            <div class="form-hint">Recommandé: 150-160 caractères</div>
+                        </div>
+
+                        <hr style="margin: 30px 0;">
+                        <h4>Sections SEO (contenu long)</h4>
+                        <p style="color: var(--text-muted); margin-bottom: 15px;">Ajoutez des sections de contenu SEO à afficher en bas de page.</p>
+                        <div id="seoSectionsList">
+                            <?php
+                            $seoSections = json_decode($sp['seo_sections'] ?? '[]', true) ?: [];
+                            if (empty($seoSections)) $seoSections = [['title' => '', 'content' => '']];
+                            foreach ($seoSections as $i => $sec): ?>
+                            <div class="seo-section-item" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                                <div class="form-group">
+                                    <label class="form-label">Titre de section</label>
+                                    <input type="text" name="seo_sections[<?= $i ?>][title]" class="form-control" value="<?= htmlspecialchars($sec['title'] ?? '') ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Contenu (HTML autorisé)</label>
+                                    <textarea name="seo_sections[<?= $i ?>][content]" class="form-control" rows="6"><?= htmlspecialchars($sec['content'] ?? '') ?></textarea>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.remove()">✕ Supprimer</button>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-light" onclick="addSeoSection()">+ Ajouter une section SEO</button>
+                    </div>
+                </div>
+
+                <div class="card-footer" style="display: flex; justify-content: space-between;">
+                    <div>
+                        <?php if ($id): ?>
+                        <a href="?page=sport_pages&action=delete_sport_page&id=<?= $id ?>&csrf_token=<?= generateCsrfToken() ?>" class="btn btn-danger" onclick="return confirm('Supprimer cette page sport ?')">Supprimer</a>
+                        <?php endif; ?>
+                    </div>
+                    <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+                </div>
+            </div>
+        </form>
+
+        <script>
+        function switchSportTab(tabId) {
+            document.querySelectorAll('.tabs-nav .tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('sport-tab-' + tabId).classList.add('active');
+        }
+
+        var sportTrustIdx = <?= count($trustBar) ?>;
+        function addSportTrustItem() {
+            var html = '<div class="form-row trust-item" style="margin-bottom: 10px;"><div class="form-group" style="flex: 1;"><input type="text" name="trust_bar[' + sportTrustIdx + '][value]" class="form-control" placeholder="500+"></div><div class="form-group" style="flex: 2;"><input type="text" name="trust_bar[' + sportTrustIdx + '][label]" class="form-control" placeholder="Clubs équipés"></div><button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.remove()">✕</button></div>';
+            document.getElementById('sportTrustBarItems').insertAdjacentHTML('beforeend', html);
+            sportTrustIdx++;
+        }
+
+        var whyIdx = <?= count($whyItems) ?>;
+        function addWhyItem() {
+            var html = '<div class="why-item" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;"><div class="form-row"><div class="form-group" style="width: 80px;"><label class="form-label">Icône</label><input type="text" name="why_items[' + whyIdx + '][icon]" class="form-control" placeholder="🎨"></div><div class="form-group" style="flex: 1;"><label class="form-label">Titre</label><input type="text" name="why_items[' + whyIdx + '][title]" class="form-control"></div><button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.parentElement.remove()" style="align-self: flex-end;">✕</button></div><div class="form-group"><label class="form-label">Description</label><textarea name="why_items[' + whyIdx + '][description]" class="form-control" rows="2"></textarea></div></div>';
+            document.getElementById('whyItemsList').insertAdjacentHTML('beforeend', html);
+            whyIdx++;
+        }
+
+        var sportFaqIdx = <?= count($faqItems) ?>;
+        function addSportFaqItem() {
+            var html = '<div class="faq-item-edit" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;"><div class="form-group"><label class="form-label">Question</label><input type="text" name="faq_items[' + sportFaqIdx + '][question]" class="form-control"></div><div class="form-group"><label class="form-label">Réponse</label><textarea name="faq_items[' + sportFaqIdx + '][answer]" class="form-control" rows="3"></textarea></div><button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.remove()">✕ Supprimer</button></div>';
+            document.getElementById('sportFaqList').insertAdjacentHTML('beforeend', html);
+            sportFaqIdx++;
+        }
+
+        var seoSecIdx = <?= count($seoSections) ?>;
+        function addSeoSection() {
+            var html = '<div class="seo-section-item" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;"><div class="form-group"><label class="form-label">Titre de section</label><input type="text" name="seo_sections[' + seoSecIdx + '][title]" class="form-control"></div><div class="form-group"><label class="form-label">Contenu (HTML autorisé)</label><textarea name="seo_sections[' + seoSecIdx + '][content]" class="form-control" rows="6"></textarea></div><button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.remove()">✕ Supprimer</button></div>';
+            document.getElementById('seoSectionsList').insertAdjacentHTML('beforeend', html);
+            seoSecIdx++;
+        }
+
+        // Product selection for sport pages
+        function addSportProduct(el, id, prod) {
+            if (el.classList.contains('selected')) return;
+            el.classList.add('selected');
+            el.style.opacity = '0.5';
+
+            var prodName = prod.meta_title || prod.nom;
+            var html = '<div class="sport-prod-item" data-id="' + id + '" style="display: flex; align-items: center; gap: 10px; padding: 8px; background: #fff5f3; border: 1px solid #FF4B26; border-radius: 6px; margin-bottom: 8px;"><img src="' + (prod.photo_1 || '/photos/placeholder.webp') + '" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;"><div style="flex: 1; overflow: hidden;"><div style="font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + escapeHtmlSport(prodName) + '</div><div style="font-size: 10px; color: #666;">' + escapeHtmlSport(prod.sport) + '</div></div><input type="hidden" name="page_products[]" value="' + id + '"><button type="button" class="btn btn-sm" style="color: #ef4444;" onclick="removeSportProduct(this)">✕</button></div>';
+            document.getElementById('selectedSportProducts').insertAdjacentHTML('beforeend', html);
+        }
+
+        function removeSportProduct(btn) {
+            var item = btn.closest('.sport-prod-item');
+            var id = item.dataset.id;
+            item.remove();
+            var avail = document.querySelector('.sport-prod-avail[data-id="' + id + '"]');
+            if (avail) {
+                avail.classList.remove('selected');
+                avail.style.opacity = '1';
+            }
+        }
+
+        function filterSportProducts() {
+            var search = document.getElementById('sportProductSearch').value.toLowerCase();
+            document.querySelectorAll('.sport-prod-avail').forEach(function(el) {
+                var name = el.dataset.name || '';
+                el.style.display = name.indexOf(search) >= 0 ? '' : 'none';
+            });
+        }
+
+        function escapeHtmlSport(str) {
             if (!str) return '';
             return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
         }
