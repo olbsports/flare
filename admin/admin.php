@@ -191,6 +191,8 @@ try {
         'tab_faq' => 'LONGTEXT DEFAULT NULL',
         'llm_content' => 'LONGTEXT DEFAULT NULL',
         'reviews_custom' => 'JSON',
+        'reviews_count' => 'INT DEFAULT 127',
+        'reviews_rating' => 'DECIMAL(2,1) DEFAULT 4.8',
         'configurator_config' => 'LONGTEXT DEFAULT NULL',
         'size_chart_id' => 'INT DEFAULT NULL',
         // Prix enfants par quantité (-10% du prix adulte par défaut)
@@ -326,7 +328,7 @@ if ($action && $pdo) {
                     'photo_1', 'photo_2', 'photo_3', 'photo_4', 'photo_5', 'genre', 'finition',
                     'meta_title', 'meta_description', 'tab_description', 'tab_specifications',
                     'tab_sizes', 'tab_templates', 'tab_faq', 'llm_content', 'reviews_custom',
-                    'configurator_config', 'size_chart_id',
+                    'reviews_count', 'reviews_rating', 'configurator_config', 'size_chart_id',
                     'active', 'stock_status', 'slug', 'url', 'featured', 'is_new', 'on_sale', 'sort_order'];
                 $set = implode('=?, ', $fields) . '=?';
                 $values = array_map(fn($f) => $_POST[$f] ?? null, $fields);
@@ -2688,7 +2690,21 @@ $user = $_SESSION['admin_user'] ?? null;
                         <hr style="margin: 30px 0; border: none; border-top: 2px solid var(--primary); opacity: 0.3;">
 
                         <div class="form-group">
-                            <label class="form-label">⭐ Avis Clients Personnalisés</label>
+                            <label class="form-label">⭐ Statistiques Avis</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                                <div>
+                                    <label style="font-size: 12px; color: var(--text-muted);">Nombre d'avis affichés</label>
+                                    <input type="number" name="reviews_count" class="form-control" value="<?= htmlspecialchars($p['reviews_count'] ?? 127) ?>" min="0" placeholder="127">
+                                </div>
+                                <div>
+                                    <label style="font-size: 12px; color: var(--text-muted);">Note moyenne (/5)</label>
+                                    <input type="number" name="reviews_rating" class="form-control" value="<?= htmlspecialchars($p['reviews_rating'] ?? 4.8) ?>" min="0" max="5" step="0.1" placeholder="4.8">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">✍️ Avis Clients Personnalisés</label>
                             <?php
                             $defaultReviews = [
                                 ['stars' => 5, 'text' => '', 'author' => '', 'meta' => ''],

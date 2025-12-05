@@ -361,19 +361,26 @@ $tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
                 </div>
                 <?php endif; ?>
 
-                <div class="main-image" id="mainImage" style="position: relative;">
+                <div class="main-image" id="mainImage" onclick="openImageZoom(this.querySelector('img').src)">
                     <img src="<?php echo htmlspecialchars($photos[0]); ?>" alt="<?php echo htmlspecialchars($nom); ?>">
+                    <button class="zoom-btn" title="Agrandir">🔍</button>
                 </div>
                 <div class="thumbnail-wrapper">
                     <button class="gallery-nav gallery-prev" onclick="scrollGallery(-1)">‹</button>
                     <div class="thumbnail-grid" id="thumbnailGrid">
                         <?php foreach ($photos as $i => $photo): ?>
                         <div class="thumbnail<?php echo $i === 0 ? ' active' : ''; ?>">
-                            <img src="<?php echo htmlspecialchars($photo); ?>" alt="<?php echo htmlspecialchars($nom); ?> - Photo <?php echo $i + 1; ?>">
+                            <img src="<?php echo htmlspecialchars($photo); ?>" alt="<?php echo htmlspecialchars($nom); ?> - Photo <?php echo $i + 1; ?>"<?php echo $i > 0 ? ' loading="lazy"' : ''; ?>>
                         </div>
                         <?php endforeach; ?>
                     </div>
                     <button class="gallery-nav gallery-next" onclick="scrollGallery(1)">›</button>
+                </div>
+
+                <!-- ZOOM MODAL -->
+                <div id="imageZoomModal" class="zoom-modal" onclick="closeImageZoom()">
+                    <span class="zoom-close">&times;</span>
+                    <img class="zoom-modal-content" id="zoomImage" src="" alt="Zoom">
                 </div>
             </div>
 
@@ -720,12 +727,14 @@ $tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
         ['stars' => 5, 'text' => 'Le tissu est vraiment respirant et confortable. Rendu professionnel. Merci FLARE CUSTOM !', 'author' => 'Équipe Locale - M. Dupont', 'meta' => 'Commande de 45 pièces · Septembre 2024']
     ];
     $reviews = !empty($customReviews) ? $customReviews : $defaultReviews;
+    $reviewsCount = $product['reviews_count'] ?? 127;
+    $reviewsRating = $product['reviews_rating'] ?? 4.8;
     ?>
     <section class="reviews-section">
         <div class="reviews-container">
             <div class="section-header">
                 <h2>ILS NOUS FONT CONFIANCE</h2>
-                <p>127 avis vérifiés · Note moyenne 4.8/5</p>
+                <p><?php echo (int)$reviewsCount; ?> avis vérifiés · Note moyenne <?php echo number_format((float)$reviewsRating, 1, ',', ''); ?>/5</p>
             </div>
             <div class="reviews-grid">
                 <?php foreach ($reviews as $review): ?>
@@ -739,6 +748,63 @@ $tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
             </div>
         </div>
     </section>
+
+    <!-- SCHEMA.ORG - Structured Data pour SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": <?php echo json_encode($nom); ?>,
+        "description": <?php echo json_encode($metaDescription); ?>,
+        "sku": <?php echo json_encode($reference); ?>,
+        "image": <?php echo json_encode(array_filter($photos)); ?>,
+        "brand": {
+            "@type": "Brand",
+            "name": "FLARE Custom"
+        },
+        "manufacturer": {
+            "@type": "Organization",
+            "name": "FLARE Custom"
+        },
+        "category": <?php echo json_encode($famille . ' ' . $sport); ?>,
+        "material": <?php echo json_encode($tissu); ?>,
+        "offers": {
+            "@type": "AggregateOffer",
+            "priceCurrency": "EUR",
+            "lowPrice": <?php echo json_encode($priceLow); ?>,
+            "highPrice": <?php echo json_encode($priceHigh); ?>,
+            "availability": "https://schema.org/InStock",
+            "seller": {
+                "@type": "Organization",
+                "name": "FLARE Custom"
+            }
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": <?php echo json_encode((float)$reviewsRating); ?>,
+            "reviewCount": <?php echo json_encode((int)$reviewsCount); ?>,
+            "bestRating": 5,
+            "worstRating": 1
+        }<?php if (!empty($reviews)): ?>,
+        "review": [
+            <?php foreach ($reviews as $idx => $rev): ?>
+            {
+                "@type": "Review",
+                "reviewRating": {
+                    "@type": "Rating",
+                    "ratingValue": <?php echo json_encode($rev['stars'] ?? 5); ?>
+                },
+                "author": {
+                    "@type": "Person",
+                    "name": <?php echo json_encode($rev['author'] ?? 'Client vérifié'); ?>
+                },
+                "reviewBody": <?php echo json_encode($rev['text'] ?? ''); ?>
+            }<?php echo $idx < count($reviews) - 1 ? ',' : ''; ?>
+            <?php endforeach; ?>
+        ]
+        <?php endif; ?>
+    }
+    </script>
 
     <!-- CONTENU STRUCTURÉ POUR LLM/SEO - Tout à la fin -->
     <div class="llm-context">
@@ -829,6 +895,26 @@ $tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
         function scrollToConfigurator() {
             document.getElementById('configurator-container').scrollIntoView({behavior: 'smooth'});
         }
+
+        // ZOOM IMAGE
+        function openImageZoom(src) {
+            const modal = document.getElementById('imageZoomModal');
+            const zoomImg = document.getElementById('zoomImage');
+            zoomImg.src = src;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageZoom() {
+            const modal = document.getElementById('imageZoomModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Fermer avec Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeImageZoom();
+        });
     </script>
 </body>
 </html>
