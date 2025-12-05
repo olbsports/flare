@@ -364,12 +364,16 @@ $tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
                 <div class="main-image" id="mainImage" style="position: relative;">
                     <img src="<?php echo htmlspecialchars($photos[0]); ?>" alt="<?php echo htmlspecialchars($nom); ?>">
                 </div>
-                <div class="thumbnail-grid">
-                    <?php foreach ($photos as $i => $photo): ?>
-                    <div class="thumbnail<?php echo $i === 0 ? ' active' : ''; ?>">
-                        <img src="<?php echo htmlspecialchars($photo); ?>" alt="<?php echo htmlspecialchars($nom); ?> - Photo <?php echo $i + 1; ?>">
+                <div class="thumbnail-wrapper">
+                    <button class="gallery-nav gallery-prev" onclick="scrollGallery(-1)">‹</button>
+                    <div class="thumbnail-grid" id="thumbnailGrid">
+                        <?php foreach ($photos as $i => $photo): ?>
+                        <div class="thumbnail<?php echo $i === 0 ? ' active' : ''; ?>">
+                            <img src="<?php echo htmlspecialchars($photo); ?>" alt="<?php echo htmlspecialchars($nom); ?> - Photo <?php echo $i + 1; ?>">
+                        </div>
+                        <?php endforeach; ?>
                     </div>
-                    <?php endforeach; ?>
+                    <button class="gallery-nav gallery-next" onclick="scrollGallery(1)">›</button>
                 </div>
             </div>
 
@@ -557,6 +561,7 @@ $tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
             <!-- PRODUITS LIÉS -->
             <?php if (!empty($relatedProducts)): ?>
             <div class="related-products-section">
+                <h3 class="related-products-title">Complétez votre équipement</h3>
                 <div class="related-products-wrapper">
                     <button class="related-nav related-prev" onclick="scrollRelatedProducts(-1)">‹</button>
                     <div class="related-products-grid">
@@ -770,6 +775,37 @@ $tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
                 document.querySelector('#mainImage img').src = img.src;
             });
         });
+
+        // GALLERY SLIDER (pour plus de 5 images)
+        (function initGallerySlider() {
+            const grid = document.getElementById('thumbnailGrid');
+            const prevBtn = document.querySelector('.gallery-prev');
+            const nextBtn = document.querySelector('.gallery-next');
+
+            if (!grid || !prevBtn || !nextBtn) return;
+
+            // Vérifier si plus de 5 images
+            const thumbnails = grid.querySelectorAll('.thumbnail');
+            if (thumbnails.length <= 5) return;
+
+            // Montrer le bouton suivant au démarrage
+            nextBtn.classList.add('visible');
+
+            function updateNavButtons() {
+                prevBtn.classList.toggle('visible', grid.scrollLeft > 10);
+                const maxScroll = grid.scrollWidth - grid.clientWidth;
+                nextBtn.classList.toggle('visible', grid.scrollLeft < maxScroll - 10);
+            }
+
+            grid.addEventListener('scroll', updateNavButtons);
+
+            window.scrollGallery = function(dir) {
+                grid.scrollBy({ left: dir * 180, behavior: 'smooth' });
+            };
+
+            // Initial check
+            setTimeout(updateNavButtons, 100);
+        })();
 
         // TABS
         document.querySelectorAll('.tab-btn').forEach(btn => {
