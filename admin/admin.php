@@ -2698,6 +2698,31 @@ $user = $_SESSION['admin_user'] ?? null;
                             </div>
                         </div>
 
+                        <h4 style="margin: 25px 0 20px;">👥 Genres / Sexes disponibles</h4>
+                        <div style="display: flex; gap: 30px; flex-wrap: wrap; margin-bottom: 25px; padding: 20px; background: #fafbfc; border-radius: 8px;">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                <input type="checkbox" id="cfg_gender_homme" <?= ($config['genders']['homme'] ?? true) ? 'checked' : '' ?>>
+                                <span><strong>Homme</strong></span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                <input type="checkbox" id="cfg_gender_femme" <?= ($config['genders']['femme'] ?? true) ? 'checked' : '' ?>>
+                                <span><strong>Femme</strong></span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                <input type="checkbox" id="cfg_gender_mixte" <?= ($config['genders']['mixte'] ?? true) ? 'checked' : '' ?>>
+                                <span><strong>Mixte / Unisexe</strong></span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                <input type="checkbox" id="cfg_gender_enfant" <?= ($config['genders']['enfant'] ?? true) ? 'checked' : '' ?>>
+                                <span><strong>Enfant</strong></span>
+                            </label>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 25px;">
+                            <label class="form-label">Genres personnalisés (optionnel)</label>
+                            <input type="text" id="cfg_genders_custom" class="form-control" value="<?= htmlspecialchars(implode(', ', $config['genders_custom'] ?? [])) ?>" placeholder="Ex: Junior, Senior, Veteran (séparés par virgules)">
+                            <div class="form-hint">Ajoutez des genres supplémentaires si besoin</div>
+                        </div>
+
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label">🎨 Couleurs personnalisables</label>
@@ -2906,6 +2931,13 @@ $user = $_SESSION['admin_user'] ?? null;
                                 },
                                 sizes: document.getElementById('cfg_sizes').value.split(',').map(s => s.trim()).filter(s => s),
                                 sizes_kids: document.getElementById('cfg_sizes_kids').value.split(',').map(s => s.trim()).filter(s => s),
+                                genders: {
+                                    homme: document.getElementById('cfg_gender_homme').checked,
+                                    femme: document.getElementById('cfg_gender_femme').checked,
+                                    mixte: document.getElementById('cfg_gender_mixte').checked,
+                                    enfant: document.getElementById('cfg_gender_enfant').checked
+                                },
+                                genders_custom: document.getElementById('cfg_genders_custom').value.split(',').map(s => s.trim()).filter(s => s),
                                 colors_available: document.getElementById('cfg_colors').value === 'true',
                                 min_quantity: parseInt(document.getElementById('cfg_min_qty').value) || 1,
                                 delivery_time: document.getElementById('cfg_delivery').value,

@@ -149,6 +149,7 @@ if (!empty($relatedProductIds)) {
         $excludeIds = array_column($relatedProducts, 'id');
         $excludeIds[] = $product['id'];
         $placeholders = implode(',', array_fill(0, count($excludeIds), '?'));
+        $remaining = 4 - count($relatedProducts);
 
         $moreQuery = "
             SELECT id, reference, nom, meta_title, photo_1, prix_500, sport, famille
@@ -156,11 +157,10 @@ if (!empty($relatedProductIds)) {
             WHERE active = 1
             AND id NOT IN ($placeholders)
             ORDER BY RAND()
-            LIMIT ?
+            LIMIT $remaining
         ";
         $stmtMore = $pdo->prepare($moreQuery);
-        $params = array_merge($excludeIds, [4 - count($relatedProducts)]);
-        $stmtMore->execute($params);
+        $stmtMore->execute($excludeIds);
         $relatedProducts = array_merge($relatedProducts, $stmtMore->fetchAll(PDO::FETCH_ASSOC));
     }
 }
