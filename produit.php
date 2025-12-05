@@ -554,33 +554,57 @@ $tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
             </div>
             <?php endif; ?>
 
-            <!-- PRODUITS LIÉS / COMPLÉTEZ VOTRE ÉQUIPEMENT -->
+            <!-- PRODUITS LIÉS -->
             <?php if (!empty($relatedProducts)): ?>
-            <div style="margin: 2rem 0; padding: 2rem; background: linear-gradient(135deg, #f8f8f8 0%, #fff 100%); border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                <h3 style="font-size: 1.4rem; margin-bottom: 1.25rem; color: #1a1a1a; font-weight: 700;">Complétez votre équipement</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem;">
+            <div class="related-products-section">
+                <div class="related-products-wrapper">
+                    <button class="related-nav related-prev" onclick="scrollRelatedProducts(-1)">‹</button>
+                    <div class="related-products-grid">
                     <?php foreach ($relatedProducts as $related):
                         $relatedName = !empty($related['meta_title']) ? $related['meta_title'] : $related['nom'];
                         $relatedPrice = $related['prix_500'] ? number_format($related['prix_500'], 2, ',', ' ') . ' €' : '';
                     ?>
-                    <a href="/produit/<?php echo htmlspecialchars($related['reference']); ?>" class="related-product-card" style="display: block; background: #fff; border-radius: 8px; overflow: hidden; text-decoration: none; border: 1px solid #e8e8e8; transition: all 0.3s ease;">
-                        <div style="position: relative; height: 140px; overflow: hidden; background: #f5f5f5;">
-                            <img src="<?php echo htmlspecialchars($related['photo_1'] ?: '/photos/placeholder.webp'); ?>" alt="<?php echo htmlspecialchars($relatedName); ?>" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">
-                            <span style="position: absolute; top: 8px; left: 8px; background: #000; color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 3px; text-transform: uppercase;"><?php echo htmlspecialchars($related['famille']); ?></span>
+                    <a href="/produit/<?php echo htmlspecialchars($related['reference']); ?>" class="related-product-card">
+                        <div class="related-product-image">
+                            <img src="<?php echo htmlspecialchars($related['photo_1'] ?: '/photos/placeholder.webp'); ?>" alt="<?php echo htmlspecialchars($relatedName); ?>" loading="lazy">
+                            <span class="related-product-badge"><?php echo htmlspecialchars($related['famille']); ?></span>
                         </div>
-                        <div style="padding: 12px;">
-                            <div style="color: #666; font-size: 11px; text-transform: uppercase; margin-bottom: 4px;"><?php echo htmlspecialchars($related['sport']); ?></div>
-                            <div style="color: #1a1a1a; font-weight: 600; font-size: 13px; line-height: 1.3; margin-bottom: 8px; min-height: 34px;"><?php echo htmlspecialchars($relatedName); ?></div>
+                        <div class="related-product-info">
+                            <div class="related-product-sport"><?php echo htmlspecialchars($related['sport']); ?></div>
+                            <div class="related-product-name"><?php echo htmlspecialchars($relatedName); ?></div>
                             <?php if ($relatedPrice): ?>
-                            <div style="color: #FF4B26; font-weight: 700; font-size: 14px;">Dès <?php echo $relatedPrice; ?></div>
+                            <div class="related-product-price">Dès <?php echo $relatedPrice; ?></div>
                             <?php else: ?>
-                            <div style="color: #FF4B26; font-weight: 600; font-size: 12px;">Demander un devis</div>
+                            <div class="related-product-price">Demander un devis</div>
                             <?php endif; ?>
                         </div>
                     </a>
                     <?php endforeach; ?>
+                    </div>
+                    <button class="related-nav related-next" onclick="scrollRelatedProducts(1)">›</button>
                 </div>
             </div>
+            <script>
+            (function() {
+                const grid = document.querySelector('.related-products-grid');
+                const prevBtn = document.querySelector('.related-prev');
+                const nextBtn = document.querySelector('.related-next');
+                if (grid && grid.children.length > 4) {
+                    nextBtn.style.opacity = '1';
+                    nextBtn.style.pointerEvents = 'auto';
+                }
+                grid.addEventListener('scroll', function() {
+                    prevBtn.style.opacity = grid.scrollLeft > 10 ? '1' : '0.3';
+                    prevBtn.style.pointerEvents = grid.scrollLeft > 10 ? 'auto' : 'none';
+                    const maxScroll = grid.scrollWidth - grid.clientWidth;
+                    nextBtn.style.opacity = grid.scrollLeft < maxScroll - 10 ? '1' : '0.3';
+                    nextBtn.style.pointerEvents = grid.scrollLeft < maxScroll - 10 ? 'auto' : 'none';
+                });
+                window.scrollRelatedProducts = function(dir) {
+                    grid.scrollBy({ left: dir * 240, behavior: 'smooth' });
+                };
+            })();
+            </script>
             <?php endif; ?>
         </div>
 

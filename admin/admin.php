@@ -1749,6 +1749,51 @@ $user = $_SESSION['admin_user'] ?? null;
         .quill-editor-container .ql-toolbar { border-radius: 6px 6px 0 0; background: #fafbfc; }
         .quill-editor-container .ql-container { border-radius: 0 0 6px 6px; }
 
+        /* HTML Table Editor Styles */
+        .wysiwyg-table {
+            background: #1e1e1e !important;
+            color: #d4d4d4 !important;
+            font-family: 'Monaco', 'Consolas', 'Courier New', monospace !important;
+            font-size: 13px !important;
+            line-height: 1.5 !important;
+            padding: 15px !important;
+            border-radius: 8px !important;
+            border: 1px solid #333 !important;
+        }
+        .wysiwyg-table:focus {
+            outline: none;
+            border-color: var(--primary) !important;
+        }
+        .html-preview-box {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .html-preview-box table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .html-preview-box th, .html-preview-box td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        .html-preview-box th {
+            background: #000;
+            color: #fff;
+        }
+        .html-preview-box tr:nth-child(even) td {
+            background: #f9f9f9;
+        }
+        .toggle-html-mode.active {
+            background: var(--primary);
+            color: #fff;
+        }
+
         /* Photo Gallery Manager */
         .photo-gallery-manager { margin-bottom: 30px; }
         .photo-dropzone {
@@ -2546,9 +2591,19 @@ $user = $_SESSION['admin_user'] ?? null;
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">📋 Onglet Caractéristiques</label>
-                            <textarea name="tab_specifications" class="form-control wysiwyg"><?= htmlspecialchars($p['tab_specifications'] ?? '') ?></textarea>
-                            <div class="form-hint">Éditeur visuel. Tableau des spécifications techniques.</div>
+                            <label class="form-label">📋 Onglet Caractéristiques (Fiche Technique)</label>
+                            <div style="margin-bottom: 10px; display: flex; gap: 10px; align-items: center;">
+                                <span style="font-size: 12px; color: var(--text-muted);">Mode HTML pour tableaux</span>
+                                <button type="button" class="btn btn-sm btn-primary" onclick="previewHTML('tab_specifications')" style="font-size: 11px;">
+                                    👁️ Aperçu
+                                </button>
+                                <button type="button" class="btn btn-sm btn-light" onclick="insertTableTemplate('tab_specifications')" style="font-size: 11px;">
+                                    📋 Insérer tableau modèle
+                                </button>
+                            </div>
+                            <textarea name="tab_specifications" id="tab_specifications" class="form-control wysiwyg-table" style="min-height: 300px;"><?= htmlspecialchars($p['tab_specifications'] ?? '') ?></textarea>
+                            <div id="preview_tab_specifications" class="html-preview-box" style="display: none;"></div>
+                            <div class="form-hint">Éditez le HTML directement. Les tableaux seront stylisés automatiquement.</div>
                         </div>
 
                         <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
@@ -2588,8 +2643,18 @@ $user = $_SESSION['admin_user'] ?? null;
 
                         <div class="form-group" id="custom-sizes-area">
                             <label class="form-label">Contenu personnalisé (si pas de guide sélectionné)</label>
-                            <textarea name="tab_sizes" class="form-control wysiwyg"><?= htmlspecialchars($p['tab_sizes'] ?? '') ?></textarea>
-                            <div class="form-hint">Éditeur visuel. Utilisé uniquement si aucun guide n'est sélectionné.</div>
+                            <div style="margin-bottom: 10px; display: flex; gap: 10px; align-items: center;">
+                                <span style="font-size: 12px; color: var(--text-muted);">Mode HTML pour tableaux</span>
+                                <button type="button" class="btn btn-sm btn-primary" onclick="previewHTML('tab_sizes')" style="font-size: 11px;">
+                                    👁️ Aperçu
+                                </button>
+                                <button type="button" class="btn btn-sm btn-light" onclick="insertSizeTableTemplate('tab_sizes')" style="font-size: 11px;">
+                                    📏 Insérer tableau tailles
+                                </button>
+                            </div>
+                            <textarea name="tab_sizes" id="tab_sizes" class="form-control wysiwyg-table" style="min-height: 300px;"><?= htmlspecialchars($p['tab_sizes'] ?? '') ?></textarea>
+                            <div id="preview_tab_sizes" class="html-preview-box" style="display: none;"></div>
+                            <div class="form-hint">Utilisé uniquement si aucun guide prédéfini n'est sélectionné.</div>
                         </div>
 
                         <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
@@ -5937,6 +6002,77 @@ function toggleCustomSizes(select) {
         previewContent.innerHTML = '';
         customArea.style.opacity = '1';
     }
+}
+
+// Preview HTML pour les tableaux
+function previewHTML(textareaId) {
+    var textarea = document.getElementById(textareaId);
+    var previewBox = document.getElementById('preview_' + textareaId);
+    if (textarea && previewBox) {
+        if (previewBox.style.display === 'none') {
+            previewBox.innerHTML = textarea.value || '<p style="color:#999;">Aucun contenu</p>';
+            previewBox.style.display = 'block';
+        } else {
+            previewBox.style.display = 'none';
+        }
+    }
+}
+
+// Insérer un modèle de tableau specs
+function insertTableTemplate(textareaId) {
+    var textarea = document.getElementById(textareaId);
+    if (!textarea) return;
+
+    var template = `<h2>Fiche Technique</h2>
+<table>
+    <tr><td><strong>Référence</strong></td><td>REF-XXX</td></tr>
+    <tr><td><strong>Sport</strong></td><td>Football</td></tr>
+    <tr><td><strong>Catégorie</strong></td><td>Maillot</td></tr>
+    <tr><td><strong>Matière</strong></td><td>Polyester recyclé</td></tr>
+    <tr><td><strong>Grammage</strong></td><td>140g/m²</td></tr>
+    <tr><td><strong>Genre</strong></td><td>Mixte</td></tr>
+    <tr><td><strong>Fabrication</strong></td><td>Europe</td></tr>
+    <tr><td><strong>Délai</strong></td><td>3-4 semaines</td></tr>
+</table>`;
+
+    if (textarea.value.trim()) {
+        if (!confirm('Remplacer le contenu existant ?')) return;
+    }
+    textarea.value = template;
+    previewHTML(textareaId);
+}
+
+// Insérer un modèle de tableau de tailles
+function insertSizeTableTemplate(textareaId) {
+    var textarea = document.getElementById(textareaId);
+    if (!textarea) return;
+
+    var template = `<h2>Guide des Tailles</h2>
+<table>
+    <tr>
+        <th>Taille</th>
+        <th>Tour de poitrine</th>
+        <th>Tour de taille</th>
+        <th>Longueur</th>
+    </tr>
+    <tr><td>XS</td><td>84-88 cm</td><td>70-74 cm</td><td>66 cm</td></tr>
+    <tr><td>S</td><td>88-92 cm</td><td>74-78 cm</td><td>68 cm</td></tr>
+    <tr><td>M</td><td>92-96 cm</td><td>78-82 cm</td><td>70 cm</td></tr>
+    <tr><td>L</td><td>96-100 cm</td><td>82-86 cm</td><td>72 cm</td></tr>
+    <tr><td>XL</td><td>100-104 cm</td><td>86-90 cm</td><td>74 cm</td></tr>
+    <tr><td>XXL</td><td>104-108 cm</td><td>90-94 cm</td><td>76 cm</td></tr>
+</table>
+
+<h3>Comment prendre vos mesures ?</h3>
+<p><strong>Tour de poitrine :</strong> Mesurez horizontalement à l'endroit le plus fort.</p>
+<p><strong>Tour de taille :</strong> Mesurez au niveau du nombril.</p>
+<p><strong>Longueur :</strong> De l'épaule jusqu'au bas du vêtement.</p>`;
+
+    if (textarea.value.trim()) {
+        if (!confirm('Remplacer le contenu existant ?')) return;
+    }
+    textarea.value = template;
+    previewHTML(textareaId);
 }
 
 // Initialiser le preview si un guide est déjà sélectionné
