@@ -234,27 +234,30 @@ function extractAllContent($html, $config) {
                 $section['title'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
             }
 
-            // Content blocks - extraire TOUT le contenu HTML
+            // Content blocks - utiliser split pour capturer TOUS les blocs
             if (preg_match('/<div class=["\']seo-content-grid["\']>(.*?)<\/div>\s*<div class=["\']seo-keywords/is', $seoHtml, $gridMatch)) {
                 $gridHtml = $gridMatch[1];
 
-                // Séparer les blocs
-                if (preg_match_all('/<div class=["\']seo-content-block["\']>(.*?)<\/div>\s*(?=<div class=["\']seo-content-block|$)/is', $gridHtml, $blockMatches)) {
-                    foreach ($blockMatches[1] as $blockHtml) {
-                        $block = ['title' => '', 'content' => ''];
+                // Séparer les blocs avec split
+                $blockParts = preg_split('/<div class=["\']seo-content-block["\']>/is', $gridHtml);
 
-                        // Titre du bloc
-                        if (preg_match('/<h3>([^<]+)<\/h3>/i', $blockHtml, $m)) {
-                            $block['title'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
-                        }
+                foreach ($blockParts as $blockHtml) {
+                    if (empty(trim($blockHtml))) continue;
 
-                        // Tout le contenu après le h3 (paragraphes, listes)
-                        $content = preg_replace('/<h3>[^<]+<\/h3>/i', '', $blockHtml);
-                        $block['content'] = trim($content);
+                    $block = ['title' => '', 'content' => ''];
 
-                        if (!empty($block['title']) || !empty($block['content'])) {
-                            $section['blocks'][] = $block;
-                        }
+                    // Titre du bloc
+                    if (preg_match('/<h3>([^<]+)<\/h3>/i', $blockHtml, $m)) {
+                        $block['title'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
+                    }
+
+                    // Tout le contenu après le h3 (paragraphes, listes) - nettoyer les divs de fermeture
+                    $content = preg_replace('/<h3>[^<]+<\/h3>/i', '', $blockHtml);
+                    $content = preg_replace('/<\/div>\s*$/is', '', $content); // Enlever div fermant en fin
+                    $block['content'] = trim($content);
+
+                    if (!empty($block['title']) || !empty($block['content'])) {
+                        $section['blocks'][] = $block;
                     }
                 }
             }
