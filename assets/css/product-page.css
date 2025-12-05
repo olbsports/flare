@@ -1223,13 +1223,62 @@ body {
 }
 
 /* ==============================================
+   TABLEAUX - Guide des tailles dans les onglets
+   ============================================== */
+#tab-sizes .wysiwyg-content table,
+#tab-specifications .wysiwyg-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#tab-sizes .wysiwyg-content table th,
+#tab-specifications .wysiwyg-content table th {
+    padding: 14px 16px;
+    text-align: left;
+    background: #1a1a1a !important;
+    color: #fff !important;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid #333;
+}
+
+#tab-sizes .wysiwyg-content table td,
+#tab-specifications .wysiwyg-content table td {
+    padding: 12px 16px;
+    text-align: left;
+    border: 1px solid #e0e0e0;
+    font-size: 14px;
+}
+
+#tab-sizes .wysiwyg-content table tr:nth-child(even) td {
+    background: #f8f8f8;
+}
+
+#tab-sizes .wysiwyg-content table tr:nth-child(odd) td {
+    background: #fff;
+}
+
+#tab-sizes .wysiwyg-content table td:first-child {
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+/* ==============================================
    BLOC DETAILS/SUMMARY - Informations dépliables
    ============================================== */
 .llm-context {
-    padding: 1rem;
+    max-width: 1400px;
+    margin: 40px auto;
+    padding: 1.5rem 5%;
     background: #fafafa;
     border: 1px solid #f0f0f0;
-    margin: 1.5rem 0;
     font-size: 0.9rem;
     color: #666;
     border-radius: 8px;

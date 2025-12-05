@@ -534,28 +534,6 @@ $tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
             <h3>Fabrication Européenne Certifiée</h3>
 
             <p>Tous nos équipements de <?php echo htmlspecialchars($sportLower); ?> sont fabriqués dans des ateliers certifiés en Europe, garantissant qualité professionnelle et respect de l'environnement. Délai de fabrication : 3-4 semaines. Livraison express Europe en 3-5 jours.</p>
-
-            <!-- CONTENU STRUCTURÉ POUR RÉFÉRENCEMENT LLM -->
-            <div class="llm-context" style="padding: 1rem; background: #fafafa; border: 1px solid #f0f0f0; margin: 1.5rem 0; font-size: 0.9rem; color: #666;">
-                <details>
-                    <summary style="cursor: pointer; font-weight: 600; color: #333; margin-bottom: 0.5rem;">Informations détaillées produit</summary>
-                    <div style="line-height: 1.6; margin-top: 0.75rem;">
-                        <p><strong>Produit:</strong> <?php echo htmlspecialchars($nom); ?></p>
-                        <p><strong>Référence:</strong> <?php echo htmlspecialchars($reference); ?></p>
-                        <p><strong>Catégorie:</strong> <?php echo htmlspecialchars($famille . ' ' . $sport); ?> personnalisé</p>
-                        <p><strong>Technique:</strong> Sublimation intégrale textile</p>
-                        <p><strong>Tissu:</strong> <?php echo htmlspecialchars($tissu); ?> - <?php echo htmlspecialchars($grammage); ?></p>
-                        <p><strong>Genre:</strong> <?php echo htmlspecialchars($genre); ?></p>
-                        <p><strong>Fabrication:</strong> Europe - Ateliers certifiés</p>
-                        <p><strong>Délai:</strong> 3-4 semaines + livraison express 3-5 jours</p>
-                        <p><strong>Minimum:</strong> Aucune quantité minimum (dès 1 pièce)</p>
-                        <p><strong>Prix indicatif:</strong> À partir de <?php echo number_format($priceLow, 2, ',', ' '); ?>€ l'unité (sur volume)</p>
-                        <p><strong>Personnalisation:</strong> Illimitée - logos, noms, numéros, sponsors, dégradés</p>
-                        <p><strong>Cas d'usage:</strong> Clubs sportifs, écoles, entreprises, événements, équipes amateurs et professionnelles</p>
-                        <p><strong>Avantages:</strong> Durabilité exceptionnelle, design unique, couleurs illimitées, fabrication européenne</p>
-                    </div>
-                </details>
-            </div>
             <?php endif; ?>
         </div>
 
@@ -614,8 +592,10 @@ $tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
         <!-- TAB: SIZE GUIDE -->
         <div class="tab-content" id="tab-sizes">
             <?php if ($sizeChart): ?>
-                <h2><?php echo htmlspecialchars($sizeChart['nom']); ?></h2>
-                <?php echo $sizeChart['html_content']; ?>
+                <div class="wysiwyg-content">
+                    <h2><?php echo htmlspecialchars($sizeChart['nom']); ?></h2>
+                    <?php echo $sizeChart['html_content']; ?>
+                </div>
             <?php elseif (!empty($tabSizes)): ?>
                 <div class="wysiwyg-content"><?php echo $tabSizes; ?></div>
             <?php else: ?>
@@ -759,6 +739,28 @@ $tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
             </div>
         </div>
     </section>
+
+    <!-- CONTENU STRUCTURÉ POUR LLM/SEO - Tout à la fin -->
+    <div class="llm-context">
+        <details>
+            <summary>Informations détaillées produit</summary>
+            <div>
+                <p><strong>Produit:</strong> <?php echo htmlspecialchars($nom); ?></p>
+                <p><strong>Référence:</strong> <?php echo htmlspecialchars($reference); ?></p>
+                <p><strong>Catégorie:</strong> <?php echo htmlspecialchars($famille . ' ' . $sport); ?> personnalisé</p>
+                <p><strong>Technique:</strong> Sublimation intégrale textile</p>
+                <p><strong>Tissu:</strong> <?php echo htmlspecialchars($tissu); ?> - <?php echo htmlspecialchars($grammage); ?></p>
+                <p><strong>Genre:</strong> <?php echo htmlspecialchars($genre); ?></p>
+                <p><strong>Fabrication:</strong> Europe - Ateliers certifiés</p>
+                <p><strong>Délai:</strong> 3-4 semaines + livraison express 3-5 jours</p>
+                <p><strong>Minimum:</strong> Aucune quantité minimum (dès 1 pièce)</p>
+                <p><strong>Prix indicatif:</strong> À partir de <?php echo number_format($priceLow, 2, ',', ' '); ?>€ l'unité (sur volume)</p>
+                <p><strong>Personnalisation:</strong> Illimitée - logos, noms, numéros, sponsors, dégradés</p>
+                <p><strong>Cas d'usage:</strong> Clubs sportifs, écoles, entreprises, événements, équipes amateurs et professionnelles</p>
+                <p><strong>Avantages:</strong> Durabilité exceptionnelle, design unique, couleurs illimitées, fabrication européenne</p>
+            </div>
+        </details>
+    </div>
 
     <div id="dynamic-footer"></div>
 
