@@ -314,19 +314,10 @@ if ($page === 'logout') {
 
 // ACTIONS
 $toast = '';
-$debugInfo = ''; // Pour afficher les infos de debug
 if ($action && $pdo) {
     try {
         switch ($action) {
             case 'save_product':
-                // DEBUG: Afficher ce qui est reçu pour les onglets
-                $debugInfo = "DEBUG POST reçu:\n";
-                $debugInfo .= "- tab_description: " . (empty($_POST['tab_description']) ? 'VIDE' : strlen($_POST['tab_description']) . ' chars') . "\n";
-                $debugInfo .= "- tab_specifications: " . (empty($_POST['tab_specifications']) ? 'VIDE' : strlen($_POST['tab_specifications']) . ' chars') . "\n";
-                $debugInfo .= "- configurator_config: " . (empty($_POST['configurator_config']) ? 'VIDE' : strlen($_POST['configurator_config']) . ' chars') . "\n";
-                $debugInfo .= "- meta_title: " . ($_POST['meta_title'] ?? 'NULL') . "\n";
-                $debugInfo .= "- active: " . ($_POST['active'] ?? 'NULL') . "\n";
-
                 $fields = ['nom', 'sport', 'famille', 'description', 'description_seo', 'tissu', 'grammage',
                     'prix_1', 'prix_5', 'prix_10', 'prix_20', 'prix_50', 'prix_100', 'prix_250', 'prix_500',
                     'prix_enfant_1', 'prix_enfant_5', 'prix_enfant_10', 'prix_enfant_20', 'prix_enfant_50', 'prix_enfant_100', 'prix_enfant_250', 'prix_enfant_500',
@@ -384,21 +375,6 @@ if ($action && $pdo) {
                     $stmt = $pdo->prepare("UPDATE products SET $set, etiquettes=?, related_products=?, updated_at=NOW() WHERE id=?");
                     $allValues = array_merge($values, [$etiquettesStr, $relatedProductsJson, $id]);
                     $result = $stmt->execute($allValues);
-                    $rowCount = $stmt->rowCount();
-
-                    // Debug: infos sur l'UPDATE
-                    $debugInfo .= "\n--- UPDATE ---\n";
-                    $debugInfo .= "Result: " . ($result ? 'OK' : 'FAIL') . "\n";
-                    $debugInfo .= "Rows affected: $rowCount\n";
-                    $debugInfo .= "ID: $id\n";
-
-                    // Vérifier ce qui est dans la BDD après
-                    $checkStmt = $pdo->prepare("SELECT tab_description, meta_title, configurator_config FROM products WHERE id = ?");
-                    $checkStmt->execute([$id]);
-                    $afterSave = $checkStmt->fetch(PDO::FETCH_ASSOC);
-                    $debugInfo .= "\n--- APRES SAVE ---\n";
-                    $debugInfo .= "tab_description en BDD: " . (empty($afterSave['tab_description']) ? 'VIDE' : strlen($afterSave['tab_description']) . ' chars') . "\n";
-                    $debugInfo .= "meta_title en BDD: " . ($afterSave['meta_title'] ?? 'NULL') . "\n";
 
                     if (!$result) {
                         $toast = 'Erreur SQL: ' . implode(', ', $stmt->errorInfo());
@@ -1921,13 +1897,6 @@ $user = $_SESSION['admin_user'] ?? null;
 <script>setTimeout(() => document.querySelector('.toast').remove(), 3000);</script>
 <?php endif; ?>
 
-<?php if ($debugInfo): ?>
-<div style="position: fixed; top: 80px; right: 20px; background: #1e293b; color: #22c55e; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; white-space: pre-wrap; z-index: 10000; max-width: 400px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-    <strong style="color: #f59e0b;">🔍 DEBUG INFO</strong><br><br><?= htmlspecialchars($debugInfo) ?>
-    <br><button onclick="this.parentElement.remove()" style="margin-top: 10px; padding: 5px 10px; cursor: pointer;">Fermer</button>
-</div>
-<?php endif; ?>
-
 <!-- SIDEBAR -->
 <aside class="sidebar">
     <div class="sidebar-header">
@@ -2731,29 +2700,168 @@ $user = $_SESSION['admin_user'] ?? null;
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label">👔 Options de col</label>
-                                <input type="text" id="cfg_collars" class="form-control" value="<?= htmlspecialchars(implode(', ', $config['collar_options'] ?? ['col_v','col_rond','col_polo'])) ?>">
-                                <div class="form-hint">Ex: col_v, col_rond, col_polo</div>
-                            </div>
-                            <div class="form-group">
                                 <label class="form-label">🎨 Couleurs personnalisables</label>
                                 <select id="cfg_colors" class="form-control">
                                     <option value="true" <?= ($config['colors_available'] ?? true) ? 'selected' : '' ?>>Oui</option>
                                     <option value="false" <?= !($config['colors_available'] ?? true) ? 'selected' : '' ?>>Non</option>
                                 </select>
                             </div>
-                        </div>
-
-                        <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label">📦 Quantité minimum</label>
                                 <input type="number" id="cfg_min_qty" class="form-control" value="<?= intval($config['min_quantity'] ?? 1) ?>" min="1">
                             </div>
+                        </div>
+
+                        <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label">🚚 Délai de livraison</label>
                                 <input type="text" id="cfg_delivery" class="form-control" value="<?= htmlspecialchars($config['delivery_time'] ?? '3-4 semaines') ?>">
                             </div>
                         </div>
+
+                        <hr style="margin: 25px 0; border: none; border-top: 1px solid var(--border);">
+
+                        <h4 style="margin-bottom: 20px;">⚙️ Options personnalisées du produit</h4>
+                        <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 13px;">
+                            Créez vos propres options avec les choix disponibles. Ces options apparaîtront dans le configurateur de devis.
+                        </p>
+
+                        <?php $customOptions = $config['custom_options'] ?? []; ?>
+                        <div id="custom-options-container">
+                            <?php if (!empty($customOptions)): ?>
+                                <?php foreach ($customOptions as $idx => $opt): ?>
+                                <div class="custom-option-item" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #e0e0e0;">
+                                    <div style="display: flex; gap: 15px; align-items: start;">
+                                        <div style="flex: 1;">
+                                            <input type="text" class="form-control cfg-opt-title" value="<?= htmlspecialchars($opt['title'] ?? '') ?>" placeholder="Titre de l'option (ex: Type de col)" style="margin-bottom: 10px; font-weight: 600;">
+                                            <input type="text" class="form-control cfg-opt-choices" value="<?= htmlspecialchars(implode(', ', $opt['choices'] ?? [])) ?>" placeholder="Choix possibles séparés par virgules (ex: Col V, Col rond, Col polo)">
+                                            <div style="margin-top: 8px;">
+                                                <label style="font-size: 12px; display: flex; align-items: center; gap: 5px;">
+                                                    <input type="checkbox" class="cfg-opt-required" <?= ($opt['required'] ?? false) ? 'checked' : '' ?>>
+                                                    Obligatoire
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="this.closest('.custom-option-item').remove(); updateConfigJSON();">🗑️</button>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                            <button type="button" class="btn btn-light" onclick="addCustomOption()">
+                                + Ajouter une option
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="loadDefaultOptions()">
+                                🔄 Charger options par défaut (selon famille)
+                            </button>
+                        </div>
+
+                        <script>
+                        // Options par défaut selon la famille du produit
+                        var familleOptions = {
+                            'maillot': [
+                                {title: 'Type de col', choices: 'Col rond, Col V, Col polo', required: true},
+                                {title: 'Longueur des manches', choices: 'Manches courtes, Manches longues, Sans manches', required: true}
+                            ],
+                            'short': [
+                                {title: 'Poches', choices: 'Sans poches, Avec poches', required: false}
+                            ],
+                            'pantalon': [
+                                {title: 'Poches', choices: 'Sans poches, Poches latérales, Poches zippées', required: false},
+                                {title: 'Ceinture', choices: 'Élastique, Cordon, Mixte', required: false}
+                            ],
+                            'polo': [
+                                {title: 'Longueur des manches', choices: 'Manches courtes, Manches longues', required: true}
+                            ],
+                            'sweat': [
+                                {title: 'Type de col', choices: 'Col rond, Capuche', required: true},
+                                {title: 'Poches', choices: 'Sans poches, Poche kangourou, Poches latérales', required: false},
+                                {title: 'Fermeture', choices: 'Sans fermeture, Zip intégral, Demi-zip', required: false}
+                            ],
+                            'veste': [
+                                {title: 'Type de col', choices: 'Col montant, Capuche, Col classique', required: true},
+                                {title: 'Poches', choices: 'Poches zippées, Poches plaquées, Sans poches', required: false},
+                                {title: 'Fermeture', choices: 'Zip intégral, Boutons', required: true}
+                            ],
+                            't-shirt': [
+                                {title: 'Type de col', choices: 'Col rond, Col V', required: true},
+                                {title: 'Longueur des manches', choices: 'Manches courtes, Manches longues', required: true}
+                            ],
+                            'débardeur': [
+                                {title: 'Coupe', choices: 'Classique, Dos nageur', required: true}
+                            ],
+                            'cuissard': [
+                                {title: 'Longueur', choices: 'Court, Mi-long, Long', required: true},
+                                {title: 'Peau de chamois', choices: 'Sans, Basique, Performance', required: false}
+                            ],
+                            'combinaison': [
+                                {title: 'Type de col', choices: 'Col rond, Col zippé', required: true},
+                                {title: 'Longueur des manches', choices: 'Manches courtes, Manches longues, Sans manches', required: true}
+                            ],
+                            'gilet': [
+                                {title: 'Type de col', choices: 'Col montant, Col rond', required: true},
+                                {title: 'Poches', choices: 'Poches zippées, Sans poches', required: false},
+                                {title: 'Fermeture', choices: 'Zip, Boutons', required: true}
+                            ]
+                        };
+
+                        function loadDefaultOptions() {
+                            var famille = document.querySelector('select[name="famille"]')?.value || '';
+                            famille = famille.toLowerCase().trim();
+
+                            // Chercher les options pour cette famille
+                            var options = familleOptions[famille];
+
+                            if (!options) {
+                                // Options par défaut génériques
+                                options = [
+                                    {title: 'Type de col', choices: 'Col rond, Col V, Col polo, Col montant', required: false},
+                                    {title: 'Longueur des manches', choices: 'Manches courtes, Manches longues, Sans manches', required: false},
+                                    {title: 'Poches', choices: 'Sans poches, Avec poches, Poches zippées', required: false},
+                                    {title: 'Fermeture', choices: 'Sans fermeture, Zip, Boutons', required: false}
+                                ];
+                            }
+
+                            // Vider le conteneur
+                            document.getElementById('custom-options-container').innerHTML = '';
+
+                            // Ajouter les options
+                            options.forEach(function(opt) {
+                                addCustomOption(opt.title, opt.choices, opt.required);
+                            });
+
+                            alert('✅ Options chargées pour: ' + (famille || 'Défaut') + '\n\nVous pouvez maintenant les modifier selon vos besoins.');
+                        }
+
+                        function addCustomOption(title = '', choices = '', required = false) {
+                            var container = document.getElementById('custom-options-container');
+                            var html = `
+                            <div class="custom-option-item" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #e0e0e0;">
+                                <div style="display: flex; gap: 15px; align-items: start;">
+                                    <div style="flex: 1;">
+                                        <input type="text" class="form-control cfg-opt-title" value="${title}" placeholder="Titre de l'option (ex: Type de col)" style="margin-bottom: 10px; font-weight: 600;">
+                                        <input type="text" class="form-control cfg-opt-choices" value="${choices}" placeholder="Choix possibles séparés par virgules (ex: Col V, Col rond, Col polo)">
+                                        <div style="margin-top: 8px;">
+                                            <label style="font-size: 12px; display: flex; align-items: center; gap: 5px;">
+                                                <input type="checkbox" class="cfg-opt-required" ${required ? 'checked' : ''}>
+                                                Obligatoire
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="this.closest('.custom-option-item').remove(); updateConfigJSON();">🗑️</button>
+                                </div>
+                            </div>`;
+                            container.insertAdjacentHTML('beforeend', html);
+                            // Attach events to new inputs
+                            container.querySelectorAll('.custom-option-item:last-child input').forEach(function(el) {
+                                el.addEventListener('change', updateConfigJSON);
+                                el.addEventListener('input', updateConfigJSON);
+                            });
+                            updateConfigJSON();
+                        }
+                        </script>
 
                         <hr style="margin: 25px 0; border: none; border-top: 1px solid var(--border);">
 
@@ -2769,6 +2877,21 @@ $user = $_SESSION['admin_user'] ?? null;
 
                         <script>
                         function updateConfigJSON() {
+                            // Collecter les options personnalisées
+                            var customOptions = [];
+                            document.querySelectorAll('.custom-option-item').forEach(function(item) {
+                                var title = item.querySelector('.cfg-opt-title').value.trim();
+                                var choicesStr = item.querySelector('.cfg-opt-choices').value;
+                                var required = item.querySelector('.cfg-opt-required').checked;
+                                if (title) {
+                                    customOptions.push({
+                                        title: title,
+                                        choices: choicesStr.split(',').map(s => s.trim()).filter(s => s),
+                                        required: required
+                                    });
+                                }
+                            });
+
                             var config = {
                                 design_options: {
                                     flare: document.getElementById('cfg_design_flare').checked,
@@ -2784,14 +2907,19 @@ $user = $_SESSION['admin_user'] ?? null;
                                 sizes: document.getElementById('cfg_sizes').value.split(',').map(s => s.trim()).filter(s => s),
                                 sizes_kids: document.getElementById('cfg_sizes_kids').value.split(',').map(s => s.trim()).filter(s => s),
                                 colors_available: document.getElementById('cfg_colors').value === 'true',
-                                collar_options: document.getElementById('cfg_collars').value.split(',').map(s => s.trim()).filter(s => s),
                                 min_quantity: parseInt(document.getElementById('cfg_min_qty').value) || 1,
-                                delivery_time: document.getElementById('cfg_delivery').value
+                                delivery_time: document.getElementById('cfg_delivery').value,
+                                custom_options: customOptions
                             };
                             document.getElementById('configurator_config_json').value = JSON.stringify(config, null, 2);
                         }
                         // Attach to all config inputs
                         document.querySelectorAll('[id^="cfg_"]').forEach(function(el) {
+                            el.addEventListener('change', updateConfigJSON);
+                            el.addEventListener('input', updateConfigJSON);
+                        });
+                        // Attach to existing custom options
+                        document.querySelectorAll('.custom-option-item input').forEach(function(el) {
                             el.addEventListener('change', updateConfigJSON);
                             el.addEventListener('input', updateConfigJSON);
                         });
@@ -2812,14 +2940,9 @@ $user = $_SESSION['admin_user'] ?? null;
                                     var editor = container.querySelector('.ql-editor');
                                     if (editor) {
                                         textarea.value = editor.innerHTML;
-                                        console.log('Synced ' + textarea.name + ':', textarea.value.substring(0, 100));
                                     }
                                 }
                             });
-                            // Debug: afficher les valeurs importantes
-                            console.log('tab_description:', document.querySelector('[name="tab_description"]')?.value?.substring(0, 100));
-                            console.log('configurator_config:', document.querySelector('[name="configurator_config"]')?.value?.substring(0, 100));
-                            console.log('meta_title:', document.querySelector('[name="meta_title"]')?.value);
                             return true; // Permettre la soumission
                         }
                         </script>
