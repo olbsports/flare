@@ -191,15 +191,38 @@ class ConfigurateurProduit {
     }
 
     /**
+     * Retourne les options personnalisées depuis l'admin
+     */
+    getCustomOptions() {
+        return this.productConfig.custom_options || [];
+    }
+
+    /**
      * Retourne les options disponibles selon la famille du produit
+     * PRIORITÉ: custom_options de l'admin > options par défaut selon famille
      */
     getAvailableOptions() {
+        // Si des options personnalisées existent dans l'admin, on les utilise
+        const customOptions = this.getCustomOptions();
+        if (customOptions && customOptions.length > 0) {
+            // Retourner un objet vide car on utilise les custom_options
+            return {
+                col: [],
+                manches: [],
+                poches: false,
+                fermeture: [],
+                hasCustomOptions: true
+            };
+        }
+
+        // Sinon, utiliser les options par défaut selon la famille
         const famille = this.product.famille || '';
         const options = {
             col: [],
             manches: [],
             poches: false,
-            fermeture: []
+            fermeture: [],
+            hasCustomOptions: false
         };
 
         switch (famille.toLowerCase()) {
@@ -540,77 +563,103 @@ class ConfigurateurProduit {
      */
     renderStep2Options() {
         const availableOptions = this.getAvailableOptions();
+        const customOptions = this.getCustomOptions();
 
         let optionsHTML = '';
 
-        // Type de col (si disponible)
-        if (availableOptions.col && availableOptions.col.length > 0) {
-            optionsHTML += `
-                <div class="config-option-group">
-                    <label class="config-label">Type de col</label>
-                    <div class="config-option-buttons">
-                        ${availableOptions.col.map(col => `
-                            <button class="config-option-btn ${this.configuration.options.col === col ? 'selected' : ''}"
-                                    onclick="configurateurProduitInstance.selectOption('col', '${col}')">
-                                ${col}
-                            </button>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
+        // PRIORITÉ 1: Options personnalisées depuis l'admin
+        if (customOptions && customOptions.length > 0) {
+            customOptions.forEach((option, index) => {
+                const optionKey = 'custom_' + index;
+                const currentValue = this.configuration.options[optionKey] || null;
+                const isRequired = option.required ? '<span style="color: #FF4B26;">*</span>' : '';
 
-        // Type de manches (si disponible)
-        if (availableOptions.manches && availableOptions.manches.length > 0) {
-            optionsHTML += `
-                <div class="config-option-group">
-                    <label class="config-label">Type de manches</label>
-                    <div class="config-option-buttons">
-                        ${availableOptions.manches.map(manche => `
-                            <button class="config-option-btn ${this.configuration.options.manches === manche ? 'selected' : ''}"
-                                    onclick="configurateurProduitInstance.selectOption('manches', '${manche}')">
-                                ${manche}
-                            </button>
-                        `).join('')}
+                optionsHTML += `
+                    <div class="config-option-group">
+                        <label class="config-label">${option.title} ${isRequired}</label>
+                        <div class="config-option-buttons">
+                            ${option.choices.map(choice => `
+                                <button class="config-option-btn ${currentValue === choice ? 'selected' : ''}"
+                                        onclick="configurateurProduitInstance.selectOption('${optionKey}', '${choice.replace(/'/g, "\\'")}')">
+                                    ${choice}
+                                </button>
+                            `).join('')}
+                        </div>
                     </div>
-                </div>
-            `;
-        }
+                `;
+            });
+        } else {
+            // PRIORITÉ 2: Options par défaut selon la famille
 
-        // Poches (si disponible)
-        if (availableOptions.poches) {
-            optionsHTML += `
-                <div class="config-option-group">
-                    <label class="config-label">Poches</label>
-                    <div class="config-option-buttons">
-                        <button class="config-option-btn ${this.configuration.options.poches === true ? 'selected' : ''}"
-                                onclick="configurateurProduitInstance.selectOption('poches', true)">
-                            Avec poches
-                        </button>
-                        <button class="config-option-btn ${this.configuration.options.poches === false ? 'selected' : ''}"
-                                onclick="configurateurProduitInstance.selectOption('poches', false)">
-                            Sans poches
-                        </button>
+            // Type de col (si disponible)
+            if (availableOptions.col && availableOptions.col.length > 0) {
+                optionsHTML += `
+                    <div class="config-option-group">
+                        <label class="config-label">Type de col</label>
+                        <div class="config-option-buttons">
+                            ${availableOptions.col.map(col => `
+                                <button class="config-option-btn ${this.configuration.options.col === col ? 'selected' : ''}"
+                                        onclick="configurateurProduitInstance.selectOption('col', '${col}')">
+                                    ${col}
+                                </button>
+                            `).join('')}
+                        </div>
                     </div>
-                </div>
-            `;
-        }
+                `;
+            }
 
-        // Fermeture (si disponible)
-        if (availableOptions.fermeture && availableOptions.fermeture.length > 0) {
-            optionsHTML += `
-                <div class="config-option-group">
-                    <label class="config-label">Type de fermeture</label>
-                    <div class="config-option-buttons">
-                        ${availableOptions.fermeture.map(fermeture => `
-                            <button class="config-option-btn ${this.configuration.options.fermeture === fermeture ? 'selected' : ''}"
-                                    onclick="configurateurProduitInstance.selectOption('fermeture', '${fermeture}')">
-                                ${fermeture}
-                            </button>
-                        `).join('')}
+            // Type de manches (si disponible)
+            if (availableOptions.manches && availableOptions.manches.length > 0) {
+                optionsHTML += `
+                    <div class="config-option-group">
+                        <label class="config-label">Type de manches</label>
+                        <div class="config-option-buttons">
+                            ${availableOptions.manches.map(manche => `
+                                <button class="config-option-btn ${this.configuration.options.manches === manche ? 'selected' : ''}"
+                                        onclick="configurateurProduitInstance.selectOption('manches', '${manche}')">
+                                    ${manche}
+                                </button>
+                            `).join('')}
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
+
+            // Poches (si disponible)
+            if (availableOptions.poches) {
+                optionsHTML += `
+                    <div class="config-option-group">
+                        <label class="config-label">Poches</label>
+                        <div class="config-option-buttons">
+                            <button class="config-option-btn ${this.configuration.options.poches === true ? 'selected' : ''}"
+                                    onclick="configurateurProduitInstance.selectOption('poches', true)">
+                                Avec poches
+                            </button>
+                            <button class="config-option-btn ${this.configuration.options.poches === false ? 'selected' : ''}"
+                                    onclick="configurateurProduitInstance.selectOption('poches', false)">
+                                Sans poches
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Fermeture (si disponible)
+            if (availableOptions.fermeture && availableOptions.fermeture.length > 0) {
+                optionsHTML += `
+                    <div class="config-option-group">
+                        <label class="config-label">Type de fermeture</label>
+                        <div class="config-option-buttons">
+                            ${availableOptions.fermeture.map(fermeture => `
+                                <button class="config-option-btn ${this.configuration.options.fermeture === fermeture ? 'selected' : ''}"
+                                        onclick="configurateurProduitInstance.selectOption('fermeture', '${fermeture}')">
+                                    ${fermeture}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
         }
 
         // Si aucune option n'est disponible
@@ -1317,23 +1366,38 @@ class ConfigurateurProduit {
             case 2:
                 // Validation dynamique selon les options disponibles
                 const availableOptions = this.getAvailableOptions();
+                const customOpts = this.getCustomOptions();
 
-                // Vérifier col seulement si disponible
-                if (availableOptions.col && availableOptions.col.length > 0 && !this.configuration.options.col) {
-                    alert('Veuillez sélectionner un type de col');
-                    return false;
-                }
+                // PRIORITÉ 1: Valider les options personnalisées requises
+                if (customOpts && customOpts.length > 0) {
+                    for (let i = 0; i < customOpts.length; i++) {
+                        const opt = customOpts[i];
+                        const optKey = 'custom_' + i;
+                        if (opt.required && !this.configuration.options[optKey]) {
+                            alert(`Veuillez sélectionner : ${opt.title}`);
+                            return false;
+                        }
+                    }
+                } else {
+                    // PRIORITÉ 2: Valider les options par défaut
 
-                // Vérifier manches seulement si disponible
-                if (availableOptions.manches && availableOptions.manches.length > 0 && !this.configuration.options.manches) {
-                    alert('Veuillez sélectionner un type de manches');
-                    return false;
-                }
+                    // Vérifier col seulement si disponible
+                    if (availableOptions.col && availableOptions.col.length > 0 && !this.configuration.options.col) {
+                        alert('Veuillez sélectionner un type de col');
+                        return false;
+                    }
 
-                // Vérifier fermeture seulement si disponible
-                if (availableOptions.fermeture && availableOptions.fermeture.length > 0 && !this.configuration.options.fermeture) {
-                    alert('Veuillez sélectionner un type de fermeture');
-                    return false;
+                    // Vérifier manches seulement si disponible
+                    if (availableOptions.manches && availableOptions.manches.length > 0 && !this.configuration.options.manches) {
+                        alert('Veuillez sélectionner un type de manches');
+                        return false;
+                    }
+
+                    // Vérifier fermeture seulement si disponible
+                    if (availableOptions.fermeture && availableOptions.fermeture.length > 0 && !this.configuration.options.fermeture) {
+                        alert('Veuillez sélectionner un type de fermeture');
+                        return false;
+                    }
                 }
                 break;
 
