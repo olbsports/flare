@@ -178,33 +178,24 @@ function cleanWysiwygHtml($html) {
     if (empty($html)) return '';
 
     // Supprimer les balises vides de Quill
-    $html = preg_replace('/<p><br><\/p>/i', '', $html);
-    $html = preg_replace('/<p>\s*<\/p>/i', '', $html);
-    $html = preg_replace('/<br\s*\/?>/i', '<br>', $html); // Normaliser les br
+    $html = preg_replace('#<p><br></p>#i', '', $html);
+    $html = preg_replace('#<p>\s*</p>#i', '', $html);
 
     // Supprimer les classes Quill (ql-*)
-    $html = preg_replace('/\s*class="ql-[^"]*"/i', '', $html);
+    $html = preg_replace('#\s*class="ql-[^"]*"#i', '', $html);
 
     // Supprimer TOUS les styles inline (Quill génère des couleurs et fonts qui cassent le design)
-    $html = preg_replace('/\s*style="[^"]*"/i', '', $html);
+    $html = preg_replace('#\s*style="[^"]*"#i', '', $html);
 
     // Supprimer les attributs data de Quill
-    $html = preg_replace('/\s*data-[a-z\-]+="[^"]*"/i', '', $html);
+    $html = preg_replace('#\s*data-[a-z\-]+="[^"]*"#i', '', $html);
 
     // Supprimer les spans vides (Quill les génère souvent)
-    $html = preg_replace('/<span>([^<]*)<\/span>/i', '$1', $html);
+    $html = preg_replace('#<span>([^<]*)</span>#i', '$1', $html);
 
     // Nettoyer les attributs vides
-    $html = preg_replace('/\s+class=""/i', '', $html);
-    $html = preg_replace('/\s+id=""/i', '', $html);
-
-    // Nettoyer les espaces multiples dans les attributs
-    $html = preg_replace('/\s+>/i', '>', $html);
-    $html = preg_replace('/<(\w+)\s+>/i', '<$1>', $html);
-
-    // Supprimer les espaces multiples entre balises
-    $html = preg_replace('/>\s+</i', '><', $html);
-    $html = preg_replace('/\s{2,}/', ' ', $html);
+    $html = preg_replace('#\s+class=""#i', '', $html);
+    $html = preg_replace('#\s+id=""#i', '', $html);
 
     return trim($html);
 }
@@ -561,6 +552,7 @@ $tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
                     </div>
                 </details>
             </div>
+            <?php endif; ?>
 
             <!-- PRODUITS LIÉS / COMPLÉTEZ VOTRE ÉQUIPEMENT -->
             <?php if (!empty($relatedProducts)): ?>
