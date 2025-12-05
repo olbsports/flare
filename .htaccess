@@ -84,6 +84,13 @@
 
     # REDIRECTION 301: anciennes URLs HTML → nouvelles URLs propres
     RewriteRule ^pages/products/([A-Za-z0-9_-]+)\.html$ /categorie/$1 [R=301,L]
+
+    # ==========================================
+    # E. SPORTS - Pages sports dynamiques (DB)
+    # ==========================================
+
+    # URL canonique: /sport/football → sport.php?slug=football
+    RewriteRule ^sport/([A-Za-z0-9_-]+)/?$ sport.php?slug=$1 [L,QSA]
 </IfModule>
 
 # ============================================
