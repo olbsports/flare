@@ -2749,11 +2749,92 @@ $user = $_SESSION['admin_user'] ?? null;
                             <?php endif; ?>
                         </div>
 
-                        <button type="button" class="btn btn-light" onclick="addCustomOption()" style="margin-bottom: 20px;">
-                            + Ajouter une option
-                        </button>
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                            <button type="button" class="btn btn-light" onclick="addCustomOption()">
+                                + Ajouter une option
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="loadDefaultOptions()">
+                                🔄 Charger options par défaut (selon famille)
+                            </button>
+                        </div>
 
                         <script>
+                        // Options par défaut selon la famille du produit
+                        var familleOptions = {
+                            'maillot': [
+                                {title: 'Type de col', choices: 'Col rond, Col V, Col polo', required: true},
+                                {title: 'Longueur des manches', choices: 'Manches courtes, Manches longues, Sans manches', required: true}
+                            ],
+                            'short': [
+                                {title: 'Poches', choices: 'Sans poches, Avec poches', required: false}
+                            ],
+                            'pantalon': [
+                                {title: 'Poches', choices: 'Sans poches, Poches latérales, Poches zippées', required: false},
+                                {title: 'Ceinture', choices: 'Élastique, Cordon, Mixte', required: false}
+                            ],
+                            'polo': [
+                                {title: 'Longueur des manches', choices: 'Manches courtes, Manches longues', required: true}
+                            ],
+                            'sweat': [
+                                {title: 'Type de col', choices: 'Col rond, Capuche', required: true},
+                                {title: 'Poches', choices: 'Sans poches, Poche kangourou, Poches latérales', required: false},
+                                {title: 'Fermeture', choices: 'Sans fermeture, Zip intégral, Demi-zip', required: false}
+                            ],
+                            'veste': [
+                                {title: 'Type de col', choices: 'Col montant, Capuche, Col classique', required: true},
+                                {title: 'Poches', choices: 'Poches zippées, Poches plaquées, Sans poches', required: false},
+                                {title: 'Fermeture', choices: 'Zip intégral, Boutons', required: true}
+                            ],
+                            't-shirt': [
+                                {title: 'Type de col', choices: 'Col rond, Col V', required: true},
+                                {title: 'Longueur des manches', choices: 'Manches courtes, Manches longues', required: true}
+                            ],
+                            'débardeur': [
+                                {title: 'Coupe', choices: 'Classique, Dos nageur', required: true}
+                            ],
+                            'cuissard': [
+                                {title: 'Longueur', choices: 'Court, Mi-long, Long', required: true},
+                                {title: 'Peau de chamois', choices: 'Sans, Basique, Performance', required: false}
+                            ],
+                            'combinaison': [
+                                {title: 'Type de col', choices: 'Col rond, Col zippé', required: true},
+                                {title: 'Longueur des manches', choices: 'Manches courtes, Manches longues, Sans manches', required: true}
+                            ],
+                            'gilet': [
+                                {title: 'Type de col', choices: 'Col montant, Col rond', required: true},
+                                {title: 'Poches', choices: 'Poches zippées, Sans poches', required: false},
+                                {title: 'Fermeture', choices: 'Zip, Boutons', required: true}
+                            ]
+                        };
+
+                        function loadDefaultOptions() {
+                            var famille = document.querySelector('select[name="famille"]')?.value || '';
+                            famille = famille.toLowerCase().trim();
+
+                            // Chercher les options pour cette famille
+                            var options = familleOptions[famille];
+
+                            if (!options) {
+                                // Options par défaut génériques
+                                options = [
+                                    {title: 'Type de col', choices: 'Col rond, Col V, Col polo, Col montant', required: false},
+                                    {title: 'Longueur des manches', choices: 'Manches courtes, Manches longues, Sans manches', required: false},
+                                    {title: 'Poches', choices: 'Sans poches, Avec poches, Poches zippées', required: false},
+                                    {title: 'Fermeture', choices: 'Sans fermeture, Zip, Boutons', required: false}
+                                ];
+                            }
+
+                            // Vider le conteneur
+                            document.getElementById('custom-options-container').innerHTML = '';
+
+                            // Ajouter les options
+                            options.forEach(function(opt) {
+                                addCustomOption(opt.title, opt.choices, opt.required);
+                            });
+
+                            alert('✅ Options chargées pour: ' + (famille || 'Défaut') + '\n\nVous pouvez maintenant les modifier selon vos besoins.');
+                        }
+
                         function addCustomOption(title = '', choices = '', required = false) {
                             var container = document.getElementById('custom-options-container');
                             var html = `
