@@ -136,11 +136,47 @@ $stockSchemaMap = [
 ];
 $stockSchemaUrl = $stockSchemaMap[$stockStatus] ?? 'https://schema.org/InStock';
 
+// Fonction pour nettoyer le HTML généré par Quill
+function cleanWysiwygHtml($html) {
+    if (empty($html)) return '';
+
+    // Supprimer les balises vides de Quill
+    $html = preg_replace('/<p><br><\/p>/i', '', $html);
+    $html = preg_replace('/<p>\s*<\/p>/i', '', $html);
+    $html = preg_replace('/<br\s*\/?>/i', '<br>', $html); // Normaliser les br
+
+    // Supprimer les classes Quill (ql-*)
+    $html = preg_replace('/\s*class="ql-[^"]*"/i', '', $html);
+
+    // Supprimer TOUS les styles inline (Quill génère des couleurs et fonts qui cassent le design)
+    $html = preg_replace('/\s*style="[^"]*"/i', '', $html);
+
+    // Supprimer les attributs data de Quill
+    $html = preg_replace('/\s*data-[a-z\-]+="[^"]*"/i', '', $html);
+
+    // Supprimer les spans vides (Quill les génère souvent)
+    $html = preg_replace('/<span>([^<]*)<\/span>/i', '$1', $html);
+
+    // Nettoyer les attributs vides
+    $html = preg_replace('/\s+class=""/i', '', $html);
+    $html = preg_replace('/\s+id=""/i', '', $html);
+
+    // Nettoyer les espaces multiples dans les attributs
+    $html = preg_replace('/\s+>/i', '>', $html);
+    $html = preg_replace('/<(\w+)\s+>/i', '<$1>', $html);
+
+    // Supprimer les espaces multiples entre balises
+    $html = preg_replace('/>\s+</i', '><', $html);
+    $html = preg_replace('/\s{2,}/', ' ', $html);
+
+    return trim($html);
+}
+
 // Contenu des onglets (depuis BDD ou génération par défaut)
-$tabDescription = $product['tab_description'] ?? '';
-$tabSpecifications = $product['tab_specifications'] ?? '';
-$tabSizes = $product['tab_sizes'] ?? '';
-$tabFaq = $product['tab_faq'] ?? '';
+$tabDescription = cleanWysiwygHtml($product['tab_description'] ?? '');
+$tabSpecifications = cleanWysiwygHtml($product['tab_specifications'] ?? '');
+$tabSizes = cleanWysiwygHtml($product['tab_sizes'] ?? '');
+$tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
 ?>
 <!DOCTYPE html>
 <html lang="fr">
