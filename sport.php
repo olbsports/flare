@@ -7,7 +7,6 @@
 
 require_once __DIR__ . '/config/database.php';
 
-// Récupérer le slug du sport
 $slug = $_GET['slug'] ?? '';
 
 if (empty($slug)) {
@@ -20,7 +19,6 @@ try {
         $pdo = getConnection();
     }
 
-    // Charger la page sport
     $stmt = $pdo->prepare("SELECT * FROM sport_pages WHERE slug = ? AND active = 1");
     $stmt->execute([$slug]);
     $page = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -75,6 +73,47 @@ $metaDescription = $page['meta_description'] ?: '';
 $productCount = count($products);
 $sportName = $page['sport_name'] ?: $page['title'];
 $sportNameLower = strtolower($sportName);
+$sportIcon = $page['sport_icon'] ?? '🏆';
+
+// ============ VALEURS PAR DEFAUT ============
+
+// Trust bar par défaut
+if (empty($trustBar)) {
+    $trustBar = [
+        ['value' => '500+', 'label' => 'Clubs équipés'],
+        ['value' => '4.9/5', 'label' => 'Satisfaction client'],
+        ['value' => '48h', 'label' => 'Devis sous 48h'],
+        ['value' => '100%', 'label' => 'Sublimation française']
+    ];
+}
+
+// Why items par défaut
+if (empty($whyItems)) {
+    $whyItems = [
+        ['icon' => '⭐', 'title' => 'Design 100% personnalisé', 'description' => "Aucune limite de couleurs, motifs ou logos. Notre équipe de designers professionnels vous accompagne gratuitement pour créer un design unique qui correspond parfaitement à votre identité. Révisions illimitées jusqu'à satisfaction complète."],
+        ['icon' => '✅', 'title' => 'Fabrication européenne certifiée', 'description' => "Production dans nos ateliers partenaires certifiés en Europe. Tissus techniques haute performance testés et approuvés. Contrôle qualité rigoureux à chaque étape. Garantie 1 an contre les défauts de fabrication sur tous nos produits."],
+        ['icon' => '⚡', 'title' => 'Livraison rapide garantie', 'description' => "Délai standard 3-4 semaines, option express 10-15 jours disponible. Livraison suivie dans toute l'Europe. Nous respectons scrupuleusement nos engagements ou vous êtes remboursé. Emballage soigné et protection optimale."],
+        ['icon' => 'ℹ️', 'title' => 'Accompagnement expert complet', 'description' => "Service client dédié du devis à la livraison. BAT (Bon à Tirer) détaillé pour validation avant production. Guide des tailles personnalisé. Conseils techniques gratuits. Suivi en temps réel de votre commande."],
+        ['icon' => '💰', 'title' => 'Prix dégressifs ultra-compétitifs', 'description' => "Tarifs agressifs dès 1 pièce. Prix dégressifs jusqu'à -60% selon la quantité. Pas de frais cachés. Devis gratuit et détaillé sous 24h. Facilités de paiement pour les clubs et associations."],
+        ['icon' => '🎨', 'title' => 'Sublimation durable premium', 'description' => "Technique de sublimation intégrale garantissant des couleurs éclatantes qui ne se délavent jamais. Impression dans la fibre du tissu pour une durabilité maximale. Résistance aux lavages répétés (50+ cycles testés)."]
+    ];
+}
+
+// FAQ par défaut
+if (empty($faqItems) || empty(array_filter($faqItems, fn($f) => !empty($f['question'])))) {
+    $faqItems = [
+        ['question' => "Quel est le délai de fabrication pour des équipements $sportNameLower personnalisés ?", 'answer' => "Le délai standard est de 3 à 4 semaines après validation du BAT. Nous proposons également un service express en 10-15 jours pour les commandes urgentes."],
+        ['question' => "Puis-je commander des tailles mixtes (adultes et enfants) ?", 'answer' => "Oui, vous pouvez mélanger librement les tailles adultes et enfants dans votre commande. Les prix sont calculés selon le barème correspondant à chaque type."],
+        ['question' => "Le flocage des numéros et noms est-il inclus dans le prix ?", 'answer' => "Les numéros classiques sont inclus dans le prix de base. Pour des noms ou numéros personnalisés spécifiques, comptez +2€ par pièce."],
+        ['question' => "Quelle est la différence entre les tissus ÉCO et PRO ?", 'answer' => "Les tissus ÉCO (130-160g/m²) offrent un excellent rapport qualité-prix pour l'entraînement. Les tissus PRO sont plus techniques et recommandés pour la compétition."],
+        ['question' => "Peut-on ajouter plusieurs logos de sponsors ?", 'answer' => "Oui, vous pouvez intégrer autant de logos que vous le souhaitez sans frais supplémentaires. La sublimation permet un nombre illimité d'éléments graphiques."],
+        ['question' => "Les couleurs seront-elles fidèles à notre charte graphique ?", 'answer' => "Oui, nous travaillons avec des codes couleurs Pantone ou RVB pour garantir une reproduction fidèle. Vous recevrez un BAT détaillé pour validation avant production."],
+        ['question' => "Les équipements résistent-ils au lavage en machine ?", 'answer' => "Oui, nos équipements passent en machine à 30°C sans problème. Les couleurs restent éclatantes même après des dizaines de lavages."],
+        ['question' => "Quelle est la quantité minimum pour bénéficier des prix dégressifs ?", 'answer' => "Les prix dégressifs commencent dès 5 pièces et augmentent par paliers (10, 20, 50, 100, 250, 500). Plus vous commandez, plus le prix unitaire baisse."],
+        ['question' => "Fournissez-vous un tableau des tailles détaillé ?", 'answer' => "Oui, nous fournissons un guide des tailles complet avec toutes les mesures en cm pour chaque modèle, disponible avant commande."],
+        ['question' => "Proposez-vous des designs spécifiques pour gardiens ?", 'answer' => "Oui, nous créons des équipements gardien avec designs différenciés, couleurs distinctes et options de protections rembourrées."]
+    ];
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -82,7 +121,7 @@ $sportNameLower = strtolower($sportName);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($metaTitle) ?> | <?= $siteName ?></title>
-    <meta name="description" content="<?= htmlspecialchars($metaDescription) ?>">
+    <meta name="description" content="<?= htmlspecialchars($metaDescription ?: "Équipements $sportName personnalisés sublimation. Maillots, shorts, kits complets sur mesure. Design gratuit, fabrication européenne, livraison 3-4 semaines. Devis gratuit sous 24h.") ?>">
     <meta name="robots" content="index, follow">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
@@ -110,18 +149,13 @@ $sportNameLower = strtolower($sportName);
     <!-- Hero Sport -->
     <section class="hero-sport">
         <div class="hero-sport-content">
-            <?php if (!empty($page['hero_eyebrow'])): ?>
-            <span class="hero-sport-eyebrow"><?= htmlspecialchars($page['hero_eyebrow']) ?></span>
-            <?php endif; ?>
-            <h1 class="hero-sport-title"><?= htmlspecialchars($page['hero_title'] ?: $page['title']) ?></h1>
-            <?php if (!empty($page['hero_subtitle'])): ?>
-            <p class="hero-sport-subtitle"><?= htmlspecialchars($page['hero_subtitle']) ?></p>
-            <?php endif; ?>
+            <span class="hero-sport-eyebrow"><?= htmlspecialchars($page['hero_eyebrow'] ?: "$sportIcon $sportName") ?></span>
+            <h1 class="hero-sport-title"><?= htmlspecialchars($page['hero_title'] ?: "Équipements $sportName") ?></h1>
+            <p class="hero-sport-subtitle"><?= htmlspecialchars($page['hero_subtitle'] ?: 'Personnalisés Sublimation') ?></p>
         </div>
     </section>
 
     <!-- Trust Bar -->
-    <?php if (!empty($trustBar)): ?>
     <section class="trust-bar">
         <div class="container">
             <div class="trust-items">
@@ -134,23 +168,20 @@ $sportNameLower = strtolower($sportName);
             </div>
         </div>
     </section>
-    <?php endif; ?>
 
     <!-- Products Section -->
     <section class="products-section" id="products">
         <div class="container">
             <div class="section-header">
-                <?php if (!empty($page['products_eyebrow'])): ?>
-                <div class="section-eyebrow"><?= htmlspecialchars($page['products_eyebrow']) ?></div>
-                <?php endif; ?>
-                <h2 class="section-title"><?= htmlspecialchars($page['products_title'] ?: 'Nos équipements ' . $sportNameLower) ?></h2>
+                <div class="section-eyebrow"><?= htmlspecialchars($page['products_eyebrow'] ?: "Catalogue $sportNameLower") ?></div>
+                <h2 class="section-title"><?= htmlspecialchars($page['products_title'] ?: "Nos équipements $sportNameLower") ?></h2>
                 <p class="section-description">
-                    <?= htmlspecialchars($page['products_description'] ?: "Plus de $productCount modèles disponibles. Tissus techniques respirants, coutures renforcées, personnalisation illimitée en sublimation.") ?>
+                    <?= htmlspecialchars($page['products_description'] ?: "Plus de $productCount modèles de maillots, shorts et kits complets. Tissus techniques respirants, coutures renforcées, personnalisation illimitée en sublimation.") ?>
                 </p>
             </div>
 
             <!-- Filters -->
-            <?php if ($page['show_filters'] && (!empty($uniqueFamilles) || !empty($uniqueGenres))): ?>
+            <?php if ($page['show_filters'] ?? true): ?>
             <div class="filters-bar">
                 <?php if (!empty($uniqueFamilles)): ?>
                 <div class="filter-group">
@@ -223,14 +254,10 @@ $sportNameLower = strtolower($sportName);
                         </div>
                         <?php if (count($photos) > 1): ?>
                         <button class="slider-nav prev" aria-label="Photo précédente">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                         </button>
                         <button class="slider-nav next" aria-label="Photo suivante">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                         </button>
                         <div class="product-slider-dots">
                             <?php foreach ($photos as $idx => $photo): ?>
@@ -293,37 +320,26 @@ $sportNameLower = strtolower($sportName);
     </section>
 
     <!-- Why Us Section -->
-    <?php if (!empty($page['why_title']) || !empty($whyItems)): ?>
     <section class="why-us-section" id="why-us">
         <div class="container">
             <div class="section-header">
                 <div class="section-eyebrow">Nos engagements</div>
                 <h2 class="section-title"><?= htmlspecialchars($page['why_title'] ?: 'Pourquoi choisir Flare Custom') ?></h2>
-                <?php if (!empty($page['why_subtitle'])): ?>
-                <p class="section-desc"><?= htmlspecialchars($page['why_subtitle']) ?></p>
-                <?php else: ?>
-                <p class="section-desc">La référence européenne en équipements sportifs personnalisés</p>
-                <?php endif; ?>
+                <p class="section-desc"><?= htmlspecialchars($page['why_subtitle'] ?: 'La référence européenne en équipements sportifs personnalisés') ?></p>
             </div>
 
             <div class="why-us-grid-redesign">
-                <?php
-                $defaultWhyItems = [
-                    ['icon' => '⭐', 'title' => 'Design 100% personnalisé', 'description' => "Aucune limite de couleurs, motifs ou logos. Notre équipe de designers professionnels vous accompagne gratuitement pour créer un design unique."],
-                    ['icon' => '✅', 'title' => 'Fabrication européenne certifiée', 'description' => "Production dans nos ateliers partenaires certifiés en Europe. Tissus techniques haute performance testés et approuvés."],
-                    ['icon' => '⚡', 'title' => 'Livraison rapide garantie', 'description' => "Délai standard 3-4 semaines, option express 10-15 jours disponible. Livraison suivie dans toute l'Europe."],
-                    ['icon' => 'ℹ️', 'title' => 'Accompagnement expert complet', 'description' => "Service client dédié du devis à la livraison. BAT détaillé pour validation avant production."],
-                    ['icon' => '💰', 'title' => 'Prix dégressifs ultra-compétitifs', 'description' => "Tarifs agressifs dès 1 pièce. Prix dégressifs jusqu'à -60% selon la quantité. Pas de frais cachés."],
-                    ['icon' => '🎨', 'title' => 'Sublimation durable premium', 'description' => "Technique de sublimation intégrale garantissant des couleurs éclatantes qui ne se délavent jamais."]
-                ];
-                $displayWhyItems = !empty($whyItems) ? $whyItems : $defaultWhyItems;
-                $num = 1;
-                foreach ($displayWhyItems as $item):
-                ?>
+                <?php $num = 1; foreach ($whyItems as $item): ?>
                 <div class="why-us-card-redesign">
                     <div class="why-us-number">0<?= $num++ ?></div>
                     <div class="why-us-icon-redesign">
-                        <?= $item['icon'] ?? '✓' ?>
+                        <?php if (!empty($item['icon'])): ?>
+                        <?= $item['icon'] ?>
+                        <?php else: ?>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+                        </svg>
+                        <?php endif; ?>
                     </div>
                     <h3><?= htmlspecialchars($item['title'] ?? '') ?></h3>
                     <p><?= htmlspecialchars($item['description'] ?? '') ?></p>
@@ -332,22 +348,18 @@ $sportNameLower = strtolower($sportName);
             </div>
         </div>
     </section>
-    <?php endif; ?>
 
     <!-- CTA Section -->
-    <?php if (!empty($page['cta_title'])): ?>
     <section class="cta-section" id="contact">
         <div class="cta-container">
             <div class="cta-content">
-                <h2 class="cta-title"><?= nl2br(htmlspecialchars($page['cta_title'])) ?></h2>
-                <?php if (!empty($page['cta_subtitle'])): ?>
-                <p class="cta-text"><?= htmlspecialchars($page['cta_subtitle']) ?></p>
-                <?php else: ?>
-                <p class="cta-text">Devis gratuit sous 24h • Designer dédié • Prix dégressifs • Livraison 3-4 semaines</p>
-                <?php endif; ?>
+                <h2 class="cta-title"><?= nl2br(htmlspecialchars($page['cta_title'] ?: "Équipez votre club\nde $sportNameLower")) ?></h2>
+                <p class="cta-text">
+                    <?= htmlspecialchars($page['cta_subtitle'] ?: 'Devis gratuit sous 24h • Designer dédié • Prix dégressifs • Livraison 3-4 semaines') ?>
+                </p>
                 <div class="cta-buttons">
                     <a href="<?= htmlspecialchars($page['cta_button_link'] ?: '/pages/info/contact.html') ?>" class="btn-cta-primary">
-                        <?= htmlspecialchars($page['cta_button_text'] ?: 'Demander un devis ' . $sportNameLower) ?>
+                        <?= htmlspecialchars($page['cta_button_text'] ?: "Demander un devis $sportNameLower") ?>
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                             <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                         </svg>
@@ -356,20 +368,22 @@ $sportNameLower = strtolower($sportName);
                     <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $page['cta_whatsapp']) ?>" class="btn-cta-secondary">
                         <?= htmlspecialchars($page['cta_whatsapp']) ?>
                     </a>
+                    <?php else: ?>
+                    <a href="https://wa.me/359885813134" class="btn-cta-secondary">
+                        +33 1 23 45 67 89
+                    </a>
                     <?php endif; ?>
                 </div>
             </div>
         </div>
     </section>
-    <?php endif; ?>
 
     <!-- FAQ Sport-Specific Section -->
-    <?php if (!empty($faqItems) && !empty(array_filter($faqItems, fn($f) => !empty($f['question'])))): ?>
     <section class="faq-sport-section">
         <div class="container">
             <div class="section-header">
                 <div class="section-eyebrow">Questions fréquentes</div>
-                <h2 class="section-title"><?= htmlspecialchars($page['faq_title'] ?: 'FAQ ' . $sportName) ?></h2>
+                <h2 class="section-title"><?= htmlspecialchars($page['faq_title'] ?: "FAQ $sportName") ?></h2>
                 <p class="section-description">
                     Toutes les réponses à vos questions sur nos équipements <?= htmlspecialchars($sportNameLower) ?> personnalisés.
                 </p>
@@ -405,22 +419,132 @@ $sportNameLower = strtolower($sportName);
             </div>
         </div>
     </section>
-    <?php endif; ?>
 
-    <!-- SEO Footer Sections -->
+    <!-- SEO Footer Section 1 -->
+    <section class="seo-footer-section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-eyebrow">Expertise <?= htmlspecialchars($sportName) ?></div>
+                <h2 class="section-title">FLARE CUSTOM - Équipements <?= htmlspecialchars($sportName) ?> Personnalisés Sublimation</h2>
+            </div>
+
+            <div class="seo-content-grid">
+                <div class="seo-content-block">
+                    <h3>Maillots <?= htmlspecialchars($sportName) ?> Sublimation Haute Qualité</h3>
+                    <p>Spécialiste français des <strong>équipements de <?= htmlspecialchars($sportNameLower) ?> personnalisés</strong>, FLARE CUSTOM produit vos <strong>maillots, shorts et kits complets</strong> en sublimation haute définition. Notre technologie garantit des <strong>couleurs éclatantes qui ne s'effacent jamais</strong>, même après des dizaines de lavages.</p>
+                    <p>Nous proposons des <strong>tissus techniques respirants</strong> de 130g/m² à 160g/m², parfaitement adaptés à l'intensité du <?= htmlspecialchars($sportNameLower) ?>. Performance Mesh et Reversible Pro offrent <strong>évacuation optimale de la transpiration</strong> et confort maximal pendant les matchs.</p>
+                </div>
+
+                <div class="seo-content-block">
+                    <h3>Personnalisation illimitée pour Votre Club</h3>
+                    <p>Design 100% sur-mesure sans limite de couleurs, logos ou sponsors. Notre <strong>service design gratuit</strong> transforme vos idées en équipements professionnels. <strong>BAT détaillé avant production</strong> pour validation complète.</p>
+                    <ul>
+                        <li>Numéros classiques inclus (noms/numéros spécifiques +2€/pcs)</li>
+                        <li>Tous logos vectorisés acceptés</li>
+                        <li>Dégradés et effets complexes</li>
+                        <li>Reproduction fidèle de vos couleurs</li>
+                        <li>Marquages sponsors illimités</li>
+                    </ul>
+                </div>
+
+                <div class="seo-content-block">
+                    <h3>Prix dégressifs & livraison Europe</h3>
+                    <p><strong>Tarifs compétitifs dès 22.90€</strong> avec prix dégressifs selon quantité. Production française dans ateliers certifiés, <strong>livraison Europe entière</strong> sous 3-4 semaines standard ou 10-15 jours en express.</p>
+                    <ul>
+                        <li>À partir de 1 pièce minimum</li>
+                        <li>Garantie 1 an défauts fabrication</li>
+                        <li>Devis gratuit sous 24h</li>
+                        <li>Tableau de tailles détaillé</li>
+                        <li>Support client réactif 7j/7</li>
+                    </ul>
+                </div>
+
+                <div class="seo-content-block">
+                    <h3>Gamme Complète <?= htmlspecialchars($sportName) ?> Club</h3>
+                    <p>Équipez entièrement votre club avec notre <strong>catalogue complet</strong> : maillots manches courtes/longues, shorts joueurs, maillots gardien avec protections, kits complets économiques, débardeurs entraînement.</p>
+                    <p><strong>Options Homme et Femme</strong> avec coupes anatomiques adaptées. Finitions professionnelles : coutures renforcées, ourlets élastiqués, cordons de serrage, étiquettes personnalisées possibles.</p>
+                </div>
+            </div>
+
+            <div class="seo-keywords">
+                <h4>Recherches populaires <?= htmlspecialchars($sportName) ?></h4>
+                <p>Maillot <?= htmlspecialchars($sportNameLower) ?> personnalisé sublimation • Kit <?= htmlspecialchars($sportNameLower) ?> club sur mesure • Equipement <?= htmlspecialchars($sportNameLower) ?> personnalisé pas cher • Tenue <?= htmlspecialchars($sportNameLower) ?> complète personnalisée • Maillot <?= htmlspecialchars($sportNameLower) ?> avec sponsors • Short <?= htmlspecialchars($sportNameLower) ?> personnalisé • Equipement <?= htmlspecialchars($sportNameLower) ?> écologique • Tenue <?= htmlspecialchars($sportNameLower) ?> respirante • Kit <?= htmlspecialchars($sportNameLower) ?> fabrication française • Equipement sportif <?= htmlspecialchars($sportNameLower) ?> club • Maillot <?= htmlspecialchars($sportNameLower) ?> sublimation HD • Tenue <?= htmlspecialchars($sportNameLower) ?> professionnelle club</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SEO Content Section 2 -->
+    <section class="seo-footer-section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-eyebrow"><?= htmlspecialchars($sportName) ?> Excellence</div>
+                <h2 class="section-title"><?= htmlspecialchars($sportName) ?> : L'Excellence de l'Équipement Personnalisé</h2>
+            </div>
+
+            <div class="seo-content-grid">
+                <div class="seo-content-block">
+                    <h3>Des Équipements <?= htmlspecialchars($sportName) ?> Personnalisés de Haute Performance</h3>
+                    <p>
+                        Chez Flare Custom, nous comprenons que chaque équipe, chaque club, chaque athlète mérite des équipements <?= htmlspecialchars($sportName) ?> qui reflètent leur identité unique et leur niveau d'exigence. C'est pourquoi nous avons développé une expertise pointue dans la conception et la fabrication d'équipements sportifs personnalisés en sublimation intégrale, une technique qui garantit des couleurs éclatantes, une durabilité exceptionnelle et un confort optimal.
+                    </p>
+                    <p>
+                        Notre processus de personnalisation est simple et efficace : vous nous partagez votre vision, nos designers créent le design parfait pour vous, vous validez le BAT (Bon à Tirer), et nous lançons la production dans nos ateliers partenaires certifiés en Europe. Du premier contact à la livraison, nous sommes à vos côtés pour garantir un résultat qui dépasse vos attentes.
+                    </p>
+                </div>
+                <div class="seo-content-block">
+                    <h3>Pourquoi la Sublimation pour vos Équipements <?= htmlspecialchars($sportName) ?> ?</h3>
+                    <p>
+                        La sublimation est une technique d'impression révolutionnaire qui offre des avantages incomparables pour les équipements sportifs. Contrairement aux méthodes traditionnelles de sérigraphie ou de flocage, la sublimation intègre directement les couleurs dans les fibres du tissu. Résultat : des designs complexes avec un nombre illimité de couleurs, des dégradés parfaits, des logos ultra-précis, et tout cela sans aucun surcoût ni limite créative.
+                    </p>
+                    <p>
+                        Vos équipements <?= htmlspecialchars($sportName) ?> sublimés conservent leur souplesse naturelle, leur respirabilité optimale et leur légèreté. Pas de zones rigides, pas de risque de craquelage ou de décollement. Les couleurs restent éclatantes même après des dizaines de lavages en machine. C'est la garantie d'équipements qui durent et qui gardent leur aspect neuf saison après saison.
+                    </p>
+                </div>
+                <div class="seo-content-block">
+                    <h3>Une Gamme Complète pour Tous vos Besoins <?= htmlspecialchars($sportName) ?></h3>
+                    <p>
+                        Notre catalogue <?= htmlspecialchars($sportName) ?> propose une large sélection de produits adaptés à tous les niveaux de pratique : maillots manches courtes et manches longues, shorts et cuissards, débardeurs et tops, vestes et survêtements, accessoires coordonnés. Chaque produit est disponible en version homme, femme et enfant, avec des coupes adaptées (slim, regular, large) et un large choix de tailles (du XS au 4XL).
+                    </p>
+                    <p>
+                        Nous proposons différentes qualités de tissus techniques selon vos besoins et votre budget : notre gamme ÉCO en 130g/m² et 160g/m² offre un excellent rapport qualité-prix pour l'entraînement et les matchs amicaux, tandis que notre gamme PRO avec des tissus plus techniques est idéale pour la compétition de haut niveau. Tous nos tissus sont respirants, évacuent efficacement la transpiration et sèchent rapidement.
+                    </p>
+                </div>
+                <div class="seo-content-block">
+                    <h3>Personnalisation illimitée sans Contraintes</h3>
+                    <p>
+                        Avec Flare Custom, la personnalisation de vos équipements <?= htmlspecialchars($sportName) ?> ne connaît aucune limite. Vous pouvez intégrer autant de couleurs que vous le souhaitez, ajouter tous vos sponsors et partenaires, créer des motifs complexes, des dégradés sophistiqués, des effets graphiques modernes. Noms et numéros des joueurs sont inclus dans le prix de base, sans supplément, et chaque équipement peut être personnalisé individuellement.
+                    </p>
+                    <p>
+                        Vous n'avez pas de maquette ? Aucun problème ! Notre équipe de designers professionnels créera pour vous des propositions graphiques sur mesure, gratuitement. Vous avez déjà votre design ? Parfait, nous l'adaptons et l'optimisons pour la sublimation. Dans tous les cas, vous recevrez un BAT détaillé à valider avant toute production, garantissant un résultat 100% conforme à vos attentes.
+                    </p>
+                </div>
+            </div>
+
+            <div class="seo-keywords">
+                <h4>En savoir plus sur <?= htmlspecialchars($sportName) ?></h4>
+                <p>Équipement <?= htmlspecialchars($sportNameLower) ?> personnalisé • Maillot <?= htmlspecialchars($sportNameLower) ?> sublimation • Kit <?= htmlspecialchars($sportNameLower) ?> sur mesure • Tenue <?= htmlspecialchars($sportNameLower) ?> club personnalisée • Equipement sportif <?= htmlspecialchars($sportNameLower) ?> • Personnalisation textile <?= htmlspecialchars($sportNameLower) ?> • Maillot <?= htmlspecialchars($sportNameLower) ?> pas cher • Kit complet <?= htmlspecialchars($sportNameLower) ?> personnalisé • Fabrication européenne <?= htmlspecialchars($sportNameLower) ?> • Livraison rapide équipement <?= htmlspecialchars($sportNameLower) ?></p>
+            </div>
+        </div>
+    </section>
+
+    <?php // Sections SEO personnalisées depuis l'admin ?>
     <?php if (!empty($seoSections)): ?>
     <?php foreach ($seoSections as $sec): ?>
     <?php if (!empty($sec['title']) || !empty($sec['content'])): ?>
     <section class="seo-footer-section">
         <div class="container">
-            <div class="seo-content">
-                <?php if (!empty($sec['title'])): ?>
+            <?php if (!empty($sec['title'])): ?>
+            <div class="section-header">
                 <h2 class="section-title"><?= htmlspecialchars($sec['title']) ?></h2>
-                <?php endif; ?>
-                <?php if (!empty($sec['content'])): ?>
-                <div class="seo-text"><?= $sec['content'] ?></div>
-                <?php endif; ?>
             </div>
+            <?php endif; ?>
+            <?php if (!empty($sec['content'])): ?>
+            <div class="seo-content-grid">
+                <div class="seo-content-block" style="grid-column: 1/-1;">
+                    <?= $sec['content'] ?>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
     </section>
     <?php endif; ?>
@@ -436,7 +560,6 @@ $sportNameLower = strtolower($sportName);
     <script src="/assets/js/product-cards-linker.js" defer></script>
 
     <script>
-        // Filters for products
         document.addEventListener('DOMContentLoaded', function() {
             const filterFamily = document.getElementById('filterFamily');
             const filterGenre = document.getElementById('filterGenre');
@@ -445,13 +568,13 @@ $sportNameLower = strtolower($sportName);
             const productsCount = document.getElementById('productsCount');
 
             function filterAndSortProducts() {
+                if (!productsGrid) return;
                 const cards = Array.from(productsGrid.querySelectorAll('.product-card'));
                 let visibleCount = 0;
 
                 cards.forEach(card => {
                     const famille = card.dataset.famille || '';
                     const genre = card.dataset.genre || '';
-
                     let show = true;
 
                     if (filterFamily && filterFamily.value && !famille.includes(filterFamily.value)) show = false;
@@ -461,7 +584,6 @@ $sportNameLower = strtolower($sportName);
                     if (show) visibleCount++;
                 });
 
-                // Sort
                 if (sortProducts && sortProducts.value !== 'default') {
                     const sortedCards = cards.filter(c => c.style.display !== 'none');
                     sortedCards.sort((a, b) => {
@@ -499,26 +621,31 @@ $sportNameLower = strtolower($sportName);
                 }
 
                 if (prevBtn) prevBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
+                    e.preventDefault(); e.stopPropagation();
                     showSlide(currentSlide - 1);
                 });
 
                 if (nextBtn) nextBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
+                    e.preventDefault(); e.stopPropagation();
                     showSlide(currentSlide + 1);
                 });
 
                 dots.forEach(function(dot, i) {
                     dot.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
+                        e.preventDefault(); e.stopPropagation();
                         showSlide(i);
                     });
                 });
             });
         });
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(() => {});
+            });
+        }
     </script>
 </body>
 </html>
