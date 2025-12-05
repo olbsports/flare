@@ -557,60 +557,6 @@ $tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
                 </details>
             </div>
             <?php endif; ?>
-
-            <!-- PRODUITS LIÉS -->
-            <?php if (!empty($relatedProducts)): ?>
-            <div class="related-products-section">
-                <h3 class="related-products-title">Complétez votre équipement</h3>
-                <div class="related-products-wrapper">
-                    <button class="related-nav related-prev" onclick="scrollRelatedProducts(-1)">‹</button>
-                    <div class="related-products-grid">
-                    <?php foreach ($relatedProducts as $related):
-                        $relatedName = !empty($related['meta_title']) ? $related['meta_title'] : $related['nom'];
-                        $relatedPrice = $related['prix_500'] ? number_format($related['prix_500'], 2, ',', ' ') . ' €' : '';
-                    ?>
-                    <a href="/produit/<?php echo htmlspecialchars($related['reference']); ?>" class="related-product-card">
-                        <div class="related-product-image">
-                            <img src="<?php echo htmlspecialchars($related['photo_1'] ?: '/photos/placeholder.webp'); ?>" alt="<?php echo htmlspecialchars($relatedName); ?>" loading="lazy">
-                            <span class="related-product-badge"><?php echo htmlspecialchars($related['famille']); ?></span>
-                        </div>
-                        <div class="related-product-info">
-                            <div class="related-product-sport"><?php echo htmlspecialchars($related['sport']); ?></div>
-                            <div class="related-product-name"><?php echo htmlspecialchars($relatedName); ?></div>
-                            <?php if ($relatedPrice): ?>
-                            <div class="related-product-price">Dès <?php echo $relatedPrice; ?></div>
-                            <?php else: ?>
-                            <div class="related-product-price">Demander un devis</div>
-                            <?php endif; ?>
-                        </div>
-                    </a>
-                    <?php endforeach; ?>
-                    </div>
-                    <button class="related-nav related-next" onclick="scrollRelatedProducts(1)">›</button>
-                </div>
-            </div>
-            <script>
-            (function() {
-                const grid = document.querySelector('.related-products-grid');
-                const prevBtn = document.querySelector('.related-prev');
-                const nextBtn = document.querySelector('.related-next');
-                if (grid && grid.children.length > 4) {
-                    nextBtn.style.opacity = '1';
-                    nextBtn.style.pointerEvents = 'auto';
-                }
-                grid.addEventListener('scroll', function() {
-                    prevBtn.style.opacity = grid.scrollLeft > 10 ? '1' : '0.3';
-                    prevBtn.style.pointerEvents = grid.scrollLeft > 10 ? 'auto' : 'none';
-                    const maxScroll = grid.scrollWidth - grid.clientWidth;
-                    nextBtn.style.opacity = grid.scrollLeft < maxScroll - 10 ? '1' : '0.3';
-                    nextBtn.style.pointerEvents = grid.scrollLeft < maxScroll - 10 ? 'auto' : 'none';
-                });
-                window.scrollRelatedProducts = function(dir) {
-                    grid.scrollBy({ left: dir * 240, behavior: 'smooth' });
-                };
-            })();
-            </script>
-            <?php endif; ?>
         </div>
 
         <!-- TAB: SPECIFICATIONS -->
@@ -727,6 +673,62 @@ $tabFaq = cleanWysiwygHtml($product['tab_faq'] ?? '');
             <?php endif; ?>
         </div>
     </section>
+
+    <!-- PRODUITS LIÉS - Après les onglets -->
+    <?php if (!empty($relatedProducts)): ?>
+    <section class="related-products-section">
+        <div class="related-products-container">
+            <h3 class="related-products-title">Complétez votre équipement</h3>
+            <div class="related-products-wrapper">
+                <button class="related-nav related-prev" onclick="scrollRelatedProducts(-1)">‹</button>
+                <div class="related-products-grid">
+                <?php foreach ($relatedProducts as $related):
+                    $relatedName = !empty($related['meta_title']) ? $related['meta_title'] : $related['nom'];
+                    $relatedPrice = $related['prix_500'] ? number_format($related['prix_500'], 2, ',', ' ') . ' €' : '';
+                ?>
+                <a href="/produit/<?php echo htmlspecialchars($related['reference']); ?>" class="related-product-card">
+                    <div class="related-product-image">
+                        <img src="<?php echo htmlspecialchars($related['photo_1'] ?: '/photos/placeholder.webp'); ?>" alt="<?php echo htmlspecialchars($relatedName); ?>" loading="lazy">
+                        <span class="related-product-badge"><?php echo htmlspecialchars($related['famille']); ?></span>
+                    </div>
+                    <div class="related-product-info">
+                        <div class="related-product-sport"><?php echo htmlspecialchars($related['sport']); ?></div>
+                        <div class="related-product-name"><?php echo htmlspecialchars($relatedName); ?></div>
+                        <?php if ($relatedPrice): ?>
+                        <div class="related-product-price">Dès <?php echo $relatedPrice; ?></div>
+                        <?php else: ?>
+                        <div class="related-product-price">Demander un devis</div>
+                        <?php endif; ?>
+                    </div>
+                </a>
+                <?php endforeach; ?>
+                </div>
+                <button class="related-nav related-next" onclick="scrollRelatedProducts(1)">›</button>
+            </div>
+        </div>
+    </section>
+    <script>
+    (function() {
+        const grid = document.querySelector('.related-products-grid');
+        const prevBtn = document.querySelector('.related-prev');
+        const nextBtn = document.querySelector('.related-next');
+        if (grid && grid.children.length > 4) {
+            nextBtn.style.opacity = '1';
+            nextBtn.style.pointerEvents = 'auto';
+        }
+        grid.addEventListener('scroll', function() {
+            prevBtn.style.opacity = grid.scrollLeft > 10 ? '1' : '0.3';
+            prevBtn.style.pointerEvents = grid.scrollLeft > 10 ? 'auto' : 'none';
+            const maxScroll = grid.scrollWidth - grid.clientWidth;
+            nextBtn.style.opacity = grid.scrollLeft < maxScroll - 10 ? '1' : '0.3';
+            nextBtn.style.pointerEvents = grid.scrollLeft < maxScroll - 10 ? 'auto' : 'none';
+        });
+        window.scrollRelatedProducts = function(dir) {
+            grid.scrollBy({ left: dir * 240, behavior: 'smooth' });
+        };
+    })();
+    </script>
+    <?php endif; ?>
 
     <!-- REVIEWS -->
     <section class="reviews-section">
