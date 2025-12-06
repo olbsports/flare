@@ -779,7 +779,16 @@ if ($action && $pdo) {
                 $ctaFeatures = json_encode(array_filter(array_map('trim', explode("\n", $_POST['cta_features'] ?? ''))), JSON_UNESCAPED_UNICODE);
                 $seoCards = json_encode($_POST['seo_cards'] ?? [], JSON_UNESCAPED_UNICODE);
                 $seoStats = json_encode($_POST['seo_stats'] ?? [], JSON_UNESCAPED_UNICODE);
-                $seoBlocks = json_encode($_POST['seo_content_blocks'] ?? [], JSON_UNESCAPED_UNICODE);
+                // Traiter seo_content_blocks - convertir les listes en tableaux
+                $seoBlocksRaw = $_POST['seo_content_blocks'] ?? [];
+                foreach ($seoBlocksRaw as &$block) {
+                    if (isset($block['list']) && is_string($block['list'])) {
+                        $block['list'] = array_filter(array_map('trim', explode("\n", $block['list'])));
+                    }
+                }
+                $seoBlocks = json_encode($seoBlocksRaw, JSON_UNESCAPED_UNICODE);
+                $longtailBlocks = json_encode($_POST['longtail_blocks'] ?? [], JSON_UNESCAPED_UNICODE);
+                $faqItems = json_encode($_POST['faq_items'] ?? [], JSON_UNESCAPED_UNICODE);
 
                 $fields = [
                     'slug', 'title', 'famille_name', 'famille_icon', 'meta_title', 'meta_description',
@@ -787,8 +796,12 @@ if ($action && $pdo) {
                     'products_title', 'products_subtitle', 'products_eyebrow', 'products_description',
                     'show_filters', 'filter_famille', 'filter_genre', 'filter_sport', 'filter_sort',
                     'products_source', 'products_sport_filter', 'products_famille_filter',
+                    'intro_text', 'show_sports_links', 'sports_links_eyebrow', 'sports_links_title',
                     'cta_title', 'cta_subtitle', 'cta_button_text', 'cta_button_link', 'cta_whatsapp',
                     'seo_hero_badge', 'seo_hero_title', 'seo_hero_intro', 'seo_full_content',
+                    'longtail_eyebrow', 'longtail_title',
+                    'faq_eyebrow', 'faq_title',
+                    'final_cta_title', 'final_cta_text', 'final_cta_button_text', 'final_cta_button_link',
                     'active', 'sort_order'
                 ];
 
@@ -817,6 +830,10 @@ if ($action && $pdo) {
                     $_POST['products_source'] ?? 'famille',
                     $_POST['products_sport_filter'] ?? '',
                     $_POST['products_famille_filter'] ?? '',
+                    $_POST['intro_text'] ?? '',
+                    isset($_POST['show_sports_links']) ? 1 : 0,
+                    $_POST['sports_links_eyebrow'] ?? 'Par sport',
+                    $_POST['sports_links_title'] ?? '',
                     $_POST['cta_title'] ?? '',
                     $_POST['cta_subtitle'] ?? '',
                     $_POST['cta_button_text'] ?? '',
@@ -826,13 +843,21 @@ if ($action && $pdo) {
                     $_POST['seo_hero_title'] ?? '',
                     $_POST['seo_hero_intro'] ?? '',
                     $_POST['seo_full_content'] ?? '',
+                    $_POST['longtail_eyebrow'] ?? 'Guide complet',
+                    $_POST['longtail_title'] ?? '',
+                    $_POST['faq_eyebrow'] ?? 'Questions fréquentes',
+                    $_POST['faq_title'] ?? '',
+                    $_POST['final_cta_title'] ?? 'Prêt à équiper votre équipe ?',
+                    $_POST['final_cta_text'] ?? '',
+                    $_POST['final_cta_button_text'] ?? 'Demander un devis gratuit',
+                    $_POST['final_cta_button_link'] ?? '/pages/info/contact.html',
                     isset($_POST['active']) ? 1 : 0,
                     intval($_POST['sort_order'] ?? 0)
                 ];
 
                 // Ajouter les champs JSON
-                $jsonFields = ['trust_bar', 'cta_features', 'seo_cards', 'seo_stats', 'seo_content_blocks'];
-                $jsonValues = [$trustBar, $ctaFeatures, $seoCards, $seoStats, $seoBlocks];
+                $jsonFields = ['trust_bar', 'cta_features', 'seo_cards', 'seo_stats', 'seo_content_blocks', 'longtail_blocks', 'faq_items'];
+                $jsonValues = [$trustBar, $ctaFeatures, $seoCards, $seoStats, $seoBlocks, $longtailBlocks, $faqItems];
 
                 if ($id) {
                     $set = implode('=?, ', $fields) . '=?, ' . implode('=?, ', $jsonFields) . '=?';
@@ -6103,8 +6128,12 @@ $user = $_SESSION['admin_user'] ?? null;
                     <button type="button" class="tab-btn active" onclick="switchFamilleTab('general')">Général</button>
                     <button type="button" class="tab-btn" onclick="switchFamilleTab('hero')">Hero</button>
                     <button type="button" class="tab-btn" onclick="switchFamilleTab('products')">Produits</button>
+                    <button type="button" class="tab-btn" onclick="switchFamilleTab('intro')">Intro</button>
                     <button type="button" class="tab-btn" onclick="switchFamilleTab('cta')">CTA</button>
-                    <button type="button" class="tab-btn" onclick="switchFamilleTab('seo')">SEO</button>
+                    <button type="button" class="tab-btn" onclick="switchFamilleTab('seo')">SEO Mega</button>
+                    <button type="button" class="tab-btn" onclick="switchFamilleTab('longtail')">Longtail</button>
+                    <button type="button" class="tab-btn" onclick="switchFamilleTab('faq')">FAQ</button>
+                    <button type="button" class="tab-btn" onclick="switchFamilleTab('finalcta')">CTA Final</button>
                 </div>
 
                 <!-- TAB GENERAL -->
@@ -6227,6 +6256,36 @@ $user = $_SESSION['admin_user'] ?? null;
                     </div>
                 </div>
 
+                <!-- TAB INTRO -->
+                <div class="tab-content" id="famille-tab-intro">
+                    <div class="card-body">
+                        <h4>Section Introduction SEO</h4>
+                        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Texte d'introduction affiché après la trust bar, avant les produits.</p>
+                        <div class="form-group">
+                            <label class="form-label">Texte d'introduction</label>
+                            <textarea name="intro_text" class="form-control" rows="4" placeholder="Découvrez notre collection de maillots personnalisés en sublimation intégrale..."><?= htmlspecialchars($fp['intro_text'] ?? '') ?></textarea>
+                            <small style="color: var(--text-muted);">Variables disponibles: {famille}, {famille_lower}, {count}, {sports_count}</small>
+                        </div>
+                        <hr>
+                        <h4>Section Liens Sports (SEO Internal Linking)</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label"><input type="checkbox" name="show_sports_links" <?= ($fp['show_sports_links'] ?? 1) ? 'checked' : '' ?>> Afficher la section</label>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label class="form-label">Eyebrow</label>
+                                <input type="text" name="sports_links_eyebrow" class="form-control" value="<?= htmlspecialchars($fp['sports_links_eyebrow'] ?? 'Par sport') ?>">
+                            </div>
+                            <div class="form-group" style="flex: 2;">
+                                <label class="form-label">Titre</label>
+                                <input type="text" name="sports_links_title" class="form-control" value="<?= htmlspecialchars($fp['sports_links_title'] ?? '') ?>" placeholder="{famille} par discipline">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- TAB CTA -->
                 <div class="tab-content" id="famille-tab-cta">
                     <div class="card-body">
@@ -6290,6 +6349,192 @@ $user = $_SESSION['admin_user'] ?? null;
                             <label class="form-label">Contenu SEO complet (HTML)</label>
                             <textarea name="seo_full_content" class="form-control" rows="6"><?= htmlspecialchars($fp['seo_full_content'] ?? '') ?></textarea>
                         </div>
+                        <hr>
+                        <h4>Cartes SEO (3 cartes)</h4>
+                        <div id="familleSeoCards">
+                            <?php
+                            $seoCards = json_decode($fp['seo_cards'] ?? '[]', true) ?: [];
+                            if (empty($seoCards)) $seoCards = [['icon' => '', 'title' => '', 'content' => '']];
+                            foreach ($seoCards as $i => $card): ?>
+                            <div class="seo-card-item" style="background: var(--bg-secondary); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                                <div class="form-row">
+                                    <div class="form-group" style="width: 80px;">
+                                        <label class="form-label">Icône</label>
+                                        <input type="text" name="seo_cards[<?= $i ?>][icon]" class="form-control" value="<?= htmlspecialchars($card['icon'] ?? '') ?>" placeholder="🎯" style="font-size: 20px; text-align: center;">
+                                    </div>
+                                    <div class="form-group" style="flex: 1;">
+                                        <label class="form-label">Titre</label>
+                                        <input type="text" name="seo_cards[<?= $i ?>][title]" class="form-control" value="<?= htmlspecialchars($card['title'] ?? '') ?>">
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-light" onclick="this.closest('.seo-card-item').remove()" style="align-self: flex-end; margin-bottom: 5px;">✕</button>
+                                </div>
+                                <div class="form-group" style="margin-top: 10px;">
+                                    <label class="form-label">Contenu</label>
+                                    <textarea name="seo_cards[<?= $i ?>][content]" class="form-control" rows="2"><?= htmlspecialchars($card['content'] ?? '') ?></textarea>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-light" onclick="addFamilleSeoCard()">+ Ajouter une carte</button>
+                        <hr>
+                        <h4>Stats SEO</h4>
+                        <div id="familleSeoStats">
+                            <?php
+                            $seoStats = json_decode($fp['seo_stats'] ?? '[]', true) ?: [];
+                            if (empty($seoStats)) $seoStats = [['number' => '', 'label' => '']];
+                            foreach ($seoStats as $i => $stat): ?>
+                            <div class="form-row seo-stat-item" style="margin-bottom: 10px;">
+                                <div class="form-group" style="flex: 1;">
+                                    <input type="text" name="seo_stats[<?= $i ?>][number]" class="form-control" value="<?= htmlspecialchars($stat['number'] ?? '') ?>" placeholder="500+">
+                                </div>
+                                <div class="form-group" style="flex: 2;">
+                                    <input type="text" name="seo_stats[<?= $i ?>][label]" class="form-control" value="<?= htmlspecialchars($stat['label'] ?? '') ?>" placeholder="Clubs équipés">
+                                </div>
+                                <button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.remove()">✕</button>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-light" onclick="addFamilleSeoStat()">+ Ajouter une stat</button>
+                        <hr>
+                        <h4>Blocs Alternés</h4>
+                        <div id="familleSeoBlocks">
+                            <?php
+                            $seoBlocks = json_decode($fp['seo_content_blocks'] ?? '[]', true) ?: [];
+                            if (empty($seoBlocks)) $seoBlocks = [['title' => '', 'content' => '', 'list' => []]];
+                            foreach ($seoBlocks as $i => $block): ?>
+                            <div class="seo-block-item" style="background: var(--bg-secondary); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                                <div class="form-row">
+                                    <div class="form-group" style="flex: 1;">
+                                        <label class="form-label">Titre</label>
+                                        <input type="text" name="seo_content_blocks[<?= $i ?>][title]" class="form-control" value="<?= htmlspecialchars($block['title'] ?? '') ?>">
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-light" onclick="this.closest('.seo-block-item').remove()" style="align-self: flex-end; margin-bottom: 5px;">✕</button>
+                                </div>
+                                <div class="form-group" style="margin-top: 10px;">
+                                    <label class="form-label">Contenu</label>
+                                    <textarea name="seo_content_blocks[<?= $i ?>][content]" class="form-control" rows="2"><?= htmlspecialchars($block['content'] ?? '') ?></textarea>
+                                </div>
+                                <div class="form-group" style="margin-top: 10px;">
+                                    <label class="form-label">Liste (une ligne par item)</label>
+                                    <textarea name="seo_content_blocks[<?= $i ?>][list]" class="form-control" rows="3"><?= htmlspecialchars(implode("\n", $block['list'] ?? [])) ?></textarea>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-light" onclick="addFamilleSeoBlock()">+ Ajouter un bloc</button>
+                    </div>
+                </div>
+
+                <!-- TAB LONGTAIL -->
+                <div class="tab-content" id="famille-tab-longtail">
+                    <div class="card-body">
+                        <h4>Section SEO Longtail</h4>
+                        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">4 blocs informatifs pour le SEO longue traîne (sublimation, avantages, délais, prix...)</p>
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label class="form-label">Eyebrow</label>
+                                <input type="text" name="longtail_eyebrow" class="form-control" value="<?= htmlspecialchars($fp['longtail_eyebrow'] ?? 'Guide complet') ?>">
+                            </div>
+                            <div class="form-group" style="flex: 2;">
+                                <label class="form-label">Titre</label>
+                                <input type="text" name="longtail_title" class="form-control" value="<?= htmlspecialchars($fp['longtail_title'] ?? '') ?>" placeholder="Tout savoir sur les {famille_lower} personnalisés">
+                            </div>
+                        </div>
+                        <hr>
+                        <div id="familleLongtailBlocks">
+                            <?php
+                            $longtailBlocks = json_decode($fp['longtail_blocks'] ?? '[]', true) ?: [];
+                            if (empty($longtailBlocks)) $longtailBlocks = [
+                                ['title' => "Qu'est-ce que la sublimation ?", 'content' => ''],
+                                ['title' => 'Pourquoi choisir FLARE CUSTOM ?', 'content' => ''],
+                                ['title' => 'Délais et livraison', 'content' => ''],
+                                ['title' => 'Prix dégressifs', 'content' => '']
+                            ];
+                            foreach ($longtailBlocks as $i => $block): ?>
+                            <div class="longtail-block-item" style="background: var(--bg-secondary); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                                <div class="form-row">
+                                    <div class="form-group" style="flex: 1;">
+                                        <label class="form-label">Titre du bloc</label>
+                                        <input type="text" name="longtail_blocks[<?= $i ?>][title]" class="form-control" value="<?= htmlspecialchars($block['title'] ?? '') ?>">
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-light" onclick="this.closest('.longtail-block-item').remove()" style="align-self: flex-end; margin-bottom: 5px;">✕</button>
+                                </div>
+                                <div class="form-group" style="margin-top: 10px;">
+                                    <label class="form-label">Contenu</label>
+                                    <textarea name="longtail_blocks[<?= $i ?>][content]" class="form-control" rows="3"><?= htmlspecialchars($block['content'] ?? '') ?></textarea>
+                                    <small style="color: var(--text-muted);">Variables: {famille}, {famille_lower}</small>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-light" onclick="addFamilleLongtailBlock()">+ Ajouter un bloc</button>
+                    </div>
+                </div>
+
+                <!-- TAB FAQ -->
+                <div class="tab-content" id="famille-tab-faq">
+                    <div class="card-body">
+                        <h4>Section FAQ</h4>
+                        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Questions fréquentes avec Schema.org FAQ markup</p>
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label class="form-label">Eyebrow</label>
+                                <input type="text" name="faq_eyebrow" class="form-control" value="<?= htmlspecialchars($fp['faq_eyebrow'] ?? 'Questions fréquentes') ?>">
+                            </div>
+                            <div class="form-group" style="flex: 2;">
+                                <label class="form-label">Titre</label>
+                                <input type="text" name="faq_title" class="form-control" value="<?= htmlspecialchars($fp['faq_title'] ?? '') ?>" placeholder="FAQ {famille} Personnalisés">
+                            </div>
+                        </div>
+                        <hr>
+                        <div id="familleFaqItems">
+                            <?php
+                            $faqItems = json_decode($fp['faq_items'] ?? '[]', true) ?: [];
+                            if (empty($faqItems)) $faqItems = [['question' => '', 'answer' => '']];
+                            foreach ($faqItems as $i => $faq): ?>
+                            <div class="faq-item" style="background: var(--bg-secondary); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                                <div class="form-row">
+                                    <div class="form-group" style="flex: 1;">
+                                        <label class="form-label">Question</label>
+                                        <input type="text" name="faq_items[<?= $i ?>][question]" class="form-control" value="<?= htmlspecialchars($faq['question'] ?? '') ?>">
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-light" onclick="this.closest('.faq-item').remove()" style="align-self: flex-end; margin-bottom: 5px;">✕</button>
+                                </div>
+                                <div class="form-group" style="margin-top: 10px;">
+                                    <label class="form-label">Réponse</label>
+                                    <textarea name="faq_items[<?= $i ?>][answer]" class="form-control" rows="3"><?= htmlspecialchars($faq['answer'] ?? '') ?></textarea>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-light" onclick="addFamilleFaqItem()">+ Ajouter une question</button>
+                    </div>
+                </div>
+
+                <!-- TAB FINAL CTA -->
+                <div class="tab-content" id="famille-tab-finalcta">
+                    <div class="card-body">
+                        <h4>Section CTA Final</h4>
+                        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Dernière section d'appel à l'action en bas de page</p>
+                        <div class="form-group">
+                            <label class="form-label">Titre</label>
+                            <input type="text" name="final_cta_title" class="form-control" value="<?= htmlspecialchars($fp['final_cta_title'] ?? 'Prêt à équiper votre équipe ?') ?>">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Texte</label>
+                            <textarea name="final_cta_text" class="form-control" rows="3"><?= htmlspecialchars($fp['final_cta_text'] ?? '') ?></textarea>
+                            <small style="color: var(--text-muted);">Variables: {famille}, {famille_lower}</small>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Texte bouton</label>
+                                <input type="text" name="final_cta_button_text" class="form-control" value="<?= htmlspecialchars($fp['final_cta_button_text'] ?? 'Demander un devis gratuit') ?>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Lien bouton</label>
+                                <input type="text" name="final_cta_button_link" class="form-control" value="<?= htmlspecialchars($fp['final_cta_button_link'] ?? '/pages/info/contact.html') ?>">
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -6322,6 +6567,41 @@ $user = $_SESSION['admin_user'] ?? null;
         function toggleFamilleProductsSource() {
             var source = document.getElementById('familleProductsSource').value;
             document.getElementById('familleFamilleFilterGroup').style.display = source === 'famille' ? '' : 'none';
+        }
+
+        var familleSeoCardIdx = <?= count($seoCards) ?>;
+        function addFamilleSeoCard() {
+            var html = '<div class="seo-card-item" style="background: var(--bg-secondary); padding: 15px; border-radius: 8px; margin-bottom: 15px;"><div class="form-row"><div class="form-group" style="width: 80px;"><label class="form-label">Icône</label><input type="text" name="seo_cards[' + familleSeoCardIdx + '][icon]" class="form-control" placeholder="🎯" style="font-size: 20px; text-align: center;"></div><div class="form-group" style="flex: 1;"><label class="form-label">Titre</label><input type="text" name="seo_cards[' + familleSeoCardIdx + '][title]" class="form-control"></div><button type="button" class="btn btn-sm btn-light" onclick="this.closest(\'.seo-card-item\').remove()" style="align-self: flex-end; margin-bottom: 5px;">✕</button></div><div class="form-group" style="margin-top: 10px;"><label class="form-label">Contenu</label><textarea name="seo_cards[' + familleSeoCardIdx + '][content]" class="form-control" rows="2"></textarea></div></div>';
+            document.getElementById('familleSeoCards').insertAdjacentHTML('beforeend', html);
+            familleSeoCardIdx++;
+        }
+
+        var familleSeoStatIdx = <?= count($seoStats) ?>;
+        function addFamilleSeoStat() {
+            var html = '<div class="form-row seo-stat-item" style="margin-bottom: 10px;"><div class="form-group" style="flex: 1;"><input type="text" name="seo_stats[' + familleSeoStatIdx + '][number]" class="form-control" placeholder="500+"></div><div class="form-group" style="flex: 2;"><input type="text" name="seo_stats[' + familleSeoStatIdx + '][label]" class="form-control" placeholder="Clubs équipés"></div><button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.remove()">✕</button></div>';
+            document.getElementById('familleSeoStats').insertAdjacentHTML('beforeend', html);
+            familleSeoStatIdx++;
+        }
+
+        var familleSeoBlockIdx = <?= count($seoBlocks) ?>;
+        function addFamilleSeoBlock() {
+            var html = '<div class="seo-block-item" style="background: var(--bg-secondary); padding: 15px; border-radius: 8px; margin-bottom: 15px;"><div class="form-row"><div class="form-group" style="flex: 1;"><label class="form-label">Titre</label><input type="text" name="seo_content_blocks[' + familleSeoBlockIdx + '][title]" class="form-control"></div><button type="button" class="btn btn-sm btn-light" onclick="this.closest(\'.seo-block-item\').remove()" style="align-self: flex-end; margin-bottom: 5px;">✕</button></div><div class="form-group" style="margin-top: 10px;"><label class="form-label">Contenu</label><textarea name="seo_content_blocks[' + familleSeoBlockIdx + '][content]" class="form-control" rows="2"></textarea></div><div class="form-group" style="margin-top: 10px;"><label class="form-label">Liste (une ligne par item)</label><textarea name="seo_content_blocks[' + familleSeoBlockIdx + '][list]" class="form-control" rows="3"></textarea></div></div>';
+            document.getElementById('familleSeoBlocks').insertAdjacentHTML('beforeend', html);
+            familleSeoBlockIdx++;
+        }
+
+        var familleLongtailIdx = <?= count($longtailBlocks) ?>;
+        function addFamilleLongtailBlock() {
+            var html = '<div class="longtail-block-item" style="background: var(--bg-secondary); padding: 15px; border-radius: 8px; margin-bottom: 15px;"><div class="form-row"><div class="form-group" style="flex: 1;"><label class="form-label">Titre du bloc</label><input type="text" name="longtail_blocks[' + familleLongtailIdx + '][title]" class="form-control"></div><button type="button" class="btn btn-sm btn-light" onclick="this.closest(\'.longtail-block-item\').remove()" style="align-self: flex-end; margin-bottom: 5px;">✕</button></div><div class="form-group" style="margin-top: 10px;"><label class="form-label">Contenu</label><textarea name="longtail_blocks[' + familleLongtailIdx + '][content]" class="form-control" rows="3"></textarea><small style="color: var(--text-muted);">Variables: {famille}, {famille_lower}</small></div></div>';
+            document.getElementById('familleLongtailBlocks').insertAdjacentHTML('beforeend', html);
+            familleLongtailIdx++;
+        }
+
+        var familleFaqIdx = <?= count($faqItems) ?>;
+        function addFamilleFaqItem() {
+            var html = '<div class="faq-item" style="background: var(--bg-secondary); padding: 15px; border-radius: 8px; margin-bottom: 15px;"><div class="form-row"><div class="form-group" style="flex: 1;"><label class="form-label">Question</label><input type="text" name="faq_items[' + familleFaqIdx + '][question]" class="form-control"></div><button type="button" class="btn btn-sm btn-light" onclick="this.closest(\'.faq-item\').remove()" style="align-self: flex-end; margin-bottom: 5px;">✕</button></div><div class="form-group" style="margin-top: 10px;"><label class="form-label">Réponse</label><textarea name="faq_items[' + familleFaqIdx + '][answer]" class="form-control" rows="3"></textarea></div></div>';
+            document.getElementById('familleFaqItems').insertAdjacentHTML('beforeend', html);
+            familleFaqIdx++;
         }
         </script>
 
