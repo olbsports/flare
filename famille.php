@@ -38,9 +38,22 @@ try {
             $positions[$row['product_id']] = $row['position'];
         }
 
-        $stmt = $pdo->prepare("SELECT p.* FROM products p WHERE p.famille = ? AND p.active = 1 ORDER BY p.nom");
-        $stmt->execute([$page['products_famille_filter']]);
-        $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Support multi-familles (JSON array) ou simple string
+        $familleFilter = $page['products_famille_filter'];
+        $familles = json_decode($familleFilter, true);
+        if (!is_array($familles)) {
+            $familles = [$familleFilter]; // Compatibilité ancien format
+        }
+        $familles = array_filter($familles); // Retirer les valeurs vides
+
+        if (!empty($familles)) {
+            $placeholders = implode(',', array_fill(0, count($familles), '?'));
+            $stmt = $pdo->prepare("SELECT p.* FROM products p WHERE p.famille IN ($placeholders) AND p.active = 1 ORDER BY p.nom");
+            $stmt->execute($familles);
+            $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } else {
+            $products = [];
+        }
 
         if (!empty($positions)) {
             usort($products, function($a, $b) use ($positions) {
