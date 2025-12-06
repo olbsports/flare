@@ -88,6 +88,8 @@ try {
     $seoCards = json_decode($page['seo_cards'] ?? '[]', true) ?: [];
     $seoStats = json_decode($page['seo_stats'] ?? '[]', true) ?: [];
     $seoBlocks = json_decode($page['seo_content_blocks'] ?? '[]', true) ?: [];
+    $longtailBlocks = json_decode($page['longtail_blocks'] ?? '[]', true) ?: [];
+    $faqItems = json_decode($page['faq_items'] ?? '[]', true) ?: [];
 
     // Extraire sports/genres uniques
     $uniqueSports = [];
@@ -122,6 +124,21 @@ $productCount = count($products);
 $familleName = $page['famille_name'] ?: $page['title'];
 $familleNameLower = strtolower($familleName);
 $familleIcon = $page['famille_icon'] ?? '👕';
+$sportsCount = count($uniqueSports);
+
+// Fonction pour remplacer les variables dans le texte
+function replaceVars($text, $vars) {
+    foreach ($vars as $key => $value) {
+        $text = str_replace('{' . $key . '}', $value, $text);
+    }
+    return $text;
+}
+$vars = [
+    'famille' => $familleName,
+    'famille_lower' => $familleNameLower,
+    'count' => $productCount,
+    'sports_count' => $sportsCount
+];
 
 // Générer les mots-clés SEO
 $seoKeywords = "$familleName personnalisé, $familleName sublimation, $familleName sport, $familleName club, " . implode(', ', array_map(fn($s) => "$familleName $s", array_slice($uniqueSports, 0, 5)));
@@ -328,14 +345,17 @@ $seoKeywords = "$familleName personnalisé, $familleName sublimation, $familleNa
     <?php endif; ?>
 
     <!-- Intro SEO Text -->
+    <?php
+    $introText = $page['intro_text'] ?? '';
+    if (empty($introText)) {
+        $introText = "Découvrez notre collection de <strong>{famille_lower} personnalisés</strong> en sublimation intégrale. Avec <strong>{count} modèles</strong> disponibles pour {sports_count} sports différents, trouvez le {famille_lower} parfait pour votre équipe. Personnalisation illimitée, couleurs au choix, logos et sponsors inclus. <strong>Fabrication 100% européenne</strong> avec livraison en 3-4 semaines.";
+    }
+    $introText = replaceVars($introText, $vars);
+    ?>
     <section style="padding: 60px 5%; background: #fff;">
         <div class="container" style="max-width: 900px; margin: 0 auto; text-align: center;">
             <p style="font-size: 18px; line-height: 1.9; color: #495057;">
-                Découvrez notre collection de <strong><?= htmlspecialchars($familleNameLower) ?> personnalisés</strong> en sublimation intégrale.
-                Avec <strong><?= $productCount ?> modèles</strong> disponibles pour <?= count($uniqueSports) ?> sports différents,
-                trouvez le <?= htmlspecialchars($familleNameLower) ?> parfait pour votre équipe.
-                Personnalisation illimitée, couleurs au choix, logos et sponsors inclus.
-                <strong>Fabrication 100% européenne</strong> avec livraison en 3-4 semaines.
+                <?= $introText ?>
             </p>
         </div>
     </section>
@@ -489,12 +509,17 @@ $seoKeywords = "$familleName personnalisé, $familleName sublimation, $familleNa
     </section>
 
     <!-- Sports Links Section (SEO Internal Linking) -->
-    <?php if (!empty($uniqueSports)): ?>
+    <?php if (!empty($uniqueSports) && ($page['show_sports_links'] ?? 1)): ?>
+    <?php
+    $sportsLinksEyebrow = $page['sports_links_eyebrow'] ?? 'Par sport';
+    $sportsLinksTitle = $page['sports_links_title'] ?? '{famille} par discipline';
+    $sportsLinksTitle = replaceVars($sportsLinksTitle, $vars);
+    ?>
     <section style="padding: 60px 5%; background: #f8f9fa;">
         <div class="container">
             <div class="section-header" style="text-align: center; margin-bottom: 40px;">
-                <div class="section-eyebrow">Par sport</div>
-                <h2 class="section-title"><?= htmlspecialchars($familleName) ?> par discipline</h2>
+                <div class="section-eyebrow"><?= htmlspecialchars($sportsLinksEyebrow) ?></div>
+                <h2 class="section-title"><?= htmlspecialchars($sportsLinksTitle) ?></h2>
             </div>
             <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 16px;">
                 <?php foreach ($uniqueSports as $sport): ?>
@@ -636,85 +661,90 @@ $seoKeywords = "$familleName personnalisé, $familleName sublimation, $familleNa
     <?php endif; ?>
 
     <!-- SEO Longtail Content -->
+    <?php
+    $longtailEyebrow = $page['longtail_eyebrow'] ?? 'Guide complet';
+    $longtailTitle = $page['longtail_title'] ?? 'Tout savoir sur les {famille_lower} personnalisés';
+    $longtailTitle = replaceVars($longtailTitle, $vars);
+
+    // Blocs par défaut si vide
+    if (empty($longtailBlocks)) {
+        $longtailBlocks = [
+            ['title' => "Qu'est-ce que la sublimation ?", 'content' => "La sublimation est un procédé d'impression révolutionnaire où l'encre pénètre directement dans les fibres du tissu polyester. Contrairement au flocage ou à la sérigraphie, les couleurs deviennent partie intégrante du textile. Résultat : des {famille_lower} aux couleurs éclatantes qui résistent à plus de 100 lavages sans s'altérer."],
+            ['title' => 'Pourquoi choisir FLARE CUSTOM ?', 'content' => "Spécialiste européen des équipements sportifs personnalisés depuis plus de 10 ans. Fabrication dans nos ateliers partenaires certifiés en Europe (Bulgarie, Portugal, Pologne). Contrôle qualité rigoureux, design professionnel inclus, et garantie satisfait ou refabriqué sur tous nos {famille_lower}."],
+            ['title' => 'Délais et livraison', 'content' => "Production de vos {famille_lower} personnalisés en 3-4 semaines après validation du BAT (Bon à Tirer). Livraison gratuite en France métropolitaine à partir de 500€ d'achat. Suivi de commande en temps réel et tracking DHL/UPS fourni dès expédition."],
+            ['title' => 'Prix dégressifs', 'content' => "Plus vous commandez, plus vous économisez ! Réductions automatiques : -10% dès 5 pièces, -15% dès 10 pièces, -20% dès 20 pièces, jusqu'à -40% à partir de 250 {famille_lower}. Tarification transparente tout inclus : personnalisation, noms, numéros et création graphique."]
+        ];
+    }
+    ?>
     <section class="seo-longtail">
         <div class="container">
             <div class="section-header" style="text-align: center; margin-bottom: 50px;">
-                <div class="section-eyebrow">Guide complet</div>
-                <h2 class="section-title">Tout savoir sur les <?= htmlspecialchars($familleNameLower) ?> personnalisés</h2>
+                <div class="section-eyebrow"><?= htmlspecialchars($longtailEyebrow) ?></div>
+                <h2 class="section-title"><?= htmlspecialchars($longtailTitle) ?></h2>
             </div>
             <div class="seo-longtail-grid">
+                <?php foreach ($longtailBlocks as $block): ?>
                 <div class="seo-longtail-item">
-                    <h3>Qu'est-ce que la sublimation ?</h3>
-                    <p>La sublimation est un procédé d'impression révolutionnaire où l'encre pénètre directement dans les fibres du tissu polyester. Contrairement au flocage ou à la sérigraphie, les couleurs deviennent partie intégrante du textile. Résultat : des <?= htmlspecialchars($familleNameLower) ?> aux couleurs éclatantes qui résistent à plus de 100 lavages sans s'altérer.</p>
+                    <h3><?= htmlspecialchars($block['title'] ?? '') ?></h3>
+                    <p><?= replaceVars($block['content'] ?? '', $vars) ?></p>
                 </div>
-                <div class="seo-longtail-item">
-                    <h3>Pourquoi choisir FLARE CUSTOM ?</h3>
-                    <p>Spécialiste européen des équipements sportifs personnalisés depuis plus de 10 ans. Fabrication dans nos ateliers partenaires certifiés en Europe (Bulgarie, Portugal, Pologne). Contrôle qualité rigoureux, design professionnel inclus, et garantie satisfait ou refabriqué sur tous nos <?= htmlspecialchars($familleNameLower) ?>.</p>
-                </div>
-                <div class="seo-longtail-item">
-                    <h3>Délais et livraison</h3>
-                    <p>Production de vos <?= htmlspecialchars($familleNameLower) ?> personnalisés en 3-4 semaines après validation du BAT (Bon à Tirer). Livraison gratuite en France métropolitaine à partir de 500€ d'achat. Suivi de commande en temps réel et tracking DHL/UPS fourni dès expédition.</p>
-                </div>
-                <div class="seo-longtail-item">
-                    <h3>Prix dégressifs</h3>
-                    <p>Plus vous commandez, plus vous économisez ! Réductions automatiques : -10% dès 5 pièces, -15% dès 10 pièces, -20% dès 20 pièces, jusqu'à -40% à partir de 250 <?= htmlspecialchars($familleNameLower) ?>. Tarification transparente tout inclus : personnalisation, noms, numéros et création graphique.</p>
-                </div>
+                <?php endforeach; ?>
             </div>
         </div>
     </section>
 
     <!-- FAQ Section -->
+    <?php
+    $faqEyebrow = $page['faq_eyebrow'] ?? 'Questions fréquentes';
+    $faqTitle = $page['faq_title'] ?? 'FAQ {famille} Personnalisés';
+    $faqTitle = replaceVars($faqTitle, $vars);
+
+    // FAQ par défaut si vide
+    if (empty($faqItems)) {
+        $faqItems = [
+            ['question' => "Quel est le délai de fabrication pour des {famille_lower} personnalisés ?", 'answer' => "Le délai de fabrication est de 3-4 semaines après validation de votre BAT (Bon à Tirer). Ce délai inclut la création graphique, la production en sublimation et le contrôle qualité. Pour les commandes urgentes, contactez-nous pour étudier une solution express."],
+            ['question' => "Quelle est la quantité minimum de commande ?", 'answer' => "Aucune quantité minimum ! Vous pouvez commander à partir d'1 seul {famille_lower}. Cependant, les prix dégressifs démarrent dès 5 pièces (-10%) et augmentent progressivement jusqu'à -40% pour 250+ pièces."],
+            ['question' => "La personnalisation (logos, sponsors, noms) est-elle incluse ?", 'answer' => "Oui, tout est inclus ! La sublimation permet une personnalisation illimitée sans surcoût : logos multiples, sponsors, dégradés de couleurs, noms et numéros individuels. Notre équipe graphique crée gratuitement votre design sur mesure."],
+            ['question' => "Où sont fabriqués vos {famille_lower} ?", 'answer' => "100% fabrication européenne ! Nos {famille_lower} sont produits dans nos ateliers partenaires certifiés en Bulgarie, Portugal et Pologne. Nous n'avons aucune production asiatique, garantissant qualité, éthique et réactivité."],
+            ['question' => "Comment entretenir mes {famille_lower} sublimés ?", 'answer' => "Lavage en machine à 30-40°C, retourné sur l'envers. Pas de sèche-linge ni de repassage direct sur l'impression. Les couleurs sublimées résistent à plus de 100 lavages sans s'altérer. Évitez les produits chlorés."]
+        ];
+    }
+    ?>
     <section class="seo-faq" itemscope itemtype="https://schema.org/FAQPage">
         <div class="container">
             <div class="section-header">
-                <div class="section-eyebrow">Questions fréquentes</div>
-                <h2 class="section-title">FAQ <?= htmlspecialchars($familleName) ?> Personnalisés</h2>
+                <div class="section-eyebrow"><?= htmlspecialchars($faqEyebrow) ?></div>
+                <h2 class="section-title"><?= htmlspecialchars($faqTitle) ?></h2>
             </div>
             <div class="seo-faq-grid">
+                <?php foreach ($faqItems as $faq): ?>
                 <div class="seo-faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
-                    <div class="seo-faq-question" itemprop="name">Quel est le délai de fabrication pour des <?= htmlspecialchars($familleNameLower) ?> personnalisés ?</div>
+                    <div class="seo-faq-question" itemprop="name"><?= replaceVars($faq['question'] ?? '', $vars) ?></div>
                     <div class="seo-faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-                        <p itemprop="text">Le délai de fabrication est de 3-4 semaines après validation de votre BAT (Bon à Tirer). Ce délai inclut la création graphique, la production en sublimation et le contrôle qualité. Pour les commandes urgentes, contactez-nous pour étudier une solution express.</p>
+                        <p itemprop="text"><?= replaceVars($faq['answer'] ?? '', $vars) ?></p>
                     </div>
                 </div>
-                <div class="seo-faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
-                    <div class="seo-faq-question" itemprop="name">Quelle est la quantité minimum de commande ?</div>
-                    <div class="seo-faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-                        <p itemprop="text">Aucune quantité minimum ! Vous pouvez commander à partir d'1 seul <?= htmlspecialchars($familleNameLower) ?>. Cependant, les prix dégressifs démarrent dès 5 pièces (-10%) et augmentent progressivement jusqu'à -40% pour 250+ pièces.</p>
-                    </div>
-                </div>
-                <div class="seo-faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
-                    <div class="seo-faq-question" itemprop="name">La personnalisation (logos, sponsors, noms) est-elle incluse ?</div>
-                    <div class="seo-faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-                        <p itemprop="text">Oui, tout est inclus ! La sublimation permet une personnalisation illimitée sans surcoût : logos multiples, sponsors, dégradés de couleurs, noms et numéros individuels. Notre équipe graphique crée gratuitement votre design sur mesure.</p>
-                    </div>
-                </div>
-                <div class="seo-faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
-                    <div class="seo-faq-question" itemprop="name">Où sont fabriqués vos <?= htmlspecialchars($familleNameLower) ?> ?</div>
-                    <div class="seo-faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-                        <p itemprop="text">100% fabrication européenne ! Nos <?= htmlspecialchars($familleNameLower) ?> sont produits dans nos ateliers partenaires certifiés en Bulgarie, Portugal et Pologne. Nous n'avons aucune production asiatique, garantissant qualité, éthique et réactivité.</p>
-                    </div>
-                </div>
-                <div class="seo-faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
-                    <div class="seo-faq-question" itemprop="name">Comment entretenir mes <?= htmlspecialchars($familleNameLower) ?> sublimés ?</div>
-                    <div class="seo-faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-                        <p itemprop="text">Lavage en machine à 30-40°C, retourné sur l'envers. Pas de sèche-linge ni de repassage direct sur l'impression. Les couleurs sublimées résistent à plus de 100 lavages sans s'altérer. Évitez les produits chlorés.</p>
-                    </div>
-                </div>
+                <?php endforeach; ?>
             </div>
         </div>
     </section>
 
     <!-- Final CTA -->
+    <?php
+    $finalCtaTitle = $page['final_cta_title'] ?? 'Prêt à équiper votre équipe ?';
+    $finalCtaText = $page['final_cta_text'] ?? "Demandez votre devis gratuit et recevez une proposition personnalisée sous 24h. Notre équipe vous accompagne de A à Z dans votre projet de {famille_lower} personnalisés.";
+    $finalCtaText = replaceVars($finalCtaText, $vars);
+    $finalCtaButtonText = $page['final_cta_button_text'] ?? 'Demander un devis gratuit';
+    $finalCtaButtonLink = $page['final_cta_button_link'] ?? '/pages/info/contact.html';
+    ?>
     <section style="padding: 80px 5%; background: #fff; text-align: center;">
         <div class="container" style="max-width: 800px;">
-            <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 42px; margin-bottom: 20px;">Prêt à équiper votre équipe ?</h2>
+            <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 42px; margin-bottom: 20px;"><?= htmlspecialchars($finalCtaTitle) ?></h2>
             <p style="font-size: 18px; color: #495057; margin-bottom: 30px;">
-                Demandez votre devis gratuit et recevez une proposition personnalisée sous 24h.
-                Notre équipe vous accompagne de A à Z dans votre projet de <?= htmlspecialchars($familleNameLower) ?> personnalisés.
+                <?= $finalCtaText ?>
             </p>
-            <a href="/pages/info/contact.html" style="display: inline-flex; align-items: center; gap: 12px; padding: 18px 40px; background: linear-gradient(135deg, #FF4B26, #E63910); color: #fff; font-weight: 700; font-size: 18px; border-radius: 8px; text-decoration: none;">
-                Demander un devis gratuit
+            <a href="<?= htmlspecialchars($finalCtaButtonLink) ?>" style="display: inline-flex; align-items: center; gap: 12px; padding: 18px 40px; background: linear-gradient(135deg, #FF4B26, #E63910); color: #fff; font-weight: 700; font-size: 18px; border-radius: 8px; text-decoration: none;">
+                <?= htmlspecialchars($finalCtaButtonText) ?>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             </a>
         </div>

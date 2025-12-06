@@ -256,6 +256,10 @@ try {
         hero_cta_text VARCHAR(100),
         hero_cta_link VARCHAR(255),
         trust_bar JSON,
+        intro_text TEXT,
+        show_sports_links BOOLEAN DEFAULT TRUE,
+        sports_links_eyebrow VARCHAR(100) DEFAULT 'Par sport',
+        sports_links_title VARCHAR(255),
         products_title VARCHAR(255),
         products_subtitle TEXT,
         products_eyebrow VARCHAR(100),
@@ -281,11 +285,47 @@ try {
         seo_stats JSON,
         seo_full_content TEXT,
         seo_content_blocks JSON,
+        longtail_eyebrow VARCHAR(100) DEFAULT 'Guide complet',
+        longtail_title VARCHAR(255),
+        longtail_blocks JSON,
+        faq_eyebrow VARCHAR(100) DEFAULT 'Questions fréquentes',
+        faq_title VARCHAR(255),
+        faq_items JSON,
+        final_cta_title VARCHAR(255) DEFAULT 'Prêt à équiper votre équipe ?',
+        final_cta_text TEXT,
+        final_cta_button_text VARCHAR(100) DEFAULT 'Demander un devis gratuit',
+        final_cta_button_link VARCHAR(255) DEFAULT '/pages/info/contact.html',
         active BOOLEAN DEFAULT TRUE,
         sort_order INT DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    // Ajouter les nouvelles colonnes si la table existe déjà (migration)
+    $newColumns = [
+        'intro_text' => 'TEXT',
+        'show_sports_links' => 'BOOLEAN DEFAULT TRUE',
+        'sports_links_eyebrow' => "VARCHAR(100) DEFAULT 'Par sport'",
+        'sports_links_title' => 'VARCHAR(255)',
+        'longtail_eyebrow' => "VARCHAR(100) DEFAULT 'Guide complet'",
+        'longtail_title' => 'VARCHAR(255)',
+        'longtail_blocks' => 'JSON',
+        'faq_eyebrow' => "VARCHAR(100) DEFAULT 'Questions fréquentes'",
+        'faq_title' => 'VARCHAR(255)',
+        'faq_items' => 'JSON',
+        'final_cta_title' => "VARCHAR(255) DEFAULT 'Prêt à équiper votre équipe ?'",
+        'final_cta_text' => 'TEXT',
+        'final_cta_button_text' => "VARCHAR(100) DEFAULT 'Demander un devis gratuit'",
+        'final_cta_button_link' => "VARCHAR(255) DEFAULT '/pages/info/contact.html'"
+    ];
+
+    foreach ($newColumns as $colName => $colDef) {
+        try {
+            $pdo->exec("ALTER TABLE famille_pages ADD COLUMN $colName $colDef");
+        } catch (PDOException $e) {
+            // Colonne existe déjà, ignorer
+        }
+    }
 
     // Compter les entrées existantes
     $stmt = $pdo->query("SELECT COUNT(*) FROM famille_pages");
