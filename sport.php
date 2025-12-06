@@ -338,7 +338,7 @@ $sportIcon = $page['sport_icon'] ?? '🏆';
     <section class="why-us-section" id="why-us">
         <div class="container">
             <div class="section-header">
-                <div class="section-eyebrow">Nos engagements</div>
+                <div class="section-eyebrow"><?= htmlspecialchars($page['why_eyebrow'] ?: 'Nos engagements') ?></div>
                 <h2 class="section-title"><?= htmlspecialchars($page['why_title'] ?: 'Pourquoi choisir Flare Custom') ?></h2>
                 <p class="section-desc"><?= htmlspecialchars($page['why_subtitle'] ?: 'La référence européenne en équipements sportifs personnalisés') ?></p>
             </div>
@@ -397,10 +397,10 @@ $sportIcon = $page['sport_icon'] ?? '🏆';
     <section class="faq-sport-section">
         <div class="container">
             <div class="section-header">
-                <div class="section-eyebrow">Questions fréquentes</div>
+                <div class="section-eyebrow"><?= htmlspecialchars($page['faq_eyebrow'] ?: 'Questions fréquentes') ?></div>
                 <h2 class="section-title"><?= htmlspecialchars($page['faq_title'] ?: "FAQ $sportName") ?></h2>
                 <p class="section-description">
-                    Toutes les réponses à vos questions sur nos équipements <?= htmlspecialchars($sportNameLower) ?> personnalisés.
+                    <?= htmlspecialchars($page['faq_description'] ?: "Toutes les réponses à vos questions sur nos équipements $sportNameLower personnalisés.") ?>
                 </p>
             </div>
 

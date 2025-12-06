@@ -318,12 +318,15 @@ try {
             cta_whatsapp VARCHAR(50),
 
             -- Why Us section (Pourquoi choisir)
+            why_eyebrow VARCHAR(100),
             why_title VARCHAR(255),
             why_subtitle TEXT,
             why_items JSON,
 
             -- FAQ
+            faq_eyebrow VARCHAR(100),
             faq_title VARCHAR(255),
+            faq_description TEXT,
             faq_items JSON,
 
             -- SEO Content sections (JSON array of {title, content})
@@ -674,8 +677,8 @@ if ($action && $pdo) {
                     'show_filters', 'filter_famille', 'filter_genre', 'filter_sport', 'filter_sort',
                     'products_source', 'products_sport_filter', 'products_famille_filter',
                     'cta_title', 'cta_subtitle', 'cta_button_text', 'cta_button_link', 'cta_whatsapp',
-                    'why_title', 'why_subtitle',
-                    'faq_title', 'active', 'sort_order'
+                    'why_eyebrow', 'why_title', 'why_subtitle',
+                    'faq_eyebrow', 'faq_title', 'faq_description', 'active', 'sort_order'
                 ];
 
                 $values = [
@@ -708,9 +711,12 @@ if ($action && $pdo) {
                     $_POST['cta_button_text'] ?? '',
                     $_POST['cta_button_link'] ?? '',
                     $_POST['cta_whatsapp'] ?? '',
+                    $_POST['why_eyebrow'] ?? '',
                     $_POST['why_title'] ?? '',
                     $_POST['why_subtitle'] ?? '',
+                    $_POST['faq_eyebrow'] ?? '',
                     $_POST['faq_title'] ?? '',
+                    $_POST['faq_description'] ?? '',
                     isset($_POST['active']) ? 1 : 0,
                     intval($_POST['sort_order'] ?? 0)
                 ];
@@ -5388,6 +5394,10 @@ $user = $_SESSION['admin_user'] ?? null;
                 <div class="tab-content" id="sport-tab-why">
                     <div class="card-body">
                         <h4>Section "Pourquoi choisir Flare Custom"</h4>
+                        <div class="form-group">
+                            <label class="form-label">Eyebrow (petit texte au-dessus)</label>
+                            <input type="text" name="why_eyebrow" class="form-control" value="<?= htmlspecialchars($sp['why_eyebrow'] ?? '') ?>" placeholder="Nos engagements">
+                        </div>
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label">Titre</label>
@@ -5430,8 +5440,16 @@ $user = $_SESSION['admin_user'] ?? null;
                 <div class="tab-content" id="sport-tab-faq">
                     <div class="card-body">
                         <div class="form-group">
+                            <label class="form-label">Eyebrow (petit texte au-dessus)</label>
+                            <input type="text" name="faq_eyebrow" class="form-control" value="<?= htmlspecialchars($sp['faq_eyebrow'] ?? '') ?>" placeholder="Questions fréquentes">
+                        </div>
+                        <div class="form-group">
                             <label class="form-label">Titre section FAQ</label>
                             <input type="text" name="faq_title" class="form-control" value="<?= htmlspecialchars($sp['faq_title'] ?? '') ?>" placeholder="FAQ Football">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <input type="text" name="faq_description" class="form-control" value="<?= htmlspecialchars($sp['faq_description'] ?? '') ?>" placeholder="Toutes les réponses à vos questions...">
                         </div>
                         <div id="sportFaqList">
                             <?php
