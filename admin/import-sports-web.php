@@ -115,6 +115,7 @@ function extractAllContent($html, $config) {
     }
 
     // ========== WHY US - Extraire EXACTEMENT le contenu ==========
+    $data['why_eyebrow'] = 'Nos engagements';
     $data['why_title'] = 'Pourquoi choisir Flare Custom';
     $data['why_subtitle'] = '';
     $data['why_items'] = [];
@@ -122,6 +123,11 @@ function extractAllContent($html, $config) {
     // Trouver la section why-us
     if (preg_match('/<section[^>]*class=["\'][^"\']*why-us-section[^"\']*["\'][^>]*>(.*?)<\/section>/is', $html, $whySection)) {
         $whyHtml = $whySection[1];
+
+        // Eyebrow
+        if (preg_match('/<div class=["\']section-eyebrow["\']>([^<]+)<\/div>/i', $whyHtml, $m)) {
+            $data['why_eyebrow'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
+        }
 
         // Titre
         if (preg_match('/<h2 class=["\']section-title["\']>([^<]+)<\/h2>/i', $whyHtml, $m)) {
@@ -201,15 +207,27 @@ function extractAllContent($html, $config) {
     }
 
     // ========== FAQ - Extraire EXACTEMENT chaque Q/R ==========
+    $data['faq_eyebrow'] = 'Questions fréquentes';
     $data['faq_title'] = 'FAQ ' . $config['sport_name'];
+    $data['faq_description'] = '';
     $data['faq_items'] = [];
 
     if (preg_match('/<section[^>]*class=["\'][^"\']*faq-sport-section[^"\']*["\'][^>]*>(.*?)<\/section>/is', $html, $faqSection)) {
         $faqHtml = $faqSection[1];
 
+        // Eyebrow FAQ
+        if (preg_match('/<div class=["\']section-eyebrow["\']>([^<]+)<\/div>/i', $faqHtml, $m)) {
+            $data['faq_eyebrow'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
+        }
+
         // Titre FAQ
         if (preg_match('/<h2 class=["\']section-title["\']>([^<]+)<\/h2>/i', $faqHtml, $m)) {
             $data['faq_title'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
+        }
+
+        // Description FAQ
+        if (preg_match('/<p class=["\']section-description["\']>(.*?)<\/p>/is', $faqHtml, $m)) {
+            $data['faq_description'] = trim(strip_tags(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8')));
         }
 
         // Chaque FAQ item
@@ -331,10 +349,13 @@ try {
         cta_button_text VARCHAR(100),
         cta_button_link VARCHAR(255),
         cta_whatsapp VARCHAR(50),
+        why_eyebrow VARCHAR(100),
         why_title VARCHAR(255),
         why_subtitle TEXT,
         why_items JSON,
+        faq_eyebrow VARCHAR(100),
         faq_title VARCHAR(255),
+        faq_description TEXT,
         faq_items JSON,
         seo_sections JSON,
         active BOOLEAN DEFAULT TRUE,
@@ -352,6 +373,9 @@ try {
         $pdo->exec("ALTER TABLE sport_pages ADD COLUMN IF NOT EXISTS products_source ENUM('manual', 'sport', 'famille') DEFAULT 'manual'");
         $pdo->exec("ALTER TABLE sport_pages ADD COLUMN IF NOT EXISTS products_sport_filter VARCHAR(100)");
         $pdo->exec("ALTER TABLE sport_pages ADD COLUMN IF NOT EXISTS products_famille_filter VARCHAR(100)");
+        $pdo->exec("ALTER TABLE sport_pages ADD COLUMN IF NOT EXISTS why_eyebrow VARCHAR(100)");
+        $pdo->exec("ALTER TABLE sport_pages ADD COLUMN IF NOT EXISTS faq_eyebrow VARCHAR(100)");
+        $pdo->exec("ALTER TABLE sport_pages ADD COLUMN IF NOT EXISTS faq_description TEXT");
     } catch (Exception $e) {
         // Colonnes existent déjà ou autre erreur non bloquante
     }
@@ -404,8 +428,8 @@ try {
                     trust_bar = ?,
                     products_title = ?, products_eyebrow = ?, products_description = ?,
                     cta_title = ?, cta_subtitle = ?, cta_button_text = ?, cta_button_link = ?, cta_whatsapp = ?,
-                    why_title = ?, why_subtitle = ?, why_items = ?,
-                    faq_title = ?, faq_items = ?,
+                    why_eyebrow = ?, why_title = ?, why_subtitle = ?, why_items = ?,
+                    faq_eyebrow = ?, faq_title = ?, faq_description = ?, faq_items = ?,
                     seo_sections = ?
                     WHERE id = ?");
 
@@ -427,10 +451,13 @@ try {
                     $data['cta_button_text'],
                     $data['cta_button_link'],
                     $data['cta_whatsapp'],
+                    $data['why_eyebrow'],
                     $data['why_title'],
                     $data['why_subtitle'],
                     json_encode($data['why_items'], JSON_UNESCAPED_UNICODE),
+                    $data['faq_eyebrow'],
                     $data['faq_title'],
+                    $data['faq_description'],
                     json_encode($data['faq_items'], JSON_UNESCAPED_UNICODE),
                     json_encode($data['seo_sections'], JSON_UNESCAPED_UNICODE),
                     $existing['id']
@@ -446,11 +473,11 @@ try {
                     trust_bar,
                     products_title, products_eyebrow, products_description,
                     cta_title, cta_subtitle, cta_button_text, cta_button_link, cta_whatsapp,
-                    why_title, why_subtitle, why_items,
-                    faq_title, faq_items,
+                    why_eyebrow, why_title, why_subtitle, why_items,
+                    faq_eyebrow, faq_title, faq_description, faq_items,
                     seo_sections,
                     active, sort_order
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 0)");
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 0)");
 
                 $stmt->execute([
                     $data['slug'],
@@ -471,10 +498,13 @@ try {
                     $data['cta_button_text'],
                     $data['cta_button_link'],
                     $data['cta_whatsapp'],
+                    $data['why_eyebrow'],
                     $data['why_title'],
                     $data['why_subtitle'],
                     json_encode($data['why_items'], JSON_UNESCAPED_UNICODE),
+                    $data['faq_eyebrow'],
                     $data['faq_title'],
+                    $data['faq_description'],
                     json_encode($data['faq_items'], JSON_UNESCAPED_UNICODE),
                     json_encode($data['seo_sections'], JSON_UNESCAPED_UNICODE)
                 ]);
