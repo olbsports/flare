@@ -5412,12 +5412,20 @@ $user = $_SESSION['admin_user'] ?? null;
                             <?php
                             $whyItems = json_decode($sp['why_items'] ?? '[]', true) ?: [];
                             if (empty($whyItems)) $whyItems = [['icon' => '', 'title' => '', 'description' => '']];
-                            foreach ($whyItems as $i => $item): ?>
+                            foreach ($whyItems as $i => $item):
+                                $iconValue = $item['icon'] ?? '';
+                                $isSvg = strpos($iconValue, '<svg') !== false;
+                            ?>
                             <div class="why-item" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                                <div class="form-row">
-                                    <div class="form-group" style="width: 80px;">
-                                        <label class="form-label">Icône</label>
-                                        <input type="text" name="why_items[<?= $i ?>][icon]" class="form-control" value="<?= htmlspecialchars($item['icon'] ?? '') ?>" placeholder="🎨">
+                                <div class="form-row" style="align-items: flex-start;">
+                                    <div class="form-group" style="width: <?= $isSvg ? '200px' : '80px' ?>;">
+                                        <label class="form-label">Icône <?= $isSvg ? '(SVG)' : '(emoji)' ?></label>
+                                        <?php if ($isSvg): ?>
+                                        <div style="background: #fff; padding: 8px; border-radius: 4px; margin-bottom: 5px; text-align: center;"><?= $iconValue ?></div>
+                                        <textarea name="why_items[<?= $i ?>][icon]" class="form-control" rows="3" style="font-size: 10px; font-family: monospace;"><?= htmlspecialchars($iconValue) ?></textarea>
+                                        <?php else: ?>
+                                        <input type="text" name="why_items[<?= $i ?>][icon]" class="form-control" value="<?= htmlspecialchars($iconValue) ?>" placeholder="🎨" style="font-size: 24px; text-align: center;">
+                                        <?php endif; ?>
                                     </div>
                                     <div class="form-group" style="flex: 1;">
                                         <label class="form-label">Titre</label>
@@ -5489,22 +5497,55 @@ $user = $_SESSION['admin_user'] ?? null;
 
                         <hr style="margin: 30px 0;">
                         <h4>Sections SEO (contenu long)</h4>
-                        <p style="color: var(--text-muted); margin-bottom: 15px;">Ajoutez des sections de contenu SEO à afficher en bas de page.</p>
+                        <p style="color: var(--text-muted); margin-bottom: 15px;">Sections de contenu SEO en bas de page avec blocs et mots-clés.</p>
                         <div id="seoSectionsList">
                             <?php
                             $seoSections = json_decode($sp['seo_sections'] ?? '[]', true) ?: [];
-                            if (empty($seoSections)) $seoSections = [['title' => '', 'content' => '']];
-                            foreach ($seoSections as $i => $sec): ?>
-                            <div class="seo-section-item" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                                <div class="form-group">
-                                    <label class="form-label">Titre de section</label>
-                                    <input type="text" name="seo_sections[<?= $i ?>][title]" class="form-control" value="<?= htmlspecialchars($sec['title'] ?? '') ?>">
+                            if (empty($seoSections)) $seoSections = [['eyebrow' => '', 'title' => '', 'blocks' => [['title' => '', 'content' => '']], 'keywords_title' => '', 'keywords' => '']];
+                            foreach ($seoSections as $i => $sec):
+                                $blocks = $sec['blocks'] ?? [['title' => '', 'content' => '']];
+                            ?>
+                            <div class="seo-section-item" style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e2e8f0;">
+                                <div class="form-row">
+                                    <div class="form-group" style="flex: 1;">
+                                        <label class="form-label">Eyebrow (petit texte)</label>
+                                        <input type="text" name="seo_sections[<?= $i ?>][eyebrow]" class="form-control" value="<?= htmlspecialchars($sec['eyebrow'] ?? '') ?>" placeholder="Guide complet">
+                                    </div>
+                                    <div class="form-group" style="flex: 2;">
+                                        <label class="form-label">Titre de section</label>
+                                        <input type="text" name="seo_sections[<?= $i ?>][title]" class="form-control" value="<?= htmlspecialchars($sec['title'] ?? '') ?>">
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="form-label">Contenu (HTML autorisé)</label>
-                                    <textarea name="seo_sections[<?= $i ?>][content]" class="form-control" rows="6"><?= htmlspecialchars($sec['content'] ?? '') ?></textarea>
+
+                                <h5 style="margin: 15px 0 10px; font-size: 14px; color: #475569;">Blocs de contenu</h5>
+                                <div class="seo-blocks-container" data-section="<?= $i ?>">
+                                    <?php foreach ($blocks as $j => $block): ?>
+                                    <div class="seo-block-item" style="background: #fff; padding: 15px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #e2e8f0;">
+                                        <div class="form-group">
+                                            <label class="form-label">Titre du bloc</label>
+                                            <input type="text" name="seo_sections[<?= $i ?>][blocks][<?= $j ?>][title]" class="form-control" value="<?= htmlspecialchars($block['title'] ?? '') ?>">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Contenu (HTML autorisé)</label>
+                                            <textarea name="seo_sections[<?= $i ?>][blocks][<?= $j ?>][content]" class="form-control" rows="4"><?= htmlspecialchars($block['content'] ?? '') ?></textarea>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.remove()">✕ Bloc</button>
+                                    </div>
+                                    <?php endforeach; ?>
                                 </div>
-                                <button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.remove()">✕ Supprimer</button>
+                                <button type="button" class="btn btn-sm btn-light" onclick="addSeoBlock(<?= $i ?>)" style="margin-bottom: 15px;">+ Ajouter un bloc</button>
+
+                                <div class="form-row" style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #e2e8f0;">
+                                    <div class="form-group" style="flex: 1;">
+                                        <label class="form-label">Titre mots-clés</label>
+                                        <input type="text" name="seo_sections[<?= $i ?>][keywords_title]" class="form-control" value="<?= htmlspecialchars($sec['keywords_title'] ?? '') ?>" placeholder="Recherches associées">
+                                    </div>
+                                    <div class="form-group" style="flex: 2;">
+                                        <label class="form-label">Mots-clés (séparés par virgules)</label>
+                                        <input type="text" name="seo_sections[<?= $i ?>][keywords]" class="form-control" value="<?= htmlspecialchars($sec['keywords'] ?? '') ?>">
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()" style="margin-top: 10px;">✕ Supprimer cette section</button>
                             </div>
                             <?php endforeach; ?>
                         </div>
@@ -5540,7 +5581,13 @@ $user = $_SESSION['admin_user'] ?? null;
 
         var whyIdx = <?= count($whyItems) ?>;
         function addWhyItem() {
-            var html = '<div class="why-item" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;"><div class="form-row"><div class="form-group" style="width: 80px;"><label class="form-label">Icône</label><input type="text" name="why_items[' + whyIdx + '][icon]" class="form-control" placeholder="🎨"></div><div class="form-group" style="flex: 1;"><label class="form-label">Titre</label><input type="text" name="why_items[' + whyIdx + '][title]" class="form-control"></div><button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.parentElement.remove()" style="align-self: flex-end;">✕</button></div><div class="form-group"><label class="form-label">Description</label><textarea name="why_items[' + whyIdx + '][description]" class="form-control" rows="2"></textarea></div></div>';
+            var html = '<div class="why-item" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">' +
+                '<div class="form-row" style="align-items: flex-start;">' +
+                '<div class="form-group" style="width: 80px;"><label class="form-label">Icône (emoji)</label><input type="text" name="why_items[' + whyIdx + '][icon]" class="form-control" placeholder="🎨" style="font-size: 24px; text-align: center;"></div>' +
+                '<div class="form-group" style="flex: 1;"><label class="form-label">Titre</label><input type="text" name="why_items[' + whyIdx + '][title]" class="form-control"></div>' +
+                '<button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.parentElement.remove()" style="align-self: flex-end;">✕</button></div>' +
+                '<div class="form-group"><label class="form-label">Description</label><textarea name="why_items[' + whyIdx + '][description]" class="form-control" rows="2"></textarea></div>' +
+                '</div>';
             document.getElementById('whyItemsList').insertAdjacentHTML('beforeend', html);
             whyIdx++;
         }
@@ -5553,10 +5600,47 @@ $user = $_SESSION['admin_user'] ?? null;
         }
 
         var seoSecIdx = <?= count($seoSections) ?>;
+        var seoBlockIdx = {};
+        <?php foreach ($seoSections as $i => $sec): ?>
+        seoBlockIdx[<?= $i ?>] = <?= count($sec['blocks'] ?? []) ?>;
+        <?php endforeach; ?>
+
         function addSeoSection() {
-            var html = '<div class="seo-section-item" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;"><div class="form-group"><label class="form-label">Titre de section</label><input type="text" name="seo_sections[' + seoSecIdx + '][title]" class="form-control"></div><div class="form-group"><label class="form-label">Contenu (HTML autorisé)</label><textarea name="seo_sections[' + seoSecIdx + '][content]" class="form-control" rows="6"></textarea></div><button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.remove()">✕ Supprimer</button></div>';
+            var html = '<div class="seo-section-item" style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e2e8f0;">' +
+                '<div class="form-row">' +
+                '<div class="form-group" style="flex: 1;"><label class="form-label">Eyebrow (petit texte)</label><input type="text" name="seo_sections[' + seoSecIdx + '][eyebrow]" class="form-control" placeholder="Guide complet"></div>' +
+                '<div class="form-group" style="flex: 2;"><label class="form-label">Titre de section</label><input type="text" name="seo_sections[' + seoSecIdx + '][title]" class="form-control"></div>' +
+                '</div>' +
+                '<h5 style="margin: 15px 0 10px; font-size: 14px; color: #475569;">Blocs de contenu</h5>' +
+                '<div class="seo-blocks-container" data-section="' + seoSecIdx + '">' +
+                '<div class="seo-block-item" style="background: #fff; padding: 15px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #e2e8f0;">' +
+                '<div class="form-group"><label class="form-label">Titre du bloc</label><input type="text" name="seo_sections[' + seoSecIdx + '][blocks][0][title]" class="form-control"></div>' +
+                '<div class="form-group"><label class="form-label">Contenu (HTML autorisé)</label><textarea name="seo_sections[' + seoSecIdx + '][blocks][0][content]" class="form-control" rows="4"></textarea></div>' +
+                '<button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.remove()">✕ Bloc</button>' +
+                '</div>' +
+                '</div>' +
+                '<button type="button" class="btn btn-sm btn-light" onclick="addSeoBlock(' + seoSecIdx + ')" style="margin-bottom: 15px;">+ Ajouter un bloc</button>' +
+                '<div class="form-row" style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #e2e8f0;">' +
+                '<div class="form-group" style="flex: 1;"><label class="form-label">Titre mots-clés</label><input type="text" name="seo_sections[' + seoSecIdx + '][keywords_title]" class="form-control" placeholder="Recherches associées"></div>' +
+                '<div class="form-group" style="flex: 2;"><label class="form-label">Mots-clés (séparés par virgules)</label><input type="text" name="seo_sections[' + seoSecIdx + '][keywords]" class="form-control"></div>' +
+                '</div>' +
+                '<button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()" style="margin-top: 10px;">✕ Supprimer cette section</button>' +
+                '</div>';
             document.getElementById('seoSectionsList').insertAdjacentHTML('beforeend', html);
+            seoBlockIdx[seoSecIdx] = 1;
             seoSecIdx++;
+        }
+
+        function addSeoBlock(sectionIdx) {
+            if (typeof seoBlockIdx[sectionIdx] === 'undefined') seoBlockIdx[sectionIdx] = 0;
+            var blockIdx = seoBlockIdx[sectionIdx];
+            var html = '<div class="seo-block-item" style="background: #fff; padding: 15px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #e2e8f0;">' +
+                '<div class="form-group"><label class="form-label">Titre du bloc</label><input type="text" name="seo_sections[' + sectionIdx + '][blocks][' + blockIdx + '][title]" class="form-control"></div>' +
+                '<div class="form-group"><label class="form-label">Contenu (HTML autorisé)</label><textarea name="seo_sections[' + sectionIdx + '][blocks][' + blockIdx + '][content]" class="form-control" rows="4"></textarea></div>' +
+                '<button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.remove()">✕ Bloc</button>' +
+                '</div>';
+            document.querySelector('.seo-blocks-container[data-section="' + sectionIdx + '"]').insertAdjacentHTML('beforeend', html);
+            seoBlockIdx[sectionIdx]++;
         }
 
         // Product selection for sport pages
