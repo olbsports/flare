@@ -91,6 +91,13 @@
 
     # URL canonique: /sport/football → sport.php?slug=football
     RewriteRule ^sport/([A-Za-z0-9_-]+)/?$ sport.php?slug=$1 [L,QSA]
+
+    # ==========================================
+    # F. FAMILLES - Pages familles dynamiques (DB)
+    # ==========================================
+
+    # URL canonique: /famille/maillots → famille.php?slug=maillots
+    RewriteRule ^famille/([A-Za-z0-9_-]+)/?$ famille.php?slug=$1 [L,QSA]
 </IfModule>
 
 # ============================================
