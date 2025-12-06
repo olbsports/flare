@@ -139,38 +139,32 @@ function extractAllContent($html, $config) {
             $data['why_subtitle'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
         }
 
-        // Extraire la grille why-us
-        if (preg_match('/<div class=["\']why-us-grid-redesign["\']>(.*?)<\/div>\s*<\/div>\s*<\/section>/is', $whyHtml, $gridMatch)) {
-            $gridHtml = $gridMatch[1];
+        // Extraire TOUTES les cartes why-us - utiliser split sur les délimiteurs de carte
+        $cardParts = preg_split('/<div class=["\']why-us-card-redesign["\']>/is', $whyHtml);
 
-            // Trouver chaque carte - utiliser split sur le début de chaque carte
-            $cardParts = preg_split('/<div class=["\']why-us-card-redesign["\']>/is', $gridHtml);
+        foreach ($cardParts as $idx => $cardHtml) {
+            if ($idx === 0) continue; // Premier élément est avant la première carte
+            if (empty(trim($cardHtml))) continue;
 
-            foreach ($cardParts as $cardHtml) {
-                if (empty(trim($cardHtml))) continue;
+            $item = ['icon' => '', 'title' => '', 'description' => ''];
 
-                $item = ['icon' => '', 'title' => '', 'description' => ''];
+            // Extraire le SVG (peut être dans why-us-icon-redesign)
+            if (preg_match('/<svg[^>]*>.*?<\/svg>/is', $cardHtml, $svg)) {
+                $item['icon'] = trim($svg[0]);
+            }
 
-                // Extraire le SVG complet
-                if (preg_match('/<svg[^>]*>.*?<\/svg>/is', $cardHtml, $svg)) {
-                    $item['icon'] = trim($svg[0]);
-                }
+            // Titre h3
+            if (preg_match('/<h3>([^<]+)<\/h3>/i', $cardHtml, $m)) {
+                $item['title'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
+            }
 
-                // Titre h3
-                if (preg_match('/<h3>([^<]+)<\/h3>/i', $cardHtml, $m)) {
-                    $item['title'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
-                }
+            // Description - chercher le <p> après le h3 (description longue)
+            if (preg_match('/<h3>[^<]+<\/h3>\s*<p>(.+?)<\/p>/is', $cardHtml, $m)) {
+                $item['description'] = trim(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'));
+            }
 
-                // Description - prendre le dernier <p> qui contient le texte
-                if (preg_match_all('/<p>([^<]+)<\/p>/i', $cardHtml, $pMatches)) {
-                    // Prendre le dernier paragraphe (celui avec la description)
-                    $lastP = end($pMatches[1]);
-                    $item['description'] = trim(html_entity_decode($lastP, ENT_QUOTES, 'UTF-8'));
-                }
-
-                if (!empty($item['title'])) {
-                    $data['why_items'][] = $item;
-                }
+            if (!empty($item['title'])) {
+                $data['why_items'][] = $item;
             }
         }
     }
