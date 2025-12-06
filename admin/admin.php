@@ -767,6 +767,115 @@ if ($action && $pdo) {
                 header("Location: ?page=sport_pages&toast=" . urlencode($toast));
                 exit;
 
+            case 'save_famille_page':
+                $slug = preg_replace('/[^a-z0-9\-]/', '', strtolower($_POST['slug'] ?? ''));
+                if (empty($slug)) {
+                    $toast = 'Erreur: Slug requis';
+                    break;
+                }
+
+                // Préparer les données JSON
+                $trustBar = json_encode($_POST['trust_bar'] ?? [], JSON_UNESCAPED_UNICODE);
+                $ctaFeatures = json_encode(array_filter(array_map('trim', explode("\n", $_POST['cta_features'] ?? ''))), JSON_UNESCAPED_UNICODE);
+                $seoCards = json_encode($_POST['seo_cards'] ?? [], JSON_UNESCAPED_UNICODE);
+                $seoStats = json_encode($_POST['seo_stats'] ?? [], JSON_UNESCAPED_UNICODE);
+                $seoBlocks = json_encode($_POST['seo_content_blocks'] ?? [], JSON_UNESCAPED_UNICODE);
+
+                $fields = [
+                    'slug', 'title', 'famille_name', 'famille_icon', 'meta_title', 'meta_description',
+                    'hero_title', 'hero_subtitle', 'hero_eyebrow', 'hero_image', 'hero_cta_text', 'hero_cta_link',
+                    'products_title', 'products_subtitle', 'products_eyebrow', 'products_description',
+                    'show_filters', 'filter_famille', 'filter_genre', 'filter_sport', 'filter_sort',
+                    'products_source', 'products_sport_filter', 'products_famille_filter',
+                    'cta_title', 'cta_subtitle', 'cta_button_text', 'cta_button_link', 'cta_whatsapp',
+                    'seo_hero_badge', 'seo_hero_title', 'seo_hero_intro', 'seo_full_content',
+                    'active', 'sort_order'
+                ];
+
+                $values = [
+                    $slug,
+                    $_POST['title'] ?? '',
+                    $_POST['famille_name'] ?? '',
+                    $_POST['famille_icon'] ?? '',
+                    $_POST['meta_title'] ?? '',
+                    $_POST['meta_description'] ?? '',
+                    $_POST['hero_title'] ?? '',
+                    $_POST['hero_subtitle'] ?? '',
+                    $_POST['hero_eyebrow'] ?? '',
+                    $_POST['hero_image'] ?? '',
+                    $_POST['hero_cta_text'] ?? '',
+                    $_POST['hero_cta_link'] ?? '',
+                    $_POST['products_title'] ?? '',
+                    $_POST['products_subtitle'] ?? '',
+                    $_POST['products_eyebrow'] ?? '',
+                    $_POST['products_description'] ?? '',
+                    isset($_POST['show_filters']) ? 1 : 0,
+                    isset($_POST['filter_famille']) ? 1 : 0,
+                    isset($_POST['filter_genre']) ? 1 : 0,
+                    isset($_POST['filter_sport']) ? 1 : 0,
+                    isset($_POST['filter_sort']) ? 1 : 0,
+                    $_POST['products_source'] ?? 'famille',
+                    $_POST['products_sport_filter'] ?? '',
+                    $_POST['products_famille_filter'] ?? '',
+                    $_POST['cta_title'] ?? '',
+                    $_POST['cta_subtitle'] ?? '',
+                    $_POST['cta_button_text'] ?? '',
+                    $_POST['cta_button_link'] ?? '',
+                    $_POST['cta_whatsapp'] ?? '',
+                    $_POST['seo_hero_badge'] ?? '',
+                    $_POST['seo_hero_title'] ?? '',
+                    $_POST['seo_hero_intro'] ?? '',
+                    $_POST['seo_full_content'] ?? '',
+                    isset($_POST['active']) ? 1 : 0,
+                    intval($_POST['sort_order'] ?? 0)
+                ];
+
+                // Ajouter les champs JSON
+                $jsonFields = ['trust_bar', 'cta_features', 'seo_cards', 'seo_stats', 'seo_content_blocks'];
+                $jsonValues = [$trustBar, $ctaFeatures, $seoCards, $seoStats, $seoBlocks];
+
+                if ($id) {
+                    $set = implode('=?, ', $fields) . '=?, ' . implode('=?, ', $jsonFields) . '=?';
+                    $allValues = array_merge($values, $jsonValues, [$id]);
+                    $pdo->prepare("UPDATE famille_pages SET $set WHERE id=?")->execute($allValues);
+                    $savedSlug = $slug;
+                } else {
+                    $allFields = array_merge($fields, $jsonFields);
+                    $placeholders = implode(',', array_fill(0, count($allFields), '?'));
+                    $pdo->prepare("INSERT INTO famille_pages (" . implode(',', $allFields) . ") VALUES ($placeholders)")
+                        ->execute(array_merge($values, $jsonValues));
+                    $id = $pdo->lastInsertId();
+                    $savedSlug = $slug;
+                }
+
+                // Sauvegarder les produits associés
+                $pdo->prepare("DELETE FROM page_products WHERE page_type='famille_page' AND page_slug=?")->execute([$savedSlug]);
+                $productIds = $_POST['page_products'] ?? [];
+                if (!empty($productIds)) {
+                    $insertStmt = $pdo->prepare("INSERT INTO page_products (page_type, page_slug, product_id, position) VALUES ('famille_page', ?, ?, ?)");
+                    foreach ($productIds as $pos => $prodId) {
+                        $insertStmt->execute([$savedSlug, intval($prodId), $pos]);
+                    }
+                }
+
+                $toast = 'Page famille enregistrée';
+                header("Location: ?page=famille_page&id=$id&toast=" . urlencode($toast));
+                exit;
+
+            case 'delete_famille_page':
+                if ($id) {
+                    $stmt = $pdo->prepare("SELECT slug FROM famille_pages WHERE id=?");
+                    $stmt->execute([$id]);
+                    $row = $stmt->fetch();
+                    if ($row) {
+                        $pdo->prepare("DELETE FROM page_products WHERE page_type='famille_page' AND page_slug=?")->execute([$row['slug']]);
+                        $pdo->prepare("DELETE FROM famille_pages WHERE id=?")->execute([$id]);
+                        $toast = 'Page supprimée';
+                    }
+                }
+                header("Location: ?page=famille_pages&toast=" . urlencode($toast));
+                exit;
+
             case 'save_page':
                 // Sauvegarder directement dans le fichier HTML via type et slug
                 $pageType = $_POST['page_type'] ?? 'info';
@@ -1258,6 +1367,37 @@ if ($pdo && $page !== 'login') {
                     SELECT id, reference, nom, meta_title, sport, famille, photo_1, prix_500
                     FROM products WHERE active=1
                     ORDER BY sport, famille, nom
+                ")->fetchAll();
+                break;
+
+            case 'famille_pages':
+                // Liste des pages famille dynamiques
+                try {
+                    $data['items'] = $pdo->query("SELECT * FROM famille_pages ORDER BY sort_order, title")->fetchAll();
+                } catch (Exception $e) {
+                    $data['items'] = [];
+                }
+                break;
+
+            case 'famille_page':
+                // Édition d'une page famille
+                if ($id) {
+                    $stmt = $pdo->prepare("SELECT * FROM famille_pages WHERE id=?");
+                    $stmt->execute([$id]);
+                    $data['item'] = $stmt->fetch();
+
+                    // Charger les produits sélectionnés
+                    if ($data['item']) {
+                        $stmt = $pdo->prepare("SELECT product_id FROM page_products WHERE page_type='famille_page' AND page_slug=? ORDER BY position");
+                        $stmt->execute([$data['item']['slug']]);
+                        $data['selected_products'] = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                    }
+                }
+                // Tous les produits pour le sélecteur
+                $data['all_products'] = $pdo->query("
+                    SELECT id, reference, nom, meta_title, sport, famille, photo_1, prix_500
+                    FROM products WHERE active=1
+                    ORDER BY famille, sport, nom
                 ")->fetchAll();
                 break;
 
@@ -2189,6 +2329,10 @@ $user = $_SESSION['admin_user'] ?? null;
         <a href="?page=sport_pages" class="menu-item <?= in_array($page, ['sport_pages', 'sport_page']) ? 'active' : '' ?>">
             <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             Pages Sports (DB)
+        </a>
+        <a href="?page=famille_pages" class="menu-item <?= in_array($page, ['famille_pages', 'famille_page']) ? 'active' : '' ?>">
+            <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+            Pages Familles (DB)
         </a>
         <a href="?page=blog" class="menu-item <?= in_array($page, ['blog', 'blog_edit']) ? 'active' : '' ?>">
             <svg class="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
@@ -5277,6 +5421,8 @@ $user = $_SESSION['admin_user'] ?? null;
                                             <div style="font-size: 10px; color: #666;"><?= htmlspecialchars($prod['sport']) ?> • <?= htmlspecialchars($prod['famille'] ?? '') ?></div>
                                         </div>
                                         <input type="hidden" name="page_products[]" value="<?= $prod['id'] ?>">
+                                        <button type="button" class="btn btn-sm" style="padding: 2px 6px; font-size: 10px;" onclick="moveProductTop(this)" title="Tout en haut">⬆</button>
+                                        <button type="button" class="btn btn-sm" style="padding: 2px 6px; font-size: 10px;" onclick="moveProductBottom(this)" title="Tout en bas">⬇</button>
                                         <button type="button" class="btn btn-sm" style="color: #ef4444;" onclick="removeSportProduct(this)">✕</button>
                                     </div>
                                     <?php endif; endforeach; ?>
@@ -5347,6 +5493,8 @@ $user = $_SESSION['admin_user'] ?? null;
                                     <div style="font-size: 10px; color: #666;"><?= htmlspecialchars($prod['sport']) ?> • <?= htmlspecialchars($prod['famille'] ?? '') ?></div>
                                 </div>
                                 <input type="hidden" name="page_products[]" value="<?= $prod['id'] ?>">
+                                <button type="button" class="btn btn-sm" style="padding: 2px 6px; font-size: 10px;" onclick="moveProductTop(this)" title="Tout en haut">⬆</button>
+                                <button type="button" class="btn btn-sm" style="padding: 2px 6px; font-size: 10px;" onclick="moveProductBottom(this)" title="Tout en bas">⬇</button>
                             </div>
                             <?php endforeach; ?>
                             <?php if (empty($filteredProds) && $productsSource !== 'manual'): ?>
@@ -5650,9 +5798,29 @@ $user = $_SESSION['admin_user'] ?? null;
             el.style.opacity = '0.5';
 
             var prodName = prod.meta_title || prod.nom;
-            var html = '<div class="sport-prod-item" data-id="' + id + '" draggable="true" style="display: flex; align-items: center; gap: 10px; padding: 8px; background: #fff5f3; border: 1px solid #FF4B26; border-radius: 6px; margin-bottom: 8px; cursor: grab;"><span class="drag-handle" style="color: #ccc; cursor: grab;">⋮⋮</span><img src="' + (prod.photo_1 || '/photos/placeholder.webp') + '" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;"><div style="flex: 1; overflow: hidden;"><div style="font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + escapeHtmlSport(prodName) + '</div><div style="font-size: 10px; color: #666;">' + escapeHtmlSport(prod.sport) + ' • ' + escapeHtmlSport(prod.famille || '') + '</div></div><input type="hidden" name="page_products[]" value="' + id + '"><button type="button" class="btn btn-sm" style="color: #ef4444;" onclick="removeSportProduct(this)">✕</button></div>';
+            var html = '<div class="sport-prod-item" data-id="' + id + '" draggable="true" style="display: flex; align-items: center; gap: 10px; padding: 8px; background: #fff5f3; border: 1px solid #FF4B26; border-radius: 6px; margin-bottom: 8px; cursor: grab;">' +
+                '<span class="drag-handle" style="color: #ccc; cursor: grab;">⋮⋮</span>' +
+                '<img src="' + (prod.photo_1 || '/photos/placeholder.webp') + '" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">' +
+                '<div style="flex: 1; overflow: hidden;"><div style="font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + escapeHtmlSport(prodName) + '</div><div style="font-size: 10px; color: #666;">' + escapeHtmlSport(prod.sport) + ' • ' + escapeHtmlSport(prod.famille || '') + '</div></div>' +
+                '<input type="hidden" name="page_products[]" value="' + id + '">' +
+                '<button type="button" class="btn btn-sm" style="padding: 2px 6px; font-size: 10px;" onclick="moveProductTop(this)" title="Tout en haut">⬆</button>' +
+                '<button type="button" class="btn btn-sm" style="padding: 2px 6px; font-size: 10px;" onclick="moveProductBottom(this)" title="Tout en bas">⬇</button>' +
+                '<button type="button" class="btn btn-sm" style="color: #ef4444;" onclick="removeSportProduct(this)">✕</button>' +
+                '</div>';
             document.getElementById('selectedSportProducts').insertAdjacentHTML('beforeend', html);
             updateSelectedCount();
+        }
+
+        function moveProductTop(btn) {
+            var item = btn.closest('.sport-prod-item, .filtered-prod-item');
+            var container = item.parentElement;
+            container.insertBefore(item, container.firstChild);
+        }
+
+        function moveProductBottom(btn) {
+            var item = btn.closest('.sport-prod-item, .filtered-prod-item');
+            var container = item.parentElement;
+            container.appendChild(item);
         }
 
         function removeSportProduct(btn) {
@@ -5755,6 +5923,8 @@ $user = $_SESSION['admin_user'] ?? null;
                         '<div style="font-size: 10px; color: #666;">' + escapeHtmlSport(prod.sport) + ' • ' + escapeHtmlSport(prod.famille || '') + '</div>' +
                         '</div>' +
                         '<input type="hidden" name="page_products[]" value="' + prod.id + '">' +
+                        '<button type="button" class="btn btn-sm" style="padding: 2px 6px; font-size: 10px;" onclick="moveProductTop(this)" title="Tout en haut">⬆</button>' +
+                        '<button type="button" class="btn btn-sm" style="padding: 2px 6px; font-size: 10px;" onclick="moveProductBottom(this)" title="Tout en bas">⬇</button>' +
                         '</div>';
                     container.insertAdjacentHTML('beforeend', html);
                 });
@@ -5861,6 +6031,298 @@ $user = $_SESSION['admin_user'] ?? null;
             initDragDrop();
             initFilteredDragDrop();
         });
+        </script>
+
+        <?php // ============ FAMILLE PAGES LIST ============ ?>
+        <?php elseif ($page === 'famille_pages'): ?>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Pages Famille Produits (<?= count($data['items'] ?? []) ?>)</span>
+                <div>
+                    <a href="import-famille-web.php" class="btn btn-light" target="_blank">Import HTML</a>
+                    <a href="?page=famille_page" class="btn btn-primary">+ Nouvelle page</a>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Famille</th><th>Titre</th><th>Slug</th><th>Produits</th><th>Statut</th><th>Actions</th></tr></thead>
+                    <tbody>
+                    <?php if (empty($data['items'])): ?>
+                    <tr><td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">Aucune page famille. <a href="import-famille-web.php" target="_blank">Importez depuis HTML</a></td></tr>
+                    <?php else: ?>
+                    <?php foreach ($data['items'] as $fp): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($fp['famille_icon'] . ' ' . ($fp['famille_name'] ?: $fp['title'])) ?></td>
+                            <td><strong><?= htmlspecialchars($fp['title']) ?></strong></td>
+                            <td><code>/famille/<?= htmlspecialchars($fp['slug']) ?></code></td>
+                            <td>
+                                <?php
+                                $countStmt = $pdo->prepare("SELECT COUNT(*) FROM page_products WHERE page_type='famille_page' AND page_slug=?");
+                                $countStmt->execute([$fp['slug']]);
+                                echo $countStmt->fetchColumn();
+                                ?> produits
+                            </td>
+                            <td>
+                                <span class="badge badge-<?= $fp['active'] ? 'success' : 'secondary' ?>"><?= $fp['active'] ? 'Actif' : 'Inactif' ?></span>
+                            </td>
+                            <td>
+                                <a href="?page=famille_page&id=<?= $fp['id'] ?>" class="btn btn-sm btn-primary">Modifier</a>
+                                <a href="/famille/<?= htmlspecialchars($fp['slug']) ?>" target="_blank" class="btn btn-sm btn-light">Voir</a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <?php // ============ FAMILLE PAGE EDIT ============ ?>
+        <?php elseif ($page === 'famille_page'): ?>
+        <?php
+        $fp = $data['item'] ?? [];
+        $selectedProducts = $data['selected_products'] ?? [];
+        $allProducts = $data['all_products'] ?? [];
+        ?>
+        <form method="POST" action="?page=famille_page<?= $id ? "&id=$id" : '' ?>">
+            <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+            <input type="hidden" name="action" value="save_famille_page">
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title"><?= $id ? 'Modifier' : 'Nouvelle' ?> page famille</span>
+                    <div>
+                        <?php if ($id): ?>
+                        <a href="/famille/<?= htmlspecialchars($fp['slug'] ?? '') ?>" target="_blank" class="btn btn-light">Voir</a>
+                        <?php endif; ?>
+                        <a href="?page=famille_pages" class="btn btn-light">← Retour</a>
+                    </div>
+                </div>
+
+                <div class="tabs-nav">
+                    <button type="button" class="tab-btn active" onclick="switchFamilleTab('general')">Général</button>
+                    <button type="button" class="tab-btn" onclick="switchFamilleTab('hero')">Hero</button>
+                    <button type="button" class="tab-btn" onclick="switchFamilleTab('products')">Produits</button>
+                    <button type="button" class="tab-btn" onclick="switchFamilleTab('cta')">CTA</button>
+                    <button type="button" class="tab-btn" onclick="switchFamilleTab('seo')">SEO</button>
+                </div>
+
+                <!-- TAB GENERAL -->
+                <div class="tab-content active" id="famille-tab-general">
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Titre de la page *</label>
+                                <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($fp['title'] ?? '') ?>" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Slug (URL) *</label>
+                                <div style="display: flex; align-items: center; gap: 5px;">
+                                    <span style="color: var(--text-muted);">/famille/</span>
+                                    <input type="text" name="slug" class="form-control" value="<?= htmlspecialchars($fp['slug'] ?? '') ?>" required pattern="[a-z0-9\-]+" style="flex: 1;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Nom de la famille</label>
+                                <input type="text" name="famille_name" class="form-control" value="<?= htmlspecialchars($fp['famille_name'] ?? '') ?>" placeholder="Ex: Maillots">
+                            </div>
+                            <div class="form-group" style="width: 100px;">
+                                <label class="form-label">Icône</label>
+                                <input type="text" name="famille_icon" class="form-control" value="<?= htmlspecialchars($fp['famille_icon'] ?? '') ?>" placeholder="👕" style="font-size: 24px; text-align: center;">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label"><input type="checkbox" name="active" <?= ($fp['active'] ?? 1) ? 'checked' : '' ?>> Page active</label>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Ordre d'affichage</label>
+                                <input type="number" name="sort_order" class="form-control" value="<?= intval($fp['sort_order'] ?? 0) ?>" min="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB HERO -->
+                <div class="tab-content" id="famille-tab-hero">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Eyebrow (petit texte au-dessus)</label>
+                            <input type="text" name="hero_eyebrow" class="form-control" value="<?= htmlspecialchars($fp['hero_eyebrow'] ?? '') ?>" placeholder="Maillots personnalisés">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Titre Hero</label>
+                            <input type="text" name="hero_title" class="form-control" value="<?= htmlspecialchars($fp['hero_title'] ?? '') ?>">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Sous-titre Hero</label>
+                            <input type="text" name="hero_subtitle" class="form-control" value="<?= htmlspecialchars($fp['hero_subtitle'] ?? '') ?>">
+                        </div>
+                        <hr>
+                        <h4>Trust Bar</h4>
+                        <div id="familleTrustBarItems">
+                            <?php
+                            $trustBar = json_decode($fp['trust_bar'] ?? '[]', true) ?: [];
+                            if (empty($trustBar)) $trustBar = [['value' => '', 'label' => '']];
+                            foreach ($trustBar as $i => $item): ?>
+                            <div class="form-row trust-item" style="margin-bottom: 10px;">
+                                <div class="form-group" style="flex: 1;">
+                                    <input type="text" name="trust_bar[<?= $i ?>][value]" class="form-control" value="<?= htmlspecialchars($item['value'] ?? '') ?>" placeholder="500+">
+                                </div>
+                                <div class="form-group" style="flex: 2;">
+                                    <input type="text" name="trust_bar[<?= $i ?>][label]" class="form-control" value="<?= htmlspecialchars($item['label'] ?? '') ?>" placeholder="Clubs équipés">
+                                </div>
+                                <button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.remove()">✕</button>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-light" onclick="addFamilleTrustItem()">+ Ajouter</button>
+                    </div>
+                </div>
+
+                <!-- TAB PRODUCTS -->
+                <div class="tab-content" id="famille-tab-products">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Eyebrow section produits</label>
+                            <input type="text" name="products_eyebrow" class="form-control" value="<?= htmlspecialchars($fp['products_eyebrow'] ?? '') ?>">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Titre section produits</label>
+                            <input type="text" name="products_title" class="form-control" value="<?= htmlspecialchars($fp['products_title'] ?? '') ?>">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <textarea name="products_description" class="form-control" rows="2"><?= htmlspecialchars($fp['products_description'] ?? '') ?></textarea>
+                        </div>
+                        <hr>
+                        <h4>Filtres à afficher</h4>
+                        <div class="form-row">
+                            <label><input type="checkbox" name="show_filters" <?= ($fp['show_filters'] ?? 1) ? 'checked' : '' ?>> Afficher les filtres</label>
+                            <label><input type="checkbox" name="filter_sport" <?= ($fp['filter_sport'] ?? 1) ? 'checked' : '' ?>> Sport</label>
+                            <label><input type="checkbox" name="filter_genre" <?= ($fp['filter_genre'] ?? 1) ? 'checked' : '' ?>> Genre</label>
+                            <label><input type="checkbox" name="filter_sort" <?= ($fp['filter_sort'] ?? 1) ? 'checked' : '' ?>> Tri</label>
+                        </div>
+                        <hr>
+                        <h4>Source des produits</h4>
+                        <select name="products_source" id="familleProductsSource" class="form-control" style="max-width: 300px;" onchange="toggleFamilleProductsSource()">
+                            <option value="famille" <?= ($fp['products_source'] ?? 'famille') === 'famille' ? 'selected' : '' ?>>Par famille</option>
+                            <option value="sport" <?= ($fp['products_source'] ?? '') === 'sport' ? 'selected' : '' ?>>Par sport</option>
+                            <option value="manual" <?= ($fp['products_source'] ?? '') === 'manual' ? 'selected' : '' ?>>Sélection manuelle</option>
+                        </select>
+
+                        <div id="familleFamilleFilterGroup" style="margin-top: 15px; <?= ($fp['products_source'] ?? 'famille') !== 'famille' ? 'display:none;' : '' ?>">
+                            <label class="form-label">Filtrer par famille</label>
+                            <select name="products_famille_filter" class="form-control" style="max-width: 300px;">
+                                <option value="">-- Sélectionner --</option>
+                                <?php
+                                $familles = $pdo->query("SELECT DISTINCT famille FROM products WHERE active=1 AND famille IS NOT NULL AND famille != '' ORDER BY famille")->fetchAll(PDO::FETCH_COLUMN);
+                                foreach ($familles as $f): ?>
+                                <option value="<?= htmlspecialchars($f) ?>" <?= ($fp['products_famille_filter'] ?? '') === $f ? 'selected' : '' ?>><?= htmlspecialchars($f) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB CTA -->
+                <div class="tab-content" id="famille-tab-cta">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Titre CTA</label>
+                            <input type="text" name="cta_title" class="form-control" value="<?= htmlspecialchars($fp['cta_title'] ?? '') ?>">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Sous-titre CTA</label>
+                            <textarea name="cta_subtitle" class="form-control" rows="2"><?= htmlspecialchars($fp['cta_subtitle'] ?? '') ?></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Points forts (un par ligne)</label>
+                            <textarea name="cta_features" class="form-control" rows="4"><?= htmlspecialchars(implode("\n", json_decode($fp['cta_features'] ?? '[]', true) ?: [])) ?></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Texte bouton</label>
+                                <input type="text" name="cta_button_text" class="form-control" value="<?= htmlspecialchars($fp['cta_button_text'] ?? '') ?>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Lien bouton</label>
+                                <input type="text" name="cta_button_link" class="form-control" value="<?= htmlspecialchars($fp['cta_button_link'] ?? '') ?>">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">WhatsApp</label>
+                            <input type="text" name="cta_whatsapp" class="form-control" value="<?= htmlspecialchars($fp['cta_whatsapp'] ?? '') ?>">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB SEO -->
+                <div class="tab-content" id="famille-tab-seo">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Meta Title</label>
+                            <input type="text" name="meta_title" class="form-control" value="<?= htmlspecialchars($fp['meta_title'] ?? '') ?>">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Meta Description</label>
+                            <textarea name="meta_description" class="form-control" rows="3"><?= htmlspecialchars($fp['meta_description'] ?? '') ?></textarea>
+                        </div>
+                        <hr>
+                        <h4>Section SEO Mega</h4>
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 1;">
+                                <label class="form-label">Badge</label>
+                                <input type="text" name="seo_hero_badge" class="form-control" value="<?= htmlspecialchars($fp['seo_hero_badge'] ?? '') ?>">
+                            </div>
+                            <div class="form-group" style="flex: 3;">
+                                <label class="form-label">Titre SEO</label>
+                                <input type="text" name="seo_hero_title" class="form-control" value="<?= htmlspecialchars($fp['seo_hero_title'] ?? '') ?>">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Introduction SEO</label>
+                            <textarea name="seo_hero_intro" class="form-control" rows="3"><?= htmlspecialchars($fp['seo_hero_intro'] ?? '') ?></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Contenu SEO complet (HTML)</label>
+                            <textarea name="seo_full_content" class="form-control" rows="6"><?= htmlspecialchars($fp['seo_full_content'] ?? '') ?></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer" style="display: flex; justify-content: space-between;">
+                    <div>
+                        <?php if ($id): ?>
+                        <a href="?page=famille_pages&action=delete_famille_page&id=<?= $id ?>&csrf_token=<?= generateCsrfToken() ?>" class="btn btn-danger" onclick="return confirm('Supprimer cette page famille ?')">Supprimer</a>
+                        <?php endif; ?>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </div>
+        </form>
+
+        <script>
+        function switchFamilleTab(tabId) {
+            document.querySelectorAll('.tabs-nav .tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('famille-tab-' + tabId).classList.add('active');
+        }
+
+        var familleTrustIdx = <?= count($trustBar) ?>;
+        function addFamilleTrustItem() {
+            var html = '<div class="form-row trust-item" style="margin-bottom: 10px;"><div class="form-group" style="flex: 1;"><input type="text" name="trust_bar[' + familleTrustIdx + '][value]" class="form-control" placeholder="500+"></div><div class="form-group" style="flex: 2;"><input type="text" name="trust_bar[' + familleTrustIdx + '][label]" class="form-control" placeholder="Clubs équipés"></div><button type="button" class="btn btn-sm btn-light" onclick="this.parentElement.remove()">✕</button></div>';
+            document.getElementById('familleTrustBarItems').insertAdjacentHTML('beforeend', html);
+            familleTrustIdx++;
+        }
+
+        function toggleFamilleProductsSource() {
+            var source = document.getElementById('familleProductsSource').value;
+            document.getElementById('familleFamilleFilterGroup').style.display = source === 'famille' ? '' : 'none';
+        }
         </script>
 
         <?php // ============ QUOTES ============ ?>
