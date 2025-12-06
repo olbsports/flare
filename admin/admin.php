@@ -829,7 +829,7 @@ if ($action && $pdo) {
                     isset($_POST['filter_sort']) ? 1 : 0,
                     $_POST['products_source'] ?? 'famille',
                     $_POST['products_sport_filter'] ?? '',
-                    $_POST['products_famille_filter'] ?? '',
+                    json_encode($_POST['products_famille_filter'] ?? [], JSON_UNESCAPED_UNICODE),
                     $_POST['intro_text'] ?? '',
                     isset($_POST['show_sports_links']) ? 1 : 0,
                     $_POST['sports_links_eyebrow'] ?? 'Par sport',
@@ -6108,6 +6108,30 @@ $user = $_SESSION['admin_user'] ?? null;
         $fp = $data['item'] ?? [];
         $selectedProducts = $data['selected_products'] ?? [];
         $allProducts = $data['all_products'] ?? [];
+
+        // Pré-charger les données JSON pour les formulaires dynamiques
+        $trustBar = json_decode($fp['trust_bar'] ?? '[]', true) ?: [];
+        if (empty($trustBar)) $trustBar = [['value' => '', 'label' => '']];
+
+        $seoCards = json_decode($fp['seo_cards'] ?? '[]', true) ?: [];
+        if (empty($seoCards)) $seoCards = [['icon' => '', 'title' => '', 'content' => '']];
+
+        $seoStats = json_decode($fp['seo_stats'] ?? '[]', true) ?: [];
+        if (empty($seoStats)) $seoStats = [['number' => '', 'label' => '']];
+
+        $seoBlocks = json_decode($fp['seo_content_blocks'] ?? '[]', true) ?: [];
+        if (empty($seoBlocks)) $seoBlocks = [['title' => '', 'content' => '', 'list' => []]];
+
+        $longtailBlocks = json_decode($fp['longtail_blocks'] ?? '[]', true) ?: [];
+        if (empty($longtailBlocks)) $longtailBlocks = [
+            ['title' => "Qu'est-ce que la sublimation ?", 'content' => ''],
+            ['title' => 'Pourquoi choisir FLARE CUSTOM ?', 'content' => ''],
+            ['title' => 'Délais et livraison', 'content' => ''],
+            ['title' => 'Prix dégressifs', 'content' => '']
+        ];
+
+        $faqItems = json_decode($fp['faq_items'] ?? '[]', true) ?: [];
+        if (empty($faqItems)) $faqItems = [['question' => '', 'answer' => '']];
         ?>
         <form method="POST" action="?page=famille_page<?= $id ? "&id=$id" : '' ?>">
             <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
@@ -6192,10 +6216,7 @@ $user = $_SESSION['admin_user'] ?? null;
                         <hr>
                         <h4>Trust Bar</h4>
                         <div id="familleTrustBarItems">
-                            <?php
-                            $trustBar = json_decode($fp['trust_bar'] ?? '[]', true) ?: [];
-                            if (empty($trustBar)) $trustBar = [['value' => '', 'label' => '']];
-                            foreach ($trustBar as $i => $item): ?>
+                            <?php foreach ($trustBar as $i => $item): ?>
                             <div class="form-row trust-item" style="margin-bottom: 10px;">
                                 <div class="form-group" style="flex: 1;">
                                     <input type="text" name="trust_bar[<?= $i ?>][value]" class="form-control" value="<?= htmlspecialchars($item['value'] ?? '') ?>" placeholder="500+">
@@ -6237,21 +6258,29 @@ $user = $_SESSION['admin_user'] ?? null;
                         <hr>
                         <h4>Source des produits</h4>
                         <select name="products_source" id="familleProductsSource" class="form-control" style="max-width: 300px;" onchange="toggleFamilleProductsSource()">
-                            <option value="famille" <?= ($fp['products_source'] ?? 'famille') === 'famille' ? 'selected' : '' ?>>Par famille</option>
+                            <option value="famille" <?= ($fp['products_source'] ?? 'famille') === 'famille' ? 'selected' : '' ?>>Par famille(s)</option>
                             <option value="sport" <?= ($fp['products_source'] ?? '') === 'sport' ? 'selected' : '' ?>>Par sport</option>
                             <option value="manual" <?= ($fp['products_source'] ?? '') === 'manual' ? 'selected' : '' ?>>Sélection manuelle</option>
                         </select>
 
                         <div id="familleFamilleFilterGroup" style="margin-top: 15px; <?= ($fp['products_source'] ?? 'famille') !== 'famille' ? 'display:none;' : '' ?>">
-                            <label class="form-label">Filtrer par famille</label>
-                            <select name="products_famille_filter" class="form-control" style="max-width: 300px;">
-                                <option value="">-- Sélectionner --</option>
-                                <?php
-                                $familles = $pdo->query("SELECT DISTINCT famille FROM products WHERE active=1 AND famille IS NOT NULL AND famille != '' ORDER BY famille")->fetchAll(PDO::FETCH_COLUMN);
-                                foreach ($familles as $f): ?>
-                                <option value="<?= htmlspecialchars($f) ?>" <?= ($fp['products_famille_filter'] ?? '') === $f ? 'selected' : '' ?>><?= htmlspecialchars($f) ?></option>
+                            <label class="form-label">Filtrer par famille(s) - sélection multiple</label>
+                            <?php
+                            $familles = $pdo->query("SELECT DISTINCT famille FROM products WHERE active=1 AND famille IS NOT NULL AND famille != '' ORDER BY famille")->fetchAll(PDO::FETCH_COLUMN);
+                            $selectedFamilles = json_decode($fp['products_famille_filter'] ?? '[]', true) ?: [];
+                            // Compatibilité avec l'ancien format (string simple)
+                            if (!is_array($selectedFamilles) && !empty($fp['products_famille_filter'])) {
+                                $selectedFamilles = [$fp['products_famille_filter']];
+                            }
+                            ?>
+                            <div style="display: flex; flex-wrap: wrap; gap: 10px; padding: 15px; background: var(--bg-secondary); border-radius: 8px; max-height: 200px; overflow-y: auto;">
+                                <?php foreach ($familles as $f): ?>
+                                <label style="display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: #fff; border-radius: 6px; cursor: pointer; border: 1px solid <?= in_array($f, $selectedFamilles) ? 'var(--primary)' : 'var(--border)' ?>;">
+                                    <input type="checkbox" name="products_famille_filter[]" value="<?= htmlspecialchars($f) ?>" <?= in_array($f, $selectedFamilles) ? 'checked' : '' ?>>
+                                    <?= htmlspecialchars($f) ?>
+                                </label>
                                 <?php endforeach; ?>
-                            </select>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -6352,10 +6381,7 @@ $user = $_SESSION['admin_user'] ?? null;
                         <hr>
                         <h4>Cartes SEO (3 cartes)</h4>
                         <div id="familleSeoCards">
-                            <?php
-                            $seoCards = json_decode($fp['seo_cards'] ?? '[]', true) ?: [];
-                            if (empty($seoCards)) $seoCards = [['icon' => '', 'title' => '', 'content' => '']];
-                            foreach ($seoCards as $i => $card): ?>
+                            <?php foreach ($seoCards as $i => $card): ?>
                             <div class="seo-card-item" style="background: var(--bg-secondary); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                                 <div class="form-row">
                                     <div class="form-group" style="width: 80px;">
@@ -6379,10 +6405,7 @@ $user = $_SESSION['admin_user'] ?? null;
                         <hr>
                         <h4>Stats SEO</h4>
                         <div id="familleSeoStats">
-                            <?php
-                            $seoStats = json_decode($fp['seo_stats'] ?? '[]', true) ?: [];
-                            if (empty($seoStats)) $seoStats = [['number' => '', 'label' => '']];
-                            foreach ($seoStats as $i => $stat): ?>
+                            <?php foreach ($seoStats as $i => $stat): ?>
                             <div class="form-row seo-stat-item" style="margin-bottom: 10px;">
                                 <div class="form-group" style="flex: 1;">
                                     <input type="text" name="seo_stats[<?= $i ?>][number]" class="form-control" value="<?= htmlspecialchars($stat['number'] ?? '') ?>" placeholder="500+">
@@ -6398,10 +6421,7 @@ $user = $_SESSION['admin_user'] ?? null;
                         <hr>
                         <h4>Blocs Alternés</h4>
                         <div id="familleSeoBlocks">
-                            <?php
-                            $seoBlocks = json_decode($fp['seo_content_blocks'] ?? '[]', true) ?: [];
-                            if (empty($seoBlocks)) $seoBlocks = [['title' => '', 'content' => '', 'list' => []]];
-                            foreach ($seoBlocks as $i => $block): ?>
+                            <?php foreach ($seoBlocks as $i => $block): ?>
                             <div class="seo-block-item" style="background: var(--bg-secondary); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                                 <div class="form-row">
                                     <div class="form-group" style="flex: 1;">
@@ -6442,15 +6462,7 @@ $user = $_SESSION['admin_user'] ?? null;
                         </div>
                         <hr>
                         <div id="familleLongtailBlocks">
-                            <?php
-                            $longtailBlocks = json_decode($fp['longtail_blocks'] ?? '[]', true) ?: [];
-                            if (empty($longtailBlocks)) $longtailBlocks = [
-                                ['title' => "Qu'est-ce que la sublimation ?", 'content' => ''],
-                                ['title' => 'Pourquoi choisir FLARE CUSTOM ?', 'content' => ''],
-                                ['title' => 'Délais et livraison', 'content' => ''],
-                                ['title' => 'Prix dégressifs', 'content' => '']
-                            ];
-                            foreach ($longtailBlocks as $i => $block): ?>
+                            <?php foreach ($longtailBlocks as $i => $block): ?>
                             <div class="longtail-block-item" style="background: var(--bg-secondary); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                                 <div class="form-row">
                                     <div class="form-group" style="flex: 1;">
@@ -6488,10 +6500,7 @@ $user = $_SESSION['admin_user'] ?? null;
                         </div>
                         <hr>
                         <div id="familleFaqItems">
-                            <?php
-                            $faqItems = json_decode($fp['faq_items'] ?? '[]', true) ?: [];
-                            if (empty($faqItems)) $faqItems = [['question' => '', 'answer' => '']];
-                            foreach ($faqItems as $i => $faq): ?>
+                            <?php foreach ($faqItems as $i => $faq): ?>
                             <div class="faq-item" style="background: var(--bg-secondary); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                                 <div class="form-row">
                                     <div class="form-group" style="flex: 1;">
