@@ -8,7 +8,7 @@ require_once __DIR__ . '/../config/database.php';
 
 session_start();
 
-$familleDir = __DIR__ . '/../pages/products/';
+$familleDir = __DIR__ . '/../pages/_archive/familles/';
 
 // Actions
 $resetDone = false;

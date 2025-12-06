@@ -282,15 +282,15 @@ function showError(message) {
  */
 function getSportPageUrl(sport) {
     const sportUrls = {
-        'FOOTBALL': '../pages/products/equipement-football-personnalise-sublimation.html',
-        'RUGBY': '../pages/products/equipement-rugby-personnalise-sublimation.html',
-        'BASKETBALL': '../pages/products/equipement-basketball-personnalise-sublimation.html',
-        'HANDBALL': '../pages/products/equipement-handball-personnalise-sublimation.html',
-        'VOLLEYBALL': '../pages/products/equipement-volleyball-personnalise-sublimation.html',
-        'RUNNING': '../pages/products/equipement-running-course-pied-personnalise.html',
-        'CYCLISME': '../pages/products/equipement-cyclisme-velo-personnalise-sublimation.html',
-        'TRIATHLON': '../pages/products/equipement-triathlon-personnalise-sublimation.html',
-        'PETANQUE': '../pages/products/equipement-petanque-personnalise-club.html',
+        'FOOTBALL': '../sport/football',
+        'RUGBY': '../sport/rugby',
+        'BASKETBALL': '../sport/basketball',
+        'HANDBALL': '../sport/handball',
+        'VOLLEYBALL': '../sport/volleyball',
+        'RUNNING': '../sport/running',
+        'CYCLISME': '../sport/cyclisme',
+        'TRIATHLON': '../sport/triathlon',
+        'PETANQUE': '../sport/petanque',
         'MERCHANDISING': '../pages/products/merchandising-accessoires-club-personnalises.html',
         'SPORTSWEAR': '../pages/products/sportswear-vetements-sport-personnalises.html'
     };

@@ -8,7 +8,7 @@ require_once __DIR__ . '/../config/database.php';
 
 session_start();
 
-$sportsDir = __DIR__ . '/../pages/products/';
+$sportsDir = __DIR__ . '/../pages/_archive/sports/';
 
 // Actions
 $resetDone = false;

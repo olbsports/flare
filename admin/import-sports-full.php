@@ -9,7 +9,7 @@
 require_once __DIR__ . '/../config/database.php';
 
 $dryRun = isset($argv[1]) && $argv[1] === '--dry-run';
-$sportsDir = __DIR__ . '/../pages/products/';
+$sportsDir = __DIR__ . '/../pages/_archive/sports/';
 
 // Configuration des sports à importer
 $sportsConfig = [
